@@ -8,13 +8,9 @@
   "author": {
     "name": "Daniel Essig",
     "email": "dan.essig@gmail.com",
-    "url": "clipless.io"
-  },
-  "engines": {
-    "node": ">=0.10.0"
+    "url": "http://clipless.io"
   },
   "scripts": {
-    "test": "xo",
     "start": "electron .",
     "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=0.31.1"
   },
@@ -24,30 +20,13 @@
     "index.css"
   ],
   "keywords": [
-    "electron-app"
+    "electron-app",
+    "clipboard",
+    "clipboard-manager"
   ],
-  "dependencies": {
-    "electron-debug": "^0.1.1"
-  },
+  "dependencies": {},
   "devDependencies": {
-    "electron-packager": "^5.0.0",
-    "electron-prebuilt": "^0.31.1",
-    "git-rev": "^0.2.1",
-    "gulp": "^3.9.0",
-    "gulp-compass": "^2.1.0",
-    "gulp-connect": "^2.2.0",
-    "gulp-shell": "^0.4.3",
-    "rimraf": "^2.4.3",
-    "xo": "^0.7.1"
-  },
-  "xo": {
-    "esnext": true,
-    "envs": [
-      "node",
-      "browser"
-    ],
-    "rules": {
-      "prefer-arrow-callback": 0
-    }
+    "electron": "^5.0.2",
+    "electron-packager": "^7.0.0"
   }
 }
