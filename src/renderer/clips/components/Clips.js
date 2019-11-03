@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 export const Clips = ({ clips }) => (
-  <ul>
+  <ol>
     { clips.map(clip => <li>{clip}</li>) }
-  </ul>
+  </ol>
 );
 Clips.propTypes = {
   clips: PropTypes.arrayOf(PropTypes.object).isRequired,
