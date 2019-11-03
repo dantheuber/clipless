@@ -1,6 +1,7 @@
 import React from 'react';
+import { Clips } from '../../clips';
 
 export const Content = () => (
-  <div>Testing 1 2 3</div>
+  <Clips />
 );
 Content.displayName = 'Content';
