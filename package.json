@@ -12,6 +12,8 @@
     "source-map-support": "^0.5.12"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.6.3",
+    "babel-plugin-module-resolver": "^3.2.0",
     "electron": "5.0.6",
     "electron-builder": "^21.0.11",
     "electron-webpack": "^2.7.4",
@@ -21,6 +23,8 @@
     "react-pure-lifecycle": "^3.0.0",
     "react-redux": "^7.1.1",
     "redux": "^4.0.4",
+    "redux-logger": "^3.0.6",
+    "redux-thunk": "^2.3.0",
     "webpack": "~4.35.3"
   }
 }
