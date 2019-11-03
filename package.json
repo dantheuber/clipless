@@ -1,53 +1,26 @@
 {
-  "name": "clipless",
-  "productName": "Clipless",
+  "name": "electron-webpack-quick-start",
   "version": "0.0.0",
-  "description": "My first-class app",
   "license": "MIT",
-  "repository": "dantheuber/clipless",
-  "author": {
-    "name": "Daniel Essig",
-    "email": "dan.essig@gmail.com",
-    "url": "clipless.io"
-  },
-  "engines": {
-    "node": ">=0.10.0"
-  },
   "scripts": {
-    "test": "xo",
-    "start": "electron .",
-    "build": "electron-packager . $npm_package_productName --out=dist --ignore='^/dist$' --prune --asar --all --version=0.31.1"
+    "dev": "electron-webpack dev",
+    "compile": "electron-webpack",
+    "dist": "yarn compile && electron-builder",
+    "dist:dir": "yarn dist --dir -c.compression=store -c.mac.identity=null"
   },
-  "files": [
-    "index.js",
-    "index.html",
-    "index.css"
-  ],
-  "keywords": [
-    "electron-app"
-  ],
   "dependencies": {
-    "electron-debug": "^0.1.1"
+    "source-map-support": "^0.5.12"
   },
   "devDependencies": {
-    "electron-packager": "^5.0.0",
-    "electron-prebuilt": "^0.31.1",
-    "git-rev": "^0.2.1",
-    "gulp": "^3.9.0",
-    "gulp-compass": "^2.1.0",
-    "gulp-connect": "^2.2.0",
-    "gulp-shell": "^0.4.3",
-    "rimraf": "^2.4.3",
-    "xo": "^0.7.1"
-  },
-  "xo": {
-    "esnext": true,
-    "envs": [
-      "node",
-      "browser"
-    ],
-    "rules": {
-      "prefer-arrow-callback": 0
-    }
+    "electron": "5.0.6",
+    "electron-builder": "^21.0.11",
+    "electron-webpack": "^2.7.4",
+    "prop-types": "^15.7.2",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-pure-lifecycle": "^3.0.0",
+    "react-redux": "^7.1.1",
+    "redux": "^4.0.4",
+    "webpack": "~4.35.3"
   }
 }
