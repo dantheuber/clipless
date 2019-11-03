@@ -20,7 +20,8 @@
 ## Technology
 
 - Electron
-- 
+- react
+- redux
 
 
 ## Clip Compile Templates
