@@ -1,6 +1,10 @@
 'use strict'
 
-import { app, BrowserWindow } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  globalShortcut,
+} from 'electron';
 import * as path from 'path';
 import { format as formatUrl } from 'url';
 
@@ -45,6 +49,14 @@ function createMainWindow() {
   return window;
 }
 
+function registerShortcuts(window) {
+  [1,2,3,4,5,6,7,8,9,0].forEach((key) => {
+    globalShortcut.register(`CommandOrControl+${key}`, () => {
+      window.webContents.send('get-clip', { key });
+    });
+  });
+}
+
 // quit application when all windows are closed
 app.on('window-all-closed', () => {
   // on macOS it is common for applications to stay open until the user explicitly quits
@@ -63,4 +75,9 @@ app.on('activate', () => {
 // create main BrowserWindow when electron is ready
 app.on('ready', () => {
   mainWindow = createMainWindow();
+  registerShortcuts(mainWindow);
+});
+
+app.on('will-quit', () => {
+  globalShortcut.unregisterAll();
 });
