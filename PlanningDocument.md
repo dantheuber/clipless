@@ -11,6 +11,9 @@
 
 - Will record 10-* previous clipboard contents and display them.
 - Will allow for configurable hotkeys to quickly paste the contents of a previous clip
+    - This feature is blocked by the fact that I cannot get robotjs to work within electron.
+        - robotjs required for sending keytap to paste clipboard contents
+        - hotkey can still retrieve and replace clipboard contents with a previous clip, so not the biggest blocker.
 - Will allow for a previous clip to be "locked", maintaining its current contents while others will continue to update as clipboard changes.
 - Will allow any clip to be edited, allowing the user to modify its contents.
 - Will allow for "[Clip Compile Templates](#clip-compile-templates)" functionality
