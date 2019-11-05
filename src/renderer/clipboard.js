@@ -1,7 +1,7 @@
 import { clipboard, ipcRenderer } from 'electron';
 import { CLIPBOARD_CHECK_INTERVAL } from './constants';
 import { lastClip as selectLastClip, clip } from './clips/selectors';
-import { clipboardUpdated } from './clips/actions';
+import { clipboardUpdated, clipKeyPressed } from './clips/actions';
 
 let clipboardInterval = null;
 
@@ -10,12 +10,13 @@ export const startClipboard = (store) => {
     const lastClip = selectLastClip(store.getState());
     const newClip = clipboard.readText();
     if (newClip !== lastClip) {
-      store.dispatch(clipboardUpdated(newClip));
+      store.dispatch(clipboardUpdated(newClip, false));
     }
   }, CLIPBOARD_CHECK_INTERVAL);
 
-  ipcRenderer.on('get-clip', (event, args) => {
-    clipboard.writeText(clip(store.getState(), args.key));
+  ipcRenderer.on('get-clip', (event, { index }) => {
+    store.dispatch(clipKeyPressed(index));
+    clipboard.writeText(clip(store.getState(), index));
   });
 };
 
