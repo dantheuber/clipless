@@ -6,9 +6,10 @@ export const Clip = ({
   index,
   isLocked,
   toggleLock,
+  clipModified,
 }) => (
   <li>
-    <input type="text" value={clip} />
+    <input type="text" onChange={e => clipModified(e, index)} value={clip} />
     <input
       type="button"
       onClick={() => toggleLock(index)}
@@ -22,4 +23,5 @@ Clip.propTypes = {
   index: PropTypes.number.isRequired,
   isLocked: PropTypes.bool.isRequired,
   toggleLock: PropTypes.func.isRequired,
+  clipModified: PropTypes.func.isRequired,
 };

@@ -16,6 +16,12 @@ export const clipboardUpdated = text => (dispatch, getState) => {
   });
 };
 
+export const clipModified = (e, index) => ({
+  type: types.CLIP_MODIFIED,
+  payload: e.target.value,
+  metadata: { index },
+});
+
 export const clipKeyPressed = (index) => ({
   type: types.CLIP_KEY_PRESSED,
   payload: index,

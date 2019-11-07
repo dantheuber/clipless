@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { clip, clipIsLocked } from '../selectors';
-import { toggleLock } from '../actions';
+import { toggleLock, clipModified } from '../actions';
 import { Clip } from '../components/Clip';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -10,6 +10,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = {
   toggleLock,
+  clipModified,
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(Clip);

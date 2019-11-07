@@ -14,6 +14,11 @@ const clips = (state = DEFAULT_CLIPS_STATE, action) => {
         return value;
       });
     }
+    case types.CLIP_MODIFIED:{
+      const newState = [...state];
+      newState[action.metadata.index] = action.payload;
+      return newState;
+    }
     default:
       return state;
   }
