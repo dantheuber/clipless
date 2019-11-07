@@ -10,7 +10,7 @@ export const startClipboard = (store) => {
     const lastClip = selectLastClip(store.getState());
     const newClip = clipboard.readText();
     if (newClip !== lastClip) {
-      store.dispatch(clipboardUpdated(newClip, false));
+      store.dispatch(clipboardUpdated(newClip));
     }
   }, CLIPBOARD_CHECK_INTERVAL);
 
