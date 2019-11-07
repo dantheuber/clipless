@@ -1,12 +1,11 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { CLIP_RENDER_ARRAY } from '../constants';
+import { Clip } from '../containers/Clip';
 
-export const Clips = ({ clips }) => (
+export const Clips = () => (
   <ol>
-    { clips.map(clip => <li>{clip}</li>) }
+    { CLIP_RENDER_ARRAY.map((index) => <Clip index={index} />) }
   </ol>
 );
-Clips.propTypes = {
-  clips: PropTypes.arrayOf(PropTypes.object).isRequired,
-};
+Clips.propTypes = {};
 Clips.displayName = 'Clips';
