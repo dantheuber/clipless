@@ -6,7 +6,6 @@ const clips = (state = DEFAULT_CLIPS_STATE, action) => {
   switch (action.type) {
     case types.CLIPBOARD_UPDATED: {
       if (action.metadata.hotkey) return state;
-      if (state.length === 0) return [action.payload];
       let lastClip = action.payload;
       return state.map((clip, index) => {
         if (action.metadata.lockedClips[index]) return clip;

@@ -5,11 +5,11 @@ import {
 } from 'redux';
 import reduxThunk from 'redux-thunk';
 import reduxLogger from 'redux-logger';
+import hydrateState from './utils/hydrate-state';
 import reducers from './reducers';
 import { LOCAL_STORAGE_STATE_KEY } from './constants';
 
-// const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || {};
-const storedState = {};
+const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || DEFAULT_APP_STATE;
 
 const middleware = [
   reduxThunk,
@@ -23,17 +23,17 @@ if (['development', 'dev', 'local'].includes(process.env.NODE_ENV)) {
 
 const store = createStore(
   combineReducers({ ...reducers }),
-  storedState,
+  hydrateState(storedState),
   applyMiddleware(...middleware),
 );
 
 // stores redux state in session storage
-// window.addEventListener('beforeunload', () => {
-//   const saveState = {
-//     ...store.getState(),
-//   };
-//   localStorage.setItem(LOCAL_STORAGE_STATE_KEY, JSON.stringify(saveState));
-// });
+window.addEventListener('beforeunload', () => {
+  const saveState = {
+    ...store.getState(),
+  };
+  localStorage.setItem(LOCAL_STORAGE_STATE_KEY, JSON.stringify(saveState));
+});
 
 
 export default store;
