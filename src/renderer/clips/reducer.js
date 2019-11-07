@@ -1,11 +1,33 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
+import { DEFAULT_CLIPS_STATE } from './constants';
 
-const clips = (state = [], action) => {
+const clips = (state = DEFAULT_CLIPS_STATE, action) => {
   switch (action.type) {
     case types.CLIPBOARD_UPDATED: {
       if (action.metadata.hotkey) return state;
-      return [action.payload, ...state];
+      if (state.length === 0) return [action.payload];
+      let lastClip = action.payload;
+      return state.map((clip, index) => {
+        if (action.metadata.lockedClips[index]) return clip;
+        const value = lastClip;
+        lastClip = clip;
+        return value;
+      });
+    }
+    default:
+      return state;
+  }
+};
+
+const lockedClips = (state = {}, action) => {
+  switch (action.type) {
+    case types.TOGGLE_LOCK: {
+      const lockState = state[action.payload];
+      return {
+        ...state,
+        [action.payload]: !lockState,
+      };
     }
     default:
       return state;
@@ -36,6 +58,7 @@ const clipKeyPressed = (state = false, action) => {
 
 export const reducer = combineReducers({
   clips,
+  lockedClips,
   lastKeyUsed,
   clipKeyPressed,
 });

@@ -8,7 +8,8 @@ import reduxLogger from 'redux-logger';
 import reducers from './reducers';
 import { LOCAL_STORAGE_STATE_KEY } from './constants';
 
-const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || {};
+// const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || {};
+const storedState = {};
 
 const middleware = [
   reduxThunk,
@@ -27,12 +28,12 @@ const store = createStore(
 );
 
 // stores redux state in session storage
-window.addEventListener('beforeunload', () => {
-  const saveState = {
-    ...store.getState(),
-  };
-  localStorage.setItem(LOCAL_STORAGE_STATE_KEY, JSON.stringify(saveState));
-});
+// window.addEventListener('beforeunload', () => {
+//   const saveState = {
+//     ...store.getState(),
+//   };
+//   localStorage.setItem(LOCAL_STORAGE_STATE_KEY, JSON.stringify(saveState));
+// });
 
 
 export default store;
