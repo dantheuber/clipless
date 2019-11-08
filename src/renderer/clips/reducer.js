@@ -40,7 +40,7 @@ const lockedClips = (state = {}, action) => {
 
 const lastKeyUsed = (state = 0, action) => {
   switch (action.type) {
-    case types.CLIP_KEY_PRESSED:
+    case types.CLIP_SELECTED:
       return action.payload;
     case types.CLIPBOARD_UPDATED:
       return 0;
@@ -51,7 +51,7 @@ const lastKeyUsed = (state = 0, action) => {
 
 const clipKeyPressed = (state = false, action) => {
   switch (action.type) {
-    case types.CLIP_KEY_PRESSED:
+    case types.CLIP_SELECTED:
       return true;
     case types.CLIPBOARD_UPDATED:
       return false;
