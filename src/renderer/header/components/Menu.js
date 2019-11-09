@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const Menu = ({ hideMenu }) => (
+export const Menu = () => (
   <ul className="Clipless-Clippings--header--navigation--list">
     <li className="Clipless-Clippings--header--navigation--list--item preferences">
       <a className="Clipless-Clippings--header--navigation--list--item--link">
@@ -29,6 +29,4 @@ export const Menu = ({ hideMenu }) => (
     </li>
   </ul>
 );
-Menu.propTypes = {
-  hideMenu: PropTypes.func.isRequired,
-};
+Menu.propTypes = {};
