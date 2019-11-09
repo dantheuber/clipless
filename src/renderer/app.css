@@ -568,6 +568,7 @@ a:visited {
 }
 
 .Clipless-Clippings--header--navigation {
+  -webkit-app-region: no-drag;
   position: absolute;
   top: 0;
   right: 4px;

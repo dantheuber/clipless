@@ -1,16 +1,19 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import OutsideClickHandler from 'react-outside-click-handler';
 import { Menu } from '../containers/Menu';
 
 export const Header = ({
   menuVisible,
   toggleMenu,
+  hideMenu,
 }) => (
   <header className="Clipless-Clippings--header">
-      <h1 className="Clipless-Clippings--header--heading">
-        Clipless
-      </h1>
+    <h1 className="Clipless-Clippings--header--heading">
+      Clipless
+    </h1>
+    <OutsideClickHandler onOutsideClick={hideMenu}>
       <nav className={classnames('Clipless-Clippings--header--navigation', {
         'is-Active': menuVisible,
       })}>
@@ -22,9 +25,11 @@ export const Header = ({
         </h2>
         { menuVisible && <Menu /> }
       </nav>
-    </header>
+    </OutsideClickHandler>
+  </header>
 );
 Header.propTypes = {
   menuVisible: PropTypes.bool.isRequired,
   toggleMenu: PropTypes.func.isRequired,
+  hideMenu: PropTypes.func.isRequired,
 };

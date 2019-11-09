@@ -9,7 +9,7 @@ export const Clip = ({
   clipSelected,
 }) => (
   <li className="Clipless-Clippings--main--clips-list--item">
-    <a href="javascript:void(0);" className="Clipless-Clippings--main--clips-list--item--paste-button" onClick={() => clipSelected(index)}>
+    <a className="Clipless-Clippings--main--clips-list--item--paste-button" onClick={() => clipSelected(index)}>
       <span className="Clipless-Clippings--main--clips-list--item--paste-button--text">Paste Clip</span>
       <span className="Clipless-Clippings--main--clips-list--item--paste-button--number">{index + 1}</span>
     </a>
