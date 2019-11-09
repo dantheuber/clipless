@@ -37,3 +37,6 @@ export const clipSelected = index => (dispatch, getState) => {
 export const toggleClipSettings = indexAction(types.TOGGLE_CLIP_SETTINGS);
 export const hideClipSettings = indexAction(types.HIDE_CLIP_SETTINGS);
 export const toggleLock = indexAction(types.TOGGLE_LOCK);
+export const emptyClip = indexAction(types.EMPTY_CLIP);
+
+export const emptyAllClips = () => ({ type: types.EMPTY_ALL_CLIPS });

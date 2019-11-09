@@ -19,6 +19,13 @@ const clips = (state = DEFAULT_CLIPS_STATE, action) => {
       newState[action.metadata.index] = action.payload;
       return newState;
     }
+    case types.EMPTY_CLIP: {
+      const newState = [...state];
+      newState[action.payload] = '';
+      return newState;
+    }
+    case types.EMPTY_ALL_CLIPS:
+      return DEFAULT_CLIPS_STATE;
     default:
       return state;
   }

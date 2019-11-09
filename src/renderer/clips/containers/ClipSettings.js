@@ -1,5 +1,10 @@
 import { connect } from 'react-redux';
-import { toggleLock, toggleClipSettings } from '../actions';
+import {
+  emptyClip,
+  toggleLock,
+  hideClipSettings,
+  toggleClipSettings,
+} from '../actions';
 import { ClipSettings } from '../components/ClipSettings';
 import { clipSettingsVisible } from '../selectors';
 
@@ -8,8 +13,10 @@ const mapStateToProps = (state, ownProps) => ({
 })
 
 const mapDispatchToProps = {
-  toggleClipSettings,
+  emptyClip,
   toggleLock,
+  hideClipSettings,
+  toggleClipSettings,
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(ClipSettings);

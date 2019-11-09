@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export const Menu = () => (
+export const Menu = ({ emptyAllClips }) => (
   <ul className="Clipless-Clippings--header--navigation--list">
     <li className="Clipless-Clippings--header--navigation--list--item preferences">
       <a className="Clipless-Clippings--header--navigation--list--item--link">
@@ -12,7 +12,7 @@ export const Menu = () => (
       </a>
     </li>
     <li className="Clipless-Clippings--header--navigation--list--item clear-clips">
-      <a className="Clipless-Clippings--header--navigation--list--item--link">
+      <a className="Clipless-Clippings--header--navigation--list--item--link" onClick={emptyAllClips}>
         <svg className="Clipless-Clippings--header--navigation--list--item--link--icon u-InlineIcon">
           <path d="M15,16H19V18H15V16M15,8H22V10H15V8M15,12H21V14H15V12M3,18A2,2 0 0,0 5,20H11A2,2 0 0,0 13,18V8H3V18M14,5H11L10,4H6L5,5H2V7H14V5Z" />
         </svg>
@@ -29,4 +29,6 @@ export const Menu = () => (
     </li>
   </ul>
 );
-Menu.propTypes = {};
+Menu.propTypes = {
+  emptyAllClips: PropTypes.func.isRequired,
+};
