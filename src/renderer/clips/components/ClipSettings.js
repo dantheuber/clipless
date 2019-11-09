@@ -30,14 +30,17 @@ export const ClipSettings = ({
             <span className="Clipless-Clippings--main--clips-list--item--settings--list--item--link--text">Delete</span>
           </a>
         </li>
-        <li className="Clipless-Clippings--main--clips-list--item--settings--list--item unlock">
-          <a className="Clipless-Clippings--main--clips-list--item--settings--list--item--link" onClick={() => toggleLock(index)}>
-            <svg className="Clipless-Clippings--main--clips-list--item--settings--list--item--link--icon u-InlineIcon" viewBox="0 0 24 24">
-              <path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17Z" />
-            </svg>
-            <span className="Clipless-Clippings--main--clips-list--item--settings--list--item--link--text">Unlock</span>
-          </a>
-        </li>
+        {/* https://github.com/dantheuber/clipless/issues/4 bandaid */}
+        { index !== 0 &&
+          <li className="Clipless-Clippings--main--clips-list--item--settings--list--item unlock">
+            <a className="Clipless-Clippings--main--clips-list--item--settings--list--item--link" onClick={() => toggleLock(index)}>
+              <svg className="Clipless-Clippings--main--clips-list--item--settings--list--item--link--icon u-InlineIcon" viewBox="0 0 24 24">
+                <path d="M18,8A2,2 0 0,1 20,10V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V10A2,2 0 0,1 6,8H15V6A3,3 0 0,0 12,3A3,3 0 0,0 9,6H7A5,5 0 0,1 12,1A5,5 0 0,1 17,6V8H18M12,17A2,2 0 0,0 14,15A2,2 0 0,0 12,13A2,2 0 0,0 10,15A2,2 0 0,0 12,17Z" />
+              </svg>
+              <span className="Clipless-Clippings--main--clips-list--item--settings--list--item--link--text">Unlock</span>
+            </a>
+          </li>
+        }
         <li className="Clipless-Clippings--main--clips-list--item--settings--list--item scan">
           <a className="Clipless-Clippings--main--clips-list--item--settings--list--item--link">
             <svg className="Clipless-Clippings--main--clips-list--item--settings--list--item--link--icon u-InlineIcon" viewBox="0 0 24 24">
