@@ -19,6 +19,13 @@ const clips = (state = DEFAULT_CLIPS_STATE, action) => {
       newState[action.metadata.index] = action.payload;
       return newState;
     }
+    case types.EMPTY_CLIP: {
+      const newState = [...state];
+      newState[action.payload] = '';
+      return newState;
+    }
+    case types.EMPTY_ALL_CLIPS:
+      return DEFAULT_CLIPS_STATE;
     default:
       return state;
   }
@@ -38,9 +45,26 @@ const lockedClips = (state = {}, action) => {
   }
 };
 
+const settingsVisible = (state = {}, action) => {
+  switch (action.type) {
+    case types.TOGGLE_CLIP_SETTINGS:
+      return {
+        ...state,
+        [action.payload]: !state[action.payload],
+      };
+    case types.HIDE_CLIP_SETTINGS:
+      return {
+        ...state,
+        [action.payload]: false,
+      };
+    default:
+      return state;
+  }
+};
+
 const lastKeyUsed = (state = 0, action) => {
   switch (action.type) {
-    case types.CLIP_KEY_PRESSED:
+    case types.CLIP_SELECTED:
       return action.payload;
     case types.CLIPBOARD_UPDATED:
       return 0;
@@ -51,7 +75,7 @@ const lastKeyUsed = (state = 0, action) => {
 
 const clipKeyPressed = (state = false, action) => {
   switch (action.type) {
-    case types.CLIP_KEY_PRESSED:
+    case types.CLIP_SELECTED:
       return true;
     case types.CLIPBOARD_UPDATED:
       return false;
@@ -63,6 +87,7 @@ const clipKeyPressed = (state = false, action) => {
 export const reducer = combineReducers({
   clips,
   lockedClips,
+  settingsVisible,
   lastKeyUsed,
   clipKeyPressed,
 });

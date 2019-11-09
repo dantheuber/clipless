@@ -3,11 +3,12 @@ import {
   createStore,
   applyMiddleware,
 } from 'redux';
+import unset from 'lodash.unset';
 import reduxThunk from 'redux-thunk';
 import reduxLogger from 'redux-logger';
 import hydrateState from './utils/hydrate-state';
 import reducers from './reducers';
-import { LOCAL_STORAGE_STATE_KEY } from './constants';
+import { LOCAL_STORAGE_STATE_KEY, STATE_PERSIST_BLACKLIST } from './constants';
 
 const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || DEFAULT_APP_STATE;
 
@@ -32,6 +33,9 @@ window.addEventListener('beforeunload', () => {
   const saveState = {
     ...store.getState(),
   };
+  STATE_PERSIST_BLACKLIST.forEach(key => {
+    unset(saveState, key);
+  });
   localStorage.setItem(LOCAL_STORAGE_STATE_KEY, JSON.stringify(saveState));
 });
 
