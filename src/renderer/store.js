@@ -8,7 +8,11 @@ import reduxThunk from 'redux-thunk';
 import reduxLogger from 'redux-logger';
 import hydrateState from './utils/hydrate-state';
 import reducers from './reducers';
-import { LOCAL_STORAGE_STATE_KEY, STATE_PERSIST_BLACKLIST } from './constants';
+import {
+  DEFAULT_APP_STATE,
+  LOCAL_STORAGE_STATE_KEY,
+  STATE_PERSIST_BLACKLIST,
+} from './constants';
 
 const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || DEFAULT_APP_STATE;
 

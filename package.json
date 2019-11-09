@@ -2,6 +2,12 @@
   "name": "clipless",
   "version": "0.3.0",
   "license": "MIT",
+  "author": {
+    "name": "Daniel Essig",
+    "email": "dan.essig@gmail.com",
+    "url": "https://github.com/dantheuber"
+  },
+  "description": "A clipboard manager for office workers.",
   "scripts": {
     "dev": "electron-webpack dev",
     "compile": "electron-webpack",

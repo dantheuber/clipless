@@ -32,7 +32,6 @@ function createMainWindow() {
   const transparent = store.get('transparent');
   const alwaysOnTop = store.get('alwaysOnTop');
   const window = new BrowserWindow({
-    titleBarStyle: 'hiddenInset',
     frame: false,
     transparent,
     alwaysOnTop,
