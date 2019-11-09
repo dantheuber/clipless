@@ -903,7 +903,7 @@ a:visited {
   list-style: none;
   margin: 0;
   padding: 0;
-  padding-right: 32px
+  /* padding-right: 24px */
 }
 
 .Clipless-Clippings--main--clips-list--item--settings.is-Active .Clipless-Clippings--main--clips-list--item--settings--heading--icon {
@@ -911,16 +911,16 @@ a:visited {
 }
 
 .Clipless-Clippings--main--clips-list--item--settings.is-Active .Clipless-Clippings--main--clips-list--item--settings--list {
-  width: 170px;
+  width: 130px;
   background-color: #666;
   display: block
 }
 
 .Clipless-Clippings--main--clips-list--item--settings.is-Active .Clipless-Clippings--main--clips-list--item--settings--list--item {
-  width: 32px;
+  width: 24px;
   display: inline;
   float: left;
-  margin: 0 5px
+  margin: 0 3px
 }
 
 .Clipless-Clippings--main--clips-list--item--settings.is-Active .Clipless-Clippings--main--clips-list--item--settings--list--item--link {

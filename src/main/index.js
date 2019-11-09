@@ -8,17 +8,40 @@ import {
 } from 'electron';
 import * as path from 'path';
 import { format as formatUrl } from 'url';
+import {
+  MIN_WIDTH,
+  MIN_HEIGHT,
+  DEFAULT_STORE_VALUE,
+  DEFAULT_CONFIG_FILENAME,
+} from './constants';
+import Store from './store';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
+
+const store = new Store({
+  configName: DEFAULT_CONFIG_FILENAME,
+  defaults: DEFAULT_STORE_VALUE,
+})
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow;
 
 function createMainWindow() {
+  const { width, height } = store.get('windowBounds');
+  const { x, y } = store.get('position');
+  const transparent = store.get('transparent');
+  const alwaysOnTop = store.get('alwaysOnTop');
   const window = new BrowserWindow({
-    frame: false,
-    transparent: true,
     titleBarStyle: 'hiddenInset',
+    frame: false,
+    transparent,
+    alwaysOnTop,
+    height,
+    width,
+    x,
+    y,
+    minWidth: MIN_WIDTH,
+    minHeight: MIN_HEIGHT,
     webPreferences: {
       nodeIntegration: true,
     }
@@ -41,6 +64,19 @@ function createMainWindow() {
 
   window.on('closed', () => {
     mainWindow = null
+  });
+
+  window.on('resize', () => {
+    const { width, height } = window.getBounds();
+    store.set('windowBounds', { width, height });
+  });
+
+  window.on('move', () => {
+    const pos = window.getPosition();
+    store.set('position', {
+      x: pos[0],
+      y: pos[1],
+    });
   });
 
   window.webContents.on('devtools-opened', () => {
