@@ -4,6 +4,7 @@ import {
   app,
   BrowserWindow,
   globalShortcut,
+  ipcMain,
 } from 'electron';
 import * as path from 'path';
 import { format as formatUrl } from 'url';
@@ -85,4 +86,9 @@ app.on('ready', () => {
 
 app.on('will-quit', () => {
   globalShortcut.unregisterAll();
+});
+
+ipcMain.on('quit-app', () => {
+  console.log('closing');
+  app.quit();
 });
