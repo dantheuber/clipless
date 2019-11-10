@@ -105,6 +105,23 @@ const clipBeingViewed = (state = 0, action) => {
   }
 };
 
+const clipCopiedOverlay = (state = {}, action) => {
+  switch (action.type) {
+    case types.CLIP_SELECTED:
+      return {
+        ...state,
+        [action.payload]: true,
+      };
+    case types.HIDE_COPIED_TOOLTIP:
+      return {
+        ...state,
+        [action.payload]: false,
+      };
+    default:
+      return state;
+  }
+};
+
 export const reducer = combineReducers({
   clips,
   lockedClips,
@@ -113,4 +130,5 @@ export const reducer = combineReducers({
   clipKeyPressed,
   viewingMultiLineEditor,
   clipBeingViewed,
+  clipCopiedOverlay,
 });
