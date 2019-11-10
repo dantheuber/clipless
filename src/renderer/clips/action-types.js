@@ -14,3 +14,6 @@ export const HIDE_CLIP_SETTINGS = ca('HIDE_CLIP_SETTINGS');
 
 export const EMPTY_CLIP = ca('EMPTY_CLIP');
 export const EMPTY_ALL_CLIPS = ca('EMPTY_ALL_CLIPS');
+
+export const VIEW_MULTI_LINE_EDITOR = ca('VIEW_MULTI_LINE_EDITOR');
+export const RETURN_TO_NORMAL_VIEW = ca('RETURN_TO_NORMAL_VIEW');

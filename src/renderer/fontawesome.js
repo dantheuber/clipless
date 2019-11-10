@@ -1,24 +1,26 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import {
-  faTrash,
-  faUserCog,
   faCog,
-  faSignOutAlt,
   faLock,
-  faLockOpen,
+  faEdit,
+  faTrash,
   faSearch,
-  faClipboardList,
+  faUserCog,
+  faLockOpen,
   faClipboard,
+  faSignOutAlt,
+  faClipboardList,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
-  faUserCog,
   faCog,
-  faTrash,
-  faSignOutAlt,
   faLock,
-  faLockOpen,
+  faEdit,
+  faTrash,
   faSearch,
-  faClipboardList,
+  faUserCog,
+  faLockOpen,
   faClipboard,
+  faSignOutAlt,
+  faClipboardList,
 );

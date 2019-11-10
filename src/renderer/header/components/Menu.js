@@ -8,11 +8,11 @@ export const Menu = ({
   quitApp,
 }) => (
   <Nav className="mr-auto">
-    <Nav.Link key="Preferences">
+    {/* <Nav.Link key="Preferences">
       <FontAwesomeIcon icon="user-cog" /> Preferences
-    </Nav.Link>
+    </Nav.Link> */}
     <Nav.Link key="EmptyClips" onClick={emptyAllClips}>
-      <FontAwesomeIcon icon="trash" /> Empty Clips
+      <FontAwesomeIcon icon="trash" /> Empty All Clips
     </Nav.Link>
     <Nav.Link key="QuitApp" onClick={quitApp}>
       <FontAwesomeIcon icon="sign-out-alt" /> Exit

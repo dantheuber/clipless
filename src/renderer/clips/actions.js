@@ -38,5 +38,7 @@ export const toggleClipSettings = indexAction(types.TOGGLE_CLIP_SETTINGS);
 export const hideClipSettings = indexAction(types.HIDE_CLIP_SETTINGS);
 export const toggleLock = indexAction(types.TOGGLE_LOCK);
 export const emptyClip = indexAction(types.EMPTY_CLIP);
+export const viewMultiLineEditor = indexAction(types.VIEW_MULTI_LINE_EDITOR);
 
+export const returnToNormalView = () => ({ type: types.RETURN_TO_NORMAL_VIEW });
 export const emptyAllClips = () => ({ type: types.EMPTY_ALL_CLIPS });

@@ -4,6 +4,7 @@ import {
   toggleLock,
   hideClipSettings,
   toggleClipSettings,
+  viewMultiLineEditor,
 } from '../actions';
 import { ClipSettings } from '../components/ClipSettings';
 import { clipSettingsVisible, clipIsLocked } from '../selectors';
@@ -18,6 +19,7 @@ const mapDispatchToProps = {
   toggleLock,
   hideClipSettings,
   toggleClipSettings,
+  viewMultiLineEditor
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(ClipSettings);

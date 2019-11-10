@@ -7,5 +7,6 @@ export const DEFAULT_CLIPS_STATE = CLIP_RENDER_ARRAY.map(() => '');
 export const CLIPS_STATE_BLACKLIST = [
   `${NAME}.settingsVisible`,
   `${NAME}.viewingMultiLineEditor`,
+  `${NAME}.clipBeingViewed`,
   `${NAME}.clipKeyPressed`,
 ];

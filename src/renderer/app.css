@@ -72,3 +72,8 @@ input, textarea {
   padding-top: 2px;
   padding-left: 8px;
 }
+
+.multiLineView {
+  height: 272px !important;
+  resize: none;
+}
