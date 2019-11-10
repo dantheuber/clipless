@@ -126,6 +126,5 @@ app.on('will-quit', () => {
 });
 
 ipcMain.on('quit-app', () => {
-  console.log('closing');
   app.quit();
 });

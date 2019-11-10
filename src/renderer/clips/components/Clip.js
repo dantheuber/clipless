@@ -17,6 +17,7 @@ export const Clip = ({
       <Button variant="dark" onClick={() => clipSelected(index)}>{ index + 1}</Button>
     </InputGroup.Prepend>
     <FormControl
+      className="clip"
       value={clip}
       readOnly={index === 0}
       onChange={e => clipModified(e, index)}
