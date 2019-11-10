@@ -32,6 +32,8 @@ function createMainWindow() {
   const transparent = store.get('transparent');
   const alwaysOnTop = store.get('alwaysOnTop');
   const window = new BrowserWindow({
+    fullscreenable: false,
+    resizable: false,
     frame: false,
     transparent,
     alwaysOnTop,

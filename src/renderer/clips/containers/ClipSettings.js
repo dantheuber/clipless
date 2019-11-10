@@ -6,11 +6,12 @@ import {
   toggleClipSettings,
 } from '../actions';
 import { ClipSettings } from '../components/ClipSettings';
-import { clipSettingsVisible } from '../selectors';
+import { clipSettingsVisible, clipIsLocked } from '../selectors';
 
 const mapStateToProps = (state, ownProps) => ({
   settingsVisible: clipSettingsVisible(state, ownProps.index),
-})
+  clipIsLocked: clipIsLocked(state, ownProps.index),
+});
 
 const mapDispatchToProps = {
   emptyClip,

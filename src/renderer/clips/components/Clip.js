@@ -1,5 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Button from 'react-bootstrap/Button';
+import FormControl from 'react-bootstrap/FormControl';
 import { ClipSettings } from '../containers/ClipSettings';
 
 export const Clip = ({
@@ -8,20 +11,18 @@ export const Clip = ({
   clipModified,
   clipSelected,
 }) => (
-  <li className="Clipless-Clippings--main--clips-list--item">
-    <a className="Clipless-Clippings--main--clips-list--item--paste-button" onClick={() => clipSelected(index)}>
-      <span className="Clipless-Clippings--main--clips-list--item--paste-button--text">Paste Clip</span>
-      <span className="Clipless-Clippings--main--clips-list--item--paste-button--number">{index + 1}</span>
-    </a>
-    <div className="Clipless-Clippings--main--clips-list--item--clipping">
-      <textarea
-        className="Clipless-Clippings--main--clips-list--item--clipping--textarea"
-        onChange={e => clipModified(e, index)}
-        value={clip}
-      />
-    </div>
-    <ClipSettings index={index} />
-  </li>
+  <InputGroup size="sm">
+    <InputGroup.Prepend className="clip-number">
+      <Button variant="dark" onClick={() => clipSelected(index)}>{ index + 1}</Button>
+    </InputGroup.Prepend>
+    <FormControl
+      value={clip}
+      onChange={e => clipModified(e, index)}
+    />
+    <InputGroup.Append className="clip-settings">
+      <ClipSettings index={index} />
+    </InputGroup.Append>
+  </InputGroup>
 );
 
 Clip.propTypes = {
