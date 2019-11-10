@@ -22,6 +22,7 @@ export const Clip = ({
     <InputGroup size="sm">
       <InputGroup.Prepend className="clip-number">
         <OverlayTrigger
+          rootClose
           placement="right"
           trigger="hover"
           delay={TOOLTIP_DELAY}

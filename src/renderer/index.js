@@ -5,8 +5,9 @@ import { Content } from './content'
 import { startClipboard } from './clipboard';
 import store from './store';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './app.css';
 import './fontawesome';
+import './window-blur';
+import './app.css';
 
 ReactDOM.render(
   <Provider store={store}>
