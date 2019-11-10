@@ -29,7 +29,7 @@
 
 ## Clip Compile Templates
 
-Use an easy to understand syntax to allow users to save what will be call "compile templates", which will allow them to provide a template to quickly compile multiple clips into a re-usable template.
+Use an easy to understand syntax to allow users to save what will be called "compile templates", which will allow them to provide a template to quickly compile multiple clips into a re-usable template.
 
 ### Example
 
@@ -67,7 +67,7 @@ The "Quick Clip Launch" feature aims to expediate the time and effort used to us
 
 This regex would then be used to check against clipboard contents and prompt user of any matches.
 
-The user can then identify what tool they would like to launch when these search strings are found. by providing URI's during configuration, such as with the twitter handle example above: `https://www.twitter.com/{twitter_handle}` where `{}` is used to indicate where the capture group of the same name's data should be placed.
+The user can then identify what tool they would like to launch when these search strings are found. by providing URI's during configuration, such as with the twitter handle example above: `https://www.twitter.com/{twitter_handle}` where `{twitter_handle}` is used to indicate where the capture group of the same name's data should be placed.
 
 The user experience once configured should be as follows:
 
