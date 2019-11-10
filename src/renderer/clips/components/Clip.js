@@ -3,12 +3,10 @@ import PropTypes from 'prop-types';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Overlay from 'react-bootstrap/Overlay';
 import Tooltip from 'react-bootstrap/Tooltip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ClipSettings } from '../containers/ClipSettings';
-import { TOOLTIP_DELAY } from '../constants';
 
 export const Clip = ({
   clip,
@@ -21,25 +19,13 @@ export const Clip = ({
   return (
     <InputGroup size="sm">
       <InputGroup.Prepend className="clip-number">
-        <OverlayTrigger
-          rootClose
-          placement="right"
-          trigger="hover"
-          delay={TOOLTIP_DELAY}
-          overlay={
-            <Tooltip id={`select-clip-${index + 1}-tooltip`}>
-              Select This Clip
-            </Tooltip>
-          }
+        <Button
+          ref={target}
+          variant="dark"
+          onClick={() => clipSelected(index)}
         >
-          <Button
-            ref={target}
-            variant="dark"
-            onClick={() => clipSelected(index)}
-          >
-            { index + 1}
-          </Button>
-        </OverlayTrigger>
+          { index + 1}
+        </Button>
         <Overlay
           target={target.current}
           id={`clip-${index + 1}-copied-overlay`}
