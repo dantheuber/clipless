@@ -4,6 +4,7 @@ import {
   lockedClips,
   clipKeyPressed as selectClipKeyPressed,
 } from './selectors';
+import { TOOLTIP_DELAY } from './constants';
 import { clipboard } from 'electron';
 
 const indexAction = type => payload => ({ type, payload });
@@ -26,12 +27,15 @@ export const clipModified = (e, index) => ({
   metadata: { index },
 });
 
+export const hideCopiedTooltip = indexAction(types.HIDE_COPIED_TOOLTIP);
+
 export const clipSelected = index => (dispatch, getState) => {
   dispatch({
     type: types.CLIP_SELECTED,
     payload: index,
   });
   clipboard.writeText(clip(getState(), index));
+  setTimeout(() => dispatch(hideCopiedTooltip(index)), TOOLTIP_DELAY);
 };
 
 export const toggleClipSettings = indexAction(types.TOGGLE_CLIP_SETTINGS);

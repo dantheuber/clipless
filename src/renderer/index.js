@@ -5,8 +5,8 @@ import { Content } from './content'
 import { startClipboard } from './clipboard';
 import store from './store';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import './app.css';
 import './fontawesome';
+import './app.css';
 
 ReactDOM.render(
   <Provider store={store}>
