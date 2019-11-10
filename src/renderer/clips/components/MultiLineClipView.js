@@ -10,7 +10,13 @@ export const MultiLineClipView = ({
   returnToNormalView,
 }) => (
   <div>
-    <Button onClick={returnToNormalView} float="right">Done</Button>
+    <Button
+      float="right"
+      variant="link"
+      onClick={returnToNormalView}
+    >
+      Done
+    </Button>
     <FormControl
       className="multiLineView"
       as="textarea"
