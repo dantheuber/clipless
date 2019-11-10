@@ -7,15 +7,15 @@ export const Menu = ({
   emptyAllClips,
   quitApp,
 }) => (
-  <Nav className="mr-auto" align="right">
+  <Nav className="mr-auto">
     <Nav.Link key="Preferences">
-      Preferences <FontAwesomeIcon icon="user-cog" />
+      <FontAwesomeIcon icon="user-cog" /> Preferences
     </Nav.Link>
     <Nav.Link key="EmptyClips" onClick={emptyAllClips}>
-      Empty Clips <FontAwesomeIcon icon="trash" />
+      <FontAwesomeIcon icon="trash" /> Empty Clips
     </Nav.Link>
     <Nav.Link key="QuitApp" onClick={quitApp}>
-      Exit <FontAwesomeIcon icon="sign-out-alt" />
+      <FontAwesomeIcon icon="sign-out-alt" /> Exit
     </Nav.Link>
   </Nav>
 );

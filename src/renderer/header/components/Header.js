@@ -1,6 +1,7 @@
 import React from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import { Menu } from '../containers/Menu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Header = () => (
   <Navbar
@@ -12,10 +13,10 @@ export const Header = () => (
     expand="sm"
   >
     <Navbar.Brand>
-      Clipless
+      <FontAwesomeIcon icon="clipboard-list" /> Clipless
     </Navbar.Brand>
     <Navbar.Toggle aria-controls="navbar-menu" className="menu-toggle" size="sm" />
-    <Navbar.Collapse id="navbar-menu" align="right" className="menu">
+    <Navbar.Collapse id="navbar-menu" className="menu">
       <Menu />
     </Navbar.Collapse>
   </Navbar>

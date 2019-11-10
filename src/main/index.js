@@ -27,7 +27,7 @@ const store = new Store({
 let mainWindow;
 
 function createMainWindow() {
-  const { width, height } = store.get('windowBounds');
+  // const { width, height } = store.get('windowBounds');
   const { x, y } = store.get('position');
   const transparent = store.get('transparent');
   const alwaysOnTop = store.get('alwaysOnTop');
@@ -37,8 +37,8 @@ function createMainWindow() {
     frame: false,
     transparent,
     alwaysOnTop,
-    height,
-    width,
+    height: MIN_HEIGHT,
+    width: MIN_WIDTH,
     x,
     y,
     minWidth: MIN_WIDTH,

@@ -7,6 +7,8 @@ import {
   faLock,
   faLockOpen,
   faSearch,
+  faClipboardList,
+  faClipboard,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -17,4 +19,6 @@ library.add(
   faLock,
   faLockOpen,
   faSearch,
+  faClipboardList,
+  faClipboard,
 );

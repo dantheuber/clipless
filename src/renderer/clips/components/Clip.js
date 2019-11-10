@@ -4,6 +4,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Button from 'react-bootstrap/Button';
 import FormControl from 'react-bootstrap/FormControl';
 import { ClipSettings } from '../containers/ClipSettings';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Clip = ({
   clip,
@@ -17,10 +18,15 @@ export const Clip = ({
     </InputGroup.Prepend>
     <FormControl
       value={clip}
+      readOnly={index === 0}
       onChange={e => clipModified(e, index)}
     />
     <InputGroup.Append className="clip-settings">
-      <ClipSettings index={index} />
+      { index === 0 ? (
+        <Button variant="dark" onClick={() => clipSelected(index)}>
+          <FontAwesomeIcon icon="clipboard" />
+        </Button>
+      ) : <ClipSettings index={index} /> }
     </InputGroup.Append>
   </InputGroup>
 );

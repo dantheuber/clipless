@@ -5,37 +5,38 @@ import OutsideClickHandler from 'react-outside-click-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const ClipSettings = ({
-  index,
-  emptyClip,
-  toggleLock,
   toggleClipSettings,
   hideClipSettings,
   settingsVisible,
   clipIsLocked,
+  toggleLock,
+  emptyClip,
+  index,
 }) => (
   <OutsideClickHandler onOutsideClick={() => hideClipSettings(index)}>
     { settingsVisible && [
-      <Button key="trash" onClick={() => emptyClip(index)}>
+      <Button key="trash" variant="dark" onClick={() => emptyClip(index)}>
         <FontAwesomeIcon icon="trash" />
       </Button>,
-      index === 0 ? null : <Button key="lock" onClick={() => toggleLock(index)}>
+      <Button key="lock" variant="dark" onClick={() => toggleLock(index)}>
         <FontAwesomeIcon icon={clipIsLocked ? 'lock' : 'lock-open'} />
       </Button>,
-      <Button key="scan">
+      <Button key="scan" variant="dark">
         <FontAwesomeIcon icon="search" />
       </Button>
     ]}
-    <Button onClick={() => toggleClipSettings(index)}>
+    <Button variant="dark" onClick={() => toggleClipSettings(index)}>
       <FontAwesomeIcon icon="cog" />
     </Button>
   </OutsideClickHandler>
 );
 ClipSettings.propTypes = {
-  index: PropTypes.number.isRequired,
-  emptyClip: PropTypes.func.isRequired,
-  toggleLock: PropTypes.func.isRequired,
   toggleClipSettings: PropTypes.func.isRequired,
   hideClipSettings: PropTypes.func.isRequired,
   settingsVisible: PropTypes.bool.isRequired,
   clipIsLocked: PropTypes.bool.isRequired,
+  toggleLock: PropTypes.func.isRequired,
+  emptyClip: PropTypes.func.isRequired,
+  index: PropTypes.number.isRequired,
 };
+ClipSettings.displayName = 'ClipSettings';
