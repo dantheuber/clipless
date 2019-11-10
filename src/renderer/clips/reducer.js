@@ -52,6 +52,7 @@ const settingsVisible = (state = {}, action) => {
         ...state,
         [action.payload]: !state[action.payload],
       };
+    case types.VIEW_MULTI_LINE_EDITOR:
     case types.HIDE_CLIP_SETTINGS:
       return {
         ...state,
@@ -84,10 +85,32 @@ const clipKeyPressed = (state = false, action) => {
   }
 };
 
+const viewingMultiLineEditor = (state = false, action) => {
+  switch (action.type) {
+    case types.VIEW_MULTI_LINE_EDITOR:
+      return true;
+    case types.RETURN_TO_NORMAL_VIEW:
+      return false;
+    default:
+      return state;
+  }
+};
+
+const clipBeingViewed = (state = 0, action) => {
+  switch (action.type) {
+    case types.VIEW_MULTI_LINE_EDITOR:
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
 export const reducer = combineReducers({
   clips,
   lockedClips,
   settingsVisible,
   lastKeyUsed,
   clipKeyPressed,
+  viewingMultiLineEditor,
+  clipBeingViewed,
 });

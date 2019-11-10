@@ -27,16 +27,18 @@ const store = new Store({
 let mainWindow;
 
 function createMainWindow() {
-  const { width, height } = store.get('windowBounds');
+  // const { width, height } = store.get('windowBounds');
   const { x, y } = store.get('position');
   const transparent = store.get('transparent');
   const alwaysOnTop = store.get('alwaysOnTop');
   const window = new BrowserWindow({
+    fullscreenable: false,
+    resizable: false,
     frame: false,
     transparent,
     alwaysOnTop,
-    height,
-    width,
+    height: MIN_HEIGHT,
+    width: MIN_WIDTH,
     x,
     y,
     minWidth: MIN_WIDTH,
@@ -124,6 +126,5 @@ app.on('will-quit', () => {
 });
 
 ipcMain.on('quit-app', () => {
-  console.log('closing');
   app.quit();
 });

@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
-import { clips } from '../selectors';
+import { viewingMultiLineEditor } from '../selectors';
 import { Clips } from '../components/Clips';
 
 const mapStateToProps = state => ({
-  clips: clips(state),
+  viewingMultiLineEditor: viewingMultiLineEditor(state),
 });
 
 const container = connect(mapStateToProps)(Clips);

@@ -4,11 +4,12 @@ import { Provider } from 'react-redux';
 import { Content } from './content'
 import { startClipboard } from './clipboard';
 import store from './store';
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './app.css';
+import './fontawesome';
 
 ReactDOM.render(
   <Provider store={store}>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700,900" rel="stylesheet"></link>
     <Content />
   </Provider>,
   document.getElementById('app'),

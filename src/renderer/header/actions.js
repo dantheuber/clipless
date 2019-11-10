@@ -10,6 +10,5 @@ export const hideMenu = () => ({
 });
 
 export const quitApp = () => () => {
-  console.log('closing');
   remote.getCurrentWindow().close();
 };

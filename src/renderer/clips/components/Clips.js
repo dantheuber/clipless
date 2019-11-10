@@ -1,13 +1,18 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { CLIP_RENDER_ARRAY } from '../constants';
 import { Clip } from '../containers/Clip';
+import { MultiLineClipView } from '../containers/MultiLineClipView';
 
-export const Clips = () => (
-  <main className="Clipless-Clippings--main">
-    <ul className="Clipless-Clippings--main--clips-list">
-      { CLIP_RENDER_ARRAY.map((index) => <Clip key={index} index={index} />) }
-    </ul>
-  </main>
+export const Clips = ({ viewingMultiLineEditor }) => (
+  <div>
+    { viewingMultiLineEditor && <MultiLineClipView /> }
+    {
+      !viewingMultiLineEditor && CLIP_RENDER_ARRAY.map((index) => <Clip key={index} index={index} />)
+    }
+  </div>
 );
-Clips.propTypes = {};
+Clips.propTypes = {
+  viewingMultiLineEditor: PropTypes.bool.isRequired,
+};
 Clips.displayName = 'Clips';

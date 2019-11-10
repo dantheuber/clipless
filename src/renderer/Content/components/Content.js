@@ -1,11 +1,14 @@
 import React from 'react';
+import Container from 'react-bootstrap/Container';
 import { Clips } from '../../clips';
 import { Header } from '../../header';
 
 export const Content = () => (
-  <div className="Clipless-Clippings">
+  <Container fluid className="wrapper">
     <Header />
-    <Clips />
-  </div>
+    <div className="main">
+      <Clips />
+    </div>
+  </Container>
 );
 Content.displayName = 'Content';
