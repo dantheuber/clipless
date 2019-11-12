@@ -1,3 +1,4 @@
+import { clipboard } from 'electron';
 import * as types from './action-types';
 import {
   clip,
@@ -5,7 +6,6 @@ import {
   clipKeyPressed as selectClipKeyPressed,
 } from './selectors';
 import { TOOLTIP_DELAY } from './constants';
-import { clipboard } from 'electron';
 
 const simpleAction = type => payload => ({ type, payload });
 
