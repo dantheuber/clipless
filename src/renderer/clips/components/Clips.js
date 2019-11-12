@@ -2,17 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { CLIP_RENDER_ARRAY } from '../constants';
 import { Clip } from '../containers/Clip';
-import { MultiLineClipView } from '../containers/MultiLineClipView';
+import { ClipEditor } from '../containers/ClipEditor';
 
-export const Clips = ({ viewingMultiLineEditor }) => (
+export const Clips = ({ viewingClipEditor }) => (
   <div>
-    { viewingMultiLineEditor && <MultiLineClipView /> }
+    { viewingClipEditor && <ClipEditor /> }
     {
-      !viewingMultiLineEditor && CLIP_RENDER_ARRAY.map((index) => <Clip key={index} index={index} />)
+      !viewingClipEditor && CLIP_RENDER_ARRAY.map((index) => <Clip key={index} index={index} />)
     }
   </div>
 );
 Clips.propTypes = {
-  viewingMultiLineEditor: PropTypes.bool.isRequired,
+  viewingClipEditor: PropTypes.bool.isRequired,
 };
 Clips.displayName = 'Clips';

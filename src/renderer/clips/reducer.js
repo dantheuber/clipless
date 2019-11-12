@@ -52,7 +52,7 @@ const settingsVisible = (state = {}, action) => {
         ...state,
         [action.payload]: !state[action.payload],
       };
-    case types.VIEW_MULTI_LINE_EDITOR:
+    case types.VIEW_CLIP_EDITOR:
     case types.HIDE_CLIP_SETTINGS:
       return {
         ...state,
@@ -85,9 +85,9 @@ const clipKeyPressed = (state = false, action) => {
   }
 };
 
-const viewingMultiLineEditor = (state = false, action) => {
+const viewingClipEditor = (state = false, action) => {
   switch (action.type) {
-    case types.VIEW_MULTI_LINE_EDITOR:
+    case types.VIEW_CLIP_EDITOR:
       return true;
     case types.RETURN_TO_NORMAL_VIEW:
       return false;
@@ -98,7 +98,16 @@ const viewingMultiLineEditor = (state = false, action) => {
 
 const clipBeingViewed = (state = 0, action) => {
   switch (action.type) {
-    case types.VIEW_MULTI_LINE_EDITOR:
+    case types.VIEW_CLIP_EDITOR:
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
+const clipEditorLang = (state = 'plaintext', action) => {
+  switch (action.type) {
+    case types.SELECT_EDITOR_LANG:
       return action.payload;
     default:
       return state;
@@ -128,7 +137,8 @@ export const reducer = combineReducers({
   settingsVisible,
   lastKeyUsed,
   clipKeyPressed,
-  viewingMultiLineEditor,
+  viewingClipEditor,
   clipBeingViewed,
+  clipEditorLang,
   clipCopiedOverlay,
 });
