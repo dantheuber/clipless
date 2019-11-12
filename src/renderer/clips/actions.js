@@ -44,6 +44,5 @@ export const toggleLock = simpleAction(types.TOGGLE_LOCK);
 export const emptyClip = simpleAction(types.EMPTY_CLIP);
 export const viewMultiLineEditor = simpleAction(types.VIEW_CLIP_EDITOR);
 export const selectEditorLanguage = simpleAction(types.SELECT_EDITOR_LANG);
-
-export const returnToNormalView = () => ({ type: types.RETURN_TO_NORMAL_VIEW });
-export const emptyAllClips = () => ({ type: types.EMPTY_ALL_CLIPS });
+export const returnToNormalView = simpleAction(types.RETURN_TO_NORMAL_VIEW);
+export const emptyAllClips = simpleAction(types.EMPTY_ALL_CLIPS);
