@@ -23,7 +23,7 @@ export const clipboardUpdated = text => (dispatch, getState) => {
 
 export const clipModified = (e, index) => ({
   type: types.CLIP_MODIFIED,
-  payload: e.target.value,
+  payload: typeof e === 'string' ? e : e.target.value,
   metadata: { index },
 });
 
