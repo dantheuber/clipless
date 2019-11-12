@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import FormControl from 'react-bootstrap/FormControl';
 import Button from 'react-bootstrap/Button';
 import MonacoEditor from 'react-monaco-editor';
 
@@ -12,7 +11,7 @@ const options = {
   lineNumbersMinChars: 4,
 };
 
-export const MultiLineClipView = ({
+export const ClipEditor = ({
   clip,
   index,
   clipModified,
@@ -28,22 +27,15 @@ export const MultiLineClipView = ({
     </Button>
     <MonacoEditor
       height="272"
-      // width="340"
       theme="vs-dark"
       language={lang}
       options={options}
       value={clip}
       onChange={e => clipModified(e, index)}
-      />
-    {/* <FormControl
-      className="multiLineView"
-      as="textarea"
-      value={clip}
-      onChange={e => clipModified(e, index)} 
-    /> */}
+    />
   </div>
 );
-MultiLineClipView.propTypes = {
+ClipEditor.propTypes = {
   clip: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   clipModified: PropTypes.func.isRequired,

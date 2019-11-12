@@ -3,8 +3,8 @@ import {
   clipModified,
   returnToNormalView,
 } from '../actions';
-import { MultiLineClipView } from '../components/MultiLineClipView';
 import { clipBeingViewed, clip } from '../selectors';
+import { ClipEditor } from '../components/ClipEditor';
 
 const mapStateToProps = state => ({
   index: clipBeingViewed(state),
@@ -16,6 +16,6 @@ const mapDispatchToProps = {
   returnToNormalView,
 };
 
-const container = connect(mapStateToProps, mapDispatchToProps)(MultiLineClipView);
+const container = connect(mapStateToProps, mapDispatchToProps)(ClipEditor);
 
-export { container as MultiLineClipView };
+export { container as ClipEditor };

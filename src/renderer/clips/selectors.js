@@ -9,7 +9,7 @@ export const lastKeyUsed = select('lastKeyUsed');
 export const clipKeyPressed = select('clipKeyPressed');
 export const settingsVisible = select('settingsVisible');
 export const clipBeingViewed = select('clipBeingViewed');
-export const viewingMultiLineEditor = select('viewingMultiLineEditor');
+export const viewingClipEditor = select('viewingClipEditor');
 export const clipCopiedOverlay = select('clipCopiedOverlay');
 
 export const showCopiedTooltip = (state, index) => clipCopiedOverlay(state)[index] || false;

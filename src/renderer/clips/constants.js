@@ -8,7 +8,7 @@ export const TOOLTIP_DELAY = 500;
 
 export const CLIPS_STATE_BLACKLIST = [
   `${NAME}.settingsVisible`,
-  `${NAME}.viewingMultiLineEditor`,
+  `${NAME}.viewingClipEditor`,
   `${NAME}.clipBeingViewed`,
   `${NAME}.clipKeyPressed`,
   `${NAME}.clipCopiedOverlay`,

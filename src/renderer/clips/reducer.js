@@ -85,7 +85,7 @@ const clipKeyPressed = (state = false, action) => {
   }
 };
 
-const viewingMultiLineEditor = (state = false, action) => {
+const viewingClipEditor = (state = false, action) => {
   switch (action.type) {
     case types.VIEW_MULTI_LINE_EDITOR:
       return true;
@@ -128,7 +128,7 @@ export const reducer = combineReducers({
   settingsVisible,
   lastKeyUsed,
   clipKeyPressed,
-  viewingMultiLineEditor,
+  viewingClipEditor,
   clipBeingViewed,
   clipCopiedOverlay,
 });
