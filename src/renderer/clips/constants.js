@@ -6,6 +6,28 @@ export const DEFAULT_CLIPS_STATE = CLIP_RENDER_ARRAY.map(() => '');
 
 export const TOOLTIP_DELAY = 500;
 
+export const LANGUAGES = [
+  'plaintext',
+  'javascript',
+  'typescript',
+  'json',
+  'css',
+  'c#',
+  'go',
+  'mysql',
+  'mssql',
+];
+
+export const EDITOR_OPTIONS = {
+  minimap: { enabled: false },
+  autoComplete: false,
+  lineNumbersMinChars: 4,
+  scrollBeyondLastLine: false,
+  quickSuggestions: false,
+  wordBasedSuggestions: false,
+  contextmenu: false,
+};
+
 export const CLIPS_STATE_BLACKLIST = [
   `${NAME}.settingsVisible`,
   `${NAME}.viewingClipEditor`,

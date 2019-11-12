@@ -73,13 +73,6 @@ input, textarea {
   padding-left: 8px;
 }
 
-.multiLineView {
-  font: 400 14.1px Arial !important;
-  height: 272px !important;
-  resize: none;
-  background: url('/line-numbers.png');
-  background-attachment: local;
-  background-repeat: no-repeat;
-  padding-left: 35px;
-  padding-top: 11px;
+.dropdown-menu.show {
+  transform: none !important;
 }

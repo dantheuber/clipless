@@ -7,7 +7,7 @@ import {
 import { TOOLTIP_DELAY } from './constants';
 import { clipboard } from 'electron';
 
-const indexAction = type => payload => ({ type, payload });
+const simpleAction = type => payload => ({ type, payload });
 
 export const clipboardUpdated = text => (dispatch, getState) => {
   const state = getState();
@@ -27,7 +27,7 @@ export const clipModified = (e, index) => ({
   metadata: { index },
 });
 
-export const hideCopiedTooltip = indexAction(types.HIDE_COPIED_TOOLTIP);
+export const hideCopiedTooltip = simpleAction(types.HIDE_COPIED_TOOLTIP);
 
 export const clipSelected = index => (dispatch, getState) => {
   dispatch({
@@ -38,11 +38,12 @@ export const clipSelected = index => (dispatch, getState) => {
   setTimeout(() => dispatch(hideCopiedTooltip(index)), TOOLTIP_DELAY);
 };
 
-export const toggleClipSettings = indexAction(types.TOGGLE_CLIP_SETTINGS);
-export const hideClipSettings = indexAction(types.HIDE_CLIP_SETTINGS);
-export const toggleLock = indexAction(types.TOGGLE_LOCK);
-export const emptyClip = indexAction(types.EMPTY_CLIP);
-export const viewMultiLineEditor = indexAction(types.VIEW_MULTI_LINE_EDITOR);
+export const toggleClipSettings = simpleAction(types.TOGGLE_CLIP_SETTINGS);
+export const hideClipSettings = simpleAction(types.HIDE_CLIP_SETTINGS);
+export const toggleLock = simpleAction(types.TOGGLE_LOCK);
+export const emptyClip = simpleAction(types.EMPTY_CLIP);
+export const viewMultiLineEditor = simpleAction(types.VIEW_CLIP_EDITOR);
+export const selectEditorLanguage = simpleAction(types.SELECT_EDITOR_LANG);
 
 export const returnToNormalView = () => ({ type: types.RETURN_TO_NORMAL_VIEW });
 export const emptyAllClips = () => ({ type: types.EMPTY_ALL_CLIPS });
