@@ -9,6 +9,6 @@ export const closePreferences = simpleAction(types.CLOSE_PREFERENCES);
 export const toggleAlwaysOnTop = () => (dispatch, getState) => {
   const state = getState();
   const preference = !alwaysOnTop(state);
-  dispatch(simpleAction(types.TOGGLE_ALWAYS_ON_TOP));
+  dispatch({ type: types.TOGGLE_ALWAYS_ON_TOP });
   ipcRenderer.send('set-always-on-top', { preference });
 };

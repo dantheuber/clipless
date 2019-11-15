@@ -9,11 +9,7 @@ export const Content = ({ viewingPreferences }) => (
   <Container fluid className="wrapper">
     <Header />
     { viewingPreferences && <Preferences /> }
-    { !viewingPreferences &&
-      <div className="main">
-        <Clips />
-      </div>
-    }
+    { !viewingPreferences && <Clips /> }
   </Container>
 );
 Content.propTypes = {

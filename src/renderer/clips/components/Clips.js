@@ -5,7 +5,7 @@ import { Clip } from '../containers/Clip';
 import { ClipEditor } from '../containers/ClipEditor';
 
 export const Clips = ({ viewingClipEditor }) => (
-  <div>
+  <div className="main clips">
     { viewingClipEditor && <ClipEditor /> }
     {
       !viewingClipEditor && CLIP_RENDER_ARRAY.map((index) => <Clip key={index} index={index} />)
