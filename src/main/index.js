@@ -13,6 +13,7 @@ import {
   MIN_HEIGHT,
   DEFAULT_STORE_VALUE,
   DEFAULT_CONFIG_FILENAME,
+  ALWAYS_ON_TOP_SETTING,
 } from './constants';
 import Store from './store';
 
@@ -30,7 +31,7 @@ function createMainWindow() {
   // const { width, height } = store.get('windowBounds');
   const { x, y } = store.get('position');
   const transparent = store.get('transparent');
-  const alwaysOnTop = store.get('alwaysOnTop');
+  const alwaysOnTop = store.get(ALWAYS_ON_TOP_SETTING);
   const window = new BrowserWindow({
     fullscreenable: false,
     resizable: false,
@@ -127,7 +128,7 @@ app.on('will-quit', () => {
 
 ipcMain.on('set-always-on-top', (e, { preference }) => {
   mainWindow.setAlwaysOnTop(preference);
-  store.set('alwaysOnTop', preference);
+  store.set(ALWAYS_ON_TOP_SETTING, preference);
 });
 
 ipcMain.on('quit-app', () => {
