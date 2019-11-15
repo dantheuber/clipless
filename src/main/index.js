@@ -127,7 +127,7 @@ app.on('will-quit', () => {
 
 ipcMain.on('set-always-on-top', (e, { preference }) => {
   mainWindow.setAlwaysOnTop(preference);
-  store.set('alwaysOnTOp', preference);
+  store.set('alwaysOnTop', preference);
 });
 
 ipcMain.on('quit-app', () => {
