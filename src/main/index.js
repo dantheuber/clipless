@@ -125,6 +125,11 @@ app.on('will-quit', () => {
   globalShortcut.unregisterAll();
 });
 
+ipcMain.on('set-always-on-top', (e, { preference }) => {
+  mainWindow.setAlwaysOnTop(preference);
+  store.set('alwaysOnTOp', preference);
+});
+
 ipcMain.on('quit-app', () => {
   app.quit();
 });

@@ -1,9 +1,9 @@
 * {
   border-radius: 0 !important;
 }
-body {
+/* body {
   background-color: black !important;
-}
+} */
 input, textarea {
   background-color: #6c757d !important;
   color: white !important;
@@ -25,6 +25,9 @@ input, textarea {
 
 .main {
   padding-top: 40px;
+}
+.clips {
+  background-color: black;
 }
 
 .header {
