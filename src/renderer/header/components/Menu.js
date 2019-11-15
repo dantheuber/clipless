@@ -4,14 +4,22 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Nav from 'react-bootstrap/Nav';
 
 export const Menu = ({
+  viewPreferences,
   emptyAllClips,
   quitApp,
+  toggleRef,
 }) => (
   <Nav className="mr-auto">
-    {/* <Nav.Link key="Preferences">
+    <Nav.Link key="Preferences" onClick={() => {
+      viewPreferences();
+      toggleRef.current.click();
+    }}>
       <FontAwesomeIcon icon="user-cog" /> Preferences
-    </Nav.Link> */}
-    <Nav.Link key="EmptyClips" onClick={emptyAllClips}>
+    </Nav.Link>
+    <Nav.Link key="EmptyClips" onClick={() => {
+      emptyAllClips();
+      toggleRef.current.click();
+    }}>
       <FontAwesomeIcon icon="trash" /> Empty All Clips
     </Nav.Link>
     <Nav.Link key="QuitApp" onClick={quitApp}>
@@ -20,6 +28,11 @@ export const Menu = ({
   </Nav>
 );
 Menu.propTypes = {
+  viewPreferences: PropTypes.func.isRequired,
   emptyAllClips: PropTypes.func.isRequired,
   quitApp: PropTypes.func.isRequired,
+  toggleRef: PropTypes.oneOfType([
+    PropTypes.func, 
+    PropTypes.shape({ current: PropTypes.any })
+  ]).isRequired,
 };
