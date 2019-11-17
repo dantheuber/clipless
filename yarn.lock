@@ -772,11 +772,6 @@
   dependencies:
     prop-types "^15.5.10"
 
-"@microsoft/typescript-etw@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@microsoft/typescript-etw/-/typescript-etw-0.1.0.tgz#96c7ee76657520488e3d556a42da857b15427eb9"
-  integrity sha512-P6ohPmiIMNH406IGkh95ZSQ3sZhGLF3xPFA9F7/9F4dXT8yV5dBPA297jlRF1ZNjroi3g9pasCM/LoqrxP+SqQ==
-
 "@posthtml/esm@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@posthtml/esm/-/esm-1.0.0.tgz#09bcb28a02438dcee22ad1970ca1d85a000ae0cf"

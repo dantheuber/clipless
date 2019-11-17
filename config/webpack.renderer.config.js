@@ -13,6 +13,21 @@ module.exports = {
     ],
   },
   plugins: [
-    new MonacoWebpackPlugin(),
+    new MonacoWebpackPlugin({
+      languages: [
+        'csharp',
+        'css',
+        'html',
+        'javascript',
+        'json',
+        'markdown',
+        'mysql',
+        'php',
+        'powershell',
+        'python',
+        'shell',
+        'sql',
+      ]
+    }),
   ]
 };

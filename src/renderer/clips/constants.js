@@ -7,15 +7,19 @@ export const DEFAULT_CLIPS_STATE = CLIP_RENDER_ARRAY.map(() => '');
 export const TOOLTIP_DELAY = 500;
 
 export const LANGUAGES = [
-  'plaintext',
-  'javascript',
-  'typescript',
-  'json',
+  'csharp',
   'css',
-  'c#',
-  'go',
+  'html',
+  'javascript',
+  'json',
+  'markdown',
   'mysql',
-  'mssql',
+  'php',
+  'plaintext',
+  'powershell',
+  'python',
+  'shell',
+  'sql',
 ];
 
 export const EDITOR_OPTIONS = {
