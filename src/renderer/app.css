@@ -34,8 +34,14 @@ input, textarea {
   -webkit-app-region: drag;
 }
 .menu {
-  -webkit-app-region: no-drag;
   padding-left: 5px;
+  line-height: 1;
+}
+.navbar-nav {
+  -webkit-app-region: drag;
+}
+.nav-link {
+  -webkit-app-region: no-drag;
 }
 .navbar-toggler {
   width: 34px;
