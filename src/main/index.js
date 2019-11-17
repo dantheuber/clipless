@@ -28,22 +28,22 @@ const store = new Store({
 let mainWindow;
 
 function createMainWindow() {
-  // const { width, height } = store.get('windowBounds');
+  const { width, height } = store.get('windowBounds');
   const { x, y } = store.get('position');
   const transparent = store.get('transparent');
   const alwaysOnTop = store.get(ALWAYS_ON_TOP_SETTING);
   const window = new BrowserWindow({
     fullscreenable: false,
-    resizable: false,
     frame: false,
     transparent,
     alwaysOnTop,
-    height: MIN_HEIGHT,
-    width: MIN_WIDTH,
+    height,
+    width,
     x,
     y,
     minWidth: MIN_WIDTH,
     minHeight: MIN_HEIGHT,
+    maxHeight: MIN_HEIGHT, // locking height for now until we have a nice handling of height changes
     webPreferences: {
       nodeIntegration: true,
     }

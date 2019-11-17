@@ -24,6 +24,7 @@ export const LANGUAGES = [
 
 export const EDITOR_OPTIONS = {
   minimap: { enabled: false },
+  automaticLayout: true,
   autoComplete: false,
   lineNumbersMinChars: 4,
   scrollBeyondLastLine: false,

@@ -9,7 +9,7 @@ export const Menu = ({
   quitApp,
   toggleRef,
 }) => (
-  <Nav className="mr-auto">
+  <Nav className="ml-auto">
     <Nav.Link key="Preferences" onClick={() => {
       viewPreferences();
       toggleRef.current.click();
