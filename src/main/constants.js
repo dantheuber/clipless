@@ -3,6 +3,7 @@ export const MIN_WIDTH = 350;
 export const MIN_HEIGHT = 350;
 export const ALWAYS_ON_TOP_SETTING = 'alwaysOnTop';
 export const TRANSPARENT_SETTING = 'transparent';
+export const OPACITY_SETTING = 'opacity';
 export const DEFAULT_STORE_VALUE = {
   windowBounds: {
     width: MIN_WIDTH,
@@ -14,4 +15,5 @@ export const DEFAULT_STORE_VALUE = {
   },
   transparent: true,
   alwaysOnTop: true,
+  opacity: 0.5,
 };

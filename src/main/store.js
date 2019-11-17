@@ -7,7 +7,10 @@ export default class Store {
   constructor(options) {
     const userDataPath = app.getPath('userData');
     this.path = join(userDataPath, `${options.configName}.json`);
-    this.data = parseDataFile(this.path, options.defaults);
+    this.data = {
+      ...options.defaults,
+      ...parseDataFile(this.path, options.defaults)
+    };
     console.log(this.path);
   }
 

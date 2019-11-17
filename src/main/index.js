@@ -15,6 +15,7 @@ import {
   DEFAULT_CONFIG_FILENAME,
   ALWAYS_ON_TOP_SETTING,
   TRANSPARENT_SETTING,
+  OPACITY_SETTING,
 } from './constants';
 import Store from './store';
 
@@ -49,9 +50,9 @@ function createMainWindow() {
       nodeIntegration: true,
     }
   });
-  console.log(transparent);
+
   if (transparent) {
-    window.setOpacity(0.5);
+    window.setOpacity(store.get(OPACITY_SETTING));
   }
 
   if (isDevelopment) {
@@ -137,9 +138,13 @@ ipcMain.on('set-always-on-top', (e, { preference }) => {
 });
 
 ipcMain.on('set-transparent', (e, { preference }) => {
-  console.log(preference);
-  mainWindow.setOpacity(preference ? 0.5 : 1);
+  mainWindow.setOpacity(preference ? store.get(OPACITY_SETTING) : 1);
   store.set(TRANSPARENT_SETTING, preference);
+});
+
+ipcMain.on('set-opacity', (e, { opacity }) => {
+  mainWindow.setOpacity(opacity);
+  store.set(OPACITY_SETTING, opacity);
 });
 
 ipcMain.on('quit-app', () => {

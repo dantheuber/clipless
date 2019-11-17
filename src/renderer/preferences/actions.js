@@ -20,3 +20,12 @@ export const toggleTransparent = () => (dispatch, getState) => {
   dispatch({ type: types.TOGGLE_TRANSPARENT });
   ipcRenderer.send('set-transparent', { preference });
 };
+
+export const setOpacity = e => (dispatch) => {
+  const opacity = Number(e.target.value);
+  dispatch({
+    type: types.SET_OPACITY,
+    payload: opacity,
+  });
+  ipcRenderer.send('set-opacity', { opacity });
+};

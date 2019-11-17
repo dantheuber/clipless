@@ -1,5 +1,6 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
+import { DEFAULT_OPACITY } from './constants';
 
 const viewingPreferences = (state = false, action) => {
   switch (action.type) {
@@ -39,9 +40,19 @@ const transparent = (state = false, action) => {
   }
 };
 
+const opacity = (state = DEFAULT_OPACITY, action) => {
+  switch (action.type) {
+    case types.SET_OPACITY:
+      return action.payload;
+    default:
+      return state;
+  }
+};
+
 export const reducer = combineReducers({
   viewingPreferences,
   alwaysOnTop,
   emptyLockedClips,
   transparent,
+  opacity,
 });
