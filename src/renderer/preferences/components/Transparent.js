@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
-import FormControl from 'react-bootstrap/FormControl';
 
 export const Transparent = ({
   transparent,
@@ -19,8 +18,10 @@ export const Transparent = ({
         checked={transparent}
         onChange={toggleTransparent}
       />
-      { transparent &&
-        <FormControl
+      { transparent && [
+        <Form.Label key="label">Opacity</Form.Label>,
+        <Form.Control
+          key="control"
           type="range"
           min="0.1"
           max="1.0"
@@ -28,7 +29,7 @@ export const Transparent = ({
           value={opacity}
           onChange={setOpacity}
         />
-      }
+      ]}
     </Form>
   </Row>
 );
