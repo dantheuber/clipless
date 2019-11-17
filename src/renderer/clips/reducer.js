@@ -24,8 +24,12 @@ const clips = (state = DEFAULT_CLIPS_STATE, action) => {
       newState[action.payload] = '';
       return newState;
     }
-    case types.EMPTY_ALL_CLIPS:
-      return DEFAULT_CLIPS_STATE;
+    case types.EMPTY_ALL_CLIPS: {
+      const { lockedClips, emptyLockedClips } = action.payload;
+      return state.map((clip, index) => (
+        emptyLockedClips ? '' : (lockedClips[index] ? clip : '')
+      ));
+    }
     default:
       return state;
   }

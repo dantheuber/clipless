@@ -13,7 +13,10 @@
         "dev"
       ],
       "windows": {
-        "runtimeExecutable": "${workspaceFolder}\\node_modules\\.bin\\electron-webpack.cmd"
+        "runtimeExecutable": "${workspaceFolder}\\node_modules\\.bin\\electron-webpack.cmd",
+        "runtimeArgs": [
+          "dev"
+        ]
       }
     }
   ]
