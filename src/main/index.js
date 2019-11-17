@@ -14,6 +14,7 @@ import {
   DEFAULT_STORE_VALUE,
   DEFAULT_CONFIG_FILENAME,
   ALWAYS_ON_TOP_SETTING,
+  TRANSPARENT_SETTING,
 } from './constants';
 import Store from './store';
 
@@ -30,7 +31,7 @@ let mainWindow;
 function createMainWindow() {
   const { width, height } = store.get('windowBounds');
   const { x, y } = store.get('position');
-  const transparent = store.get('transparent');
+  const transparent = store.get(TRANSPARENT_SETTING);
   const alwaysOnTop = store.get(ALWAYS_ON_TOP_SETTING);
   const window = new BrowserWindow({
     fullscreenable: false,
@@ -48,6 +49,10 @@ function createMainWindow() {
       nodeIntegration: true,
     }
   });
+  console.log(transparent);
+  if (transparent) {
+    window.setOpacity(0.5);
+  }
 
   if (isDevelopment) {
     window.webContents.openDevTools();
@@ -129,6 +134,12 @@ app.on('will-quit', () => {
 ipcMain.on('set-always-on-top', (e, { preference }) => {
   mainWindow.setAlwaysOnTop(preference);
   store.set(ALWAYS_ON_TOP_SETTING, preference);
+});
+
+ipcMain.on('set-transparent', (e, { preference }) => {
+  console.log(preference);
+  mainWindow.setOpacity(preference ? 0.5 : 1);
+  store.set(TRANSPARENT_SETTING, preference);
 });
 
 ipcMain.on('quit-app', () => {

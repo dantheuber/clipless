@@ -21,7 +21,27 @@ const alwaysOnTop = (state = true, action) => {
   }
 };
 
+const emptyLockedClips = (state = true, action) => {
+  switch (action.type) {
+    case types.TOGGLE_EMPTY_LOCKED_CLIPS:
+      return !state;
+    default:
+      return state;
+  }
+};
+
+const transparent = (state = false, action) => {
+  switch (action.type) {
+    case types.TOGGLE_TRANSPARENT:
+      return !state;
+    default:
+      return state;
+  }
+};
+
 export const reducer = combineReducers({
   viewingPreferences,
   alwaysOnTop,
+  emptyLockedClips,
+  transparent,
 });
