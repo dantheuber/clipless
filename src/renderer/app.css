@@ -21,10 +21,6 @@ input, textarea {
   padding-right: 0;
 }
 
-.transparent {
-  opacity: 0.5;
-}
-
 .main {
   padding-top: 40px;
 }
