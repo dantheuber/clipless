@@ -20,3 +20,5 @@ export const RETURN_TO_NORMAL_VIEW = ca('RETURN_TO_NORMAL_VIEW');
 export const SELECT_EDITOR_LANG = ca('SELECT_EDITOR_LANG');
 
 export const HIDE_COPIED_TOOLTIP = ca('HIDE_COPIED_TOOLTIP');
+
+export const CLIPS_SAVED = ca('CLIPS_SAVED');

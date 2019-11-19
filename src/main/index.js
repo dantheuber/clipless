@@ -9,6 +9,7 @@ import {
 import * as path from 'path';
 import { format as formatUrl } from 'url';
 import {
+  CLIPS,
   MIN_WIDTH,
   MIN_HEIGHT,
   DEFAULT_STORE_VALUE,
@@ -145,6 +146,10 @@ ipcMain.on('set-transparent', (e, { preference }) => {
 ipcMain.on('set-opacity', (e, { opacity }) => {
   mainWindow.setOpacity(opacity);
   store.set(OPACITY_SETTING, opacity);
+});
+
+ipcMain.on('save-clips', (e, { clips }) => {
+  store.set(CLIPS, clips);
 });
 
 ipcMain.on('quit-app', () => {

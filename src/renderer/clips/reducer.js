@@ -1,6 +1,9 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
-import { DEFAULT_CLIPS_STATE } from './constants';
+import {
+  DEFAULT_CLIPS_STATE,
+  DEFAULT_CLIP_EDITOR_LANG,
+} from './constants';
 
 const clips = (state = DEFAULT_CLIPS_STATE, action) => {
   switch (action.type) {
@@ -109,7 +112,7 @@ const clipBeingViewed = (state = 0, action) => {
   }
 };
 
-const clipEditorLang = (state = 'plaintext', action) => {
+const clipEditorLang = (state = DEFAULT_CLIP_EDITOR_LANG, action) => {
   switch (action.type) {
     case types.SELECT_EDITOR_LANG:
       return action.payload;
@@ -135,6 +138,23 @@ const clipCopiedOverlay = (state = {}, action) => {
   }
 };
 
+const clipsChanged = (state = false, action) => {
+  switch (action.type) {
+    case types.CLIPBOARD_UPDATED: {
+      if (action.metadata.hotkey) return state;
+      return true;
+    }
+    case types.EMPTY_CLIP:
+    case types.EMPTY_ALL_CLIPS:
+    case types.CLIP_MODIFIED:
+      return true;
+    case types.CLIPS_SAVED:
+      return false;
+    default:
+      return state;
+  }
+};
+
 export const reducer = combineReducers({
   clips,
   lockedClips,
@@ -145,4 +165,5 @@ export const reducer = combineReducers({
   clipBeingViewed,
   clipEditorLang,
   clipCopiedOverlay,
+  clipsChanged,
 });

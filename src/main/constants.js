@@ -4,7 +4,9 @@ export const MIN_HEIGHT = 350;
 export const ALWAYS_ON_TOP_SETTING = 'alwaysOnTop';
 export const TRANSPARENT_SETTING = 'transparent';
 export const OPACITY_SETTING = 'opacity';
+export const CLIPS = 'clips';
 export const DEFAULT_STORE_VALUE = {
+  [CLIPS]: [],
   windowBounds: {
     width: MIN_WIDTH,
     height: MIN_HEIGHT,
@@ -13,7 +15,7 @@ export const DEFAULT_STORE_VALUE = {
     x: 400,
     y: 400,
   },
-  transparent: true,
-  alwaysOnTop: true,
-  opacity: 0.5,
+  [TRANSPARENT_SETTING]: true,
+  [ALWAYS_ON_TOP_SETTING]: true,
+  [OPACITY_SETTING]: 0.5,
 };
