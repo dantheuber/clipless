@@ -3,6 +3,7 @@ import * as types from './action-types';
 import {
   DEFAULT_CLIP_EDITOR_LANG,
 } from './constants';
+import { SET_NUMBER_OF_CLIPS } from '../preferences/action-types';
 
 const updateClipsLength = (state, numberOfClips) => {
   if (state.length < numberOfClips) {
@@ -154,6 +155,7 @@ const clipsChanged = (state = false, action) => {
       if (action.metadata.hotkey) return state;
       return true;
     }
+    case SET_NUMBER_OF_CLIPS:
     case types.EMPTY_CLIP:
     case types.EMPTY_ALL_CLIPS:
     case types.CLIP_MODIFIED:

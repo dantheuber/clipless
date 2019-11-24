@@ -47,7 +47,7 @@ function createMainWindow() {
     y,
     minWidth: MIN_WIDTH,
     minHeight: MIN_HEIGHT,
-    maxHeight: MIN_HEIGHT, // locking height for now until we have a nice handling of height changes
+    // maxHeight: MIN_HEIGHT, // locking height for now until we have a nice handling of height changes
     webPreferences: {
       nodeIntegration: true,
     }
@@ -149,8 +149,8 @@ ipcMain.on('set-opacity', (e, { opacity }) => {
   store.set(OPACITY_SETTING, opacity);
 });
 
-ipcMain.on('set-number-of-clips', (e, { numberOfclips }) => {
-  store.set(NUMBER_OF_CLIPS_SETTING, numberOfclips);
+ipcMain.on('set-number-of-clips', (e, { numberOfClips }) => {
+  store.set(NUMBER_OF_CLIPS_SETTING, numberOfClips);
 });
 
 ipcMain.on('save-clips', (e, { clips }) => {
