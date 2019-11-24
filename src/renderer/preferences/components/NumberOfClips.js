@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
-import FormControl from 'react-bootstrap/FormControl';
+// import FormControl from 'react-bootstrap/FormControl';
 import Row from 'react-bootstrap/Row';
 import DebounceInput from 'react-debounce-input';
 
@@ -17,11 +17,13 @@ export const NumberOfClips = ({
   return (
     <Row>
       <Form>
-        <label>
+        <Form.Label htmlFor="numberOfClips">
           Number of Clips
-        </label>
-        <FormControl
+        </Form.Label>
+        <Form.Control
+          name="numberOfClips"
           as={DebounceInput}
+          type="number"
           value={numberOfClips}
           onChange={handler}
         />
