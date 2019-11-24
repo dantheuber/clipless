@@ -47,7 +47,6 @@ function createMainWindow() {
     y,
     minWidth: MIN_WIDTH,
     minHeight: MIN_HEIGHT,
-    // maxHeight: MIN_HEIGHT, // locking height for now until we have a nice handling of height changes
     webPreferences: {
       nodeIntegration: true,
     }
@@ -151,6 +150,13 @@ ipcMain.on('set-opacity', (e, { opacity }) => {
 
 ipcMain.on('set-number-of-clips', (e, { numberOfClips }) => {
   store.set(NUMBER_OF_CLIPS_SETTING, numberOfClips);
+  const maxHeight = (numberOfClips * 31) + 40;
+  const currentSize = mainWindow.getSize();
+  if (currentSize[1] > maxHeight) mainWindow.setSize(currentSize[0], maxHeight);
+  mainWindow.setMaximumSize(
+    2048 * 4, // do not want to set a maximum width, but that is not possible so we just set a big one
+    maxHeight,
+  );
 });
 
 ipcMain.on('save-clips', (e, { clips }) => {
