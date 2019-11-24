@@ -6,7 +6,7 @@ import {
   clipKeyPressed as selectClipKeyPressed,
   clipIsLocked,
 } from './selectors';
-import { emptyLockedClips } from '../preferences/selectors';
+import { emptyLockedClips, numberOfClips } from '../preferences/selectors';
 import { TOOLTIP_DELAY } from './constants';
 import simpleAction from '../utils/simple-action';
 
@@ -18,6 +18,7 @@ export const clipboardUpdated = text => (dispatch, getState) => {
     metadata: {
       hotkey: selectClipKeyPressed(state),
       lockedClips: lockedClips(state),
+      numberOfClips: numberOfClips(state),
     },
   });
 };

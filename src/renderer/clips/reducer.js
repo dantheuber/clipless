@@ -1,17 +1,27 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
 import {
-  DEFAULT_CLIPS_STATE,
   DEFAULT_CLIP_EDITOR_LANG,
 } from './constants';
 
-const clips = (state = DEFAULT_CLIPS_STATE, action) => {
+const updateClipsLength = (state, numberOfClips) => {
+  if (state.length < numberOfClips) {
+    for (let index = 0; index < numberOfClips; index++) {
+      if (typeof state[index] !== 'string') state[index] = '';
+    }
+  }
+  return [...state];
+};
+
+const clips = (state = [], action) => {
   switch (action.type) {
     case types.CLIPBOARD_UPDATED: {
       if (action.metadata.hotkey) return state;
+      const { lockedClips, numberOfClips } = action.metadata;
+      const newState = updateClipsLength(state, numberOfClips);
       let lastClip = action.payload;
-      return state.map((clip, index) => {
-        if (action.metadata.lockedClips[index]) return clip;
+      return newState.map((clip, index) => {
+        if (lockedClips[index]) return clip;
         const value = lastClip;
         lastClip = clip;
         return value;

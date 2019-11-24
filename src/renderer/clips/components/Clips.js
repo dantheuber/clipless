@@ -1,18 +1,25 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { CLIP_RENDER_ARRAY } from '../constants';
 import { Clip } from '../containers/Clip';
 import { ClipEditor } from '../containers/ClipEditor';
 
-export const Clips = ({ viewingClipEditor }) => (
+const renderClips = (num) => {
+  const clipsArray = [];
+  for (let index = 0; index < num; index++) {
+    clipsArray.push(<Clip key={index} index={index} />);
+  }
+  return clipsArray;
+};
+
+export const Clips = ({ viewingClipEditor, numberOfClips }) => (
   <div className="main clips">
     { viewingClipEditor && <ClipEditor /> }
-    {
-      !viewingClipEditor && CLIP_RENDER_ARRAY.map((index) => <Clip key={index} index={index} />)
-    }
+    { !viewingClipEditor && renderClips(numberOfClips) }
   </div>
 );
+
 Clips.propTypes = {
   viewingClipEditor: PropTypes.bool.isRequired,
+  numberOfClips: PropTypes.number.isRequired,
 };
 Clips.displayName = 'Clips';
