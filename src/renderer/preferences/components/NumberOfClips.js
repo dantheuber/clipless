@@ -17,7 +17,9 @@ export const NumberOfClips = ({
   return (
     <Row>
       <Form>
-        <label>Number of Clips</label>
+        <label>
+          Number of Clips
+        </label>
         <FormControl
           as={DebounceInput}
           value={numberOfClips}
