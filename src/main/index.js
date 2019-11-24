@@ -17,6 +17,7 @@ import {
   ALWAYS_ON_TOP_SETTING,
   TRANSPARENT_SETTING,
   OPACITY_SETTING,
+  NUMBER_OF_CLIPS_SETTING,
 } from './constants';
 import Store from './store';
 
@@ -148,8 +149,16 @@ ipcMain.on('set-opacity', (e, { opacity }) => {
   store.set(OPACITY_SETTING, opacity);
 });
 
+ipcMain.on('set-number-of-clips', (e, { numberOfclips }) => {
+  store.set(NUMBER_OF_CLIPS_SETTING, numberOfclips);
+});
+
 ipcMain.on('save-clips', (e, { clips }) => {
   store.set(CLIPS, clips);
+});
+
+ipcMain.on('load-clips', (event) => {
+  event.returnValue = store.get(CLIPS);
 });
 
 ipcMain.on('quit-app', () => {

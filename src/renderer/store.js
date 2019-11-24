@@ -20,8 +20,6 @@ const middleware = [
   reduxThunk,
 ];
 
-// create-react-app build overrides NODE_ENV with "production"
-// so we use our own env variable for development builds.
 if (['development', 'dev', 'local'].includes(process.env.NODE_ENV)) {
   middleware.push(reduxLogger);
 }

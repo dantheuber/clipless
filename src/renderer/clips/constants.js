@@ -36,6 +36,7 @@ export const EDITOR_OPTIONS = {
 };
 
 export const CLIPS_STATE_BLACKLIST = [
+  `${NAME}.clips`,
   `${NAME}.settingsVisible`,
   `${NAME}.viewingClipEditor`,
   `${NAME}.clipBeingViewed`,

@@ -1,16 +1,12 @@
 import { DEFAULT_APP_STATE } from "../constants";
-import {
-  NAME as CLIPS_NAME,
-  NUMBER_OF_CLIPS,
-  DEFAULT_CLIPS_STATE,
-} from '../clips/constants';
+import { NAME as CLIPS_NAME } from '../clips/constants';
+import { ipcRenderer } from "electron";
 
 export default function hydrateState(storedState = DEFAULT_APP_STATE) {
   const state = storedState;
-  
-  if (state[CLIPS_NAME].clips.length < NUMBER_OF_CLIPS) {
-    state[CLIPS_NAME].clips = DEFAULT_CLIPS_STATE;
-  }
+
+  const clips = ipcRenderer.sendSync('load-clips');
+  state[CLIPS_NAME].clips = clips;
 
   return state;
 }

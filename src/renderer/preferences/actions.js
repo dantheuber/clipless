@@ -29,3 +29,12 @@ export const setOpacity = e => (dispatch) => {
   });
   ipcRenderer.send('set-opacity', { opacity });
 };
+
+export const setNumberOfClips = e => (dispatch) => {
+  const numberOfClips = Number(e.target.value);
+  dispatch({
+    type: types.SET_NUMBER_OF_CLIPS,
+    payload: numberOfClips
+  });
+  ipcRenderer.send('set-number-of-clips', { numberOfClips });
+};
