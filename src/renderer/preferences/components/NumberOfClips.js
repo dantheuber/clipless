@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
-// import FormControl from 'react-bootstrap/FormControl';
 import Row from 'react-bootstrap/Row';
 import DebounceInput from 'react-debounce-input';
+import { MAX_CLIPS } from '../constants';
 
 export const NumberOfClips = ({
   numberOfClips,
@@ -26,6 +26,7 @@ export const NumberOfClips = ({
           type="number"
           value={numberOfClips}
           onChange={handler}
+          max={MAX_CLIPS}
         />
       </Form>
     </Row>
