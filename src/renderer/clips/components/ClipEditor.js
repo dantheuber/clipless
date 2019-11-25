@@ -23,6 +23,7 @@ export const ClipEditor = ({
       }
     });
   });
+  const height = window.innerHeight - 40;
   return (
     <div>
       <InputGroup>
@@ -49,7 +50,7 @@ export const ClipEditor = ({
         </DropdownButton>
       </InputGroup>
       <MonacoEditor
-        height="279"
+        height={height}
         theme="vs-dark"
         language={language}
         options={EDITOR_OPTIONS}

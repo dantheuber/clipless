@@ -9,6 +9,7 @@ import {
 import * as path from 'path';
 import { format as formatUrl } from 'url';
 import {
+  CLIPS,
   MIN_WIDTH,
   MIN_HEIGHT,
   DEFAULT_STORE_VALUE,
@@ -16,6 +17,7 @@ import {
   ALWAYS_ON_TOP_SETTING,
   TRANSPARENT_SETTING,
   OPACITY_SETTING,
+  NUMBER_OF_CLIPS_SETTING,
 } from './constants';
 import Store from './store';
 
@@ -45,7 +47,6 @@ function createMainWindow() {
     y,
     minWidth: MIN_WIDTH,
     minHeight: MIN_HEIGHT,
-    maxHeight: MIN_HEIGHT, // locking height for now until we have a nice handling of height changes
     webPreferences: {
       nodeIntegration: true,
     }
@@ -145,6 +146,25 @@ ipcMain.on('set-transparent', (e, { preference }) => {
 ipcMain.on('set-opacity', (e, { opacity }) => {
   mainWindow.setOpacity(opacity);
   store.set(OPACITY_SETTING, opacity);
+});
+
+ipcMain.on('set-number-of-clips', (e, { numberOfClips }) => {
+  store.set(NUMBER_OF_CLIPS_SETTING, numberOfClips);
+  const maxHeight = (numberOfClips * 31) + 40;
+  const currentSize = mainWindow.getSize();
+  if (currentSize[1] > maxHeight) mainWindow.setSize(currentSize[0], maxHeight);
+  mainWindow.setMaximumSize(
+    2048 * 4, // do not want to set a maximum width, but that is not possible so we just set a big one
+    maxHeight,
+  );
+});
+
+ipcMain.on('save-clips', (e, { clips }) => {
+  store.set(CLIPS, clips);
+});
+
+ipcMain.on('load-clips', (event) => {
+  event.returnValue = store.get(CLIPS);
 });
 
 ipcMain.on('quit-app', () => {

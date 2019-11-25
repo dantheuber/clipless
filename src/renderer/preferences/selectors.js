@@ -8,3 +8,4 @@ export const alwaysOnTop = select('alwaysOnTop');
 export const emptyLockedClips = select('emptyLockedClips');
 export const transparent = select('transparent');
 export const opacity = select('opacity');
+export const numberOfClips = select('numberOfClips');

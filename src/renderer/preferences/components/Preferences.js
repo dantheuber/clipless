@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row';
 import { AlwaysOnTop } from '../containers/AlwaysOnTop';
 import { EmptyLockedClips } from '../containers/EmptyLockedClips';
 import { Transparent } from '../containers/Transparent';
+import { NumberOfClips } from '../containers/NumberOfClips';
 
 export const Preferences = ({
   closePreferences,
@@ -14,6 +15,7 @@ export const Preferences = ({
     <Row>
       <h3>Preferences</h3>
     </Row>
+    <NumberOfClips />
     <AlwaysOnTop />
     <EmptyLockedClips />
     <Transparent />

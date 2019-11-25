@@ -5,8 +5,9 @@ import {
   lockedClips,
   clipKeyPressed as selectClipKeyPressed,
   clipIsLocked,
+  clipSettingsVisible,
 } from './selectors';
-import { emptyLockedClips } from '../preferences/selectors';
+import { emptyLockedClips, numberOfClips } from '../preferences/selectors';
 import { TOOLTIP_DELAY } from './constants';
 import simpleAction from '../utils/simple-action';
 
@@ -18,6 +19,7 @@ export const clipboardUpdated = text => (dispatch, getState) => {
     metadata: {
       hotkey: selectClipKeyPressed(state),
       lockedClips: lockedClips(state),
+      numberOfClips: numberOfClips(state),
     },
   });
 };
@@ -47,6 +49,7 @@ export const emptyClip = (index) => (dispatch, getState) => {
     payload: index,
   });
 };
+
 export const emptyAllClips = () => (dispatch, getState) => {
   const state = getState();
   dispatch({
@@ -57,9 +60,19 @@ export const emptyAllClips = () => (dispatch, getState) => {
     },
   });
 };
+
+export const hideClipSettings = (index) => (dispatch, getState) => {
+  if (clipSettingsVisible(getState(), index)) {
+    dispatch({
+      type: types.HIDE_CLIP_SETTINGS,
+      payload: index,
+    });
+  }
+};
+
 export const toggleClipSettings = simpleAction(types.TOGGLE_CLIP_SETTINGS);
-export const hideClipSettings = simpleAction(types.HIDE_CLIP_SETTINGS);
 export const toggleLock = simpleAction(types.TOGGLE_LOCK);
 export const viewMultiLineEditor = simpleAction(types.VIEW_CLIP_EDITOR);
 export const selectEditorLanguage = simpleAction(types.SELECT_EDITOR_LANG);
 export const returnToNormalView = simpleAction(types.RETURN_TO_NORMAL_VIEW);
+export const clipsSaved = simpleAction(types.CLIPS_SAVED);

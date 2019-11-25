@@ -12,6 +12,7 @@ export const clipBeingViewed = select('clipBeingViewed');
 export const viewingClipEditor = select('viewingClipEditor');
 export const clipCopiedOverlay = select('clipCopiedOverlay');
 export const clipEditorLang = select('clipEditorLang');
+export const clipsChanged = select('clipsChanged');
 
 export const showCopiedTooltip = (state, index) => clipCopiedOverlay(state)[index] || false;
 export const clip = (state, index) => clips(state)[index] || '';
