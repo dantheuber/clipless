@@ -11,11 +11,13 @@ input, textarea {
   color: white !important;
   border: 1px solid #212529 !important;
 }
+
 :focus {
   outline: none !important;
   box-shadow: none !important;
   -webkit-box-shadow: none !important;
 }
+
 ::selection {
   background-color: #212529;
 }
@@ -36,6 +38,7 @@ input, textarea {
   overflow-y: scroll;
   box-sizing: content-box;
 }
+
 .clips {
   background-color: black;
   position: absolute;
@@ -44,26 +47,32 @@ input, textarea {
 .header {
   -webkit-app-region: drag;
 }
+
 .menu {
   padding-left: 5px;
   line-height: 1;
 }
+
 .navbar-nav {
   -webkit-app-region: drag;
 }
+
 .nav-link {
   -webkit-app-region: no-drag;
 }
+
 .navbar-toggler {
   width: 34px;
   padding: 0;
   border: 0;
   -webkit-app-region: no-drag;
 }
+
 .navbar-toggler-icon {
   height: 34px;
   width: 34px;
 }
+
 .header.navbar {
   min-height: 34px !important;
   padding: 3px !important;
@@ -79,6 +88,7 @@ input, textarea {
 .clip-number, .clip-number .btn {
   width: 34px;
 }
+
 .clip-number .btn {
   padding: 0;
 }
@@ -86,6 +96,7 @@ input, textarea {
 .clip-settings {
   height: 31px;
 }
+
 .clip-settings .btn {
   width: 31px;
   height: 31px;
