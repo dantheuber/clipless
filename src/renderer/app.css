@@ -38,6 +38,7 @@ input, textarea {
 }
 .clips {
   background-color: black;
+  position: absolute;
 }
 
 .header {

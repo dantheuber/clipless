@@ -1,20 +1,33 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
+import List from 'react-virtualized/dist/commonjs/List';
+import { OVERSCAN_ROWS } from '../constants';
 import { Clip } from '../containers/Clip';
 import { ClipEditor } from '../containers/ClipEditor';
+import 'react-virtualized/styles.css';
 
-const renderClips = (num) => {
-  const clipsArray = [];
-  for (let index = 0; index < num; index++) {
-    clipsArray.push(<Clip key={index} index={index} />);
-  }
-  return clipsArray;
-};
+const rowRenderer = ({ index, key, style }) => (
+  <Clip key={key} index={index} style={style} />
+);
 
 export const Clips = ({ viewingClipEditor, numberOfClips }) => (
   <div className="main clips">
     { viewingClipEditor && <ClipEditor /> }
-    { !viewingClipEditor && renderClips(numberOfClips) }
+    { !viewingClipEditor && (
+      <AutoSizer>
+        {({width,height}) => (
+          <List
+            rowHeight={31}
+            overscanRowCount={OVERSCAN_ROWS}
+            rowCount={numberOfClips}
+            rowRenderer={rowRenderer}
+            width={width}
+            height={height}
+          />
+        )}
+      </AutoSizer>
+    )}
   </div>
 );
 

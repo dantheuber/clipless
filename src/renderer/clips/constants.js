@@ -2,6 +2,7 @@ export const NAME = 'clips';
 
 export const TOOLTIP_DELAY = 500;
 export const CLIP_SAVE_INTERVAL = 1500;
+export const OVERSCAN_ROWS = 200;
 
 export const DEFAULT_CLIP_EDITOR_LANG = 'plaintext';
 export const LANGUAGES = [

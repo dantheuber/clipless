@@ -9,6 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ClipSettings } from '../containers/ClipSettings';
 
 export const Clip = ({
+  style,
   clip,
   index,
   clipModified,
@@ -17,7 +18,7 @@ export const Clip = ({
 }) => {
   const target = useRef(null);
   return (
-    <InputGroup size="sm">
+    <InputGroup size="sm" style={style}>
       <InputGroup.Prepend className="clip-number">
         <Button
           ref={target}
