@@ -1,15 +1,7 @@
-'use strict'
-
-import {
-  app,
-  BrowserWindow,
-  globalShortcut,
-  ipcMain,
-} from 'electron';
+import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import { format as formatUrl } from 'url';
 import {
-  CLIPS,
   MIN_WIDTH,
   MIN_HEIGHT,
   DEFAULT_STORE_VALUE,
@@ -17,9 +9,11 @@ import {
   ALWAYS_ON_TOP_SETTING,
   TRANSPARENT_SETTING,
   OPACITY_SETTING,
-  NUMBER_OF_CLIPS_SETTING,
 } from './constants';
 import Store from './store';
+import windowTracking from './window-tracking';
+import handleMessages from './handle-messages';
+import keyboardShortcuts from './keyboard-shortcuts';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
@@ -75,19 +69,6 @@ function createMainWindow() {
     mainWindow = null
   });
 
-  window.on('resize', () => {
-    const { width, height } = window.getBounds();
-    store.set('windowBounds', { width, height });
-  });
-
-  window.on('move', () => {
-    const pos = window.getPosition();
-    store.set('position', {
-      x: pos[0],
-      y: pos[1],
-    });
-  });
-
   window.webContents.on('devtools-opened', () => {
     window.focus();
     setImmediate(() => {
@@ -96,16 +77,6 @@ function createMainWindow() {
   });
 
   return window;
-}
-
-function registerShortcuts(window) {
-  [1,2,3,4,5,6,7,8,9,0].forEach((key) => {
-    globalShortcut.register(`CommandOrControl+${key}`, () => {
-      let index = key - 1;
-      if (key === 0) index = 9;
-      window.webContents.send('get-clip', { index });
-    });
-  });
 }
 
 // quit application when all windows are closed
@@ -126,47 +97,7 @@ app.on('activate', () => {
 // create main BrowserWindow when electron is ready
 app.on('ready', () => {
   mainWindow = createMainWindow();
-  registerShortcuts(mainWindow);
-});
-
-app.on('will-quit', () => {
-  globalShortcut.unregisterAll();
-});
-
-ipcMain.on('set-always-on-top', (e, { preference }) => {
-  mainWindow.setAlwaysOnTop(preference);
-  store.set(ALWAYS_ON_TOP_SETTING, preference);
-});
-
-ipcMain.on('set-transparent', (e, { preference }) => {
-  mainWindow.setOpacity(preference ? store.get(OPACITY_SETTING) : 1);
-  store.set(TRANSPARENT_SETTING, preference);
-});
-
-ipcMain.on('set-opacity', (e, { opacity }) => {
-  mainWindow.setOpacity(opacity);
-  store.set(OPACITY_SETTING, opacity);
-});
-
-ipcMain.on('set-number-of-clips', (e, { numberOfClips }) => {
-  store.set(NUMBER_OF_CLIPS_SETTING, numberOfClips);
-  const maxHeight = (numberOfClips * 31) + 40;
-  const currentSize = mainWindow.getSize();
-  if (currentSize[1] > maxHeight) mainWindow.setSize(currentSize[0], maxHeight);
-  mainWindow.setMaximumSize(
-    2048 * 4, // do not want to set a maximum width, but that is not possible so we just set a big one
-    maxHeight,
-  );
-});
-
-ipcMain.on('save-clips', (e, { clips }) => {
-  store.set(CLIPS, clips);
-});
-
-ipcMain.on('load-clips', (event) => {
-  event.returnValue = store.get(CLIPS);
-});
-
-ipcMain.on('quit-app', () => {
-  app.quit();
+  windowTracking(mainWindow, store);
+  keyboardShortcuts(app, mainWindow);
+  handleMessages(app, mainWindow, store);
 });
