@@ -1,6 +1,7 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
 import { DEFAULT_OPACITY, DFEAULT_NUMBER_CLIPS } from './constants';
+import * as compileClipReducers from './compile-clips/reducers';
 
 const viewingPreferences = (state = false, action) => {
   switch (action.type) {
@@ -65,4 +66,5 @@ export const reducer = combineReducers({
   transparent,
   opacity,
   numberOfClips,
+  ...compileClipReducers,
 });
