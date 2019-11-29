@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
+import PropTypes from 'prop-types';
 import Navbar from 'react-bootstrap/Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Menu } from '../containers/Menu';
 
-export const Header = () => {
+export const Header = ({ toggleMenu }) => {
   const toggleRef = useRef(null);
   return (
     <Navbar
@@ -18,6 +19,7 @@ export const Header = () => {
         <FontAwesomeIcon icon="clipboard-list" /> Clipless
       </Navbar.Brand>
       <Navbar.Toggle
+        onClick={toggleMenu}
         ref={toggleRef}
         aria-controls="navbar-menu"
         className="menu-toggle"
@@ -29,4 +31,6 @@ export const Header = () => {
     </Navbar>
   );
 };
-Header.propTypes = {};
+Header.propTypes = {
+  toggleMenu: PropTypes.func.isRequired,
+};

@@ -1,17 +1,11 @@
 import { connect } from 'react-redux';
-import { menuVisible } from '../selectors';
-import { toggleMenu, hideMenu } from '../actions';
+import { toggleMenu } from '../actions';
 import { Header } from '../components/Header';
-
-const mapStateToProps = state => ({
-  menuVisible: menuVisible(state),
-});
 
 const mapDispatchToProps = {
   toggleMenu,
-  hideMenu,
 };
 
-const container = connect(mapStateToProps, mapDispatchToProps)(Header);
+const container = connect(null, mapDispatchToProps)(Header);
 
 export { container as Header };
