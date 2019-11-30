@@ -3,6 +3,9 @@ import actionTypeConstructor from '../utils/action-type-creator';
 
 const ca = actionTypeConstructor(NAME);
 
+export const VIEW_GENERAL_PREFS = ca('VIEW_GENERAL_PREFS');
+export const VIEW_TEMPLATES = ca('VIEW_TEMPLATES');
+
 export const VIEW_PREFERENCES = ca('VIEW_PREFERENCES');
 export const CLOSE_PREFERENCES = ca('CLOSE_PREFERENCES');
 

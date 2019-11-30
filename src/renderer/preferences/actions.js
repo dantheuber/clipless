@@ -3,6 +3,9 @@ import * as types from './action-types';
 import { alwaysOnTop, transparent } from './selectors';
 import simpleAction from '../utils/simple-action';
 
+export const viewGeneralPrefs = simpleAction(types.VIEW_GENERAL_PREFS);
+export const viewTemplates = simpleAction(types.VIEW_TEMPLATES);
+
 export const viewPreferences = simpleAction(types.VIEW_PREFERENCES);
 export const closePreferences = simpleAction(types.CLOSE_PREFERENCES);
 export const toggleEmptyLockedClips = simpleAction(types.TOGGLE_EMPTY_LOCKED_CLIPS);

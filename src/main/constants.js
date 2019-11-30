@@ -5,6 +5,7 @@ export const ALWAYS_ON_TOP_SETTING = 'alwaysOnTop';
 export const TRANSPARENT_SETTING = 'transparent';
 export const OPACITY_SETTING = 'opacity';
 export const NUMBER_OF_CLIPS_SETTING = 'numberOfClips';
+export const EMPTY_LOCKED_CLIPS_SETTING = 'emptyLockedClips';
 export const CLIPS = 'clips';
 export const DEFAULT_STORE_VALUE = {
   [CLIPS]: [],
@@ -16,6 +17,7 @@ export const DEFAULT_STORE_VALUE = {
     x: 400,
     y: 400,
   },
+  [EMPTY_LOCKED_CLIPS_SETTING]: false,
   [TRANSPARENT_SETTING]: true,
   [ALWAYS_ON_TOP_SETTING]: true,
   [OPACITY_SETTING]: 0.5,
