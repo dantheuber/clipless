@@ -1,17 +1,16 @@
 import React from 'react';
-import Row from 'react-bootstrap/Row';
+import Container from 'react-bootstrap/Container';
 import { NumberOfClips } from '../containers/NumberOfClips';
 import { AlwaysOnTop } from '../containers/AlwaysOnTop';
 import { EmptyLockedClips } from '../containers/EmptyLockedClips';
 import { Transparent } from '../containers/Transparent';
 
-export const GeneralPreferences = () => ([
-  <Row key="header">
-    <h3>Preferences</h3>
-  </Row>,
-  <NumberOfClips key="numberOfClips" />,
-  <AlwaysOnTop key="alwaysOnTop" />,
-  <EmptyLockedClips key="emptyLockedClips" />,
-  <Transparent key="transparent" />
-]);
+export const GeneralPreferences = () => (
+  <Container className="main">
+    <NumberOfClips />
+    <AlwaysOnTop />
+    <EmptyLockedClips />
+    <Transparent />
+  </Container>
+);
 GeneralPreferences.propTypes = {};

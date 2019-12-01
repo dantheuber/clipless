@@ -48,6 +48,12 @@ input, textarea {
   background-color: black;
   color: whitesmoke;
 }
+.dark .list-group-item-action:active,
+.dark .list-group-item-action:hover,
+.dark .list-group-item-action:focus {
+  background-color: #004085;
+  color: white;
+}
 
 .clips {
   background-color: black;

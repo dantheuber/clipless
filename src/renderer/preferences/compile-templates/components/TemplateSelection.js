@@ -7,11 +7,13 @@ export const TemplateSelection = ({
   selectTemplate,
 }) => (
   <ListGroup className="dark">
+    <ListGroup.Item variant="primary">
+      <h3>Select Template</h3>
+    </ListGroup.Item>
     { compileTemplates.map((template, index) => (
       <ListGroup.Item
         action
-        variant="dark"
-        tabIndex={index}
+        tabIndex={index + 1}
         key={template.id}
         onClick={() => selectTemplate(template)}
       >
