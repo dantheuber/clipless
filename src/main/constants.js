@@ -6,6 +6,7 @@ export const TRANSPARENT_SETTING = 'transparent';
 export const OPACITY_SETTING = 'opacity';
 export const NUMBER_OF_CLIPS_SETTING = 'numberOfClips';
 export const EMPTY_LOCKED_CLIPS_SETTING = 'emptyLockedClips';
+export const COMPILE_TEMPLATES_SETTING = 'compileTemplates';
 export const CLIPS = 'clips';
 export const DEFAULT_STORE_VALUE = {
   [CLIPS]: [],
@@ -22,4 +23,5 @@ export const DEFAULT_STORE_VALUE = {
   [ALWAYS_ON_TOP_SETTING]: true,
   [OPACITY_SETTING]: 0.5,
   [NUMBER_OF_CLIPS_SETTING]: 100,
+  [COMPILE_TEMPLATES_SETTING]: [],
 };

@@ -10,6 +10,8 @@ import {
   faClipboard,
   faSignOutAlt,
   faClipboardList,
+  faFileImport,
+  faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -23,4 +25,6 @@ library.add(
   faClipboard,
   faSignOutAlt,
   faClipboardList,
+  faFileImport,
+  faDownload,
 );
