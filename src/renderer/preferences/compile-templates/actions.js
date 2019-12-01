@@ -69,7 +69,7 @@ export const selectTemplate = template => (dispatch, getState) => {
     .match(CLIP_TOKEN_REGEX)
     .forEach(match => {
     const number = Number(match.match(/\d+/));
-    const clipContent = clip(state, number - 1);
+    const clipContent = clip(state, number && number - 1);
     newText = newText.replace(match, clipContent);
   });
   clipboard.writeText(newText);
