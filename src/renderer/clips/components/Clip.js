@@ -21,6 +21,7 @@ export const Clip = ({
     <InputGroup size="sm" style={style}>
       <InputGroup.Prepend className="clip-number">
         <Button
+          tabIndex="-1"
           ref={target}
           variant="dark"
           onClick={() => clipSelected(index)}
@@ -39,6 +40,7 @@ export const Clip = ({
         </Overlay>
       </InputGroup.Prepend>
       <FormControl
+        tabIndex={index + 1}
         className="clip"
         value={clip}
         readOnly={index === 0}
@@ -46,7 +48,7 @@ export const Clip = ({
       />
       <InputGroup.Append className="clip-settings">
         { index === 0 ? (
-          <Button variant="dark" onClick={() => clipSelected(index)}>
+          <Button tabIndex="-1" variant="dark" onClick={() => clipSelected(index)}>
             <FontAwesomeIcon icon="clipboard" />
           </Button>
         ) : <ClipSettings index={index} /> }
