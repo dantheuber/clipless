@@ -35,3 +35,14 @@ export const compileTemplates = (state = [NEW_TEMPLATE_BASE], action) => {
       return state;
   }
 };
+
+export const showTemplateSelection = (state = false, action) => {
+  switch (action.type) {
+    case types.SHOW_TEMPLATE_SELECTION:
+      return true;
+    case types.SELECT_TEMPLATE:
+      return false;
+    default:
+      return state;
+  }
+};

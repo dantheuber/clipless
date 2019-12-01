@@ -9,6 +9,11 @@ export default function keyboardShortcuts(app, window) {
     });
   });
 
+  globalShortcut.register('CommandOrControl+`', () => {
+    window.webContents.send('compile-templates-pressed');
+    window.focus();
+  });
+
   app.on('will-quit', () => {
     globalShortcut.unregisterAll();
   });

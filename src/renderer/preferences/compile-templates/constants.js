@@ -1,6 +1,7 @@
 import uuidv1 from 'uuid/v1';
 
 export const SAVE_TO_DISK_DELAY = 1000;
+export const CLIP_TOKEN_REGEX = /(\{c\d+\})/g;
 
 export const EXAMPLE_TEMPLATE = `Use {c#} tokens to indicate what clip number you would like to use, and where for example:
 Clip 1: {c1}

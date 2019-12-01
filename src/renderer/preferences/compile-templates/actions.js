@@ -1,7 +1,9 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, clipboard } from 'electron';
 import * as types from './action-types';
-import { SAVE_TO_DISK_DELAY } from './constants';
+import { SAVE_TO_DISK_DELAY, CLIP_TOKEN_REGEX } from './constants';
 import { compileTemplates as compileTemplatesSelector } from './selectors';
+import { clip } from '../../clips/selectors';
+import simpleAction from '../../utils/simple-action';
 
 let savingTimeout;
 export const saveTemplatesToDisk = () => (dispatch, getState) => {
@@ -57,4 +59,19 @@ export const handleDragAndDrop = e => (dispatch) => {
     }
   });
   dispatch(saveTemplatesToDisk());
+};
+
+export const showCompileTemplateSelector = simpleAction(types.SHOW_TEMPLATE_SELECTION);
+export const selectTemplate = template => (dispatch, getState) => {
+  const state = getState();
+  let newText = template.content;
+  template.content
+    .match(CLIP_TOKEN_REGEX)
+    .forEach(match => {
+    const number = Number(match.match(/\d+/));
+    const clipContent = clip(state, number - 1);
+    newText = newText.replace(match, clipContent);
+  });
+  clipboard.writeText(newText);
+  dispatch({ type: types.SELECT_TEMPLATE });
 };

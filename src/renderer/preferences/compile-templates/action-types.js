@@ -3,6 +3,7 @@ import actionTypeConstructor from '../../utils/action-type-creator';
 
 const ca = actionTypeConstructor(NAME);
 
+export const SHOW_TEMPLATE_SELECTION = ca('SHOW_TEMPLATE_SELECTION');
 export const SELECT_TEMPLATE = ca('SELECT_TEMPLATE');
 export const DELETE_TEMPLATE = ca('DELETE_TEMPLATE');
 export const MODIFY_TEMPLATE = ca('MODIFY_TEMPLATE');

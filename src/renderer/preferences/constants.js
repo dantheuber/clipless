@@ -9,4 +9,5 @@ export const PREFERENCES_STATE_BLACKLIST = [
   `${NAME}.viewingTemplateEditor`,
   `${NAME}.currentTemplate`,
   `${NAME}.activeView`,
+  `${NAME}.showTemplateSelection`,
 ];
