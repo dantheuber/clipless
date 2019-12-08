@@ -4,6 +4,7 @@ import { SAVE_TO_DISK_DELAY, CLIP_TOKEN_REGEX } from './constants';
 import { compileTemplates as compileTemplatesSelector } from './selectors';
 import { clip } from '../../clips/selectors';
 import simpleAction from '../../utils/simple-action';
+import exportFile from '../../utils/export-file';
 
 let savingTimeout;
 export const saveTemplatesToDisk = () => (dispatch, getState) => {
@@ -74,4 +75,10 @@ export const selectTemplate = template => (dispatch, getState) => {
   });
   clipboard.writeText(newText);
   dispatch({ type: types.SELECT_TEMPLATE });
+};
+
+export const exportTemplates = () => (dispatch, getState) => {
+  const state = getState();
+  const templates = compileTemplatesSelector(state);
+  exportFile(JSON.stringify(templates), 'compile-templates.json');
 };

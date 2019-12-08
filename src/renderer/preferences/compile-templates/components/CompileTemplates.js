@@ -4,11 +4,19 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 import { TemplatesList } from '../containers/TemplatesList';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
-export const CompileTemplates = ({ createNewTemplate, handleDragAndDrop }) => (
+export const CompileTemplates = ({
+  createNewTemplate,
+  handleDragAndDrop,
+  exportTemplates,
+}) => (
   <Container className="main">
     <Button variant="success" onClick={createNewTemplate}>
       New Template
+    </Button>
+    <Button variant="info" onClick={exportTemplates}>
+      <FontAwesomeIcon icon="download" />
     </Button>
     <DragDropContext onDragEnd={handleDragAndDrop}>
       <Droppable droppableId="list">
@@ -25,4 +33,5 @@ export const CompileTemplates = ({ createNewTemplate, handleDragAndDrop }) => (
 CompileTemplates.propTypes = {
   createNewTemplate: PropTypes.func.isRequired,
   handleDragAndDrop: PropTypes.func.isRequired,
+  exportTemplates: PropTypes.func.isRequired,
 };
