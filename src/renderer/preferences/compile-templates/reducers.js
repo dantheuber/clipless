@@ -31,6 +31,8 @@ export const compileTemplates = (state = [NEW_TEMPLATE_BASE], action) => {
       newState.splice(destinationIndex, 0, source);
       return newState;
     }
+    case types.IMPORTED_TEMPLATES:
+      return action.payload;
     default:
       return state;
   }

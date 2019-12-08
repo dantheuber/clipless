@@ -1,4 +1,5 @@
 import { ipcRenderer, clipboard } from 'electron';
+import uniqBy from 'lodash.uniqby';
 import * as types from './action-types';
 import { SAVE_TO_DISK_DELAY, CLIP_TOKEN_REGEX } from './constants';
 import { compileTemplates as compileTemplatesSelector } from './selectors';
@@ -11,7 +12,6 @@ export const saveTemplatesToDisk = () => (dispatch, getState) => {
   clearTimeout(savingTimeout);
   savingTimeout = setTimeout(() => {
     const compileTemplates = compileTemplatesSelector(getState());
-    console.log(compileTemplates);
     ipcRenderer.send('save-compile-templates', { compileTemplates });
     savingTimeout = null;
     dispatch({ type: types.SAVED_TO_DISK });
@@ -81,4 +81,30 @@ export const exportTemplates = () => (dispatch, getState) => {
   const state = getState();
   const templates = compileTemplatesSelector(state);
   exportFile(JSON.stringify(templates), 'compile-templates.json');
+};
+
+const ensureTemplateKeys = template => ['content', 'id', 'name'].every(x => x in template);
+
+export const importTemplates = file => (dispatch, getState) => {
+  const state = getState();
+  const templates = compileTemplatesSelector(state);
+  const read = new FileReader();
+  read.readAsBinaryString(file);
+  read.onloadend = () => {
+    try {
+      const content = JSON.parse(read.result).filter(ensureTemplateKeys);
+      const unique = uniqBy([
+        ...content,
+        ...templates,
+      ], 'id');
+
+      dispatch({
+        type: types.IMPORTED_TEMPLATES,
+        payload: unique,
+      });
+      dispatch(saveTemplatesToDisk());
+    } catch (e) {
+      alert('Could not parse this file, was it exported by Clipless?');
+    }
+  };
 };
