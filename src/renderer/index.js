@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { Content } from './content'
 import { startClipboard } from './clipboard';
+import hotkeys from './hotkeys';
 import store from './store';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './fontawesome';
@@ -16,3 +17,4 @@ ReactDOM.render(
 );
 
 startClipboard(store);
+hotkeys(store);

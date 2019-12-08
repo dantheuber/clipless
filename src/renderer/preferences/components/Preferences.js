@@ -2,26 +2,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import { AlwaysOnTop } from '../containers/AlwaysOnTop';
-import { EmptyLockedClips } from '../containers/EmptyLockedClips';
-import { Transparent } from '../containers/Transparent';
-import { NumberOfClips } from '../containers/NumberOfClips';
+import { Navigation } from '../containers/Navigation';
+import { CompileTemplates } from '../compile-templates';
+import { GeneralPreferences } from './GeneralPreferences';
 
 export const Preferences = ({
   closePreferences,
+  viewingGeneralPrefs,
+  viewingTemplates,
 }) => (
   <Container className="main">
-    <Row>
-      <h3>Preferences</h3>
-    </Row>
-    <NumberOfClips />
-    <AlwaysOnTop />
-    <EmptyLockedClips />
-    <Transparent />
+    <Navigation />
+    { viewingGeneralPrefs && <GeneralPreferences /> }
+    { viewingTemplates && <CompileTemplates /> }
     <Button onClick={closePreferences}>Done</Button>
   </Container>
 );
 Preferences.propTypes = {
   closePreferences: PropTypes.func.isRequired,
+  viewingGeneralPrefs: PropTypes.bool.isRequired,
+  viewingTemplates: PropTypes.bool.isRequired,
 };

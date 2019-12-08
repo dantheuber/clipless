@@ -4,7 +4,9 @@ import {
   OPACITY_SETTING,
   TRANSPARENT_SETTING,
   NUMBER_OF_CLIPS_SETTING,
-  CLIPS
+  CLIPS,
+  EMPTY_LOCKED_CLIPS_SETTING,
+  COMPILE_TEMPLATES_SETTING
 } from "./constants";
 
 export default function handleMessages(app, window, store) {
@@ -33,13 +35,25 @@ export default function handleMessages(app, window, store) {
       maxHeight,
     );
   });
+
+  ipcMain.on('save-compile-templates', (e, { compileTemplates }) => {
+    store.set(COMPILE_TEMPLATES_SETTING, compileTemplates);
+  });
   
   ipcMain.on('save-clips', (e, { clips }) => {
     store.set(CLIPS, clips);
   });
   
-  ipcMain.on('load-clips', (event) => {
-    event.returnValue = store.get(CLIPS);
+  ipcMain.on('hydrate-state', (event) => {
+    event.returnValue = {
+      clips: store.get(CLIPS),
+      alwaysOnTop: store.get(ALWAYS_ON_TOP_SETTING),
+      transparent: store.get(TRANSPARENT_SETTING),
+      opacity: store.get(OPACITY_SETTING),
+      emptyLockedClips: store.get(EMPTY_LOCKED_CLIPS_SETTING),
+      numberOfClips: store.get(NUMBER_OF_CLIPS_SETTING),
+      compileTemplates: store.get(COMPILE_TEMPLATES_SETTING),
+    };
   });
 
   ipcMain.on('quit-app', () => {

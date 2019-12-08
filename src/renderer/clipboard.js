@@ -5,7 +5,7 @@ import {
   clipsChanged,
   lastClip as selectLastClip,
 } from './clips/selectors';
-import { clipboardUpdated, clipSelected, clipsSaved } from './clips/actions';
+import { clipboardUpdated, clipsSaved } from './clips/actions';
 import { CLIP_SAVE_INTERVAL } from './clips/constants';
 
 let clipboardInterval = null;
@@ -29,10 +29,6 @@ export const startClipboard = (store) => {
       store.dispatch(clipsSaved());
     }
   }, CLIP_SAVE_INTERVAL);
-
-  ipcRenderer.on('get-clip', (event, { index }) => {
-    store.dispatch(clipSelected(index));
-  });
 };
 
 export const stopClipboard = () => {

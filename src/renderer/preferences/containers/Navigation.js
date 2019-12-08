@@ -1,9 +1,10 @@
 import { connect } from 'react-redux';
 import {
-  closePreferences,
+  viewGeneralPrefs,
+  viewTemplates,
 } from '../actions';
 import { viewingGeneralPrefs, viewingTemplates } from '../selectors';
-import { Preferences } from '../components/Preferences';
+import { Navigation } from '../components/Navigation';
 
 const mapStateToProps = state => ({
   viewingGeneralPrefs: viewingGeneralPrefs(state),
@@ -11,9 +12,10 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = {
-  closePreferences,
+  viewGeneralPrefs,
+  viewTemplates,
 };
 
-const container = connect(mapStateToProps, mapDispatchToProps)(Preferences);
+const container = connect(mapStateToProps, mapDispatchToProps)(Navigation);
 
-export { container as Preferences };
+export { container as Navigation };

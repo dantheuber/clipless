@@ -1,6 +1,24 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
-import { DEFAULT_OPACITY, DFEAULT_NUMBER_CLIPS } from './constants';
+import {
+  DEFAULT_OPACITY,
+  DFEAULT_NUMBER_CLIPS,
+  TEMPLATE_PREFS,
+  GENERAL_PREFS
+} from './constants';
+import * as compileClipReducers from './compile-templates/reducers';
+
+const activeView = (state = GENERAL_PREFS, action) => {
+  switch(action.type) {
+    case types.VIEW_TEMPLATES:
+      return TEMPLATE_PREFS;
+    case types.CLOSE_PREFERENCES:
+    case types.VIEW_GENERAL_PREFS:
+      return GENERAL_PREFS;
+    default:
+      return state;
+  }
+};
 
 const viewingPreferences = (state = false, action) => {
   switch (action.type) {
@@ -59,10 +77,12 @@ const numberOfClips = (state = DFEAULT_NUMBER_CLIPS, action) => {
 };
 
 export const reducer = combineReducers({
+  activeView,
   viewingPreferences,
   alwaysOnTop,
   emptyLockedClips,
   transparent,
   opacity,
   numberOfClips,
+  ...compileClipReducers,
 });

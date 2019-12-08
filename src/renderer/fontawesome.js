@@ -3,6 +3,7 @@ import {
   faCog,
   faLock,
   faEdit,
+  faPlus,
   faTrash,
   faSearch,
   faUserCog,
@@ -10,12 +11,15 @@ import {
   faClipboard,
   faSignOutAlt,
   faClipboardList,
+  faFileImport,
+  faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
   faCog,
   faLock,
   faEdit,
+  faPlus,
   faTrash,
   faSearch,
   faUserCog,
@@ -23,4 +27,6 @@ library.add(
   faClipboard,
   faSignOutAlt,
   faClipboardList,
+  faFileImport,
+  faDownload,
 );
