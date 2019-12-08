@@ -11,11 +11,12 @@ Review the [planning document](https://github.com/dantheuber/clipless/blob/maste
   - `command+{number}` on Mac
 3. Lock a previous clips contents, useful for saving an item that you would like to access at a later time without going back to re-copy it from a given source.
 4. Make manual changes to a previous clip.
+5. Create clip compilation templates as described in the [planning document](https://github.com/dantheuber/clipless/blob/master/PlanningDocument.md#clip-compile-templates)
+  - Use `ctrl+~` to view list of templates and select one by clicking on it or tabbing thru the list.
 
 ### Planned Features
 
 1. [Quick Clip Launch](https://github.com/dantheuber/clipless/blob/master/PlanningDocument.md#quick-clip-launch)
-2. [Clip Compile Templates](https://github.com/dantheuber/clipless/blob/master/PlanningDocument.md#clip-compile-templates)
 
 ## Getting Started
 Simply clone down this repository, install dependencies, and start the app.
