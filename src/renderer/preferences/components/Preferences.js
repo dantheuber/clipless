@@ -4,10 +4,12 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import { Navigation } from '../containers/Navigation';
 import { CompileTemplates } from '../compile-templates';
+import { QuickClips } from '../quick-clip-launch';
 import { GeneralPreferences } from './GeneralPreferences';
 
 export const Preferences = ({
   closePreferences,
+  viewingQuickClips,
   viewingGeneralPrefs,
   viewingTemplates,
 }) => (
@@ -15,11 +17,13 @@ export const Preferences = ({
     <Navigation />
     { viewingGeneralPrefs && <GeneralPreferences /> }
     { viewingTemplates && <CompileTemplates /> }
+    { viewingQuickClips && <QuickClips />}
     <Button onClick={closePreferences}>Done</Button>
   </Container>
 );
 Preferences.propTypes = {
   closePreferences: PropTypes.func.isRequired,
+  viewingQuickClips: PropTypes.bool.isRequired,
   viewingGeneralPrefs: PropTypes.bool.isRequired,
   viewingTemplates: PropTypes.bool.isRequired,
 };

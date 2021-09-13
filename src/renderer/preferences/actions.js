@@ -5,6 +5,7 @@ import simpleAction from '../utils/simple-action';
 
 export const viewGeneralPrefs = simpleAction(types.VIEW_GENERAL_PREFS);
 export const viewTemplates = simpleAction(types.VIEW_TEMPLATES);
+export const viewQuickClips = simpleAction(types.VIEW_QUICK_CLIPS);
 
 export const viewPreferences = simpleAction(types.VIEW_PREFERENCES);
 export const closePreferences = simpleAction(types.CLOSE_PREFERENCES);

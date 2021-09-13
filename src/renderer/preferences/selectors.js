@@ -1,4 +1,4 @@
-import { NAME, GENERAL_PREFS, TEMPLATE_PREFS } from './constants';
+import { NAME, GENERAL_PREFS, TEMPLATE_PREFS, QUICK_CLIPS } from './constants';
 import baseSelect from '../utils/base-selector';
 
 const select = baseSelect(NAME);
@@ -13,3 +13,4 @@ export const viewingPreferences = select('viewingPreferences');
 
 export const viewingGeneralPrefs = state => activeView(state) === GENERAL_PREFS;
 export const viewingTemplates = state => activeView(state) === TEMPLATE_PREFS;
+export const viewingQuickClips = state => activeView(state) === QUICK_CLIPS;

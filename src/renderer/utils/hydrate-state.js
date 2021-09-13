@@ -14,6 +14,7 @@ export default function hydrateState(storedState = DEFAULT_APP_STATE) {
     emptyLockedClips,
     numberOfClips,
     compileTemplates,
+    quickClipLaunch
   } = ipcRenderer.sendSync('hydrate-state');
 
   state[CLIPS_NAME].clips = clips;
@@ -24,6 +25,7 @@ export default function hydrateState(storedState = DEFAULT_APP_STATE) {
     emptyLockedClips,
     numberOfClips,
     compileTemplates,
+    quickClipLaunch,
   };
 
   return state;
