@@ -35,6 +35,7 @@ export const AssociateTerms = ({
         <ListGroup>
           { searchTerms.map(term => (
             <ListGroup.Item
+              style={{ color: !isAssociatedWithTool(term) && 'black' }}
               active={isAssociatedWithTool(term)}
               key={term.name}
               onClick={() => onTermClick(term)}

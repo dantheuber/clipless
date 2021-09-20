@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
@@ -18,13 +19,15 @@ export const QuickClips = ({
   tools,
   createNewTool,
   createNewSearchTerm,
+  deleteTool,
+  deleteTerm,
 }) => {
   const [viewTools, setViewTools] = useState(false);
   const [createTool, setCreateTool] = useState(false);
   const [viewTerms, setViewTerms] = useState(false);
   const [createTerm, setCreateTerm] = useState(false);
   const [associatingTerms, setAssociatingTerms] = useState(false);
-  const [associateTool, setAssociateTool] = useState(null);
+  const [associateToolIndex, setAssociateToolIndex] = useState(null);
   const [newToolName, setNewToolName] = useState(DEFAULT_NEW_TOOL_NAME);
   const [newToolUrl, setNewToolUrl] = useState(DEFAULT_NEW_TOOL_URL);
 
@@ -48,9 +51,9 @@ export const QuickClips = ({
   }, false);
   if (associatingTerms) {
     return <AssociateTerms
-      tool={associateTool}
+      tool={tools[associateToolIndex]}
       done={() => {
-        setAssociateTool(null);
+        setAssociateToolIndex(null);
         setAssociatingTerms(false)
       }}
     />
@@ -62,12 +65,20 @@ export const QuickClips = ({
       </Row>
       { viewTools && (
         <ListGroup>
-          { tools.map(tool => (
+          { tools.map((tool, i) => (
             <ListGroup.Item style={{ color: 'black' }} key={tool.name}>
-              {tool.name}: {tool.url} <Button onClick={() => {
-                setAssociateTool(tool);
-                setAssociatingTerms(true);
-              }}>Associate Terms</Button>
+              {tool.name}: {tool.url}
+              <ButtonGroup>
+                <Button onClick={() => {
+                  setAssociateToolIndex(i);
+                  setAssociatingTerms(true);
+                }}>
+                  Link Terms
+                </Button>
+                <Button onClick={() => deleteTool(tool)}>
+                  Delete
+                </Button>
+              </ButtonGroup>
             </ListGroup.Item>
           ))}
         { createTool &&
@@ -112,6 +123,7 @@ export const QuickClips = ({
           { searchTerms.map(term => (
             <ListGroup.Item key={term.name} style={{ color: 'black' }}>
               {term.name}: {term.regex}
+              <Button onClick={() => deleteTerm(term)}>Delete</Button>
             </ListGroup.Item>
           ))}
           { createTerm &&
@@ -162,4 +174,6 @@ QuickClips.propTypes = {
   tools: PropTypes.arrayOf(PropTypes.object).isRequired,
   createNewTool: PropTypes.func.isRequired,
   createNewSearchTerm: PropTypes.func.isRequired,
+  deleteTool: PropTypes.func.isRequired,
+  deleteTerm: PropTypes.func.isRequired,
 };

@@ -10,9 +10,11 @@ import {
 import { emptyLockedClips, numberOfClips } from '../preferences/selectors';
 import { TOOLTIP_DELAY } from './constants';
 import simpleAction from '../utils/simple-action';
+import { scanForTerms } from '../preferences/quick-clip-launch/actions';
 
 export const clipboardUpdated = text => (dispatch, getState) => {
   const state = getState();
+  dispatch(scanForTerms(text));
   dispatch({
     type: types.CLIPBOARD_UPDATED,
     payload: text,
