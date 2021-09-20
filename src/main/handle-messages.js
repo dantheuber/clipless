@@ -7,7 +7,7 @@ import {
   CLIPS,
   EMPTY_LOCKED_CLIPS_SETTING,
   COMPILE_TEMPLATES_SETTING,
-  QUICKLIP_LAUNCH_SETTINGS,
+  QUICKLIPS_SETTINGS,
 } from "./constants";
 
 export default function handleMessages(app, window, store) {
@@ -41,8 +41,8 @@ export default function handleMessages(app, window, store) {
     store.set(COMPILE_TEMPLATES_SETTING, compileTemplates);
   });
 
-  ipcMain.on('save-quicklip-launch', (e, { quickClipLaunch }) => {
-    store.set(QUICKLIP_LAUNCH_SETTINGS, quickClipLaunch);
+  ipcMain.on('set-quickClip-settings', (e, quickClips) => {
+    store.set(QUICKLIPS_SETTINGS, quickClips);
   });
   
   ipcMain.on('save-clips', (e, { clips }) => {
@@ -58,7 +58,7 @@ export default function handleMessages(app, window, store) {
       emptyLockedClips: store.get(EMPTY_LOCKED_CLIPS_SETTING),
       numberOfClips: store.get(NUMBER_OF_CLIPS_SETTING),
       compileTemplates: store.get(COMPILE_TEMPLATES_SETTING),
-      quickClipLaunch: store.get(QUICKLIP_LAUNCH_SETTINGS),
+      quickClips: store.get(QUICKLIPS_SETTINGS),
     };
   });
 

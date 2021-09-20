@@ -7,7 +7,7 @@ export const OPACITY_SETTING = 'opacity';
 export const NUMBER_OF_CLIPS_SETTING = 'numberOfClips';
 export const EMPTY_LOCKED_CLIPS_SETTING = 'emptyLockedClips';
 export const COMPILE_TEMPLATES_SETTING = 'compileTemplates';
-export const QUICKLIP_LAUNCH_SETTINGS = 'quickClipLaunch';
+export const QUICKLIPS_SETTINGS = 'quickClips';
 export const CLIPS = 'clips';
 export const DEFAULT_STORE_VALUE = {
   [CLIPS]: [],
@@ -25,7 +25,7 @@ export const DEFAULT_STORE_VALUE = {
   [OPACITY_SETTING]: 0.5,
   [NUMBER_OF_CLIPS_SETTING]: 100,
   [COMPILE_TEMPLATES_SETTING]: [],
-  [QUICKLIP_LAUNCH_SETTINGS]: {
+  [QUICKLIPS_SETTINGS]: {
     searchTerms: [],
     tools: [],
   },

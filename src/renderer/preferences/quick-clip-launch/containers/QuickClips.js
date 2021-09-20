@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import {
-  addNewTool,
+  createNewTool,
+  createNewSearchTerm,
 } from '../actions';
 import {
   searchTerms,
@@ -13,7 +14,8 @@ const mapStateToProps = state => ({
   tools: tools(state),
 });
 const mapDispatchToProps = {
-  addNewTool,
+  createNewTool,
+  createNewSearchTerm,
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(QuickClips);

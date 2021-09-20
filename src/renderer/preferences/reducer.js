@@ -8,7 +8,7 @@ import {
   QUICK_CLIPS,
 } from './constants';
 import * as compileClipReducers from './compile-templates/reducers';
-import * as quickClipLaunchReducers from './quick-clip-launch/reducers';
+import { reducer as quickClipLaunchReducer } from './quick-clip-launch/reducers';
 
 const activeView = (state = GENERAL_PREFS, action) => {
   switch(action.type) {
@@ -89,5 +89,5 @@ export const reducer = combineReducers({
   opacity,
   numberOfClips,
   ...compileClipReducers,
-  ...quickClipLaunchReducers,
+  quickClips: quickClipLaunchReducer,
 });
