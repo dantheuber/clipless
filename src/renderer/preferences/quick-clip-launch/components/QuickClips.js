@@ -31,11 +31,11 @@ export const QuickClips = ({
   const setNewTermRegex = (str) => {
     try {
       new RegExp(str, g);
-      _setNewTermRegex(str);
-      termRegexError(false);
+      termRegexError = false;
     } catch (e) {
       termRegexError = true;
     }
+    _setNewTermRegex(str);
   };
   const toolNameExists = () => tools.reduce((i, acc) => {
     if (i.name === newToolName) {
