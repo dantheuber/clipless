@@ -27,6 +27,30 @@ export const createNewSearchTerm = payload => (dispatch) => {
   setTimeout(() => dispatch(saveToDisk()), 500);
 };
 
+export const updateTool = payload => (dispatch) => {
+  dispatch({
+    type: types.UPDATE_TOOL,
+    payload,
+  });
+  setTimeout(() => dispatch(saveToDisk()), 500);
+};
+
+export const associateTerm = ({ tool, term }) => (dispatch) => {
+  let terms = {
+    ...term
+  };
+  if (tool.terms) {
+    terms = {
+      ...tool.terms,
+      ...term,
+    };
+  }
+  dispatch(updateTool({
+    ...tool,
+    terms,
+  }));
+};
+
 export const launchQuickTool = ({ payload }) => (dispatch, getState) => {
   
   dispatch({

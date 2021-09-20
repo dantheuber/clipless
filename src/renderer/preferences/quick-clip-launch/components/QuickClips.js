@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Row from 'react-bootstrap/Row';
 import Container from 'react-bootstrap/Container';
+import { AssociateTerms } from '../containers/AssociateTerms';
 
 const DEFAULT_NEW_TOOL_NAME = '';
 const DEFAULT_NEW_TOOL_URL = 'http://example.com?query={searchTerm}';
@@ -22,6 +23,8 @@ export const QuickClips = ({
   const [createTool, setCreateTool] = useState(false);
   const [viewTerms, setViewTerms] = useState(false);
   const [createTerm, setCreateTerm] = useState(false);
+  const [associatingTerms, setAssociatingTerms] = useState(false);
+  const [associateTool, setAssociateTool] = useState(null);
   const [newToolName, setNewToolName] = useState(DEFAULT_NEW_TOOL_NAME);
   const [newToolUrl, setNewToolUrl] = useState(DEFAULT_NEW_TOOL_URL);
 
@@ -43,6 +46,15 @@ export const QuickClips = ({
     }
     return acc;
   }, false);
+  if (associatingTerms) {
+    return <AssociateTerms
+      tool={associateTool}
+      done={() => {
+        setAssociateTool(null);
+        setAssociatingTerms(false)
+      }}
+    />
+  }
   return (
     <Container>
       <Row onClick={() => setViewTools(!viewTools)}>
@@ -52,7 +64,10 @@ export const QuickClips = ({
         <ListGroup>
           { tools.map(tool => (
             <ListGroup.Item style={{ color: 'black' }} key={tool.name}>
-              {tool.name}: {tool.url}
+              {tool.name}: {tool.url} <Button onClick={() => {
+                setAssociateTool(tool);
+                setAssociatingTerms(true);
+              }}>Associate Terms</Button>
             </ListGroup.Item>
           ))}
         { createTool &&

@@ -15,6 +15,14 @@ export const searchTerms = (state = [], action) => {
 
 export const tools = (state = [], action) => {
   switch (action.type) {
+    case types.UPDATE_TOOL: {
+      return state.map(tool => {
+        if (tool.name === action.payload.name) {
+          return action.payload;
+        }
+        return tool;
+      })
+    }
     case types.CREATE_NEW_TOOL:
       return [
         { ...action.payload },
