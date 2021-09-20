@@ -43,8 +43,8 @@ export const QuickClips = ({
     }
     _setNewTermRegex(str);
   };
-  const toolNameExists = () => tools.reduce((i, acc) => {
-    if (i.name === newToolName) {
+  const toolNameExists = () => tools.reduce((acc, t) => {
+    if (t.name === newToolName) {
       return true;
     }
     return acc;

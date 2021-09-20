@@ -1,4 +1,4 @@
-import { ipcRenderer } from 'electron';
+import { ipcRenderer, shell } from 'electron';
 import * as types from './action-types';
 import { searchTerms, tools } from './selectors';
 
@@ -14,7 +14,7 @@ const saveToDisk = () => (dispatch, getState) => {
 export const createNewTool = (payload) => (dispatch) => {
   dispatch({
     type: types.CREATE_NEW_TOOL,
-    payload,
+    payload: { ...payload, terms: {} },
   });
   setTimeout(() => dispatch(saveToDisk()), 500);
 };
@@ -72,22 +72,40 @@ export const scanForTerms = (payload) => (dispatch, getState) => {
   const terms = searchTerms(state);
   
   const matches = terms.map((term) => {
-    console.log(term.regex);
     const regex = new RegExp(term.regex, 'g');
     const matches = payload.match(regex) || [];
-    console.log(matches);
     return matches.map(match => ({
       term,
       match,
     }));
-  }).reduce((m, acc) => [...m, ...acc], []);
+  }).reduce((acc, m) => [...m, ...acc], []);
 
   if (matches.length) {
     dispatch({
       type: types.SEARCH_TERMS_FOUND,
       payload: matches,
     });
+    dispatch(getItemsTools(matches));
   }
+};
+
+export const getItemsTools = (payload) => (dispatch, getState) => {
+  const state = getState();
+  const _tools = tools(state);
+
+  const m = _tools.map(tool => {
+    return {
+      ...tool,
+      matches: payload.filter(m => tool.terms && tool.terms[m.term.name])
+    };
+  }).filter(tool => tool.matches.length > 0)
+    .map(tool => {
+      tool.matches.map(({ match }) => {
+        shell.openExternalSync(tool.url.replace('{searchTerm}', encodeURIComponent(match)));
+      });
+    });
+
+  console.log(m);
 };
 
 export const launchQuickTool = ({ payload }) => (dispatch, getState) => {
