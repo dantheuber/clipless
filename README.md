@@ -17,6 +17,7 @@ Review the [planning document](https://github.com/dantheuber/clipless/blob/maste
 ### Planned Features
 
 1. [Quick Clip Launch](https://github.com/dantheuber/clipless/blob/master/PlanningDocument.md#quick-clip-launch)
+2. [Scratch Pad](https://github.com/dantheuber/clipless/issues/27)
 
 ## Getting Started
 Simply clone down this repository, install dependencies, and start the app.

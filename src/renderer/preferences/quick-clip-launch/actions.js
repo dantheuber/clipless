@@ -1,6 +1,6 @@
 import { ipcRenderer, shell } from 'electron';
 import * as types from './action-types';
-import { searchTerms, tools } from './selectors';
+import { availableTools, searchTerms, selectedTerms, selectedTools, tools } from './selectors';
 
 const saveToDisk = () => (dispatch, getState) => {
   const state = getState();
@@ -67,11 +67,15 @@ export const associateTerm = ({ tool, term }) => (dispatch) => {
   }));
 };
 
+export const startSelection = () => ({
+  type: types.START_SELECTION,
+});
+
 export const scanForTerms = (payload) => (dispatch, getState) => {
   const state = getState();
   const terms = searchTerms(state);
   
-  const matches = terms.map((term) => {
+  let matches = terms.map((term) => {
     const regex = new RegExp(term.regex, 'g');
     const matches = payload.match(regex) || [];
     return matches.map(match => ({
@@ -80,38 +84,66 @@ export const scanForTerms = (payload) => (dispatch, getState) => {
     }));
   }).reduce((acc, m) => [...m, ...acc], []);
 
+  // trim duplicate matches
+  matches = matches.filter((m, index, self) =>
+    index === self.findIndex((t) => (t.match === m.match))
+  );
+
   if (matches.length) {
     dispatch({
       type: types.SEARCH_TERMS_FOUND,
       payload: matches,
     });
-    dispatch(getItemsTools(matches));
+    dispatch(startSelection());
   }
 };
 
-export const getItemsTools = (payload) => (dispatch, getState) => {
+export const selectTerm = (payload) => ({
+  type: types.SELECT_TERM,
+  payload,
+});
+
+export const pruneToolSelection = () => (dispatch, getState) => {
   const state = getState();
-  const _tools = tools(state);
-
-  const m = _tools.map(tool => {
-    return {
-      ...tool,
-      matches: payload.filter(m => tool.terms && tool.terms[m.term.name])
-    };
-  }).filter(tool => tool.matches.length > 0)
-    .map(tool => {
-      tool.matches.map(({ match }) => {
-        shell.openExternalSync(tool.url.replace('{searchTerm}', encodeURIComponent(match)));
-      });
-    });
-
-  console.log(m);
-};
-
-export const launchQuickTool = ({ payload }) => (dispatch, getState) => {
+  const aTools = availableTools(state);
+  const sTools = selectedTools(state);
   
+  const prunedSelection = sTools.filter(st => aTools.reduce(at => at.name === st.name ? true : acc, false));
+  
+  if (sTools.length > prunedSelection) {
+    dispatch({
+      type: types.UPDATE_TOOL_SELECTION,
+      payload: prunedSelection,
+    });
+  }
+};
+export const unselectTerm = (payload) => (dispatch) => {
   dispatch({
-    type: types.LAUNCH_QUICK_TOOL,
+    type: types.UN_SELECT_TERM,
     payload,
   });
+  setTimeout(() => dispatch(pruneToolSelection()), 50);
+};
+export const selectTool = (payload) => ({
+  type: types.SELECT_TOOL,
+  payload,
+});
+export const unselectTool = (payload) => ({
+  type: types.UN_SELECT_TOOL,
+  payload,
+});
+
+export const cancelSelection = () => ({
+  type: types.CANCEL_SELECTION,
+});
+export const launchSelected = () => (dispatch, getState) => {
+  const state = getState();
+  const sTerms = selectedTerms(state);
+  const sTools = selectedTools(state);
+
+  sTools.map(tl => sTerms.map(tm => {
+    if (tl.terms[tm.term.name]) {
+      shell.openExternalSync(tl.url.replace('{searchTerm}', encodeURIComponent(tm.match)));
+    }
+  }));
 };

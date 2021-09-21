@@ -12,7 +12,7 @@ import { AssociateTerms } from '../containers/AssociateTerms';
 const DEFAULT_NEW_TOOL_NAME = '';
 const DEFAULT_NEW_TOOL_URL = 'http://example.com?query={searchTerm}';
 const DEFAULT_NEW_TERM_NAME = '';
-const DEFAULT_NEW_TERM_REGEX = '\s(?<twitter_handle>\@[a-zA-Z0-9]+)\s';
+const DEFAULT_NEW_TERM_REGEX = '\\s(?<twitter_handle>\@[a-zA-Z0-9]+)\\s';
 
 export const QuickClips = ({
   searchTerms,
