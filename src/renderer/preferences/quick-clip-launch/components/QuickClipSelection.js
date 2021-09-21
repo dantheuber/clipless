@@ -24,7 +24,12 @@ export const QuickClipSelection = ({
         { matchedTerms.map((term, i) => { 
           const active = selectedTerms.includes(term);
           return (
-            <ListGroup.Item key={`term-${i}-${term.match}`} active={active} onClick={() => active ? unselectTerm(term) : selectTerm(term)}>
+            <ListGroup.Item
+              key={`term-${i}-${term.match}`}
+              style={{ color: active ? 'white':'black' }}
+              active={active}
+              onClick={() => active ? unselectTerm(term) : selectTerm(term)}
+            >
               {term.match}
             </ListGroup.Item>
           );
@@ -37,7 +42,12 @@ export const QuickClipSelection = ({
         { availableTools.map((tool, i) => {
           const active = selectedTools.reduce((acc, t) => t.name === tool.name ? true : acc, false);
           return (
-            <ListGroup.Item key={`tool-${i}-${tool.name}`} active={active} onClick={() => active ? unselectTool(tool) : selectTool(tool)}>
+            <ListGroup.Item
+              key={`tool-${i}-${tool.name}`}
+              style={{ color: active ? 'white':'black' }}
+              active={active}
+              onClick={() => active ? unselectTool(tool) : selectTool(tool)}
+            >
               {tool.name}
             </ListGroup.Item>
           );
