@@ -28,5 +28,6 @@ export const DEFAULT_STORE_VALUE = {
   [QUICKLIPS_SETTINGS]: {
     searchTerms: [],
     tools: [],
+    autoScan: true,
   },
 };
