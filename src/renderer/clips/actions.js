@@ -11,10 +11,13 @@ import { emptyLockedClips, numberOfClips } from '../preferences/selectors';
 import { TOOLTIP_DELAY } from './constants';
 import simpleAction from '../utils/simple-action';
 import { scanForTerms } from '../preferences/quick-clip-launch/actions';
+import { autoScan } from '../preferences/quick-clip-launch/selectors';
 
 export const clipboardUpdated = text => (dispatch, getState) => {
   const state = getState();
-  dispatch(scanForTerms(text));
+  if (autoScan(state)) {
+    dispatch(scanForTerms(text));
+  }
   dispatch({
     type: types.CLIPBOARD_UPDATED,
     payload: text,
@@ -24,6 +27,12 @@ export const clipboardUpdated = text => (dispatch, getState) => {
       numberOfClips: numberOfClips(state),
     },
   });
+};
+
+export const scanClipForTerms = (index) => (dispatch, getState) => {
+  const state = getState();
+  const text = clip(state, index);
+  dispatch(scanForTerms(text));
 };
 
 export const clipModified = (e, index) => ({

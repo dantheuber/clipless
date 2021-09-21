@@ -4,6 +4,7 @@ import actionTypeConstructor from '../../utils/action-type-creator';
 const ca = actionTypeConstructor(NAME);
 
 export const LAUNCH_QUICK_TOOL = ca('LAUNCH_QUICK_TOOL');
+export const TOGGLE_AUTO_SCAN = ca('TOGGLE_AUTO_SCAN');
 
 export const CREATE_NEW_SEARCH_TERM = ca('CREATE_NEW_SEARCH_TERM');
 export const DELETE_SEARCH_TERM = ca('DELETE_SEARCH_TERM');

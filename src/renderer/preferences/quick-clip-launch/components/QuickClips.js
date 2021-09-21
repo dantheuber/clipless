@@ -15,6 +15,8 @@ const DEFAULT_NEW_TERM_NAME = '';
 const DEFAULT_NEW_TERM_REGEX = '\\s(?<twitter_handle>\@[a-zA-Z0-9]+)\\s';
 
 export const QuickClips = ({
+  autoScan,
+  toggleAutoScan,
   searchTerms,
   tools,
   createNewTool,
@@ -60,6 +62,15 @@ export const QuickClips = ({
   }
   return (
     <Container>
+      <Form>
+        <Form.Check
+          type="switch"
+          id="auto-scan"
+          label="Auto Scan clipboard"
+          checked={autoScan}
+          onChange={toggleAutoScan}
+        />
+      </Form>
       <Row onClick={() => setViewTools(!viewTools)}>
         ({tools.length}) Tools
       </Row>
@@ -172,8 +183,10 @@ export const QuickClips = ({
 QuickClips.propTypes = {
   searchTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
   tools: PropTypes.arrayOf(PropTypes.object).isRequired,
+  autoScan: PropTypes.bool.isRequired,
   createNewTool: PropTypes.func.isRequired,
   createNewSearchTerm: PropTypes.func.isRequired,
   deleteTool: PropTypes.func.isRequired,
   deleteTerm: PropTypes.func.isRequired,
+  toggleAutoScan: PropTypes.func.isRequired,
 };

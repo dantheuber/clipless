@@ -1,12 +1,20 @@
 import { ipcRenderer, shell } from 'electron';
 import * as types from './action-types';
-import { availableTools, searchTerms, selectedTerms, selectedTools, tools } from './selectors';
+import {
+  autoScan,
+  availableTools,
+  searchTerms,
+  selectedTerms,
+  selectedTools,
+  tools
+} from './selectors';
 
 const saveToDisk = () => (dispatch, getState) => {
   const state = getState();
   const quickClips = {
     tools: tools(state),
     searchTerms: searchTerms(state),
+    autoScan: autoScan(state),
   };
   ipcRenderer.send('set-quickClip-settings', quickClips);
 }
@@ -48,6 +56,11 @@ export const deleteTool = payload => (dispatch) => {
     type: types.DELETE_TOOL,
     payload,
   });
+  setTimeout(() => dispatch(saveToDisk()), 500);
+};
+
+export const toggleAutoScan = () => (dispatch) => {
+  dispatch({ type: types.TOGGLE_AUTO_SCAN });
   setTimeout(() => dispatch(saveToDisk()), 500);
 };
 

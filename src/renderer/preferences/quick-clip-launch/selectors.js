@@ -4,6 +4,7 @@ const select = attribute => state => state[NAME].quickClips[attribute];
 
 export const tools = select('tools');
 export const searchTerms = select('searchTerms');
+export const autoScan = select('autoScan');
 export const matchedTerms = select('matchedTerms');
 export const selectedTerms = select('selectedTerms');
 export const selectedTools = select('selectedTools');

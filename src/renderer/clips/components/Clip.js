@@ -15,6 +15,7 @@ export const Clip = ({
   clipModified,
   clipSelected,
   showCopiedTooltip,
+  scanClipForTerms,
 }) => {
   const target = useRef(null);
   return (
@@ -48,8 +49,8 @@ export const Clip = ({
       />
       <InputGroup.Append className="clip-settings">
         { index === 0 ? (
-          <Button tabIndex="-1" variant="dark" onClick={() => clipSelected(index)}>
-            <FontAwesomeIcon icon="clipboard" />
+          <Button tabIndex="-1" variant="dark" onClick={() => scanClipForTerms(index)}>
+            <FontAwesomeIcon icon="search" />
           </Button>
         ) : <ClipSettings index={index} /> }
       </InputGroup.Append>
@@ -62,5 +63,6 @@ Clip.propTypes = {
   index: PropTypes.number.isRequired,
   clipModified: PropTypes.func.isRequired,
   clipSelected: PropTypes.func.isRequired,
+  scanClipForTerms: PropTypes.func.isRequired,
   showCopiedTooltip: PropTypes.bool.isRequired,
 };

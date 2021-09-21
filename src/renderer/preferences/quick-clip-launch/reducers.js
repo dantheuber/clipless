@@ -1,6 +1,16 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
 
+export const autoScan = (state = true, action) => {
+  const { type } = action;
+  switch (type) {
+    case types.TOGGLE_AUTO_SCAN:
+      return !state;
+    default:
+      return state;
+  }
+};
+
 export const searchTerms = (state = [], action) => {
   const { type, payload } = action;
   switch (type) {
@@ -96,6 +106,7 @@ export const selectingQuickClips = (state = false, action) => {
 };
 
 export const reducer = combineReducers({
+  autoScan,
   searchTerms,
   tools,
   matchedTerms,

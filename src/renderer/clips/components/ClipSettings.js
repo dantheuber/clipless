@@ -8,6 +8,7 @@ export const ClipSettings = ({
   viewMultiLineEditor,
   toggleClipSettings,
   hideClipSettings,
+  scanClipForTerms,
   settingsVisible,
   clipIsLocked,
   toggleLock,
@@ -22,9 +23,9 @@ export const ClipSettings = ({
       <Button key="lock" variant="dark" onClick={() => toggleLock(index)}>
         <FontAwesomeIcon icon={clipIsLocked ? 'lock-open' : 'lock'} />
       </Button>,
-      // <Button key="scan" variant="dark">
-      //   <FontAwesomeIcon icon="search" />
-      // </Button>,
+      <Button key="scan" variant="dark" onClick={() => scanClipForTerms(index)}>
+        <FontAwesomeIcon icon="search" />
+      </Button>,
       <Button key="edit" variant="dark" onClick={() => viewMultiLineEditor(index)}>
         <FontAwesomeIcon icon="edit" />
       </Button>,
@@ -38,6 +39,7 @@ ClipSettings.propTypes = {
   viewMultiLineEditor: PropTypes.func.isRequired,
   toggleClipSettings: PropTypes.func.isRequired,
   hideClipSettings: PropTypes.func.isRequired,
+  scanClipForTerms: PropTypes.func.isRequired,
   settingsVisible: PropTypes.bool.isRequired,
   clipIsLocked: PropTypes.bool.isRequired,
   toggleLock: PropTypes.func.isRequired,
