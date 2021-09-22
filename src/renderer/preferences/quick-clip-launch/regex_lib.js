@@ -1,15 +1,4 @@
-export {
-  email,
-  url,
-  domain,
-  cc,
-  urlsafe,
-  numeric,
-  alpha,
-  alphanumeric,
-  creditcard,
-  guid,
-  date,
-  int,
-  double,
- } from 'regexps';
+export const ip = '(?<ip>(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5])\\.(\\d{1,2}|1\\d\\d|2[0-4]\\d|25[0-5]))';
+export const email = '(?<email>([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?))';
+export const url = '(?<url>(http|ftp|https|ws|wss):\\/\\/[\\w\\-_]+(\.[\\w\\-_]+)+([\\w\\-\\.,@?^=%&amp;:/~\\+#]*[\\w\\-\\@?^=%&amp;/~\\+#]))';
+export const guid = '(?<guid>[A-Fa-f\\d]{8}-[A-Fa-f\\d]{4}-[A-Fa-f0\\d]{4}-[A-Fa-f\\d]{4}-[A-Fa-f\\d]{12})';

@@ -4,6 +4,8 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Dropdown from 'react-bootstrap/Dropdown';
+import * as regexOptions from '../regex_lib';
 import {
   DEFAULT_NEW_TERM_NAME,
   DEFAULT_NEW_TERM_REGEX,
@@ -20,7 +22,7 @@ export const Terms = ({
   let termRegexError = false;
   const setNewTermRegex = (str) => {
     try {
-      new RegExp(str, g);
+      new RegExp(str, 'g');
       termRegexError = false;
     } catch (e) {
       termRegexError = true;
@@ -31,7 +33,7 @@ export const Terms = ({
     <ListGroup>
       { searchTerms.map(term => (
         <ListGroup.Item key={term.name} style={{ color: 'black' }}>
-          {term.name}: {term.regex}
+          {term.name}: {`${term.regex}`}
           <Button onClick={() => deleteTerm(term)}>Delete</Button>
         </ListGroup.Item>
       ))}
@@ -48,14 +50,28 @@ export const Terms = ({
           </InputGroup>
           <InputGroup>
             <InputGroup.Text>Regex</InputGroup.Text>
-            <Form.Control
+            <Dropdown>
+              <Dropdown.Toggle variant="success" id="dropdown-basic">
+                Choose Existing Regex
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                { Object.keys(regexOptions).map(key => (
+                  <Dropdown.Item key={key} onClick={() => setNewTermRegex(regexOptions[key])}>
+                    {key}
+                  </Dropdown.Item>
+                ))}
+              </Dropdown.Menu>
+            </Dropdown>
+          </InputGroup>
+          <Form.Control
               required
+              as="input"
               type='text'
               value={newTermRegex}
               onChange={({ target: { value }}) => setNewTermRegex(value) }
             />
             { termRegexError && <Form.Control.Feedback>Invalid Regex</Form.Control.Feedback> }
-          </InputGroup>
           <Button
             disabled={termRegexError}
             onClick={() => {
