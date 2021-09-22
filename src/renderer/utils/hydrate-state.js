@@ -16,7 +16,6 @@ export default function hydrateState(storedState = DEFAULT_APP_STATE) {
     compileTemplates,
     quickClips
   } = ipcRenderer.sendSync('hydrate-state');
-  console.log('hydrate', quickClips);
   state[CLIPS_NAME].clips = clips;
   state[PREFERENCES_NAME] = {
     alwaysOnTop,
