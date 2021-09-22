@@ -1,19 +1,6 @@
+import { urlsafe } from './regex_lib';
 export const NAME = 'quickClips';
-export {
-  email,
-  url,
-  cc,
-  urlsafe,
-  numeric,
-  alpha,
-  alphanumeric,
-  creditcard,
-  guid,
-  date,
-  int,
-  double,
-} from 'regexps';
 
-export const NEW_SEARCH_TERM_DEFAULT = {
-  searchRegex: urlsafe,
-};
+export const DEFAULT_NEW_TERM_NAME = '';
+export const DEFAULT_NEW_TERM_REGEX = urlsafe;
+

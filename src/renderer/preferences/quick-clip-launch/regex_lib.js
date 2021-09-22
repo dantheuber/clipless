@@ -1,0 +1,15 @@
+export {
+  email,
+  url,
+  domain,
+  cc,
+  urlsafe,
+  numeric,
+  alpha,
+  alphanumeric,
+  creditcard,
+  guid,
+  date,
+  int,
+  double,
+ } from 'regexps';
