@@ -63,24 +63,6 @@ const lockedClips = (state = {}, action) => {
   }
 };
 
-const settingsVisible = (state = {}, action) => {
-  switch (action.type) {
-    case types.TOGGLE_CLIP_SETTINGS:
-      return {
-        ...state,
-        [action.payload]: !state[action.payload],
-      };
-    case types.VIEW_CLIP_EDITOR:
-    case types.HIDE_CLIP_SETTINGS:
-      return {
-        ...state,
-        [action.payload]: false,
-      };
-    default:
-      return state;
-  }
-};
-
 const lastKeyUsed = (state = 0, action) => {
   switch (action.type) {
     case types.CLIP_SELECTED:
@@ -170,7 +152,6 @@ const clipsChanged = (state = false, action) => {
 export const reducer = combineReducers({
   clips,
   lockedClips,
-  settingsVisible,
   lastKeyUsed,
   clipKeyPressed,
   viewingClipEditor,
