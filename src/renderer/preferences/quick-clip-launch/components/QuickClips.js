@@ -49,17 +49,17 @@ export const QuickClips = ({
         </Form>
       </Col>
       <Col>
-        <ButtonToolbar>
+        <ButtonToolbar style={{ float: 'right', margin: '3px'}}>
           <ButtonGroup className="mr-2">
             <OverlayTrigger
-              placement="bottom"
+              placement="left"
               overlay={<Tooltip id="export-qk">Export Quick Clips</Tooltip>}
             >
               <Button variant="info" onClick={exportQuickClips}>
                 <FontAwesomeIcon icon="download" />
               </Button>
             </OverlayTrigger>
-            <Overlay show={show} target={target} placement="bottom">
+            <Overlay show={show} target={target} placement="left">
               <Tooltip id="import">Import Quick Clips</Tooltip>
             </Overlay>
             <FilePicker
