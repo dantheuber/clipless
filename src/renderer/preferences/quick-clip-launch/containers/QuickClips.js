@@ -1,5 +1,9 @@
 import { connect } from 'react-redux';
-import { toggleAutoScan } from '../actions';
+import {
+  toggleAutoScan,
+  importQuickClips,
+  exportQuickClips,
+} from '../actions';
 import {
   autoScan,
   toolCount,
@@ -14,6 +18,8 @@ const mapStateToProps = state => ({
 });
 const mapDispatchToProps = {
   toggleAutoScan,
+  importQuickClips,
+  exportQuickClips,
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(QuickClips);

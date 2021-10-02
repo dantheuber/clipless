@@ -8,6 +8,8 @@ import {
   selectedTools,
   tools
 } from './selectors';
+import exportFile from '../../utils/export-file';
+
 
 const saveToDisk = () => (dispatch, getState) => {
   const state = getState();
@@ -85,6 +87,19 @@ export const associateTerm = ({ tool, term }) => (dispatch) => {
     ...tool,
     terms,
   }));
+};
+
+export const exportQuickClips = () => (dispatch, getState) => {
+  const state = getState();
+  const toSave = {
+    tools: tools(state),
+    searchTerms: searchTerms(state),
+  };
+  exportFile(JSON.stringify(toSave), 'quick-clips.json');
+};
+
+export const importQuickClips = () => (dispatch, getState) => {
+
 };
 
 export const startSelection = () => ({
