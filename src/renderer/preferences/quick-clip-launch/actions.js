@@ -248,6 +248,6 @@ export const launchSelected = () => (dispatch, getState) => {
       matchedTerms: sTerms,
     },
   });
-  
+
   launch(sTools, sTerms);
 };

@@ -42,7 +42,7 @@ export const QuickClips = ({
           <Form.Check
             type="switch"
             id="auto-scan"
-            label="Auto Scan clipboard"
+            label="Scan clipboard on change"
             checked={autoScan}
             onChange={toggleAutoScan}
           />

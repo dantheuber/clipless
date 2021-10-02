@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import lifecycle from 'react-pure-lifecycle';
 import {
   launchSelected,
   cancelSelection,
@@ -41,6 +42,16 @@ const mapDispatchToProps = {
   launchAll
 };
 
-const container = connect(mapStateToProps, mapDispatchToProps)(QuickClipSelection);
+const methods = {
+  componentWillMount(props) {
+    if (props.matchedTerms.length === 1) {
+      props.selectTerm(props.matchedTerms[0]);
+    }
+  }
+}
+
+const container = connect(mapStateToProps, mapDispatchToProps)(
+  lifecycle(methods)(QuickClipSelection)
+);
 
 export { container as QuickClipSelection };
