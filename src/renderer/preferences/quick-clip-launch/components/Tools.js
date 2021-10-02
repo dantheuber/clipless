@@ -123,7 +123,7 @@ export const Tools = ({
       </ListGroup.Item>
     }
     { !createTool && tools.map((tool, i) => (
-      <ListGroup.Item style={{ padding: '.2rem', color: 'black' }} key={tool.name}>
+      <ListGroup.Item style={{ padding: '.2rem' }} key={tool.name}>
         <Card style={{ margin: '0', padding: '0'}}>
           <Card.Body>
             <Card.Title>

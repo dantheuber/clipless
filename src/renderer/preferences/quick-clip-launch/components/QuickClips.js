@@ -46,7 +46,7 @@ export const QuickClips = ({
             </Accordion.Toggle>
           </Card.Header>
           <Accordion.Collapse eventKey="terms">
-            <Card.Body><Terms /></Card.Body>
+            <Card.Body style={{ padding: '.2rem' }}><Terms /></Card.Body>
           </Accordion.Collapse>
         </Card>
       </Accordion>

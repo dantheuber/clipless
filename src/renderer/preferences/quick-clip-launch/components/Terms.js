@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import ListGroup from 'react-bootstrap/ListGroup';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
+import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
 import * as regexOptions from '../regex_lib';
@@ -10,6 +11,7 @@ import {
   DEFAULT_NEW_TERM_NAME,
   DEFAULT_NEW_TERM_REGEX,
 } from '../constants';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export const Terms = ({
   createNewSearchTerm,
@@ -54,7 +56,7 @@ export const Terms = ({
         <ListGroup.Item>
           <Form>
             <Form.Group>
-              <Form.Label>Name</Form.Label>
+              <Form.Label>New Search Term Name</Form.Label>
               <InputGroup hasValidation>
                 <Form.Control
                   required
@@ -69,7 +71,7 @@ export const Terms = ({
             </Form.Group>
             <Form.Group>
               <Form.Label>
-                Regex&nbsp;
+                New Search Regex&nbsp;
                 <Dropdown style={{ float: 'right' }} size="sm">
                   <Dropdown.Toggle
                     size="sm"
@@ -77,7 +79,7 @@ export const Terms = ({
                     variant="success"
                     id="dropdown-basic"
                   >
-                    Choose Existing Regex
+                    Select from library
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
                     { Object.keys(regexOptions).map(key => (
@@ -123,13 +125,18 @@ export const Terms = ({
         </ListGroup.Item>
       }
       { !createTerm && searchTerms.map(term => (
-        <ListGroup.Item key={term.name} style={{ color: 'black' }}>
-          {term.name}: {`${term.regex}`}
-          <Button onClick={() => deleteTerm(term)}>Delete</Button>
+        <ListGroup.Item style={{ padding: '.2rem' }} key={term.name}>
+          <Card style={{ margin: '0', padding: '0'}}>
+            <Card.Body>
+              <Card.Title>{term.name}</Card.Title>
+              <footer className="blockquote-footer">{term.regex}</footer>
+              <Card.Link href="#" style={{ color: 'red' }} onClick={() => deleteTerm(term)}>
+                Delete <FontAwesomeIcon icon="trash" />
+              </Card.Link>
+            </Card.Body>
+          </Card>
         </ListGroup.Item>
       ))}
-      
-      
     </ListGroup>
   );
 };
