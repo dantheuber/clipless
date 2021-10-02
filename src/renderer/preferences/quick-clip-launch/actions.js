@@ -1,4 +1,5 @@
 import { ipcRenderer, shell } from 'electron';
+import uniqBy from 'lodash.uniqby';
 import * as types from './action-types';
 import {
   autoScan,
@@ -98,8 +99,37 @@ export const exportQuickClips = () => (dispatch, getState) => {
   exportFile(JSON.stringify(toSave), 'quick-clips.json');
 };
 
-export const importQuickClips = () => (dispatch, getState) => {
-
+export const importQuickClips = file => (dispatch, getState) => {
+  const state = getState();
+  const existing = {
+    tools: tools(state),
+    searchTerms: searchTerms(state),
+  };
+  const read = new FileReader();
+  read.readAsBinaryString(file);
+  read.onloadend = () => {
+    try {
+      const content = JSON.parse(read.result);
+      const uniqueTools = uniqBy([
+        ...content.tools,
+        ...existing.tools,
+      ], 'name');
+      const uniqueTerms = uniqBy([
+        ...content.searchTerms,
+        ...existing.searchTerms,
+      ], 'name');
+      dispatch({
+        type: types.IMPORT_QUICK_CLIPS,
+        payload: {
+          tools: uniqueTools,
+          searchTerms: uniqueTerms,
+        }
+      });
+      setTimeout(() => dispatch(saveToDisk()), 500);
+    } catch (e) {
+      alert('Could not parse this file, was it exported by Clipless?');
+    }
+  } 
 };
 
 export const startSelection = () => ({

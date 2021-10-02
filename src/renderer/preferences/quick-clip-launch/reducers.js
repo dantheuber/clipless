@@ -21,6 +21,8 @@ export const searchTerms = (state = [], action) => {
         { ...payload },
         ...state,
       ];
+    case types.IMPORT_QUICK_CLIPS:
+      return payload.searchTerms;
     default:
       return state;
   }
@@ -44,6 +46,8 @@ export const tools = (state = [], action) => {
         { ...payload },
         ...state,
       ];
+    case types.IMPORT_QUICK_CLIPS:
+      return payload.tools;
     default:
       return state;
   }
