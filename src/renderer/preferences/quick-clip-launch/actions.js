@@ -64,6 +64,13 @@ export const toggleAutoScan = () => (dispatch) => {
   setTimeout(() => dispatch(saveToDisk()), 500);
 };
 
+export const toggleToolEncode = (tool) => (dispatch) => dispatch(
+  updateTool({
+    ...tool,
+    encode: !tool.encode
+  })
+);
+
 export const associateTerm = ({ tool, term }) => (dispatch) => {
   let terms = {
     ...term
@@ -154,9 +161,18 @@ export const launchSelected = () => (dispatch, getState) => {
   const sTerms = selectedTerms(state);
   const sTools = selectedTools(state);
 
+  dispatch({
+    type: types.LAUNCH_QUICK_TOOL,
+    payload: {
+      tools: sTools,
+      matchedTerms: sTerms,
+    },
+  });
+
   sTools.map(tl => sTerms.map(tm => {
     if (tl.terms[tm.term.name]) {
-      shell.openExternalSync(tl.url.replace('{searchTerm}', encodeURIComponent(tm.match)));
+      const rep = tl.encode ? encodeURIComponent(tm.match) : tm.match;
+      shell.openExternalSync(tl.url.replace('{searchTerm}', rep));
     }
   }));
 };

@@ -4,6 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Button from 'react-bootstrap/Button';
+import Form from 'react-bootstrap/Form';
 
 export const AssociateTerms = ({
   tool,
@@ -25,27 +26,24 @@ export const AssociateTerms = ({
     });
   };
   return (
-    <Container>
-      <Row>
-        <h3>{tool.name}</h3>
-        Choose search terms to associate with this tool
-        <Button onClick={done}>Done</Button>
-      </Row>
-      <Row>
-        <ListGroup>
-          { searchTerms.map(term => (
-            <ListGroup.Item
-              style={{ color: !isAssociatedWithTool(term) && 'black' }}
-              active={isAssociatedWithTool(term)}
-              key={term.name}
-              onClick={() => onTermClick(term)}
-            >
-              {term.name}
-            </ListGroup.Item>
-          ))}
-        </ListGroup>
-      </Row>
-    </Container>
+    <Form>
+      <Button inline size="sm" onClick={done}>Back</Button>
+      <Form.Text>
+        Use <strong>{tool.name}</strong> with the following search terms:
+      </Form.Text>
+      { searchTerms.map(term => (
+        <Form.Check
+          custom
+          inline
+          id={`associateWith-${term.name.replace(' ', '')}`}
+          type="checkbox"
+          checked={isAssociatedWithTool(term)}
+          key={term.name}
+          onChange={() => onTermClick(term)}
+          label={term.name}
+        />
+      ))}
+    </Form>
   );
 };
 

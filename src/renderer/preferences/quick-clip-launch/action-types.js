@@ -11,6 +11,7 @@ export const DELETE_SEARCH_TERM = ca('DELETE_SEARCH_TERM');
 export const CREATE_NEW_TOOL = ca('CREATE_NEW_TOOL');
 export const DELETE_TOOL = ca('DELETE_TOOL');
 export const UPDATE_TOOL = ca('UPDATE_TOOL');
+export const SET_TOOL_ENCODE = ca('SET_TOOL_ENCODE');
 
 export const SEARCH_TERMS_FOUND = ca('SEARCH_TERMS_FOUND');
 export const SELECT_TERM = ca('SELECT_TERM');

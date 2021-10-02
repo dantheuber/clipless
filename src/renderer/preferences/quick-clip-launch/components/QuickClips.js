@@ -19,7 +19,7 @@ export const QuickClips = ({
   searchTermCount,
 }) => (
   <Row>
-    <Col>
+    <Col style={{ paddingLeft: 0}}>
       <Form>
         <Form.Check
           type="switch"
@@ -37,7 +37,7 @@ export const QuickClips = ({
             </Accordion.Toggle>
           </Card.Header>
           <Accordion.Collapse eventKey="tools">
-            <Card.Body><Tools /></Card.Body>
+            <Card.Body style={{ padding: '.2rem' }}><Tools /></Card.Body>
           </Accordion.Collapse>
         </Card>
         <Card>
