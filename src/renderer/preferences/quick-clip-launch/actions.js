@@ -97,10 +97,11 @@ export const scanForTerms = (payload) => (dispatch, getState) => {
   
   let matches = terms.map((term) => {
     const regex = new RegExp(term.regex, 'g');
-    const matches = payload.match(regex) || [];
+    const matches = [...payload.matchAll(regex)] || [];
     return matches.map(match => ({
       term,
       match,
+      groups: match.groups
     }));
   }).reduce((acc, m) => [...m, ...acc], []);
 
@@ -172,7 +173,14 @@ export const launchSelected = () => (dispatch, getState) => {
   sTools.map(tl => sTerms.map(tm => {
     if (tl.terms[tm.term.name]) {
       const rep = tl.encode ? encodeURIComponent(tm.match) : tm.match;
-      shell.openExternalSync(tl.url.replace('{searchTerm}', rep));
+      let url = tl.url.replace('{searchTerm}', rep);
+      if (tm.groups) {
+        url = Object.keys(tm.groups).reduce((acc, group) => {
+          const r = tl.encode ? encodeURIComponent(tm.groups[group]) : tm.groups[group];
+          return acc.replace(`{${group}}`, r);
+        }, url);
+      }
+      shell.openExternalSync(url);
     }
   }));
 };

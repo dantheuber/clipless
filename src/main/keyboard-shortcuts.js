@@ -9,7 +9,7 @@ export default function keyboardShortcuts(app, window) {
     });
   });
 
-  globalShortcut.register('CommandOrControl+`', () => {
+  globalShortcut.register('CommandOrControl+Shift+`', () => {
     window.webContents.send('compile-templates-pressed');
     window.focus();
   });

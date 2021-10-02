@@ -40,7 +40,7 @@ export const Tools = ({
     return acc;
   }, false);
   const isNewToolNameValid = () => !toolNameExists() && newToolName !== '';
-  const newToolUrlIsValid = () => newToolUrl !== '' && newToolUrl.search('{searchTerm}') > 0;
+  const newToolUrlIsValid = () => newToolUrl !== '' && /\{[a-zA-Z0-9]+\}/g.exec(newToolUrl);
   const formIsInvalid = () => !isNewToolNameValid() || !newToolUrlIsValid();
 
   if (associatingTerms) {
@@ -87,7 +87,7 @@ export const Tools = ({
                 value={newToolUrl}
                 onChange={({ target: { value }}) => setNewToolUrl(value) }
               />
-              <Form.Control.Feedback type="invalid">Your URL must contain <code>{'{searchTerm}'}</code> where the matched term will be passed as a query string parameter.</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">Your URL must contain a <code>{'{searchTerm}'}</code> where the matched term will be passed as a query string parameter.</Form.Control.Feedback>
             </InputGroup>
             <Form.Check
               custom
@@ -102,7 +102,11 @@ export const Tools = ({
             size="sm"
             disabled={formIsInvalid()}
             onClick={() => {
-              createNewTool({ name: newToolName, url: newToolUrl, encode: newToolEncode });
+              createNewTool({
+                name: newToolName,
+                url: newToolUrl,
+                encode: newToolEncode
+              });
               resetNewForm();
             }}
           >

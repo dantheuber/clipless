@@ -8,18 +8,17 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-
 import { Terms } from '../containers/Terms';
 import { Tools } from '../containers/Tools';
 
 export const QuickClips = ({
   autoScan,
-  toggleAutoScan,
   toolCount,
+  toggleAutoScan,
   searchTermCount,
 }) => (
   <Row>
-    <Col style={{ paddingLeft: 0}}>
+    <Col style={{ paddingLeft: 0 }}>
       <Form>
         <Form.Check
           type="switch"
