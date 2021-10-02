@@ -12,6 +12,8 @@ import {
   faSignOutAlt,
   faClipboardList,
   faFileImport,
+  faAngleUp,
+  faAngleDown,
   faDownload,
 } from '@fortawesome/free-solid-svg-icons';
 
@@ -28,5 +30,7 @@ library.add(
   faSignOutAlt,
   faClipboardList,
   faFileImport,
+  faAngleUp,
+  faAngleDown,
   faDownload,
 );

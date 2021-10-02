@@ -3,8 +3,8 @@
 }
 
 body {
-  background-color: black;
-  color: white;
+  /* background-color: black; */
+  /* color: white; */
 }
 
 ::-webkit-scrollbar {
@@ -25,6 +25,12 @@ input, textarea {
 
 ::selection {
   background-color: #212529;
+}
+
+.prefsCloseButton {
+  position: fixed;
+  left: 10px;
+  bottom: 10px;
 }
 
 .wrapper {

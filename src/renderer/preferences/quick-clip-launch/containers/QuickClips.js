@@ -1,10 +1,16 @@
 import { connect } from 'react-redux';
 import { toggleAutoScan } from '../actions';
-import { autoScan } from '../selectors';
+import {
+  autoScan,
+  toolCount,
+  searchTermCount,
+} from '../selectors';
 import { QuickClips } from '../components/QuickClips';
 
 const mapStateToProps = state => ({
   autoScan: autoScan(state),
+  toolCount: toolCount(state),
+  searchTermCount: searchTermCount(state)
 });
 const mapDispatchToProps = {
   toggleAutoScan,

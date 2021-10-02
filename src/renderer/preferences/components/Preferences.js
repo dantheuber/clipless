@@ -13,12 +13,12 @@ export const Preferences = ({
   viewingGeneralPrefs,
   viewingTemplates,
 }) => (
-  <Container className="main">
+  <Container fluid className="main">
     <Navigation />
     { viewingGeneralPrefs && <GeneralPreferences /> }
     { viewingTemplates && <CompileTemplates /> }
     { viewingQuickClips && <QuickClips />}
-    <Button onClick={closePreferences}>Done</Button>
+    <Button className="prefsCloseButton" variant="success" onClick={closePreferences}>Done</Button>
   </Container>
 );
 Preferences.propTypes = {

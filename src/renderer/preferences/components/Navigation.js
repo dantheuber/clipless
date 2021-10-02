@@ -10,7 +10,7 @@ export const Navigation = ({
   viewGeneralPrefs,
   viewQuickClips,
 }) => (
-  <Nav justify variant="pills">
+  <Nav className="justify-content-center"  variant="tabs">
     <Nav.Item>
       <Nav.Link
         onClick={(e) => {

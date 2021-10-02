@@ -10,6 +10,8 @@ export const selectedTerms = select('selectedTerms');
 export const selectedTools = select('selectedTools');
 export const selectingQuickClips = select('selectingQuickClips');
 
+export const toolCount = state => tools(state).length;
+export const searchTermCount = state => searchTerms(state).length;
 export const availableTools = state => {
   const _tools = tools(state);
   return _tools.map(tool => ({
