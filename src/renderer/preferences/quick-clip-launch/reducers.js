@@ -59,7 +59,7 @@ export const matchedTerms = (state = [], action) => {
     case types.SEARCH_TERMS_FOUND:
       return payload;
     case types.CANCEL_SELECTION:
-    case types.LAUNCH_SELECTED:
+    case types.LAUNCH_QUICK_TOOL:
       return [];
     default:
       return state;
@@ -74,7 +74,7 @@ export const selectedTerms = (state = [], action) => {
     case types.UN_SELECT_TERM:
       return state.filter(term => term.match !== payload.match);
     case types.CANCEL_SELECTION:
-    case types.LAUNCH_SELECTED:
+    case types.LAUNCH_QUICK_TOOL:
       return [];
     default:
       return state;
@@ -91,7 +91,7 @@ export const selectedTools = (state = [], action) => {
     case types.UPDATE_TOOL_SELECTION:
       return payload;
     case types.CANCEL_SELECTION:
-    case types.LAUNCH_SELECTED:
+    case types.LAUNCH_QUICK_TOOL:
       return [];
     default:
       return state;
@@ -102,7 +102,7 @@ export const selectingQuickClips = (state = false, action) => {
     case types.START_SELECTION:
       return true;
     case types.CANCEL_SELECTION:
-    case types.LAUNCH_SELECTED:
+    case types.LAUNCH_QUICK_TOOL:
       return false;
     default:
       return state;

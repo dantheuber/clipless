@@ -28,9 +28,40 @@ input, textarea {
 }
 
 .prefsCloseButton {
+  z-index: 9999;
   position: fixed;
   left: 10px;
   bottom: 10px;
+}
+
+.qkSelectTitle {
+  font-weight: 700;
+  font-size: .75rem;
+  margin-bottom: .2rem;
+}
+.qkSelectSubtitle {
+  font-size: .5rem;
+  font-weight: 500;
+  font-style: italic;
+  margin-bottom: .2rem;
+}
+.qkSelectCaptureGroups {
+  padding: 0;
+  padding-left: .5rem;
+}
+.qkSelectCaptureGroups .card-text {
+  font-size: .7rem;
+  font-weight: 600;
+  margin-block-end: .2rem;
+}
+.qkSelectCaptureGroups ul {
+  padding-left: .7rem;
+  font-size: .6rem;
+  font-weight: 400;
+  margin-block-end: .2rem;
+}
+.qkSelectCaptureGroups ul li {
+  line-height: .7rem;
 }
 
 .wrapper {

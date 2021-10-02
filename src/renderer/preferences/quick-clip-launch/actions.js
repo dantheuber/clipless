@@ -4,6 +4,7 @@ import * as types from './action-types';
 import {
   autoScan,
   availableTools,
+  matchedTerms,
   searchTerms,
   selectedTerms,
   selectedTools,
@@ -202,6 +203,39 @@ export const unselectTool = (payload) => ({
 export const cancelSelection = () => ({
   type: types.CANCEL_SELECTION,
 });
+
+export const launch = (tls, tms) => {
+  tls.map(tl => tms.map(tm => {
+    let url = tl.url;
+    if (tm.groups) {
+      url = Object.keys(tm.groups).reduce((acc, group) => {
+        const toReplace = tl.encode ? encodeURIComponent(tm.groups[group]) : tm.groups[group];
+        return acc.replace(`{${group}}`, toReplace);
+      }, url);
+    } else {
+      const rep = tl.encode ? encodeURIComponent(tm.match) : tm.match;
+      url = tl.url.replace('{searchTerm}', rep);
+    }
+    shell.openExternalSync(url);
+  }));
+};
+
+export const launchAll = () => (dispatch, getState) => {
+  const state = getState();
+  const _terms = matchedTerms(state);
+  const _tools = tools(state);
+
+  dispatch({
+    type: types.LAUNCH_QUICK_TOOL,
+    payload: {
+      tools: _tools,
+      matchedTerms: _terms
+    },
+  });
+
+  launch(_tools, _terms);
+};
+
 export const launchSelected = () => (dispatch, getState) => {
   const state = getState();
   const sTerms = selectedTerms(state);
@@ -214,18 +248,6 @@ export const launchSelected = () => (dispatch, getState) => {
       matchedTerms: sTerms,
     },
   });
-
-  sTools.map(tl => sTerms.map(tm => {
-    if (tl.terms[tm.term.name]) {
-      const rep = tl.encode ? encodeURIComponent(tm.match) : tm.match;
-      let url = tl.url.replace('{searchTerm}', rep);
-      if (tm.groups) {
-        url = Object.keys(tm.groups).reduce((acc, group) => {
-          const r = tl.encode ? encodeURIComponent(tm.groups[group]) : tm.groups[group];
-          return acc.replace(`{${group}}`, r);
-        }, url);
-      }
-      shell.openExternalSync(url);
-    }
-  }));
+  
+  launch(sTools, sTerms);
 };

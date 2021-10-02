@@ -6,6 +6,7 @@ import {
   selectTool,
   unselectTerm,
   unselectTool,
+  launchAll
 } from '../actions';
 import {
   availableTools,
@@ -16,6 +17,7 @@ import {
   tools,
   termIsSelected,
   toolIsSelected,
+  
 } from '../selectors';
 import { QuickClipSelection } from '../components/QuickClipSelection';
 
@@ -36,6 +38,7 @@ const mapDispatchToProps = {
   selectTool,
   unselectTerm,
   unselectTool,
+  launchAll
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(QuickClipSelection);

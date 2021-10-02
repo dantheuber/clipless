@@ -76,7 +76,7 @@ export const QuickClips = ({
       </Col>
     </Row>,
     <Row key="quick-clip-accordion">
-      <Col style={{ paddingLeft: 0 }}>
+      <Col style={{ paddingLeft: 0, marginBottom: '5rem' }}>
         <Accordion defaultActiveKey="0">
           <Card>
             <Card.Header>
