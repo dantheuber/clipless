@@ -7,7 +7,8 @@ import {
   selectTool,
   unselectTerm,
   unselectTool,
-  launchAll
+  launchAll,
+  launchSingleTool
 } from '../actions';
 import {
   availableTools,
@@ -18,7 +19,7 @@ import {
   tools,
   termIsSelected,
   toolIsSelected,
-  
+  getToolsForTerm
 } from '../selectors';
 import { QuickClipSelection } from '../components/QuickClipSelection';
 
@@ -31,6 +32,7 @@ const mapStateToProps = state => ({
   matchedTerms: matchedTerms(state),
   searchTerms: searchTerms(state),
   tools: tools(state),
+  getToolsForTerm: getToolsForTerm(state),
 });
 const mapDispatchToProps = {
   launchSelected,
@@ -39,7 +41,8 @@ const mapDispatchToProps = {
   selectTool,
   unselectTerm,
   unselectTool,
-  launchAll
+  launchAll,
+  launchSingleTool
 };
 
 const methods = {

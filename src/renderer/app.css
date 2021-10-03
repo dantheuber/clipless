@@ -69,6 +69,15 @@ input, textarea {
   line-height: .7rem;
 }
 
+.qkSelectFooter {
+  padding: .2rem;
+}
+.qkSelectFooter .card-link {
+  margin: .1rem;
+  padding: .1rem;
+  font-size:small;
+}
+
 .qkTool, .qkTerm {
   padding: .2rem;
 }

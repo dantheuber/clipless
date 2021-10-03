@@ -37,3 +37,5 @@ export const toolAssociatedTermsCount = (state) => tool =>
 
 export const tool = (state, name) => tools(state).find({ name });
 export const toolTermAssociations = (state, name) => tool(state, name).terms || {};
+
+export const getToolsForTerm = (state) => term => tools(state).filter(t => t.terms[term.name]);

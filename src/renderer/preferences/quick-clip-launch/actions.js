@@ -228,6 +228,21 @@ export const cancelSelection = () => ({
   type: types.CANCEL_SELECTION,
 });
 
+export const launchSingleTool = (tool, term) => (dispatch) => {
+  // dispatch({
+  //   type: types.LAUNCH_QUICK_TOOL,
+  //   payload: {
+  //     tools: [tool],
+  //     matchedTerms: [term]
+  //   }
+  // });
+
+  const url = Object.keys(term.match.groups)
+    .reduce((acc, group) => acc.replace(`{${group}}`, term.match.groups[group]), tool.url);
+  
+  shell.openExternalSync(url);
+};
+
 export const launch = (tls, tms) => {
   tls.map(tl => tms.map(tm => {
     let url = tl.url;

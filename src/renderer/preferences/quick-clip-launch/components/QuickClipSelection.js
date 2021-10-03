@@ -21,6 +21,8 @@ export const QuickClipSelection = ({
   selectedTools,
   selectedTerms,
   launchAll,
+  getToolsForTerm,
+  launchSingleTool
 }) => {
   let defaultActiveKey = 'terms';
   if (matchedTerms.length === 1) {
@@ -63,6 +65,22 @@ export const QuickClipSelection = ({
                                 )}
                               </ul>
                             </Card.Body>
+                          }
+                          { active &&
+                            <Card.Footer className="qkSelectFooter">
+                              { getToolsForTerm(term.term).map(tool => (
+                              <Card.Link
+                                as={Button}
+                                variant="light"
+                                key={tool.name}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  launchSingleTool(tool, term);
+                                }}
+                              >{tool.name}</Card.Link>
+                            ))}
+                            </Card.Footer>
                           }
                         </Card>
                       </ListGroup.Item>
@@ -123,8 +141,10 @@ QuickClipSelection.propTypes = {
   toolIsSelected: PropTypes.func.isRequired,
   termIsSelected: PropTypes.func.isRequired,
   launchAll: PropTypes.func.isRequired,
+  launchSingleTool: PropTypes.func.isRequired,
   availableTools: PropTypes.arrayOf(PropTypes.object).isRequired,
   selectedTools: PropTypes.arrayOf(PropTypes.object).isRequired,
   selectedTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
   matchedTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
+  getToolsForTerm: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
