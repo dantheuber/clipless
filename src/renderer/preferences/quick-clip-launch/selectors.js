@@ -22,6 +22,16 @@ export const availableTools = state => {
 
 export const termIsSelected = state => term => selectedTerms(state).includes(term);
 export const toolIsSelected = state => tool => selectedTools(state).includes(tool);
+export const toolNameList = state => tools(state).map(tool => tool.name);
+export const searchTermNameList = state => searchTerms(state).map(term => term.name);
+export const searchTermNameExists = (state, name) =>
+  searchTermNameList(state)
+    .map(n => n.toLowerCase())
+    .includes(name.toLowerCase());
+export const toolAssociatedTermsCount = (state) => tool =>
+  Object.keys(tool.terms)
+    .filter(term => tool.terms[term] && searchTermNameExists(state, term))
+    .length;
 
 export const tool = (state, name) => tools(state).find({ name });
 export const toolTermAssociations = (state, name) => tool(state, name).terms || {};

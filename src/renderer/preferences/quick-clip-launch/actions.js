@@ -61,6 +61,14 @@ export const updateTool = payload => (dispatch) => {
   dispatch(saveToDisk());
 };
 
+export const updateToolUrl = (tool, newUrl) => (dispatch) => {
+  dispatch(updateTool({
+    ...tool,
+    url: newUrl,
+  }));
+  dispatch(saveToDisk());
+};
+
 export const deleteTool = payload => (dispatch) => {
   dispatch({
     type: types.DELETE_TOOL,

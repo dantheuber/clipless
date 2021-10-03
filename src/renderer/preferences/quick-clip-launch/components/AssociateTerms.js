@@ -23,7 +23,7 @@ export const AssociateTerms = ({
   return (
     <Form>
       <Form.Text>
-        Use <strong>{tool.name}</strong> with the following search terms:
+        Associated Search Terms:
       </Form.Text>
       { searchTerms.map(term => (
         <Form.Check
@@ -45,5 +45,4 @@ AssociateTerms.propTypes = {
   tool: PropTypes.object.isRequired,
   searchTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
   associateTerm: PropTypes.func.isRequired,
-  done: PropTypes.func.isRequired,
 };

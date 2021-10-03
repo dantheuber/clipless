@@ -28,6 +28,14 @@ input, textarea {
   left: 10px;
   bottom: 10px;
 }
+.qkAssociatedTool {
+  display: inline-block;
+  padding-right: .2rem;
+  margin-bottom: .2rem;
+}
+.qkAssociatedTools {
+  margin-bottom: .2rem;
+}
 .qkSelectCardBody {
   padding: .2rem;
 }

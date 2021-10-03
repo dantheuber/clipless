@@ -87,7 +87,7 @@ export const Tools = ({
                 value={newToolUrl}
                 onChange={({ target: { value }}) => setNewToolUrl(value) }
               />
-              <Form.Control.Feedback type="invalid">Your URL must contain a <code>{'{searchTerm}'}</code> where the matched term will be passed as a query string parameter.</Form.Control.Feedback>
+              <Form.Control.Feedback type="invalid">Your URL must contain a <code>{'{groupName}'}</code> token where the named capture group of the same name will be passed as a query string parameter.</Form.Control.Feedback>
             </InputGroup>
             <Form.Check
               custom

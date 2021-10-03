@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import ListGroup from 'react-bootstrap/ListGroup';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
-import Card from 'react-bootstrap/Card';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
 import * as regexOptions from '../regex_lib';
@@ -11,7 +10,6 @@ import {
   DEFAULT_NEW_TERM_NAME,
   DEFAULT_NEW_TERM_REGEX,
 } from '../constants';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Term } from '../containers/Term';
 import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
@@ -142,6 +140,5 @@ export const Terms = ({
 Terms.propTypes = {
   handleDragAndDrop: PropTypes.func.isRequired,
   searchTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
-  createNewSearchTerm: PropTypes.func.isRequired,
   deleteTerm: PropTypes.func.isRequired,
 };

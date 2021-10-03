@@ -24,7 +24,7 @@ export const Term = ({
         >
           <Card className="qkCard">
             <Card.Header bg="primary">
-              <FontAwesomeIcon icon="wrench" /> {term.name}
+              <FontAwesomeIcon icon="file-code" /> {term.name}
             </Card.Header>
             <Card.Body>
               <footer className="blockquote-footer" contentEditable={isEditing} onChange={({target: {value}}) => setNewRegex(value)}>
