@@ -3,6 +3,7 @@ import { quitApp } from '../actions';
 import { menuVisible } from '../selectors';
 import { emptyAllClips } from '../../clips/actions';
 import { viewPreferences } from '../../preferences/actions';
+import { toggleCompileTemplateSelector } from '../../preferences/compile-templates/actions';
 import { Menu } from '../components/Menu';
 
 const mapStateToProps = state => ({
@@ -10,6 +11,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = {
+  toggleCompileTemplateSelector,
   viewPreferences,
   emptyAllClips,
   quitApp,

@@ -61,7 +61,7 @@ export const handleDragAndDrop = e => (dispatch) => {
   });
   dispatch(saveTemplatesToDisk());
 };
-
+export const toggleCompileTemplateSelector = simpleAction(types.TOGGLE_TEMPLATE_SELECTION);
 export const showCompileTemplateSelector = simpleAction(types.SHOW_TEMPLATE_SELECTION);
 export const selectTemplate = template => (dispatch, getState) => {
   const state = getState();
@@ -82,6 +82,8 @@ export const exportTemplates = () => (dispatch, getState) => {
   const templates = compileTemplatesSelector(state);
   exportFile(JSON.stringify(templates), 'compile-templates.json');
 };
+
+export const cancelSelection = simpleAction(types.HIDE_TEMPLATE_SELECTION);
 
 const ensureTemplateKeys = template => ['content', 'id', 'name'].every(x => x in template);
 

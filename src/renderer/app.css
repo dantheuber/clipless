@@ -28,7 +28,9 @@ input, textarea {
   left: 10px;
   bottom: 10px;
 }
-
+.qkSelectCardBody {
+  padding: .2rem;
+}
 .qkSelectTitle {
   font-weight: 700;
   font-size: .75rem;
@@ -68,7 +70,7 @@ input, textarea {
 }
 
 .main {
-  padding-top: 40px;
+  padding-top: 37px;
   padding-right: -17px;
   width: 100%;
   height: 100%;
@@ -110,27 +112,27 @@ input, textarea {
 }
 
 .navbar-toggler {
-  width: 34px;
+  width: 31px;
   padding: 0;
   border: 0;
   -webkit-app-region: no-drag;
 }
 
 .navbar-toggler-icon {
-  height: 34px;
-  width: 34px;
+  height: 31px;
+  width: 31px;
 }
 
 .header.navbar {
-  min-height: 34px !important;
+  min-height: 31px !important;
   padding: 3px !important;
 }
 
 .header .navbar-brand {
-  height: 34px !important;
+  height: 31px !important;
   padding-top: 0 !important;
   padding-left: 3px;
-  line-height: 34px !important;
+  line-height: 31px !important;
 }
 
 .clip-number, .clip-number .btn {

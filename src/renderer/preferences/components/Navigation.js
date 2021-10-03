@@ -30,7 +30,7 @@ export const Navigation = ({
           viewTemplates();
         }}
       >
-        Compilation Templates
+        Templates
       </Nav.Link>
     </Nav.Item>
     <Nav.Item>

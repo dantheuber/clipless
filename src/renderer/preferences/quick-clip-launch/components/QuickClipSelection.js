@@ -27,7 +27,7 @@ export const QuickClipSelection = ({
     defaultActiveKey = 'tools';
   }
   return (
-    <Row>
+    <Row className="main">
       <Col style={{paddingBottom: '3rem'}}>
         <Accordion defaultActiveKey={defaultActiveKey}>
           <Card>
@@ -37,7 +37,7 @@ export const QuickClipSelection = ({
               </Accordion.Toggle>
             </Card.Header>
             <Accordion.Collapse eventKey="terms">
-              <Card.Body style={{padding:'.2rem'}}>
+              <Card.Body className="qkSelectCardBody">
                 <ListGroup variant="flush">
                   { matchedTerms.map((term, i) => {
                     const mGroups = Object.keys(term.match.groups);
@@ -79,7 +79,7 @@ export const QuickClipSelection = ({
               </Accordion.Toggle>
             </Card.Header>
             <Accordion.Collapse eventKey="tools">
-              <Card.Body style={{padding: '.2rem'}}>
+              <Card.Body className="qkSelectCardBody">
                 <ListGroup variant="flush">
                   { availableTools.map((tool, i) => {
                     const active = selectedTools.reduce((acc, t) => t.name === tool.name ? true : acc, false);

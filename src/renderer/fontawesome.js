@@ -15,6 +15,7 @@ import {
   faAngleUp,
   faAngleDown,
   faDownload,
+  faPaperclip,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -33,4 +34,5 @@ library.add(
   faAngleUp,
   faAngleDown,
   faDownload,
+  faPaperclip,
 );

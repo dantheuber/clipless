@@ -1,6 +1,6 @@
 export const DEFAULT_CONFIG_FILENAME = 'clipless-config';
-export const MIN_WIDTH = 350;
-export const MIN_HEIGHT = 350;
+export const MIN_WIDTH = 400;
+export const MIN_HEIGHT = 347;
 export const ALWAYS_ON_TOP_SETTING = 'alwaysOnTop';
 export const TRANSPARENT_SETTING = 'transparent';
 export const OPACITY_SETTING = 'opacity';

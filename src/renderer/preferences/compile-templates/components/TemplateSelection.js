@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Card from 'react-bootstrap/Card';
 
 export const TemplateSelection = ({
   compileTemplates,
   selectTemplate,
 }) => (
-  <ListGroup className="dark">
+  <ListGroup className="main" variant="flush">
     <ListGroup.Item variant="primary">
-      <h3>Select Template</h3>
+      Select Template
     </ListGroup.Item>
     { compileTemplates.map((template, index) => (
       <ListGroup.Item
@@ -17,7 +18,9 @@ export const TemplateSelection = ({
         key={template.id}
         onClick={() => selectTemplate(template)}
       >
-        { template.name }
+        <Card style={{margin:0, padding:0, border:0}} text>
+          { template.name }
+        </Card>
       </ListGroup.Item>
     ))}
   </ListGroup>

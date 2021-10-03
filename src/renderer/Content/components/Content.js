@@ -13,13 +13,11 @@ export const Content = ({
   showTemplateSelection
 }) => (
   <Container fluid className="wrapper">
-    { selectingQuickClips && <QuickClipSelection /> }
-    { showTemplateSelection && !selectingQuickClips && <TemplateSelection /> }
-    { !showTemplateSelection && !selectingQuickClips && [
-      <Header key="header" />,
-      viewingPreferences && <Preferences key="preferences" />,
-      !viewingPreferences && <Clips key="clips" />,
-    ]}
+    <Header key="header" />
+    { viewingPreferences && <Preferences /> }
+    { !viewingPreferences && selectingQuickClips && <QuickClipSelection /> }
+    { !viewingPreferences && showTemplateSelection && !selectingQuickClips && <TemplateSelection /> }
+    { !viewingPreferences && !showTemplateSelection && !selectingQuickClips && <Clips /> }
   </Container>
 );
 Content.propTypes = {
