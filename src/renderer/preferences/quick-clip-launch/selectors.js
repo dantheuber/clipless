@@ -27,7 +27,9 @@ export const searchTermNameList = state => searchTerms(state).map(term => term.n
 export const searchTermNameExists = (state, name) =>
   searchTermNameList(state)
     .map(n => n.toLowerCase())
+    .reduce((acc, n) => acc.includes(n) ? acc : [...acc, n], [])
     .includes(name.toLowerCase());
+
 export const toolAssociatedTermsCount = (state) => tool =>
   Object.keys(tool.terms)
     .filter(term => tool.terms[term] && searchTermNameExists(state, term))

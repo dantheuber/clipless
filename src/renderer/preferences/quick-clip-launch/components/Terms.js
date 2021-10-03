@@ -138,7 +138,7 @@ export const Terms = ({
 };
 
 Terms.propTypes = {
+  createNewSearchTerm: PropTypes.func.isRequired,
   handleDragAndDrop: PropTypes.func.isRequired,
   searchTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
-  deleteTerm: PropTypes.func.isRequired,
 };

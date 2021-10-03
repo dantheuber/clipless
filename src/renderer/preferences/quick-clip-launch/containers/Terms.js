@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { searchTerms } from '../selectors';
 import {
   handleDragAndDrop,
-  deleteTerm,
+  createNewSearchTerm,
 } from '../actions';
 import { Terms } from '../components/Terms';
 
@@ -12,7 +12,7 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = {
   handleDragAndDrop,
-  deleteTerm,
+  createNewSearchTerm,
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(Terms);

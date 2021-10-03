@@ -54,6 +54,13 @@ export const tools = (state = [], { type, payload }) => {
         { ...payload },
         ...state,
       ];
+    case types.DELETE_SEARCH_TERM: {
+      return state.map((tool) => {
+        let { terms } = tool;
+        delete terms[payload.name];
+        return { ...tool, terms };
+      });
+    }
     case types.HANDLE_DRAG_AND_DROP: {
       const { source, destination } = payload;
       if (source.droppableId !== 'tools') return state;
