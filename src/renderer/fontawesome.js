@@ -16,6 +16,8 @@ import {
   faAngleDown,
   faDownload,
   faPaperclip,
+  faWrench,
+  faFileCode,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -35,4 +37,6 @@ library.add(
   faAngleDown,
   faDownload,
   faPaperclip,
+  faWrench,
+  faFileCode,
 );

@@ -61,6 +61,22 @@ input, textarea {
   line-height: .7rem;
 }
 
+.qkTool, .qkTerm {
+  padding: .2rem;
+}
+.qkCard {
+  margin: 0;
+  padding: 0;
+}
+.qkCard .card-body {
+  padding: .3rem;
+}
+.qkCard .card-title {
+  font-weight: 400;
+  font-style: oblique;
+  margin-bottom: 0;
+}
+
 .wrapper {
   width: 100%;
   height: 100%;

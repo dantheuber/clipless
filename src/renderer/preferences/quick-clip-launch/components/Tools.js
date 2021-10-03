@@ -123,11 +123,11 @@ export const Tools = ({
       </ListGroup.Item>
     }
     { !createTool && tools.map((tool, i) => (
-      <ListGroup.Item style={{ padding: '.2rem' }} key={tool.name}>
-        <Card style={{ margin: '0', padding: '0'}}>
+      <ListGroup.Item className="qkTool" key={tool.name}>
+        <Card className="qkCard">
           <Card.Body>
             <Card.Title>
-              {tool.name}
+              <FontAwesomeIcon icon="wrench" /> {tool.name}
             </Card.Title>
             <footer className="blockquote-footer">{tool.url}</footer>
             <Form.Check

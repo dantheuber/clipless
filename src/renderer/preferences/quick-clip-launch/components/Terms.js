@@ -125,10 +125,12 @@ export const Terms = ({
         </ListGroup.Item>
       }
       { !createTerm && searchTerms.map(term => (
-        <ListGroup.Item style={{ padding: '.2rem' }} key={term.name}>
-          <Card style={{ margin: '0', padding: '0'}}>
+        <ListGroup.Item className="qkTerm" key={term.name}>
+          <Card className="qkCard">
             <Card.Body>
-              <Card.Title>{term.name}</Card.Title>
+              <Card.Title>
+                <FontAwesomeIcon icon="file-code" /> {term.name}
+              </Card.Title>
               <footer className="blockquote-footer">{term.regex}</footer>
               <Card.Link href="#" style={{ color: 'red' }} onClick={() => deleteTerm(term)}>
                 Delete <FontAwesomeIcon icon="trash" />
