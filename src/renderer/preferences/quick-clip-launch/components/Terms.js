@@ -12,11 +12,13 @@ import {
   DEFAULT_NEW_TERM_REGEX,
 } from '../constants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Term } from '../containers/Term';
+import { DragDropContext, Droppable } from 'react-beautiful-dnd';
 
 export const Terms = ({
   createNewSearchTerm,
   searchTerms,
-  deleteTerm,
+  handleDragAndDrop
 }) => {
   const [createTerm, setCreateTerm] = useState(false);
   const [newTermName, setNewTermName] = useState('');
@@ -124,26 +126,21 @@ export const Terms = ({
           </Button>
         </ListGroup.Item>
       }
-      { !createTerm && searchTerms.map(term => (
-        <ListGroup.Item className="qkTerm" key={term.name}>
-          <Card className="qkCard">
-            <Card.Body>
-              <Card.Title>
-                <FontAwesomeIcon icon="file-code" /> {term.name}
-              </Card.Title>
-              <footer className="blockquote-footer">{term.regex}</footer>
-              <Card.Link href="#" style={{ color: 'red' }} onClick={() => deleteTerm(term)}>
-                Delete <FontAwesomeIcon icon="trash" />
-              </Card.Link>
-            </Card.Body>
-          </Card>
-        </ListGroup.Item>
-      ))}
+      <DragDropContext onDragEnd={handleDragAndDrop}>
+        <Droppable droppableId="terms">
+          {provided => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              { searchTerms.map((term, i) => <Term term={term} index={i} key={term.name.replace(' ', '')} />) }
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </ListGroup>
   );
 };
 
 Terms.propTypes = {
+  handleDragAndDrop: PropTypes.func.isRequired,
   searchTerms: PropTypes.arrayOf(PropTypes.object).isRequired,
   createNewSearchTerm: PropTypes.func.isRequired,
   deleteTerm: PropTypes.func.isRequired,

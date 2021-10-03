@@ -1,6 +1,9 @@
 import { connect } from 'react-redux';
 import { searchTerms } from '../selectors';
-import { deleteTerm, createNewSearchTerm } from '../actions';
+import {
+  handleDragAndDrop,
+  deleteTerm,
+} from '../actions';
 import { Terms } from '../components/Terms';
 
 const mapStateToProps = state => ({
@@ -8,7 +11,7 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = {
-  createNewSearchTerm,
+  handleDragAndDrop,
   deleteTerm,
 };
 
