@@ -11,16 +11,22 @@ import {
   tools
 } from './selectors';
 import exportFile from '../../utils/export-file';
+import { SAVE_TO_DISK_DELAY } from '../compile-templates/constants';
 
-
-const saveToDisk = () => (dispatch, getState) => {
-  const state = getState();
-  const quickClips = {
-    tools: tools(state),
-    searchTerms: searchTerms(state),
-    autoScan: autoScan(state),
-  };
-  ipcRenderer.send('set-quickClip-settings', quickClips);
+let savingTimeout;
+export const saveToDisk = () => (dispatch, getState) => {
+  clearTimeout(savingTimeout);
+  savingTimeout = setTimeout(() => {
+    const state = getState();
+    const quickClips = {
+      tools: tools(state),
+      searchTerms: searchTerms(state),
+      autoScan: autoScan(state),
+    };
+    ipcRenderer.send('set-quickClip-settings', quickClips);
+    savingTimeout = null;
+    dispatch({ type: types.SAVED_TO_DISK });
+  }, SAVE_TO_DISK_DELAY);
 }
 
 export const createNewTool = (payload) => (dispatch) => {
@@ -28,7 +34,7 @@ export const createNewTool = (payload) => (dispatch) => {
     type: types.CREATE_NEW_TOOL,
     payload: { ...payload, terms: {} },
   });
-  setTimeout(() => dispatch(saveToDisk()), 500);
+  dispatch(saveToDisk());
 };
 
 export const createNewSearchTerm = payload => (dispatch) => {
@@ -36,7 +42,7 @@ export const createNewSearchTerm = payload => (dispatch) => {
     type: types.CREATE_NEW_SEARCH_TERM,
     payload,
   });
-  setTimeout(() => dispatch(saveToDisk()), 500);
+  dispatch(saveToDisk());
 };
 
 export const deleteTerm = payload => (dispatch) => {
@@ -44,7 +50,7 @@ export const deleteTerm = payload => (dispatch) => {
     type: types.DELETE_SEARCH_TERM,
     payload,
   });
-  setTimeout(() => dispatch(saveToDisk()), 500);
+  dispatch(saveToDisk());
 };
 
 export const updateTool = payload => (dispatch) => {
@@ -52,7 +58,7 @@ export const updateTool = payload => (dispatch) => {
     type: types.UPDATE_TOOL,
     payload,
   });
-  setTimeout(() => dispatch(saveToDisk()), 500);
+  dispatch(saveToDisk());
 };
 
 export const deleteTool = payload => (dispatch) => {
@@ -60,12 +66,22 @@ export const deleteTool = payload => (dispatch) => {
     type: types.DELETE_TOOL,
     payload,
   });
-  setTimeout(() => dispatch(saveToDisk()), 500);
+  dispatch(saveToDisk());
+};
+
+export const handleDragAndDrop = ({ source, destination }) => (dispatch) => {
+  dispatch({
+    type: types.HANDLE_DRAG_AND_DROP,
+    payload: {
+      source,
+      destination,
+    },
+  });
 };
 
 export const toggleAutoScan = () => (dispatch) => {
   dispatch({ type: types.TOGGLE_AUTO_SCAN });
-  setTimeout(() => dispatch(saveToDisk()), 500);
+  dispatch(saveToDisk());
 };
 
 export const toggleToolEncode = (tool) => (dispatch) => dispatch(
@@ -126,7 +142,7 @@ export const importQuickClips = file => (dispatch, getState) => {
           searchTerms: uniqueTerms,
         }
       });
-      setTimeout(() => dispatch(saveToDisk()), 500);
+      dispatch(saveToDisk());
     } catch (e) {
       alert('Could not parse this file, was it exported by Clipless?');
     }

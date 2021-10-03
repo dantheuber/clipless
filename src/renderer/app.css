@@ -71,10 +71,11 @@ input, textarea {
 .qkCard .card-body {
   padding: .3rem;
 }
-.qkCard .card-title {
+.qkCard .card-header {
+  margin: .2rem;
+  padding: 0;
   font-weight: 400;
   font-style: oblique;
-  margin-bottom: 0;
 }
 
 .wrapper {

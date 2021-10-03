@@ -1,6 +1,11 @@
 import { connect } from 'react-redux';
 import { tools } from '../selectors';
-import { toggleToolEncode, createNewTool, deleteTool } from '../actions';
+import {
+  handleDragAndDrop,
+  toggleToolEncode,
+  createNewTool,
+  deleteTool
+} from '../actions';
 import { Tools } from '../components/Tools';
 
 const mapStateToProps = state => ({
@@ -11,6 +16,7 @@ const mapDispatchToProps = {
   createNewTool,
   deleteTool,
   toggleToolEncode,
+  handleDragAndDrop,
 };
 
 const container = connect(mapStateToProps, mapDispatchToProps)(Tools);

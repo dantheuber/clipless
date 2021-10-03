@@ -21,6 +21,15 @@ export const searchTerms = (state = [], action) => {
         { ...payload },
         ...state,
       ];
+      case types.HANDLE_DRAG_AND_DROP: {
+        const { source, destination } = payload;
+        if (source.droppableId !== 'terms') return state;
+        const newState = [...state];
+        const termBeingMoved = state[source.index];
+        newState.splice(source.index, 1);
+        newState.splice(destination.index, 0, termBeingMoved);
+        return newState;
+      }
     case types.IMPORT_QUICK_CLIPS:
       return payload.searchTerms;
     default:
@@ -28,8 +37,7 @@ export const searchTerms = (state = [], action) => {
   }
 };
 
-export const tools = (state = [], action) => {
-  const { type, payload } = action;
+export const tools = (state = [], { type, payload }) => {
   switch (type) {
     case types.UPDATE_TOOL: {
       return state.map(tool => {
@@ -46,6 +54,15 @@ export const tools = (state = [], action) => {
         { ...payload },
         ...state,
       ];
+    case types.HANDLE_DRAG_AND_DROP: {
+      const { source, destination } = payload;
+      if (source.droppableId !== 'tools') return state;
+      const newState = [...state];
+      const toolBeingMoved = state[source.index];
+      newState.splice(source.index, 1);
+      newState.splice(destination.index, 0, toolBeingMoved);
+      return newState;
+    }
     case types.IMPORT_QUICK_CLIPS:
       return payload.tools;
     default:

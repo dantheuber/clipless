@@ -1,16 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
 export const AssociateTerms = ({
   tool,
   searchTerms,
   associateTerm,
-  done,
 }) => {
   const isAssociatedWithTool = ({ name }) => tool.terms && tool.terms[name];
   const onTermClick = ({ name }) => {
@@ -27,7 +22,6 @@ export const AssociateTerms = ({
   };
   return (
     <Form>
-      <Button inline size="sm" onClick={done}>Back</Button>
       <Form.Text>
         Use <strong>{tool.name}</strong> with the following search terms:
       </Form.Text>

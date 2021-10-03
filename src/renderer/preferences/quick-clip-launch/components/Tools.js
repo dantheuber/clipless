@@ -5,18 +5,18 @@ import ListGroup from 'react-bootstrap/ListGroup';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   DEFAULT_NEW_TOOL_NAME,
   DEFAULT_NEW_TOOL_URL,
 } from '../constants';
 import { AssociateTerms } from '../containers/AssociateTerms';
-import Card from 'react-bootstrap/Card';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Tool } from '../containers/Tool';
 
 export const Tools = ({
-  toggleToolEncode,
+  handleDragAndDrop,
   createNewTool,
-  deleteTool,
   tools,
 }) => {
   const [associatingTerms, setAssociatingTerms] = useState(false);
@@ -122,42 +122,21 @@ export const Tools = ({
         </Form>
       </ListGroup.Item>
     }
-    { !createTool && tools.map((tool, i) => (
-      <ListGroup.Item className="qkTool" key={tool.name}>
-        <Card className="qkCard">
-          <Card.Body>
-            <Card.Title>
-              <FontAwesomeIcon icon="wrench" /> {tool.name}
-            </Card.Title>
-            <footer className="blockquote-footer">{tool.url}</footer>
-            <Form.Check
-              custom
-              type="switch"
-              id={`toggle-${tool.name.replace(' ', '')}-encode`}
-              checked={tool.encode}
-              onChange={() => toggleToolEncode(tool)}
-              label="Encode Term as URI component"
-            />
-            <Card.Link href="#" onClick={() => {
-              setAssociateToolIndex(i);
-              setAssociatingTerms(true);
-            }}>
-              Link Search Terms
-            </Card.Link>
-            <Card.Link style={{ color: 'red' }} href="#" onClick={() => deleteTool(tool)}>
-              Delete <FontAwesomeIcon icon="trash" />
-            </Card.Link>
-          </Card.Body>
-        </Card>
-      </ListGroup.Item>
-    ))}
+    <DragDropContext onDragEnd={handleDragAndDrop}>
+      <Droppable droppableId="tools">
+        {provided => (
+          <div ref={provided.innerRef} {...provided.droppableProps}>
+            { tools.map((tool, i) => <Tool key={tool.name.replace(' ', '')} index={i} tool={tool} />) }
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
     </ListGroup>
   );
 };
 
 Tools.propTypes = {
   createNewTool: PropTypes.func.isRequired,
-  deleteTool: PropTypes.func.isRequired,
-  toggleToolEncode: PropTypes.func.isRequired,
+  handleDragAndDrop: PropTypes.func.isRequired,
   tools: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
