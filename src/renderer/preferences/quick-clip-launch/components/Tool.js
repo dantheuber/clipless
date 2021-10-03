@@ -57,7 +57,7 @@ export const Tool = ({
                     <ButtonGroup size="sm">
                       <Button
                         size="xs"
-                        disabled={!newUrlIsValid()}
+                        disabled={newUrlIsInvalid()}
                         variant="primary"
                         onClick={() => {
                           updateToolUrl(tool, newUrl);
