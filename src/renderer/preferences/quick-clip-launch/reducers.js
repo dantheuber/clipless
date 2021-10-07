@@ -30,6 +30,14 @@ export const searchTerms = (state = [], action) => {
         newState.splice(destination.index, 0, termBeingMoved);
         return newState;
       }
+    case types.UPDATE_TERM_REGEX:
+      const { term: termToUpdate, regex } = payload;
+      return state.map(term => {
+        if (term.name === termToUpdate.name) {
+          return { ...term, regex };
+        }
+        return term;
+      });
     case types.IMPORT_QUICK_CLIPS:
       return payload.searchTerms;
     default:

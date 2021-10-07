@@ -68,7 +68,9 @@ input, textarea {
 .qkSelectCaptureGroups ul li {
   line-height: .7rem;
 }
-
+.regex-option {
+  padding-left: .3rem;
+}
 .qkSelectFooter {
   padding: .2rem;
 }

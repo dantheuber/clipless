@@ -13,6 +13,7 @@ export const Term = ({
   term,
   index,
   deleteTerm,
+  updateTermRegex,
 }) => {
   const [isEditing, setEditing] = useState(false);
   const [newRegex, setNewRegex] = useState(term.regex);
@@ -107,4 +108,5 @@ Term.propTypes = {
   term: PropTypes.object.isRequired,
   index: PropTypes.number.isRequired,
   deleteTerm: PropTypes.func.isRequired,
+  updateTermRegex: PropTypes.func.isRequired,
 };

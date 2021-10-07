@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
-import { deleteTerm } from '../actions';
+import { deleteTerm, updateTermRegex } from '../actions';
 import { Term } from '../components/Term';
 
 const mapDispatchToProps = {
+  updateTermRegex,
   deleteTerm,
 };
 

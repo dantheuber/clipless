@@ -23,6 +23,7 @@ export const LAUNCH_SELECTED = ca('LAUNCH_SELECTED');
 export const CANCEL_SELECTION = ca('CANCEL_SELECTION');
 export const START_SELECTION = ca('START_SELECTION');
 
+export const UPDATE_TERM_REGEX = ca('UPDATE_TERM_REGEX');
 export const HANDLE_DRAG_AND_DROP = ca('HANDLE_DRAG_AND_DROP');
 export const SAVED_TO_DISK = ca('SAVED_TO_DISK');
 

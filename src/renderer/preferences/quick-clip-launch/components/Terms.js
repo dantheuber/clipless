@@ -5,7 +5,7 @@ import InputGroup from 'react-bootstrap/InputGroup';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Dropdown from 'react-bootstrap/Dropdown';
-import * as regexOptions from '../regex_lib';
+import { list as regexOptions } from '../regex_lib';
 import {
   DEFAULT_NEW_TERM_NAME,
   DEFAULT_NEW_TERM_REGEX,
@@ -82,9 +82,10 @@ export const Terms = ({
                     Select from library
                   </Dropdown.Toggle>
                   <Dropdown.Menu>
-                    { Object.keys(regexOptions).map(key => (
-                      <Dropdown.Item key={key} onClick={() => setNewTermRegex(regexOptions[key])}>
-                        {key}
+                    { regexOptions.map((option) => (
+                      <Dropdown.Item className="regex-option" key={option.label} onClick={() => setNewTermRegex(option.regex)}>
+                        {option.label}
+                        <footer className="blockquote-footer">Example: {option.example}</footer>
                       </Dropdown.Item>
                     ))}
                   </Dropdown.Menu>

@@ -19,11 +19,9 @@ export const Tool = ({
   updateToolUrl,
   toolAssociatedTermsCount
 }) => {
-  const [associatingTerms, setAssociatingTerms] = useState(false);
   const [isEditing, setEditing] = useState(false);
   const [newUrl, setNewUrl] = useState(tool.url);
-  const toggleAssociatingTerms = () => setAssociatingTerms(!associatingTerms)
-  const tokenRegex = /\{[a-zA-Z0-9]+\}/g;
+  const tokenRegex = /\{[a-zA-Z0-9|]+\}/g;
   const newUrlIsInvalid = () => !tokenRegex.exec(newUrl);
   const newUrlIsValid = () => newUrl !== '' && tokenRegex.exec(newUrl);
 

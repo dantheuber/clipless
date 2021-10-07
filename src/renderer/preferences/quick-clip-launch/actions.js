@@ -28,7 +28,15 @@ export const saveToDisk = () => (dispatch, getState) => {
     dispatch({ type: types.SAVED_TO_DISK });
   }, SAVE_TO_DISK_DELAY);
 }
-
+export const updateTermRegex = (term, regex) => (dispatch) => {
+  dispatch({
+    type: types.UPDATE_TERM_REGEX,
+    payload: {
+      term,
+      regex,
+    },
+  })
+}
 export const createNewTool = (payload) => (dispatch) => {
   dispatch({
     type: types.CREATE_NEW_TOOL,
@@ -243,17 +251,24 @@ export const launchSingleTool = (tool, term) => (dispatch) => {
   shell.openExternalSync(url);
 };
 
-export const launch = (tls, tms) => {
-  tls.map(tl => tms.map(tm => {
-    let url = tl.url;
-    if (tm.groups) {
-      url = Object.keys(tm.groups).reduce((acc, group) => {
-        const toReplace = tl.encode ? encodeURIComponent(tm.groups[group]) : tm.groups[group];
-        return acc.replace(`{${group}}`, toReplace);
+const tokenRegex = /\{([\w|]+)\}/;
+export const launch = (_tools, _terms) => {
+  _tools.map(_tool => _terms.map(_term => {
+    let url = _tool.url;
+    if (_term.groups) {
+      url = Object.keys(_term.groups).reduce((acc, group) => {
+        const toReplace = _tool.encode ? encodeURIComponent(_term.groups[group]) : _term.groups[group];
+        const tokens = url.match(tokenRegex);
+        const foundTokens = tokens[1].split('|');
+        if (foundTokens.includes(group)) {
+          return acc.replace(tokens[0], toReplace);
+        }
+        return acc;
+        // return acc.replace(`{${group}}`, toReplace);
       }, url);
     } else {
-      const rep = tl.encode ? encodeURIComponent(tm.match) : tm.match;
-      url = tl.url.replace('{searchTerm}', rep);
+      const rep = _tool.encode ? encodeURIComponent(_term.match) : _term.match;
+      url = _tool.url.replace('{searchTerm}', rep);
     }
     shell.openExternalSync(url);
   }));
