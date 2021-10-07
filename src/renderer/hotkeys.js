@@ -1,6 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { clipSelected } from './clips/actions';
-import { showCompileTemplateSelector } from './preferences/compile-templates/actions';
+import { toggleCompileTemplateSelector } from './preferences/compile-templates/actions';
 
 export default function hotkeys(store) {
   ipcRenderer.on('get-clip', (event, { index }) => {
@@ -8,6 +8,6 @@ export default function hotkeys(store) {
   });
 
   ipcRenderer.on('compile-templates-pressed', () => {
-    store.dispatch(showCompileTemplateSelector());
+    store.dispatch(toggleCompileTemplateSelector());
   });
 }

@@ -16,7 +16,10 @@ export const NumberOfClips = ({
   };
   return (
     <Row>
-      <Form>
+      <Form onSubmit={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}>
         <Form.Label htmlFor="numberOfClips">
           Number of Clips
         </Form.Label>

@@ -5,21 +5,23 @@ import { Clips } from '../../clips';
 import { Header } from '../../header';
 import { Preferences } from '../../preferences';
 import { TemplateSelection } from '../../preferences/compile-templates/containers/TemplateSelection';
+import { QuickClipSelection } from '../../preferences/quick-clip-launch/containers/QuickClipSelection';
 
 export const Content = ({
+  selectingQuickClips,
   viewingPreferences,
   showTemplateSelection
 }) => (
   <Container fluid className="wrapper">
-    { showTemplateSelection && <TemplateSelection /> }
-    { !showTemplateSelection && [
-      <Header key="header" />,
-      viewingPreferences && <Preferences key="preferences" />,
-      !viewingPreferences && <Clips key="clips" />,
-    ]}
+    <Header key="header" />
+    { viewingPreferences && <Preferences /> }
+    { !viewingPreferences && selectingQuickClips && <QuickClipSelection /> }
+    { !viewingPreferences && showTemplateSelection && !selectingQuickClips && <TemplateSelection /> }
+    { !viewingPreferences && !showTemplateSelection && !selectingQuickClips && <Clips /> }
   </Container>
 );
 Content.propTypes = {
+  selectingQuickClips: PropTypes.bool.isRequired,
   viewingPreferences: PropTypes.bool.isRequired,
   showTemplateSelection: PropTypes.bool.isRequired,
 };

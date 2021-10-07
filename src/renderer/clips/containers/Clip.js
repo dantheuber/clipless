@@ -1,6 +1,11 @@
 import { connect } from 'react-redux';
 import { clip, clipIsLocked, showCopiedTooltip } from '../selectors';
-import { toggleLock, clipModified, clipSelected } from '../actions';
+import {
+  toggleLock,
+  clipModified,
+  clipSelected,
+  scanClipForTerms,
+} from '../actions';
 import { Clip } from '../components/Clip';
 
 const mapStateToProps = (state, ownProps) => ({
@@ -10,6 +15,7 @@ const mapStateToProps = (state, ownProps) => ({
 });
 
 const mapDispatchToProps = {
+  scanClipForTerms,
   toggleLock,
   clipModified,
   clipSelected,

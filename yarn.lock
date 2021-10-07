@@ -6654,6 +6654,11 @@ regexp-tree@^0.1.6:
   resolved "https://registry.yarnpkg.com/regexp-tree/-/regexp-tree-0.1.11.tgz#c9c7f00fcf722e0a56c7390983a7a63dd6c272f3"
   integrity sha512-7/l/DgapVVDzZobwMCCgMlqiqyLFJ0cduo/j+3BcDJIB+yJdsYCfKuI3l/04NV+H/rfNRdPIDbXNZHM9XvQatg==
 
+regexps@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/regexps/-/regexps-0.1.0.tgz#b487d59e8c481370cb00d7a90cf309ba930e02e1"
+  integrity sha1-tIfVnoxIE3DLANepDPMJupMOAuE=
+
 regexpu-core@^4.5.4:
   version "4.5.4"
   resolved "https://registry.yarnpkg.com/regexpu-core/-/regexpu-core-4.5.4.tgz#080d9d02289aa87fe1667a4f5136bc98a6aebaae"

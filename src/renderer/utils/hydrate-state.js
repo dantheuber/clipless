@@ -14,8 +14,8 @@ export default function hydrateState(storedState = DEFAULT_APP_STATE) {
     emptyLockedClips,
     numberOfClips,
     compileTemplates,
+    quickClips
   } = ipcRenderer.sendSync('hydrate-state');
-
   state[CLIPS_NAME].clips = clips;
   state[PREFERENCES_NAME] = {
     alwaysOnTop,
@@ -24,6 +24,7 @@ export default function hydrateState(storedState = DEFAULT_APP_STATE) {
     emptyLockedClips,
     numberOfClips,
     compileTemplates,
+    quickClips,
   };
 
   return state;

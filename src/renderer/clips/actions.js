@@ -5,14 +5,18 @@ import {
   lockedClips,
   clipKeyPressed as selectClipKeyPressed,
   clipIsLocked,
-  clipSettingsVisible,
 } from './selectors';
 import { emptyLockedClips, numberOfClips } from '../preferences/selectors';
 import { TOOLTIP_DELAY } from './constants';
 import simpleAction from '../utils/simple-action';
+import { scanForTerms } from '../preferences/quick-clip-launch/actions';
+import { autoScan } from '../preferences/quick-clip-launch/selectors';
 
 export const clipboardUpdated = text => (dispatch, getState) => {
   const state = getState();
+  if (autoScan(state)) {
+    dispatch(scanForTerms(text));
+  }
   dispatch({
     type: types.CLIPBOARD_UPDATED,
     payload: text,
@@ -22,6 +26,12 @@ export const clipboardUpdated = text => (dispatch, getState) => {
       numberOfClips: numberOfClips(state),
     },
   });
+};
+
+export const scanClipForTerms = (index) => (dispatch, getState) => {
+  const state = getState();
+  const text = clip(state, index);
+  dispatch(scanForTerms(text));
 };
 
 export const clipModified = (e, index) => ({
@@ -61,16 +71,6 @@ export const emptyAllClips = () => (dispatch, getState) => {
   });
 };
 
-export const hideClipSettings = (index) => (dispatch, getState) => {
-  if (clipSettingsVisible(getState(), index)) {
-    dispatch({
-      type: types.HIDE_CLIP_SETTINGS,
-      payload: index,
-    });
-  }
-};
-
-export const toggleClipSettings = simpleAction(types.TOGGLE_CLIP_SETTINGS);
 export const toggleLock = simpleAction(types.TOGGLE_LOCK);
 export const viewMultiLineEditor = simpleAction(types.VIEW_CLIP_EDITOR);
 export const selectEditorLanguage = simpleAction(types.SELECT_EDITOR_LANG);

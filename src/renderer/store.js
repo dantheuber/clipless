@@ -15,7 +15,6 @@ import {
 } from './constants';
 
 const storedState = JSON.parse(localStorage.getItem(LOCAL_STORAGE_STATE_KEY)) || DEFAULT_APP_STATE;
-
 const middleware = [
   reduxThunk,
 ];

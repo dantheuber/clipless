@@ -40,8 +40,11 @@ export const compileTemplates = (state = [NEW_TEMPLATE_BASE], action) => {
 
 export const showTemplateSelection = (state = false, action) => {
   switch (action.type) {
+    case types.TOGGLE_TEMPLATE_SELECTION:
+      return !state;
     case types.SHOW_TEMPLATE_SELECTION:
       return true;
+    case types.HIDE_TEMPLATE_SELECTION:
     case types.SELECT_TEMPLATE:
       return false;
     default:

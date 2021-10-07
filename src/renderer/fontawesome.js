@@ -12,7 +12,13 @@ import {
   faSignOutAlt,
   faClipboardList,
   faFileImport,
+  faAngleUp,
+  faAngleDown,
+  faCheckSquare,
   faDownload,
+  faPaperclip,
+  faWrench,
+  faFileCode,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -25,8 +31,14 @@ library.add(
   faUserCog,
   faLockOpen,
   faClipboard,
+  faCheckSquare,
   faSignOutAlt,
   faClipboardList,
   faFileImport,
+  faAngleUp,
+  faAngleDown,
   faDownload,
+  faPaperclip,
+  faWrench,
+  faFileCode,
 );

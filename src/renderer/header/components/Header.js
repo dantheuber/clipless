@@ -4,7 +4,9 @@ import Navbar from 'react-bootstrap/Navbar';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Menu } from '../containers/Menu';
 
-export const Header = ({ toggleMenu }) => {
+export const Header = ({
+  toggleMenu,
+}) => {
   const toggleRef = useRef(null);
   return (
     <Navbar

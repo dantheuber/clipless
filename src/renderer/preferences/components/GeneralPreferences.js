@@ -6,7 +6,7 @@ import { EmptyLockedClips } from '../containers/EmptyLockedClips';
 import { Transparent } from '../containers/Transparent';
 
 export const GeneralPreferences = () => (
-  <Container className="main">
+  <Container>
     <NumberOfClips />
     <AlwaysOnTop />
     <EmptyLockedClips />

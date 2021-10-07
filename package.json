@@ -1,6 +1,6 @@
 {
   "name": "clipless",
-  "version": "0.12.1",
+  "version": "0.13.0",
   "license": "MIT",
   "author": {
     "name": "Daniel Essig",
@@ -22,9 +22,7 @@
   "build": {
     "productName": "Clipless"
   },
-  "dependencies": {
-    "source-map-support": "^0.5.12"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@babel/preset-react": "^7.6.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
@@ -55,6 +53,7 @@
     "redux": "^4.0.4",
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.3.0",
+    "source-map-support": "^0.5.20",
     "uuid": "^3.3.3",
     "webpack": "~4.35.3"
   }

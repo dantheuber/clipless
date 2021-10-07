@@ -11,7 +11,6 @@ export default class Store {
       ...options.defaults,
       ...parseDataFile(this.path, options.defaults)
     };
-    console.log(this.path);
   }
 
   get(key) {
