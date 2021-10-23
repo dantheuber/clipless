@@ -1,12 +1,17 @@
-import { autoUpdater, dialog } from "electron";
+import { app, autoUpdater, dialog } from "electron";
 
 const updateServer = 'https://clipless-releases-3itr653in-dantheuber.vercel.app';
 const url = `${updateServer}/update/${process.platform}/${app.getVersion()}`;
 
 autoUpdater.setFeedURL({ url });
-
-setInterval(() => {
-  autoUpdater.checkForUpdates()
+let updateCheckInterval
+updateCheckInterval = setInterval(() => {
+  try {
+    autoUpdater.checkForUpdates();
+  } catch(e) {
+    console.error(e);
+    clearInterval(updateCheckInterval);
+  }
 }, 60000);
 
 
