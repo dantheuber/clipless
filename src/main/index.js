@@ -14,13 +14,14 @@ import Store from './store';
 import windowTracking from './window-tracking';
 import handleMessages from './handle-messages';
 import keyboardShortcuts from './keyboard-shortcuts';
+import './auto-updates';
 
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
 const store = new Store({
   configName: DEFAULT_CONFIG_FILENAME,
   defaults: DEFAULT_STORE_VALUE,
-})
+});
 
 // global reference to mainWindow (necessary to prevent window from being garbage collected)
 let mainWindow;
