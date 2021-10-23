@@ -22,7 +22,9 @@
   "build": {
     "productName": "Clipless"
   },
-  "dependencies": {},
+  "dependencies": {
+    "source-map-support": "^0.5.20"
+  },
   "devDependencies": {
     "@babel/preset-react": "^7.6.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.25",
