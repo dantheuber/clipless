@@ -1,8 +1,5 @@
 import { combineReducers } from 'redux';
 import * as types from './action-types';
-import {
-  DEFAULT_CLIP_EDITOR_LANG,
-} from './constants';
 import { SET_NUMBER_OF_CLIPS } from '../preferences/action-types';
 
 const updateClipsLength = (state, numberOfClips) => {
@@ -105,15 +102,6 @@ const clipBeingViewed = (state = 0, action) => {
   }
 };
 
-const clipEditorLang = (state = DEFAULT_CLIP_EDITOR_LANG, action) => {
-  switch (action.type) {
-    case types.SELECT_EDITOR_LANG:
-      return action.payload;
-    default:
-      return state;
-  }
-};
-
 const clipCopiedOverlay = (state = {}, action) => {
   switch (action.type) {
     case types.CLIP_SELECTED:
@@ -156,7 +144,6 @@ export const reducer = combineReducers({
   clipKeyPressed,
   viewingClipEditor,
   clipBeingViewed,
-  clipEditorLang,
   clipCopiedOverlay,
   clipsChanged,
 });
