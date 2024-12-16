@@ -193,3 +193,9 @@ input, textarea {
 .dropdown-menu.show {
   transform: none !important;
 }
+
+.clip-editor {
+  width: 100%;
+  height: auto;
+  white-space: pre-wrap;
+}
