@@ -17,6 +17,13 @@ function App(): React.JSX.Element {
       <p className="tip">
         Please try pressing <code>F12</code> to open the devTool
       </p>
+      
+      {/* Tailwind CSS Test */}
+      <div className="bg-blue-500 text-white p-4 rounded-lg shadow-lg mb-4 max-w-md text-center">
+        <h2 className="text-xl font-bold mb-2">Tailwind CSS is working!</h2>
+        <p className="text-sm">This blue box is styled with Tailwind utility classes.</p>
+      </div>
+      
       <div className="actions">
         <div className="action">
           <a href="https://electron-vite.org/" target="_blank" rel="noreferrer">
