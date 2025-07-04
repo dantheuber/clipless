@@ -1,0 +1,128 @@
+/* Clip component styles */
+.clip {
+  position: relative;
+  width: 100%;
+}
+
+.clipRow {
+  display: flex;
+  align-items: center;
+  background-color: rgb(75 85 99); /* bg-gray-600 */
+  width: 100%;
+  min-width: 0;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.clipRow:hover {
+  background-color: rgb(107 114 128); /* bg-gray-500 */
+}
+
+.rowNumber {
+  flex-shrink: 0;
+  width: 2rem; /* w-8 */
+  height: 3rem; /* h-12 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(55 65 81); /* bg-gray-700 */
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  font-weight: 500; /* font-medium */
+}
+
+.contentArea {
+  flex: 1;
+  padding: 0.75rem 1rem; /* px-4 py-3 */
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; /* font-mono */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* truncate */
+}
+
+.settingsContainer {
+  position: relative;
+}
+
+.settingsButton {
+  flex-shrink: 0;
+  width: 3rem; /* w-12 */
+  height: 3rem; /* h-12 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.settingsButton:hover {
+  background-color: rgb(107 114 128); /* bg-gray-500 */
+}
+
+.settingsIcon {
+  width: 1.25rem; /* w-5 */
+  height: 1.25rem; /* h-5 */
+}
+
+.expandedMenu {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 3rem; /* h-12 */
+  background-color: rgb(31 41 55); /* bg-gray-800 */
+  border-left: 1px solid rgb(107 114 128); /* border-l border-gray-500 */
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.menuButton {
+  padding: 0 0.75rem; /* px-3 */
+  height: 100%;
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.menuButton:hover {
+  background-color: rgb(55 65 81); /* bg-gray-700 */
+}
+
+.menuButtonBorder {
+  padding: 0 0.75rem; /* px-3 */
+  height: 100%;
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  border-left: 1px solid rgb(75 85 99); /* border-l border-gray-600 */
+  cursor: pointer;
+}
+
+.menuButtonBorder:hover {
+  background-color: rgb(55 65 81); /* bg-gray-700 */
+}
+
+.deleteButton {
+  padding: 0 0.75rem; /* px-3 */
+  height: 100%;
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  border-left: 1px solid rgb(75 85 99); /* border-l border-gray-600 */
+  cursor: pointer;
+}
+
+.deleteButton:hover {
+  background-color: rgb(220 38 38); /* bg-red-600 */
+}
