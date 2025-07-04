@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { ClipItem } from '../../providers/clips';
 import styles from './Clip.module.css';
 
 interface ClipProps {
-  clip: string;
+  clip: ClipItem;
   index: number;
 }
 
@@ -11,6 +12,43 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
 
   const toggleMenu = () => {
     setExpandedMenu(!expandedMenu);
+  };
+
+  const renderClipContent = () => {
+    switch (clip.type) {
+      case 'text':
+        return <span>{clip.content}</span>;
+      case 'html':
+        return (
+          <div>
+            <span className={styles.typeLabel}>HTML:</span>
+            <span>{clip.content}</span>
+          </div>
+        );
+      case 'image':
+        return (
+          <div>
+            <span className={styles.typeLabel}>Image:</span>
+            <span>{clip.content}</span>
+          </div>
+        );
+      case 'rtf':
+        return (
+          <div>
+            <span className={styles.typeLabel}>RTF:</span>
+            <span>{clip.content}</span>
+          </div>
+        );
+      case 'bookmark':
+        return (
+          <div>
+            <span className={styles.typeLabel}>Bookmark:</span>
+            <span>{clip.title || 'Untitled'} - {clip.url}</span>
+          </div>
+        );
+      default:
+        return <span>{clip.content}</span>;
+    }
   };
 
   return (
@@ -23,7 +61,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
         
         {/* Content area */}
         <div className={styles.contentArea}>
-          {clip}
+          {renderClipContent()}
         </div>
         
         {/* Settings button */}

@@ -126,3 +126,10 @@
 .deleteButton:hover {
   background-color: rgb(220 38 38); /* bg-red-600 */
 }
+
+.typeLabel {
+  color: rgb(156 163 175); /* text-gray-400 */
+  font-weight: 500; /* font-medium */
+  margin-right: 0.5rem; /* mr-2 */
+  font-size: 0.75rem; /* text-xs */
+}

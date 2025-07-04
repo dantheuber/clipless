@@ -14,18 +14,71 @@ import { DEFAULT_MAX_CLIPS } from './constants';
  */
 
 /**
+ * Supported clipboard types based on Electron's clipboard API
+ */
+export type ClipType = 'text' | 'html' | 'image' | 'rtf' | 'bookmark';
+
+/**
+ * Represents a single clipboard item with its content and type
+ */
+export interface ClipItem {
+  type: ClipType;
+  content: string;
+  title?: string; // for bookmark type
+  url?: string;   // for bookmark type
+}
+
+/**
+ * Creates an empty clip item with default text type
+ */
+const createEmptyClip = (): ClipItem => ({
+  type: 'text',
+  content: '',
+});
+
+/**
+ * Utility functions for creating different types of clips
+ */
+export const createTextClip = (content: string): ClipItem => ({
+  type: 'text',
+  content,
+});
+
+export const createHtmlClip = (content: string): ClipItem => ({
+  type: 'html',
+  content,
+});
+
+export const createImageClip = (content: string): ClipItem => ({
+  type: 'image',
+  content, // This would be a data URL or file path for the image
+});
+
+export const createRtfClip = (content: string): ClipItem => ({
+  type: 'rtf',
+  content,
+});
+
+export const createBookmarkClip = (title: string, url: string): ClipItem => ({
+  type: 'bookmark',
+  content: url,
+  title,
+  url,
+});
+
+/**
  * Updates the length of the clips array to ensure it has the set maximum number of clips.
- * If the clips array is shorter than the maximum, it fills the remaining slots with empty strings.
+ * If the clips array is shorter than the maximum, it fills the remaining slots with empty clips.
  * @param clips the current array of clips.
  * @param maxClips the maximum number of clips allowed.
- * @returns a new array of clips with the specified maximum length, filling empty slots with empty strings.
+ * @returns a new array of clips with the specified maximum length, filling empty slots with empty clips.
  * If the clips array is already at or above the maximum length, it returns the original array
  */
-const updateClipsLength = (clips: string[], maxClips: number): string[] => {
+const updateClipsLength = (clips: ClipItem[], maxClips: number): ClipItem[] => {
   if (clips.length < maxClips) {
     for (let index = 0; index < maxClips; index++) {
-      if (typeof clips[index] !== 'string') {
-        clips[index] = '';
+      if (!clips[index]) {
+        clips[index] = createEmptyClip();
       }
     }
   }
@@ -36,12 +89,12 @@ export const ClipsContext = createContext({});
 
 // useClips type definition
 export type ClipsContextType = {
-  clips: string[];
-  setClips: React.Dispatch<React.SetStateAction<string[]>>;
-  getClip: (index: number) => string;
+  clips: ClipItem[];
+  setClips: React.Dispatch<React.SetStateAction<ClipItem[]>>;
+  getClip: (index: number) => ClipItem;
   toggleClipLock: (index: number) => void;
   isClipLocked: (index: number) => boolean;
-  clipboardUpdated: (newValue: string) => void;
+  clipboardUpdated: (newClip: ClipItem) => void;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
 };
@@ -50,7 +103,7 @@ export const useClips = (): ClipsContextType => useContext(ClipsContext) as Clip
 
 export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   // the array of clip values
-  const [clips, setClips] = useState<string[]>(updateClipsLength([], DEFAULT_MAX_CLIPS));
+  const [clips, setClips] = useState<ClipItem[]>(updateClipsLength([], DEFAULT_MAX_CLIPS));
   // the maximum number of clips to store
   const [maxClips, setMaxClips] = useState<number>(DEFAULT_MAX_CLIPS);
 
@@ -58,12 +111,12 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   const [lockedClips, setLockedClips] = useState<object>({});
 
   /**
-   * Get the value of the clip at the specified index.
+   * Get the clip at the specified index.
    * @param index the index of the clip to retrieve.
-   * @returns the clip value at the specified index, or an empty string if the index is out of bounds.
+   * @returns the clip at the specified index, or an empty clip if the index is out of bounds.
    */
-  const getClip = useCallback((index: number): string => {
-    return clips[index] || '';
+  const getClip = useCallback((index: number): ClipItem => {
+    return clips[index] || createEmptyClip();
   }, [clips]);
 
   /**
@@ -89,10 +142,10 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     [lockedClips]
   );
 
-  const clipboardUpdated = useCallback((newValue: string): void => {
-    // add new clipboard value to the start of the clips array
+  const clipboardUpdated = useCallback((newClip: ClipItem): void => {
+    // add new clipboard item to the start of the clips array
     const newState = updateClipsLength(clips, maxClips);
-    let lastClip = newValue;
+    let lastClip = newClip;
     setClips(newState.map((clip, index) => {
       if (lockedClips[index]) {
         // if the clip is locked, maintain its current value
