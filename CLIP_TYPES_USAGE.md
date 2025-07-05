@@ -40,7 +40,14 @@ The clips provider has been extended to support multiple clipboard data types ba
 - **State Management**: Manages clips array with automatic updates
 - **Manual Control**: Provides functions for manual clipboard reading
 - **Duplicate Detection**: Prevents adding identical content to the most recent clip
+- **Copy to Clipboard**: Allows copying clip content back to clipboard without triggering monitoring
 - **Cleanup**: Properly stops monitoring when component unmounts
+
+### User Interface
+- **Visual Indicators**: Type labels for HTML, RTF, images, and bookmarks
+- **Clickable Row Numbers**: Click the row number to copy clip content to clipboard
+- **Hover Effects**: Visual feedback for interactive elements
+- **Smart Copy**: Copying from the UI doesn't trigger a new clip entry
 
 ## Changes Made
 
@@ -177,6 +184,48 @@ interface ClipboardAPI {
   removeClipboardListeners: () => void;
 }
 ```
+
+## UI Implementation
+
+### Clip Component Updates (`src/renderer/src/components/clips/Clip.tsx`)
+```typescript
+export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
+  const { copyClipToClipboard } = useClips();
+  
+  const handleRowNumberClick = async () => {
+    await copyClipToClipboard(index);
+  };
+  
+  return (
+    <div 
+      className={styles.rowNumber}
+      onClick={handleRowNumberClick}
+      title="Click to copy this clip to clipboard"
+    >
+      {index + 1}
+    </div>
+  );
+};
+```
+
+### CSS Updates (`src/renderer/src/components/clips/Clip.module.css`)
+```css
+.rowNumber {
+  /* ...existing styles... */
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.rowNumber:hover {
+  background-color: rgb(75 85 99); /* bg-gray-600 */
+}
+```
+
+### Features
+- **Clickable Row Numbers**: Click any row number to copy that clip's content to clipboard
+- **Visual Feedback**: Hover effects and pointer cursor indicate clickable state
+- **Tooltip**: Helpful tooltip explains the click functionality
+- **No Duplicate Trigger**: Copying doesn't create a new clip entry in the list
 
 ## Usage Examples
 

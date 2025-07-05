@@ -28,6 +28,12 @@
   color: white;
   font-size: 0.875rem; /* text-sm */
   font-weight: 500; /* font-medium */
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.rowNumber:hover {
+  background-color: rgb(75 85 99); /* bg-gray-600 */
 }
 
 .contentArea {

@@ -97,6 +97,8 @@ export type ClipsContextType = {
   isClipLocked: (index: number) => boolean;
   clipboardUpdated: (newClip: ClipItem) => void;
   readCurrentClipboard: () => Promise<void>;
+  copyClipToClipboard: (index: number) => Promise<void>;
+  emptyClip: (index: number) => void;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
 };
@@ -121,6 +123,11 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     return clips[index] || createEmptyClip();
   }, [clips]);
 
+  const emptyClip = useCallback((index: number): void => {
+    const newClips = [...clips];
+    newClips[index] = createEmptyClip(); // replace the clip at the specified index
+    setClips(newClips);
+  }, [clips, setClips]);
   /**
    * Toggle the lock state of a clip at the specified index.
    * If the clip is locked, it will be unlocked, and vice versa.
@@ -242,6 +249,29 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [clipboardUpdated, isDuplicateOfMostRecent]);
 
+  /**
+   * Copy a clip's content to the system clipboard
+   * @param index the index of the clip to copy
+   */
+  const copyClipToClipboard = useCallback(async (index: number): Promise<void> => {
+    if (!window.api) return;
+
+    const clip = getClip(index);
+    if (!clip || !clip.content) {
+      console.warn('No clip content to copy at index:', index);
+      return;
+    }
+
+    try {
+      // For now, we'll copy as text regardless of the original type
+      // This ensures compatibility and the content can be pasted anywhere
+      await window.api.setClipboardText(clip.content);
+      console.log('Copied clip to clipboard:', clip.type, clip.content.substring(0, 50) + '...');
+    } catch (error) {
+      console.error('Failed to copy clip to clipboard:', error);
+    }
+  }, [getClip]);
+
   // Start clipboard monitoring when component mounts
   useEffect(() => {
     const startMonitoring = async () => {
@@ -312,14 +342,19 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     clips,
     setClips,
     getClip,
+    emptyClip,
+    // clip locking
     toggleClipLock,
     isClipLocked,
+    // clipboard management
     clipboardUpdated,
+    readCurrentClipboard,
+    copyClipToClipboard,
     // max clips management
     setMaxClips,
     maxClips,
   }),
-  [clips, setClips, getClip, toggleClipLock, isClipLocked, clipboardUpdated, readCurrentClipboard, setMaxClips, maxClips]);
+  [clips, setClips, getClip, toggleClipLock, isClipLocked, clipboardUpdated, readCurrentClipboard, copyClipToClipboard, setMaxClips, maxClips]);
 
   return (
     <ClipsContext.Provider value={providerValue}>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { ClipItem } from '../../providers/clips';
+import { ClipItem, useClips } from '../../providers/clips';
 import styles from './Clip.module.css';
+import { ClipOptions } from './ClipOptions';
 
 interface ClipProps {
   clip: ClipItem;
@@ -9,9 +10,14 @@ interface ClipProps {
 
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
   const [expandedMenu, setExpandedMenu] = useState<boolean>(false);
+  const { copyClipToClipboard } = useClips();
 
   const toggleMenu = () => {
     setExpandedMenu(!expandedMenu);
+  };
+
+  const handleRowNumberClick = async () => {
+    await copyClipToClipboard(index);
   };
 
   const renderClipContent = () => {
@@ -55,7 +61,11 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
     <li className={styles.clip}>
       <div className={styles.clipRow}>
         {/* Row number */}
-        <div className={styles.rowNumber}>
+        <div 
+          className={styles.rowNumber}
+          onClick={handleRowNumberClick}
+          title="Click to copy this clip to clipboard"
+        >
           {index + 1}
         </div>
         
@@ -64,36 +74,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
           {renderClipContent()}
         </div>
         
-        {/* Settings button */}
-        <div className={styles.settingsContainer}>
-          <button
-            onClick={toggleMenu}
-            className={styles.settingsButton}
-          >
-            <svg 
-              className={styles.settingsIcon}
-              fill="currentColor" 
-              viewBox="0 0 20 20"
-            >
-              <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-            </svg>
-          </button>
-          
-          {/* Expandable menu */}
-          {expandedMenu && (
-            <div className={styles.expandedMenu}>
-              <button className={styles.menuButton}>
-                Copy
-              </button>
-              <button className={styles.menuButtonBorder}>
-                Edit
-              </button>
-              <button className={styles.deleteButton}>
-                Delete
-              </button>
-            </div>
-          )}
-        </div>
+        <ClipOptions index={index} />
       </div>
     </li>
   );

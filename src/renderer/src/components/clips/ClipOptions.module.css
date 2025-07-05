@@ -1,0 +1,155 @@
+.optionsContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.optionsMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: #2d2d2d;
+  border: 1px solid #444;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 1000;
+  margin-top: 4px;
+  animation: slideDown 0.15s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.optionButton {
+  background: transparent;
+  border: none;
+  color: #ccc;
+  padding: 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.optionButton:hover {
+  background: #404040;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.optionButton:active {
+  transform: translateY(0);
+}
+
+.optionButton.trash:hover {
+  background: #dc3545;
+  color: #fff;
+}
+
+.optionButton.lock:hover {
+  background: #ffc107;
+  color: #000;
+}
+
+.optionButton.scan:hover {
+  background: #007bff;
+  color: #fff;
+}
+
+.toggleButton {
+  background: transparent;
+  border: none;
+  color: #888;
+  padding: 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  transition: all 0.2s ease;
+  font-size: 12px;
+}
+
+.toggleButton:hover {
+  background: #333;
+  color: #ccc;
+}
+
+.toggleButton.locked {
+  color: #ffc107;
+}
+
+.toggleButton.locked:hover {
+  background: #ffc107;
+  color: #000;
+}
+
+/* Dark theme adjustments */
+@media (prefers-color-scheme: dark) {
+  .optionsMenu {
+    background: #1e1e1e;
+    border-color: #333;
+  }
+  
+  .optionButton {
+    color: #d4d4d4;
+  }
+  
+  .optionButton:hover {
+    background: #2d2d2d;
+    color: #fff;
+  }
+  
+  .toggleButton {
+    color: #969696;
+  }
+  
+  .toggleButton:hover {
+    background: #2d2d2d;
+    color: #d4d4d4;
+  }
+}
+
+/* Light theme adjustments */
+@media (prefers-color-scheme: light) {
+  .optionsMenu {
+    background: #fff;
+    border-color: #ddd;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .optionButton {
+    color: #666;
+  }
+  
+  .optionButton:hover {
+    background: #f5f5f5;
+    color: #333;
+  }
+  
+  .toggleButton {
+    color: #999;
+  }
+  
+  .toggleButton:hover {
+    background: #f5f5f5;
+    color: #666;
+  }
+}
