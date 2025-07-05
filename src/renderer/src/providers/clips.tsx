@@ -4,6 +4,7 @@ import {
   useCallback,
   useMemo,
   useState,
+  useEffect,
 } from 'react';
 import { DEFAULT_MAX_CLIPS } from './constants';
 
@@ -95,6 +96,7 @@ export type ClipsContextType = {
   toggleClipLock: (index: number) => void;
   isClipLocked: (index: number) => boolean;
   clipboardUpdated: (newClip: ClipItem) => void;
+  readCurrentClipboard: () => Promise<void>;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
 };
@@ -142,7 +144,36 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     [lockedClips]
   );
 
+  /**
+   * Check if a clip item matches the most recent clip in the array
+   * @param newClip the clip to check for duplicates
+   * @returns true if the clip is a duplicate of the most recent clip
+   */
+  const isDuplicateOfMostRecent = useCallback((newClip: ClipItem): boolean => {
+    if (clips.length === 0) return false;
+    
+    const mostRecentClip = clips[0];
+    
+    // Check if type and content match
+    if (mostRecentClip.type !== newClip.type || mostRecentClip.content !== newClip.content) {
+      return false;
+    }
+    
+    // For bookmark type, also check title and url
+    if (newClip.type === 'bookmark') {
+      return mostRecentClip.title === newClip.title && mostRecentClip.url === newClip.url;
+    }
+    
+    return true;
+  }, [clips]);
+
   const clipboardUpdated = useCallback((newClip: ClipItem): void => {
+    // Check if this clip is a duplicate of the most recent clip
+    if (isDuplicateOfMostRecent(newClip)) {
+      console.log('Duplicate clip detected, not adding to array:', newClip);
+      return; // Skip adding duplicate
+    }
+
     // add new clipboard item to the start of the clips array
     const newState = updateClipsLength(clips, maxClips);
     let lastClip = newClip;
@@ -155,7 +186,126 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
       lastClip = clip; // store the previous value for the next iteration
       return value;
     }));
-  }, [clips, maxClips, lockedClips, setClips]);
+  }, [clips, maxClips, lockedClips, setClips, isDuplicateOfMostRecent]);
+
+  /**
+   * Manually read the current clipboard content and add it to clips
+   */
+  const readCurrentClipboard = useCallback(async (): Promise<void> => {
+    if (!window.api) return;
+
+    try {
+      // Use the new prioritized clipboard data getter
+      const clipData = await window.api.getCurrentClipboardData();
+      
+      if (!clipData) {
+        console.log('No clipboard content available');
+        return;
+      }
+
+      let newClip: ClipItem | null = null;
+
+      // Convert clipboard data to ClipItem based on type
+      switch (clipData.type) {
+        case 'text':
+          newClip = createTextClip(clipData.content);
+          break;
+        case 'rtf':
+          newClip = createRtfClip(clipData.content);
+          break;
+        case 'html':
+          newClip = createHtmlClip(clipData.content);
+          break;
+        case 'image':
+          newClip = createImageClip(clipData.content);
+          break;
+        case 'bookmark':
+          try {
+            const bookmarkData = JSON.parse(clipData.content);
+            newClip = createBookmarkClip(bookmarkData.title || 'Bookmark', bookmarkData.url);
+          } catch (error) {
+            console.error('Failed to parse bookmark data:', error);
+            newClip = createTextClip(clipData.content);
+          }
+          break;
+        default:
+          newClip = createTextClip(clipData.content);
+      }
+
+      if (newClip && !isDuplicateOfMostRecent(newClip)) {
+        clipboardUpdated(newClip);
+      } else if (newClip) {
+        console.log('Current clipboard content is the same as most recent clip, not adding');
+      }
+    } catch (error) {
+      console.error('Failed to read clipboard:', error);
+    }
+  }, [clipboardUpdated, isDuplicateOfMostRecent]);
+
+  // Start clipboard monitoring when component mounts
+  useEffect(() => {
+    const startMonitoring = async () => {
+      if (window.api) {
+        try {
+          // Read current clipboard content first
+          await readCurrentClipboard();
+          
+          // Then start monitoring for changes
+          await window.api.startClipboardMonitoring();
+          
+          // Set up clipboard change listener
+          window.api.onClipboardChanged((clipData: { type: string; content: string }) => {
+            let newClip: ClipItem;
+            console.log('Clipboard change detected:', clipData);
+            switch (clipData.type) {
+              case 'text':
+                newClip = createTextClip(clipData.content);
+                break;
+              case 'rtf':
+                newClip = createRtfClip(clipData.content);
+                break;
+              case 'html':
+                newClip = createHtmlClip(clipData.content);
+                break;
+              case 'image':
+                newClip = createImageClip(clipData.content);
+                break;
+              case 'bookmark':
+                try {
+                  const bookmarkData = JSON.parse(clipData.content);
+                  newClip = createBookmarkClip(bookmarkData.title || 'Bookmark', bookmarkData.url);
+                } catch (error) {
+                  console.error('Failed to parse bookmark data:', error);
+                  newClip = createTextClip(clipData.content);
+                }
+                break;
+              default:
+                newClip = createTextClip(clipData.content);
+            }
+            
+            // Only trigger clipboard updated if it's not a duplicate
+            if (!isDuplicateOfMostRecent(newClip)) {
+              clipboardUpdated(newClip);
+            } else {
+              console.log('Clipboard change detected but content is duplicate, not adding');
+            }
+          });
+        } catch (error) {
+          console.error('Failed to start clipboard monitoring:', error);
+        }
+      }
+    };
+
+    startMonitoring();
+
+    // Cleanup function to stop monitoring when component unmounts
+    return () => {
+      if (window.api) {
+        window.api.stopClipboardMonitoring();
+        window.api.removeClipboardListeners();
+      }
+    };
+  }, [clipboardUpdated, readCurrentClipboard, isDuplicateOfMostRecent]); // Include all dependencies
 
   const providerValue = useMemo(() => ({
     // clips management
@@ -169,7 +319,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     setMaxClips,
     maxClips,
   }),
-  [clips, setClips, getClip]);
+  [clips, setClips, getClip, toggleClipLock, isClipLocked, clipboardUpdated, readCurrentClipboard, setMaxClips, maxClips]);
 
   return (
     <ClipsContext.Provider value={providerValue}>

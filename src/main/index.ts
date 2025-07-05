@@ -1,12 +1,14 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, clipboard } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 
+let mainWindow: BrowserWindow | null = null;
+
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -19,7 +21,9 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    if (mainWindow) {
+      mainWindow.show()
+    }
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -34,6 +38,116 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  // Clipboard monitoring
+  let lastClipboardContent = '';
+  let lastClipboardType = '';
+  let clipboardCheckInterval: NodeJS.Timeout | null = null;
+
+  // Helper function to determine the current clipboard type and content
+  const getCurrentClipboardData = (): { type: string; content: string } | null => {
+    // Priority: text > rtf > html > image > bookmark
+    const text = clipboard.readText();
+    if (text && text.trim()) {
+      return { type: 'text', content: text };
+    }
+
+    const rtf = clipboard.readRTF();
+    if (rtf && rtf.trim()) {
+      return { type: 'rtf', content: rtf };
+    }
+
+    const html = clipboard.readHTML();
+    if (html && html.trim()) {
+      return { type: 'html', content: html };
+    }
+
+    const image = clipboard.readImage();
+    if (!image.isEmpty()) {
+      return { type: 'image', content: image.toDataURL() };
+    }
+
+    try {
+      const bookmark = clipboard.readBookmark();
+      if (bookmark && bookmark.url) {
+        return { type: 'bookmark', content: JSON.stringify(bookmark) };
+      }
+    } catch (error) {
+      // Bookmark not available on all platforms
+    }
+
+    return null;
+  };
+
+  // Initialize with current clipboard content
+  const initialClipData = getCurrentClipboardData();
+  if (initialClipData) {
+    lastClipboardContent = initialClipData.content;
+    lastClipboardType = initialClipData.type;
+  }
+
+  const checkClipboard = () => {
+    const currentClipData = getCurrentClipboardData();
+    
+    // Check if clipboard content has changed
+    if (currentClipData && 
+        (currentClipData.content !== lastClipboardContent || 
+         currentClipData.type !== lastClipboardType)) {
+      
+      // Send clipboard change to renderer (renderer will handle duplicate detection)
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('clipboard-changed', currentClipData);
+      }
+      
+      // Update last known values
+      lastClipboardContent = currentClipData.content;
+      lastClipboardType = currentClipData.type;
+    }
+  };
+
+  // Clipboard IPC handlers
+  ipcMain.handle('get-clipboard-text', () => clipboard.readText());
+  ipcMain.handle('get-clipboard-html', () => clipboard.readHTML());
+  ipcMain.handle('get-clipboard-rtf', () => clipboard.readRTF());
+  ipcMain.handle('get-clipboard-image', () => {
+    const image = clipboard.readImage();
+    if (!image.isEmpty()) {
+      return image.toDataURL();
+    }
+    return null;
+  });
+  ipcMain.handle('get-clipboard-bookmark', () => {
+    try {
+      return clipboard.readBookmark();
+    } catch (error) {
+      return null; // Not available on all platforms
+    }
+  });
+
+  // Get current clipboard data using same prioritization as monitoring
+  ipcMain.handle('get-current-clipboard-data', () => {
+    return getCurrentClipboardData();
+  });
+
+  ipcMain.handle('set-clipboard-text', (_event, text: string) => {
+    clipboard.writeText(text);
+  });
+
+  ipcMain.handle('start-clipboard-monitoring', () => {
+    if (clipboardCheckInterval) {
+      clearInterval(clipboardCheckInterval);
+    }
+    clipboardCheckInterval = setInterval(checkClipboard, 500); // Check every 500ms
+    return true;
+  });
+
+  ipcMain.handle('stop-clipboard-monitoring', () => {
+    if (clipboardCheckInterval) {
+      clearInterval(clipboardCheckInterval);
+      clipboardCheckInterval = null;
+    }
+    return true;
+  });
 }
 
 // Configure auto-updater
