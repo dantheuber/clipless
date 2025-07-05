@@ -98,6 +98,7 @@ export type ClipsContextType = {
   clipboardUpdated: (newClip: ClipItem) => void;
   readCurrentClipboard: () => Promise<void>;
   copyClipToClipboard: (index: number) => Promise<void>;
+  clipCopyIndex: number|null;
   emptyClip: (index: number) => void;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
