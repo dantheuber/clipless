@@ -108,6 +108,7 @@ export const useClips = (): ClipsContextType => useContext(ClipsContext) as Clip
 export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   // the array of clip values
   const [clips, setClips] = useState<ClipItem[]>(updateClipsLength([], DEFAULT_MAX_CLIPS));
+  const [clipCopyIndex, setClipCopyIndex] = useState<number|null>(null)
   // the maximum number of clips to store
   const [maxClips, setMaxClips] = useState<number>(DEFAULT_MAX_CLIPS);
 
@@ -175,6 +176,18 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [clips]);
 
   const clipboardUpdated = useCallback((newClip: ClipItem): void => {
+    if (clipCopyIndex !== null
+        // If a clip is being copied, check if the new clip is the same as the copied one
+        && clips[clipCopyIndex] 
+        && clips[clipCopyIndex].content === newClip.content
+        && clips[clipCopyIndex].type === newClip.type
+    ) {
+      console.log('Clipboard update matches copied clip, not adding:', newClip);
+      return; // Skip adding if it's the same as the copied clip
+    } else {
+      console.log('New clipboard content detected:', newClip);
+      setClipCopyIndex(null); // Reset copy index since we're adding a new clip
+    }
     // Check if this clip is a duplicate of the most recent clip
     if (isDuplicateOfMostRecent(newClip)) {
       console.log('Duplicate clip detected, not adding to array:', newClip);
@@ -193,7 +206,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
       lastClip = clip; // store the previous value for the next iteration
       return value;
     }));
-  }, [clips, maxClips, lockedClips, setClips, isDuplicateOfMostRecent]);
+  }, [clips, maxClips, lockedClips, setClips, clipCopyIndex, setClipCopyIndex, isDuplicateOfMostRecent]);
 
   /**
    * Manually read the current clipboard content and add it to clips
@@ -255,7 +268,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
    */
   const copyClipToClipboard = useCallback(async (index: number): Promise<void> => {
     if (!window.api) return;
-
+    setClipCopyIndex(index);
     const clip = getClip(index);
     if (!clip || !clip.content) {
       console.warn('No clip content to copy at index:', index);
@@ -313,7 +326,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         console.error('Fallback copy also failed:', fallbackError);
       }
     }
-  }, [getClip]);
+  }, [getClip, setClipCopyIndex]);
 
   // Start clipboard monitoring when component mounts
   useEffect(() => {

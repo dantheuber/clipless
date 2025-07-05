@@ -170,7 +170,7 @@ function createWindow(): void {
     if (clipboardCheckInterval) {
       clearInterval(clipboardCheckInterval);
     }
-    clipboardCheckInterval = setInterval(checkClipboard, 500); // Check every 500ms
+    clipboardCheckInterval = setInterval(checkClipboard, 250); // Check every 250ms
     return true;
   });
 
