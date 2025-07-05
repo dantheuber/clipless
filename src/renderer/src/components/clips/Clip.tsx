@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ClipItem, useClips } from '../../providers/clips';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
@@ -9,12 +8,7 @@ interface ClipProps {
 }
 
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
-  const [expandedMenu, setExpandedMenu] = useState<boolean>(false);
   const { copyClipToClipboard } = useClips();
-
-  const toggleMenu = () => {
-    setExpandedMenu(!expandedMenu);
-  };
 
   const handleRowNumberClick = async () => {
     await copyClipToClipboard(index);
