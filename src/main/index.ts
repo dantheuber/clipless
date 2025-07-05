@@ -1,10 +1,95 @@
-import { app, shell, BrowserWindow, ipcMain, clipboard, nativeImage } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, clipboard, nativeImage, Tray, Menu } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import icon from '../../resources/icon.png?asset'
 
 let mainWindow: BrowserWindow | null = null;
+let settingsWindow: BrowserWindow | null = null;
+let tray: Tray | null = null;
+let isQuitting = false;
+
+function createSettingsWindow(): void {
+  if (settingsWindow) {
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 600,
+    height: 500,
+    show: false,
+    autoHideMenuBar: true,
+    resizable: false,
+    parent: mainWindow || undefined,
+    modal: false,
+    ...(process.platform === 'linux' ? { icon } : {}),
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false
+    }
+  });
+
+  settingsWindow.on('ready-to-show', () => {
+    if (settingsWindow) {
+      settingsWindow.show();
+    }
+  });
+
+  settingsWindow.on('closed', () => {
+    settingsWindow = null;
+  });
+
+  // Load the settings HTML file
+  settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'));
+}
+
+function createTray(): void {
+  const trayIcon = nativeImage.createFromPath(icon);
+  trayIcon.setTemplateImage(true);
+  
+  tray = new Tray(trayIcon);
+  
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Show Clipless',
+      click: () => {
+        if (mainWindow) {
+          if (mainWindow.isMinimized()) mainWindow.restore();
+          mainWindow.show();
+          mainWindow.focus();
+        }
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Settings...',
+      click: () => {
+        createSettingsWindow();
+      }
+    },
+    { type: 'separator' },
+    {
+      label: 'Quit',
+      click: () => {
+        isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+  
+  tray.setContextMenu(contextMenu);
+  tray.setToolTip('Clipless - Clipboard Manager');
+  
+  // Double-click to show main window
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+    }
+  });
+}
 
 function createWindow(): void {
   // Create the browser window.
@@ -25,6 +110,19 @@ function createWindow(): void {
       mainWindow.show()
     }
   })
+
+  // Handle window close - minimize to tray instead of quitting
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      if (mainWindow) {
+        mainWindow.hide();
+      }
+    }
+  });
+
+  // Create system tray
+  createTray();
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
@@ -181,6 +279,31 @@ function createWindow(): void {
     }
     return true;
   });
+
+  // Settings window IPC handlers
+  ipcMain.handle('open-settings', () => {
+    createSettingsWindow();
+  });
+
+  ipcMain.handle('close-settings', () => {
+    if (settingsWindow) {
+      settingsWindow.close();
+    }
+  });
+
+  // Settings communication between windows
+  ipcMain.handle('settings-changed', (_event, settings) => {
+    // Relay settings changes to main window
+    if (mainWindow) {
+      mainWindow.webContents.send('settings-updated', settings);
+    }
+  });
+
+  ipcMain.handle('get-settings', () => {
+    // For now, return empty settings object
+    // In the future, this would load from persistent storage
+    return {};
+  });
 }
 
 // Configure auto-updater
@@ -265,11 +388,17 @@ app.whenReady().then(() => {
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
+// explicitly with Cmd + Q. With tray, we don't quit when windows are closed.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // Don't quit the app when all windows are closed if we have a tray
+  if (process.platform !== 'darwin' && !tray) {
     app.quit()
   }
+})
+
+// Handle app before quit to set the quitting flag
+app.on('before-quit', () => {
+  isQuitting = true;
 })
 
 // In this file you can include the rest of your app's specific main process

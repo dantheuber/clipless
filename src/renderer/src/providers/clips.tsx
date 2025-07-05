@@ -394,6 +394,29 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [clipboardUpdated, readCurrentClipboard, isDuplicateOfMostRecent]); // Include all dependencies
 
+  // Settings listener
+  useEffect(() => {
+    if (window.api) {
+      window.api.onSettingsUpdated((settings: any) => {
+        console.log('Settings updated in main window:', settings);
+        // Handle settings changes here
+        // For example, if monitoring is disabled:
+        // if (settings.monitorClipboard === false) {
+        //   window.api.stopClipboardMonitoring();
+        // }
+      });
+
+      // Cleanup
+      return () => {
+        if (window.api) {
+          window.api.removeSettingsListeners();
+        }
+      };
+    }
+    
+    return () => {}; // Return empty cleanup function if window.api is not available
+  }, []);
+
   const providerValue = useMemo(() => ({
     // clips management
     clips,

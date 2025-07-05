@@ -23,7 +23,15 @@ const api = {
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
   onClipboardChanged: (callback: (clipData: any) => void) => electronAPI.ipcRenderer.on('clipboard-changed', (_event, clipData) => callback(clipData)),
-  removeClipboardListeners: () => electronAPI.ipcRenderer.removeAllListeners('clipboard-changed')
+  removeClipboardListeners: () => electronAPI.ipcRenderer.removeAllListeners('clipboard-changed'),
+  
+  // Settings APIs
+  openSettings: () => electronAPI.ipcRenderer.invoke('open-settings'),
+  closeSettings: () => electronAPI.ipcRenderer.invoke('close-settings'),
+  getSettings: () => electronAPI.ipcRenderer.invoke('get-settings'),
+  settingsChanged: (settings: any) => electronAPI.ipcRenderer.invoke('settings-changed', settings),
+  onSettingsUpdated: (callback: (settings: any) => void) => electronAPI.ipcRenderer.on('settings-updated', (_event, settings) => callback(settings)),
+  removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

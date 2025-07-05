@@ -22,6 +22,12 @@ declare global {
       stopClipboardMonitoring: () => Promise<boolean>
       onClipboardChanged: (callback: (clipData: { type: string; content: string }) => void) => void
       removeClipboardListeners: () => void
+      openSettings: () => Promise<void>
+      closeSettings: () => Promise<void>
+      getSettings: () => Promise<any>
+      settingsChanged: (settings: any) => Promise<void>
+      onSettingsUpdated: (callback: (settings: any) => void) => void
+      removeSettingsListeners: () => void
     }
   }
 }
