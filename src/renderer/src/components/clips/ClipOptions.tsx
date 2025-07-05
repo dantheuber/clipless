@@ -3,6 +3,7 @@ import OutsideClickHandler from 'react-outside-click-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useClips } from '../../providers/clips';
 import styles from './ClipOptions.module.css';
+import classNames from 'classnames';
 
 export const ClipOptions = ({ index }): React.JSX.Element => {
   const [visible, setVisible] = useState<boolean>(false);
@@ -45,7 +46,13 @@ export const ClipOptions = ({ index }): React.JSX.Element => {
           </div>
         )}
         <button 
-          className={`${styles.toggleButton} ${isClipLocked(index) ? styles.locked : ''}`}
+          className={classNames(
+            styles.toggleButton,
+            {
+              [styles.locked]: isClipLocked(index),
+              [styles.active]: visible
+            }
+          )}
           onClick={() => toggleVisibility()}
         >
           <FontAwesomeIcon icon={isClipLocked(index) ? 'lock' : 'gear'} />

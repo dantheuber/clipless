@@ -1,7 +1,8 @@
+import { useRef } from 'react';
+import classNames from 'classnames';
 import { ClipItem, useClips } from '../../providers/clips';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
-import { useRef } from 'react';
 
 interface ClipProps {
   clip: ClipItem;
@@ -9,7 +10,7 @@ interface ClipProps {
 }
 
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
-  const { copyClipToClipboard } = useClips();
+  const { copyClipToClipboard, clipCopyIndex } = useClips();
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleRowNumberClick = async () => {
@@ -140,7 +141,12 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
       <div className={styles.clipRow}>
         {/* Row number */}
         <div 
-          className={styles.rowNumber}
+          className={classNames(
+            styles.rowNumber,
+            {
+              [styles.currentCopiedClip]: clipCopyIndex === index,
+            }
+          )}
           onClick={handleRowNumberClick}
           title="Click to copy this clip to clipboard"
         >

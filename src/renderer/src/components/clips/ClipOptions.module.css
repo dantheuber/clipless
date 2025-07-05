@@ -5,14 +5,15 @@
 
 .optionsMenu {
   position: absolute;
-  top: -2px;
-  right: 24px;
+  top: 0;
+  right: 28px;
   background: #2d2d2d;
   border: 1px solid #444;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   padding: 1px;
   display: flex;
+  height:2.5rem;
   gap: 2px;
   z-index: 1000;
   animation: slideLeft 0.15s ease-out;
@@ -44,14 +45,12 @@
   background: transparent;
   border: none;
   color: #ccc;
-  padding: 8px;
-  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 32px;
-  height: 100%;
+  height: 2.5rem;
   transition: all 0.2s ease;
   font-size: 14px;
 }
@@ -86,17 +85,17 @@
   border: none;
   color: #888;
   padding: 6px;
-  border-radius: 4px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 28px;
-  height: 28px;
+  height: 2.5rem;
   transition: all 0.2s ease;
   font-size: 12px;
 }
 
+.toggleButton.active,
 .toggleButton:hover {
   background: #333;
   color: #ccc;

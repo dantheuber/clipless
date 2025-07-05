@@ -406,6 +406,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     clipboardUpdated,
     readCurrentClipboard,
     copyClipToClipboard,
+    clipCopyIndex,
     // max clips management
     setMaxClips,
     maxClips,

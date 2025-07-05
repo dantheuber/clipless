@@ -35,6 +35,10 @@
 .rowNumber:hover {
   background-color: rgb(75 85 99); /* bg-gray-600 */
 }
+.currentCopiedClip {
+  background-color: rgb(34 197 94); /* bg-green-500 */
+  color: white;
+}
 
 .contentArea {
   flex: 1;
