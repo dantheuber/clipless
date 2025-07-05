@@ -38,9 +38,9 @@
 
 .contentArea {
   flex: 1;
-  padding: 0.75rem 1rem; /* px-4 py-3 */
+  padding: 0.25rem .5rem;
   color: white;
-  font-size: 0.875rem; /* text-sm */
+  font-size: 0.875rem; 
   font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; /* font-mono */
   white-space: nowrap;
   overflow: hidden;
@@ -138,4 +138,108 @@
   font-weight: 500; /* font-medium */
   margin-right: 0.5rem; /* mr-2 */
   font-size: 0.75rem; /* text-xs */
+}
+
+.imagePreviewContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%; /* Match parent row height */
+  position: relative;
+}
+
+.imagePreview {
+  width: 1.75rem; /* w-7 - slightly smaller to fit better */
+  height: 1.75rem; /* h-7 */
+  object-fit: cover;
+  border-radius: 0.25rem; /* rounded */
+  border: 1px solid rgb(107 114 128); /* border-gray-500 */
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.imagePreview:hover {
+  opacity: 0.8;
+}
+
+.imageInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allow text truncation */
+  justify-content: center; /* Center vertically */
+}
+
+.imageFilename {
+  color: white;
+  font-size: 0.875rem; /* text-sm */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.imageSize {
+  color: rgb(156 163 175); /* text-gray-400 */
+  font-size: 0.75rem; /* text-xs */
+  line-height: 1.2;
+}
+
+.imagePopover {
+  position: fixed;
+  background: rgb(31 41 55); /* bg-gray-800 */
+  border: 1px solid rgb(107 114 128); /* border-gray-500 */
+  border-radius: 0.5rem; /* rounded-lg */
+  padding: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+  max-width: 20rem; /* max-w-xs */
+  max-height: 20rem; /* max-h-xs */
+}
+
+.imagePreviewContainer:hover .imagePopover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0.5s; /* Show after 500ms hover */
+}
+
+.imagePopover:hover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s; /* No delay when hovering the popover itself */
+}
+
+.popoverImage {
+  width: 100%;
+  height: auto;
+  max-width: 18rem; /* Slightly smaller than container */
+  max-height: 18rem;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  border: 1px solid rgb(107 114 128);
+}
+
+.popoverInfo {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgb(75 85 99);
+  text-align: center;
+}
+
+.popoverFilename {
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.popoverSize {
+  color: rgb(156 163 175);
+  font-size: 0.75rem;
 }

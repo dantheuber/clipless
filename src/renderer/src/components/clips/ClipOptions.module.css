@@ -41,7 +41,7 @@
   align-items: center;
   justify-content: center;
   width: 32px;
-  height: 32px;
+  height: 100%;
   transition: all 0.2s ease;
   font-size: 14px;
 }

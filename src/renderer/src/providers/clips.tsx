@@ -263,12 +263,55 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     try {
-      // For now, we'll copy as text regardless of the original type
-      // This ensures compatibility and the content can be pasted anywhere
-      await window.api.setClipboardText(clip.content);
-      console.log('Copied clip to clipboard:', clip.type, clip.content.substring(0, 50) + '...');
+      // Copy the clip content with the appropriate format based on its type
+      switch (clip.type) {
+        case 'text':
+          await window.api.setClipboardText(clip.content);
+          console.log('Copied text to clipboard');
+          break;
+          
+        case 'html':
+          await window.api.setClipboardHTML(clip.content);
+          console.log('Copied HTML to clipboard');
+          break;
+          
+        case 'rtf':
+          await window.api.setClipboardRTF(clip.content);
+          console.log('Copied RTF to clipboard');
+          break;
+          
+        case 'image':
+          await window.api.setClipboardImage(clip.content);
+          console.log('Copied image to clipboard');
+          break;
+          
+        case 'bookmark':
+          // For bookmarks, we'll write both text (URL) and HTML (formatted link)
+          const bookmarkData = {
+            text: clip.url || clip.content,
+            html: `<a href="${clip.url || clip.content}">${clip.title || clip.url || clip.content}</a>`,
+            title: clip.title,
+            url: clip.url || clip.content
+          };
+          await window.api.setClipboardBookmark(bookmarkData);
+          console.log('Copied bookmark to clipboard:', clip.title, clip.url);
+          break;
+          
+        default:
+          // Fallback to text for unknown types
+          await window.api.setClipboardText(clip.content);
+          console.log('Copied unknown type as text to clipboard');
+      }
     } catch (error) {
       console.error('Failed to copy clip to clipboard:', error);
+      
+      // Fallback: try to copy as plain text if the specific format failed
+      try {
+        await window.api.setClipboardText(clip.content);
+        console.log('Fallback: copied as text to clipboard');
+      } catch (fallbackError) {
+        console.error('Fallback copy also failed:', fallbackError);
+      }
     }
   }, [getClip]);
 

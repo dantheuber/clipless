@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain, clipboard } from 'electron'
+import { app, shell, BrowserWindow, ipcMain, clipboard, nativeImage } from 'electron'
 import { join } from 'path'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
@@ -133,6 +133,39 @@ function createWindow(): void {
     clipboard.writeText(text);
   });
 
+  ipcMain.handle('set-clipboard-html', (_event, html: string) => {
+    clipboard.writeHTML(html);
+  });
+
+  ipcMain.handle('set-clipboard-rtf', (_event, rtf: string) => {
+    clipboard.writeRTF(rtf);
+  });
+
+  ipcMain.handle('set-clipboard-image', (_event, imageData: string) => {
+    try {
+      // Convert base64 data URL to NativeImage
+      const image = nativeImage.createFromDataURL(imageData);
+      clipboard.writeImage(image);
+    } catch (error) {
+      console.error('Failed to write image to clipboard:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('set-clipboard-bookmark', (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) => {
+    try {
+      // Write both text and HTML formats for maximum compatibility
+      clipboard.write({
+        text: bookmarkData.text,
+        html: bookmarkData.html
+      });
+    } catch (error) {
+      console.error('Failed to write bookmark to clipboard:', error);
+      throw error;
+    }
+  });
+
+  // Clipboard monitoring control
   ipcMain.handle('start-clipboard-monitoring', () => {
     if (clipboardCheckInterval) {
       clearInterval(clipboardCheckInterval);
