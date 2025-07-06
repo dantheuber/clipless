@@ -19,6 +19,7 @@ import {
   faPaperclip,
   faWrench,
   faFileCode,
+  faScrewdriverWrench,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -41,4 +42,5 @@ library.add(
   faPaperclip,
   faWrench,
   faFileCode,
+  faScrewdriverWrench
 );

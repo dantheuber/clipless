@@ -339,7 +339,15 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     // Ensure the array has the correct length
     const finalClips = updateClipsLength(newClips, maxClips);
     setClips(finalClips);
-  }, [clips, maxClips, lockedClips, setClips, clipCopyIndex, setClipCopyIndex, isDuplicateOfMostRecent]);
+  }, [
+    clips,
+    maxClips,
+    lockedClips,
+    setClips,
+    clipCopyIndex,
+    setClipCopyIndex,
+    isDuplicateOfMostRecent
+  ]);
 
   /**
    * Manually read the current clipboard content and add it to clips
@@ -524,7 +532,11 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         window.api.removeClipboardListeners();
       }
     };
-  }, [clipboardUpdated, readCurrentClipboard, isDuplicateOfMostRecent]); // Include all dependencies
+  }, [
+    clipboardUpdated,
+    readCurrentClipboard,
+    isDuplicateOfMostRecent
+  ]); // Include all dependencies
 
   // Settings listener
   useEffect(() => {
