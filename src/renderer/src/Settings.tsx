@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import UpdaterControl from './components/settings/UpdaterControl'
 import Versions from './components/settings/Versions'
 import { ClipsProvider } from './providers/clips'
@@ -8,23 +9,23 @@ function App(): React.JSX.Element {
   const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
   return (
-    <div className={`${styles.container} ${isDark ? styles.dark : ''}`}>
+    <div className={classNames(styles.container, { [styles.dark]: isDark })}>
       <div className={styles.scrollContainer}>
         <div className={styles.content}>
           <ClipsProvider>
             <div className={styles.grid}>
               {/* Storage Settings Section */}
-              <section className={`${styles.section} ${isDark ? styles.dark : ''}`}>
+              <section className={classNames(styles.section, { [styles.dark]: isDark })}>
                 <StorageSettings />
               </section>
 
               {/* App Updates Section */}
-              <section className={`${styles.section} ${isDark ? styles.dark : ''}`}>
+              <section className={classNames(styles.section, { [styles.dark]: isDark })}>
                 <UpdaterControl />
               </section>
 
               {/* Version Information */}
-              <section className={`${styles.section} ${isDark ? styles.dark : ''}`}>
+              <section className={classNames(styles.section, { [styles.dark]: isDark })}>
                 <Versions />
               </section>
             </div>
@@ -32,7 +33,7 @@ function App(): React.JSX.Element {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default App

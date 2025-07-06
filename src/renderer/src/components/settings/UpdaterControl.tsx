@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import classNames from 'classnames'
 import styles from './UpdaterControl.module.css'
 
 function UpdaterControl(): React.JSX.Element {
@@ -41,11 +42,11 @@ function UpdaterControl(): React.JSX.Element {
   return (
     <div className={styles.container}>
       {/* Status Display */}
-      <div className={`${styles.statusCard} ${isDark ? styles.dark : ''}`}>
+      <div className={classNames(styles.statusCard, { [styles.dark]: isDark })}>
         <div className={styles.statusContent}>
-          <div className={`${styles.statusDot} ${getStatusDotClass()}`}></div>
-          <span className={`${styles.statusText} ${isDark ? styles.dark : ''}`}>
-            Status: <span className={`${styles.statusValue} ${isDark ? styles.dark : ''}`}>{updateStatus}</span>
+          <div className={classNames(styles.statusDot, getStatusDotClass())}></div>
+          <span className={classNames(styles.statusText, { [styles.dark]: isDark })}>
+            Status: <span className={classNames(styles.statusValue, { [styles.dark]: isDark })}>{updateStatus}</span>
           </span>
         </div>
       </div>
@@ -55,10 +56,9 @@ function UpdaterControl(): React.JSX.Element {
         <button 
           onClick={handleCheckForUpdates} 
           disabled={isChecking}
-          className={`${styles.button} ${isChecking ? 
-            `${styles.buttonPrimary} ${isDark ? styles.dark : ''}` : 
-            styles.buttonPrimary
-          }`}
+          className={classNames(styles.button, styles.buttonPrimary, {
+            [styles.dark]: isChecking && isDark
+          })}
         >
           {isChecking ? (
             <>
@@ -76,7 +76,7 @@ function UpdaterControl(): React.JSX.Element {
         {updateStatus.includes('downloaded') && (
           <button 
             onClick={handleInstallUpdate}
-            className={`${styles.button} ${styles.buttonSuccess}`}
+            className={classNames(styles.button, styles.buttonSuccess)}
           >
             Restart & Install
           </button>
@@ -84,7 +84,7 @@ function UpdaterControl(): React.JSX.Element {
       </div>
 
       {/* Helper Text */}
-      <p className={`${styles.helperText} ${isDark ? styles.dark : ''}`}>
+      <p className={classNames(styles.helperText, { [styles.dark]: isDark })}>
         Updates are automatically downloaded. You'll be notified when a restart is required to complete the installation.
       </p>
     </div>
