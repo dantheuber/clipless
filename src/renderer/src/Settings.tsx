@@ -7,6 +7,7 @@ import { ThemeProvider, useTheme } from './providers/theme'
 import { LanguageDetectionProvider } from './providers/languageDetection'
 import { StorageSettings } from './components/settings/StorageSettings'
 import { UserSettings } from './components/settings/UserSettings'
+import { TemplateManager } from './components/settings/TemplateManager'
 import styles from './Settings.module.css'
 
 type TabType = 'general' | 'templates' | 'quickClips'
@@ -58,11 +59,7 @@ function SettingsContent(): React.JSX.Element {
         return (
           <div className={styles.grid}>
             <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <h2 className={styles.sectionTitle}>Templates</h2>
-              <p className={styles.placeholder}>
-                Template settings will be available here. This will allow you to create and manage 
-                reusable text templates for common clipboard operations.
-              </p>
+              <TemplateManager />
             </section>
           </div>
         )
@@ -88,7 +85,7 @@ function SettingsContent(): React.JSX.Element {
   return (
     <div className={classNames(styles.container, { [styles.light]: isLight })}>
       {/* Tab Navigation */}
-      <div className={styles.tabsContainer}>
+      <div className={classNames(styles.tabsContainer, { [styles.light]: isLight })}>
         <div className={styles.tabs}>
           {tabs.map((tab) => (
             <button

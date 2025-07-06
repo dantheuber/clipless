@@ -37,6 +37,13 @@ declare global {
       storageExportData: () => Promise<string>
       storageImportData: (jsonData: string) => Promise<boolean>
       storageClearAll: () => Promise<boolean>
+      // Template APIs
+      templatesGetAll: () => Promise<any[]>
+      templatesCreate: (name: string, content: string) => Promise<any>
+      templatesUpdate: (id: string, updates: any) => Promise<any>
+      templatesDelete: (id: string) => Promise<void>
+      templatesReorder: (templates: any[]) => Promise<void>
+      templatesGenerateText: (templateId: string, clipContents: string[]) => Promise<string>
     }
   }
 }

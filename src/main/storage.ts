@@ -1,7 +1,7 @@
 import { safeStorage, app } from 'electron';
 import { join } from 'path';
 import { promises as fs } from 'fs';
-import type { ClipItem, StoredClip, UserSettings, AppData, StorageStats } from '../shared/types';
+import type { ClipItem, StoredClip, UserSettings, AppData, StorageStats, Template } from '../shared/types';
 import { DEFAULT_MAX_CLIPS } from '../shared/constants';
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -14,6 +14,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 const DEFAULT_DATA: AppData = {
   clips: [],
   settings: DEFAULT_SETTINGS,
+  templates: [],
   version: '1.0.0'
 };
 
@@ -143,6 +144,19 @@ class SecureStorage {
         ...DEFAULT_SETTINGS,
         ...data.settings
       };
+    }
+
+    // Copy over valid templates
+    if (data.templates && Array.isArray(data.templates)) {
+      migratedData.templates = data.templates.filter((template: any) => 
+        template && 
+        typeof template.id === 'string' &&
+        typeof template.name === 'string' &&
+        typeof template.content === 'string' &&
+        typeof template.createdAt === 'number' &&
+        typeof template.updatedAt === 'number' &&
+        typeof template.order === 'number'
+      );
     }
 
     // Preserve version
@@ -283,6 +297,138 @@ class SecureStorage {
     }
 
     return { clipCount, lockedCount, dataSize };
+  }
+
+  /**
+   * Generate a unique ID for templates
+   */
+  private generateTemplateId(): string {
+    return 'template-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
+   * Get all templates
+   */
+  async getTemplates(): Promise<Template[]> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return [...this.data.templates].sort((a, b) => a.order - b.order);
+  }
+
+  /**
+   * Create a new template
+   */
+  async createTemplate(name: string, content: string): Promise<Template> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const template: Template = {
+      id: this.generateTemplateId(),
+      name,
+      content,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      order: this.data.templates.length
+    };
+
+    this.data.templates.push(template);
+    await this.saveData();
+    return template;
+  }
+
+  /**
+   * Update an existing template
+   */
+  async updateTemplate(id: string, updates: Partial<Template>): Promise<Template> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const templateIndex = this.data.templates.findIndex(t => t.id === id);
+    if (templateIndex === -1) {
+      throw new Error('Template not found');
+    }
+
+    const updatedTemplate = {
+      ...this.data.templates[templateIndex],
+      ...updates,
+      updatedAt: Date.now()
+    };
+
+    this.data.templates[templateIndex] = updatedTemplate;
+    await this.saveData();
+    return updatedTemplate;
+  }
+
+  /**
+   * Delete a template
+   */
+  async deleteTemplate(id: string): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const templateIndex = this.data.templates.findIndex(t => t.id === id);
+    if (templateIndex === -1) {
+      throw new Error('Template not found');
+    }
+
+    this.data.templates.splice(templateIndex, 1);
+    
+    // Reorder remaining templates
+    this.data.templates.forEach((template, index) => {
+      template.order = index;
+    });
+
+    await this.saveData();
+  }
+
+  /**
+   * Reorder templates
+   */
+  async reorderTemplates(templates: Template[]): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    // Update order for each template
+    templates.forEach((template, index) => {
+      const existingTemplate = this.data.templates.find(t => t.id === template.id);
+      if (existingTemplate) {
+        existingTemplate.order = index;
+      }
+    });
+
+    // Sort templates by order
+    this.data.templates.sort((a, b) => a.order - b.order);
+    await this.saveData();
+  }
+
+  /**
+   * Generate text from template using clipboard contents
+   */
+  async generateTextFromTemplate(templateId: string, clipContents: string[]): Promise<string> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const template = this.data.templates.find(t => t.id === templateId);
+    if (!template) {
+      throw new Error('Template not found');
+    }
+
+    let result = template.content;
+    
+    // Replace all {c#} tokens with corresponding clip contents
+    const tokenRegex = /\{c(\d+)\}/g;
+    result = result.replace(tokenRegex, (match, clipIndex) => {
+      const index = parseInt(clipIndex) - 1; // Convert to 0-based index
+      return index >= 0 && index < clipContents.length ? clipContents[index] : match;
+    });
+
+    return result;
   }
 }
 

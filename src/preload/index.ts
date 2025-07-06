@@ -46,7 +46,15 @@ const api = {
   storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),
   storageExportData: () => electronAPI.ipcRenderer.invoke('storage-export-data'),
   storageImportData: (jsonData: string) => electronAPI.ipcRenderer.invoke('storage-import-data', jsonData),
-  storageClearAll: () => electronAPI.ipcRenderer.invoke('storage-clear-all')
+  storageClearAll: () => electronAPI.ipcRenderer.invoke('storage-clear-all'),
+
+  // Template APIs
+  templatesGetAll: () => electronAPI.ipcRenderer.invoke('templates-get-all'),
+  templatesCreate: (name: string, content: string) => electronAPI.ipcRenderer.invoke('templates-create', name, content),
+  templatesUpdate: (id: string, updates: any) => electronAPI.ipcRenderer.invoke('templates-update', id, updates),
+  templatesDelete: (id: string) => electronAPI.ipcRenderer.invoke('templates-delete', id),
+  templatesReorder: (templates: any[]) => electronAPI.ipcRenderer.invoke('templates-reorder', templates),
+  templatesGenerateText: (templateId: string, clipContents: string[]) => electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

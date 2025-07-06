@@ -47,6 +47,7 @@ export interface UserSettings {
 export interface AppData {
   clips: StoredClip[];
   settings: UserSettings;
+  templates: Template[];
   version: string;
 }
 
@@ -75,4 +76,28 @@ export interface BookmarkData {
   html: string;
   title?: string;
   url?: string;
+}
+
+/**
+ * Template for text generation with clipboard content
+ */
+export interface Template {
+  id: string; // UUID
+  name: string;
+  content: string;
+  createdAt: number;
+  updatedAt: number;
+  order: number;
+}
+
+/**
+ * Template management operations
+ */
+export interface TemplateOperations {
+  create: (name: string, content: string) => Promise<Template>;
+  update: (id: string, updates: Partial<Template>) => Promise<Template>;
+  delete: (id: string) => Promise<void>;
+  reorder: (templates: Template[]) => Promise<void>;
+  getAll: () => Promise<Template[]>;
+  generateText: (templateId: string, clipContents: string[]) => Promise<string>;
 }
