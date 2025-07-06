@@ -6,7 +6,6 @@ import { DEFAULT_MAX_CLIPS } from '../shared/constants';
 
 const DEFAULT_SETTINGS: UserSettings = {
   maxClips: DEFAULT_MAX_CLIPS,
-  monitorClipboard: true,
   startMinimized: false,
   autoStart: false,
   theme: 'system'

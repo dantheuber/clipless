@@ -28,7 +28,6 @@ Each clip is stored with:
 ### Settings
 User preferences including:
 - **maxClips**: Maximum number of clips to store (default: 10)
-- **monitorClipboard**: Whether to monitor clipboard changes (default: true)
 - **startMinimized**: Start application minimized (default: false)
 - **autoStart**: Start with system (default: false)
 - **theme**: UI theme preference (light/dark/system)

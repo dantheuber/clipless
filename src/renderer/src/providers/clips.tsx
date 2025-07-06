@@ -584,11 +584,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     if (window.api) {
       window.api.onSettingsUpdated((settings: any) => {
         console.log('Settings updated in main window:', settings);
-        // Handle settings changes here
-        // For example, if monitoring is disabled:
-        // if (settings.monitorClipboard === false) {
-        //   window.api.stopClipboardMonitoring();
-        // }
+        // Handle settings changes here if needed
       });
 
       // Cleanup

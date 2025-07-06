@@ -34,7 +34,6 @@ export interface StoredClip {
  */
 export interface UserSettings {
   maxClips: number;
-  monitorClipboard: boolean;
   startMinimized: boolean;
   autoStart: boolean;
   hotkey?: string;

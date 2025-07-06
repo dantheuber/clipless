@@ -122,33 +122,6 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
             />
           </div>
 
-          {/* Monitor Clipboard Setting */}
-          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
-            <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Monitor Clipboard</span>
-              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
-                Automatically capture new clipboard content
-              </p>
-            </div>
-            <label className={styles.toggleLabel}>
-              <input
-                type="checkbox"
-                checked={settings.monitorClipboard}
-                onChange={(e) => handleSettingChange('monitorClipboard', e.target.checked)}
-                disabled={saving}
-                className={styles.toggleInput}
-              />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.monitorClipboard
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.monitorClipboard
-                })}></div>
-              </div>
-            </label>
-          </div>
-
           {/* Start Minimized Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
