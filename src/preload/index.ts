@@ -31,7 +31,17 @@ const api = {
   getSettings: () => electronAPI.ipcRenderer.invoke('get-settings'),
   settingsChanged: (settings: any) => electronAPI.ipcRenderer.invoke('settings-changed', settings),
   onSettingsUpdated: (callback: (settings: any) => void) => electronAPI.ipcRenderer.on('settings-updated', (_event, settings) => callback(settings)),
-  removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated')
+  removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated'),
+
+  // Storage APIs
+  storageGetClips: () => electronAPI.ipcRenderer.invoke('storage-get-clips'),
+  storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => electronAPI.ipcRenderer.invoke('storage-save-clips', clips, lockedIndices),
+  storageGetSettings: () => electronAPI.ipcRenderer.invoke('storage-get-settings'),
+  storageSaveSettings: (settings: any) => electronAPI.ipcRenderer.invoke('storage-save-settings', settings),
+  storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),
+  storageExportData: () => electronAPI.ipcRenderer.invoke('storage-export-data'),
+  storageImportData: (jsonData: string) => electronAPI.ipcRenderer.invoke('storage-import-data', jsonData),
+  storageClearAll: () => electronAPI.ipcRenderer.invoke('storage-clear-all')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

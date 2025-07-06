@@ -1,4 +1,6 @@
 import { clipboard, nativeImage, BrowserWindow, ipcMain } from 'electron'
+import { storage } from './storage'
+import type { ClipItem } from '../shared/types'
 
 // Clipboard monitoring state
 let lastClipboardContent = '';
@@ -148,5 +150,82 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       clipboardCheckInterval = null;
     }
     return true;
+  });
+
+  // Storage integration handlers
+  ipcMain.handle('storage-get-clips', async () => {
+    try {
+      return await storage.getClips();
+    } catch (error) {
+      console.error('Failed to get clips from storage:', error);
+      return [];
+    }
+  });
+
+  ipcMain.handle('storage-save-clips', async (_event, clips: ClipItem[], lockedIndices: Record<number, boolean>) => {
+    try {
+      await storage.saveClips(clips, lockedIndices);
+      return true;
+    } catch (error) {
+      console.error('Failed to save clips to storage:', error);
+      return false;
+    }
+  });
+
+  ipcMain.handle('storage-get-settings', async () => {
+    try {
+      return await storage.getSettings();
+    } catch (error) {
+      console.error('Failed to get settings from storage:', error);
+      return {};
+    }
+  });
+
+  ipcMain.handle('storage-save-settings', async (_event, settings: any) => {
+    try {
+      await storage.saveSettings(settings);
+      return true;
+    } catch (error) {
+      console.error('Failed to save settings to storage:', error);
+      return false;
+    }
+  });
+
+  ipcMain.handle('storage-get-stats', async () => {
+    try {
+      return await storage.getStorageStats();
+    } catch (error) {
+      console.error('Failed to get storage stats:', error);
+      return { clipCount: 0, lockedCount: 0, dataSize: 0 };
+    }
+  });
+
+  ipcMain.handle('storage-export-data', async () => {
+    try {
+      return await storage.exportData();
+    } catch (error) {
+      console.error('Failed to export data:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('storage-import-data', async (_event, jsonData: string) => {
+    try {
+      await storage.importData(jsonData);
+      return true;
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('storage-clear-all', async () => {
+    try {
+      await storage.clearAllData();
+      return true;
+    } catch (error) {
+      console.error('Failed to clear all data:', error);
+      return false;
+    }
   });
 }

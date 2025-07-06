@@ -114,7 +114,108 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   const [maxClips, setMaxClips] = useState<number>(DEFAULT_MAX_CLIPS);
 
   // track locked clips by their index with boolean values
-  const [lockedClips, setLockedClips] = useState<object>({});
+  const [lockedClips, setLockedClips] = useState<Record<number, boolean>>({});
+
+  // Track if we're still loading initial data to prevent saves during load
+  const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
+
+  // Load data from storage on mount
+  useEffect(() => {
+    const loadStoredData = async () => {
+      if (!window.api) {
+        setIsInitiallyLoading(false);
+        return;
+      }
+
+      try {
+        // Load settings first
+        const settings = await window.api.storageGetSettings();
+        if (settings && typeof settings.maxClips === 'number') {
+          setMaxClips(settings.maxClips);
+        }
+
+        // Load clips from storage
+        const storedClips = await window.api.storageGetClips();
+        
+        if (storedClips && storedClips.length > 0) {
+          const loadedClips: ClipItem[] = [];
+          const loadedLocks: Record<number, boolean> = {};
+
+          // Process stored clips and rebuild the array properly
+          let clipIndex = 0;
+          storedClips.forEach((storedClip: any) => {
+            if (storedClip.clip && storedClip.clip.content && storedClip.clip.content.trim() !== '') {
+              loadedClips.push(storedClip.clip); // Use push instead of index assignment
+              if (storedClip.isLocked) {
+                loadedLocks[clipIndex] = true;
+              }
+              clipIndex++;
+            }
+          });
+
+          // Always update clips state, even if empty, to ensure proper initialization
+          const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
+          const paddedClips = updateClipsLength(loadedClips, currentMaxClips);
+          setClips(paddedClips);
+          setLockedClips(loadedLocks);
+          
+          if (loadedClips.length > 0) {
+            console.log(`Successfully loaded ${loadedClips.length} clips from storage`);
+          }
+        } else {
+          console.log('No stored clips found');
+        }
+      } catch (error) {
+        console.error('Failed to load data from storage:', error);
+      } finally {
+        setIsInitiallyLoading(false);
+      }
+    };
+
+    loadStoredData();
+  }, []); // Empty dependency array - only run once on mount
+
+  // Save clips to storage whenever they change
+  useEffect(() => {
+    // Don't save during initial loading
+    if (isInitiallyLoading) return;
+
+    const saveClipsToStorage = async () => {
+      if (!window.api) return;
+
+      try {
+        // Save all clips, including empty ones to preserve array structure
+        // Filter will be done on the storage side if needed
+        await window.api.storageSaveClips(clips, lockedClips);
+      } catch (error) {
+        console.error('Failed to save clips to storage:', error);
+      }
+    };
+
+    // Debounce saves to avoid excessive writes
+    const timeoutId = setTimeout(saveClipsToStorage, 1000);
+    return () => clearTimeout(timeoutId);
+  }, [clips, lockedClips, isInitiallyLoading]);
+
+  // Save settings whenever maxClips changes
+  useEffect(() => {
+    // Don't save during initial loading
+    if (isInitiallyLoading) return;
+
+    const saveSettingsToStorage = async () => {
+      if (!window.api) return;
+
+      try {
+        await window.api.storageSaveSettings({ maxClips });
+      } catch (error) {
+        console.error('Failed to save settings to storage:', error);
+      }
+    };
+
+    // Debounce saves
+    const timeoutId = setTimeout(saveSettingsToStorage, 500);
+    return () => clearTimeout(timeoutId);
+  }, [maxClips, isInitiallyLoading]);
 
   /**
    * Get the clip at the specified index.
@@ -195,18 +296,25 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
       return; // Skip adding duplicate
     }
 
-    // add new clipboard item to the start of the clips array
-    const newState = updateClipsLength(clips, maxClips);
+    // Create new clips array by shifting existing clips down
+    const newClips = [...clips];
     let lastClip = newClip;
-    setClips(newState.map((clip, index) => {
+    
+    for (let index = 0; index < maxClips; index++) {
       if (lockedClips[index]) {
         // if the clip is locked, maintain its current value
-        return clip;
+        continue;
       }
-      const value = lastClip;
-      lastClip = clip; // store the previous value for the next iteration
-      return value;
-    }));
+      
+      // Shift the clip down
+      const currentClip = newClips[index] || createEmptyClip();
+      newClips[index] = lastClip;
+      lastClip = currentClip;
+    }
+    
+    // Ensure the array has the correct length
+    const finalClips = updateClipsLength(newClips, maxClips);
+    setClips(finalClips);
   }, [clips, maxClips, lockedClips, setClips, clipCopyIndex, setClipCopyIndex, isDuplicateOfMostRecent]);
 
   /**

@@ -4,13 +4,14 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import { createTray as createTrayIcon, getTray, setIsQuitting, getIsQuitting } from './tray'
 import { initializeClipboardMonitoring, setupClipboardIPC } from './clipboard'
+import { storage } from './storage'
 import icon from '../../resources/icon.png?asset'
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
 
 function createSettingsWindow(): void {
-  if (settingsWindow) {
+  if (settingsWindow) {     
     settingsWindow.focus();
     return;
   }
@@ -106,17 +107,30 @@ function createWindow(): void {
   });
 
   // Settings communication between windows
-  ipcMain.handle('settings-changed', (_event, settings) => {
-    // Relay settings changes to main window
-    if (mainWindow) {
-      mainWindow.webContents.send('settings-updated', settings);
+  ipcMain.handle('settings-changed', async (_event, settings) => {
+    try {
+      // Save settings to storage
+      await storage.saveSettings(settings);
+      
+      // Relay settings changes to main window
+      if (mainWindow) {
+        mainWindow.webContents.send('settings-updated', settings);
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      return false;
     }
   });
 
-  ipcMain.handle('get-settings', () => {
-    // For now, return empty settings object
-    // In the future, this would load from persistent storage
-    return {};
+  ipcMain.handle('get-settings', async () => {
+    try {
+      return await storage.getSettings();
+    } catch (error) {
+      console.error('Failed to get settings:', error);
+      return {};
+    }
   });
 }
 
@@ -156,9 +170,17 @@ if (!is.dev) {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
+
+  // Initialize secure storage
+  try {
+    await storage.initialize();
+    console.log('Secure storage initialized successfully');
+  } catch (error) {
+    console.error('Failed to initialize secure storage:', error);
+  }
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

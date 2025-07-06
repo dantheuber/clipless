@@ -28,6 +28,15 @@ declare global {
       settingsChanged: (settings: any) => Promise<void>
       onSettingsUpdated: (callback: (settings: any) => void) => void
       removeSettingsListeners: () => void
+      // Storage APIs
+      storageGetClips: () => Promise<any[]>
+      storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>
+      storageGetSettings: () => Promise<any>
+      storageSaveSettings: (settings: any) => Promise<boolean>
+      storageGetStats: () => Promise<{ clipCount: number; lockedCount: number; dataSize: number }>
+      storageExportData: () => Promise<string>
+      storageImportData: (jsonData: string) => Promise<boolean>
+      storageClearAll: () => Promise<boolean>
     }
   }
 }

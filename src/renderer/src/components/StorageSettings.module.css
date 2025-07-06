@@ -1,0 +1,257 @@
+.storage-settings {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+}
+
+.storage-settings h2 {
+  margin-bottom: 24px;
+  color: #333;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 8px;
+}
+
+.storage-settings h3 {
+  margin: 20px 0 12px 0;
+  color: #555;
+  font-size: 1.1em;
+}
+
+.storage-settings section {
+  margin-bottom: 32px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+/* Storage Statistics */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: #666;
+}
+
+.stat-value {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Settings Items */
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 8px 0;
+}
+
+.setting-item:last-child {
+  margin-bottom: 0;
+}
+
+.setting-item label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+
+.setting-item input[type="number"],
+.setting-item select {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+  min-width: 100px;
+}
+
+.setting-item input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.setting-item input:disabled,
+.setting-item select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Button Groups */
+.button-group {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.export-btn,
+.import-btn,
+.clear-btn,
+.close-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn {
+  background: #007acc;
+  color: white;
+}
+
+.export-btn:hover {
+  background: #005a9e;
+}
+
+.import-btn {
+  background: #28a745;
+  color: white;
+  display: inline-block;
+  text-decoration: none;
+}
+
+.import-btn:hover {
+  background: #1e7e34;
+}
+
+.clear-btn.danger {
+  background: #dc3545;
+  color: white;
+}
+
+.clear-btn.danger:hover {
+  background: #c82333;
+}
+
+.close-btn {
+  background: #6c757d;
+  color: white;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.close-btn:hover {
+  background: #545b62;
+}
+
+/* Loading and States */
+.storage-settings.loading,
+.storage-settings.error {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+.storage-settings.error {
+  color: #dc3545;
+}
+
+.saving-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #007acc;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 1000;
+}
+
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .storage-settings {
+    color: #e0e0e0;
+  }
+
+  .storage-settings h2 {
+    color: #f0f0f0;
+    border-bottom-color: #444;
+  }
+
+  .storage-settings h3 {
+    color: #ccc;
+  }
+
+  .storage-settings section {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+
+  .stat-item {
+    background: #333;
+    border-color: #555;
+  }
+
+  .stat-label {
+    color: #ccc;
+  }
+
+  .stat-value {
+    color: #f0f0f0;
+  }
+
+  .setting-item label {
+    color: #e0e0e0;
+  }
+
+  .setting-item input[type="number"],
+  .setting-item select {
+    background: #333;
+    border-color: #555;
+    color: #e0e0e0;
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .storage-settings {
+    padding: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  .export-btn,
+  .import-btn,
+  .clear-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
