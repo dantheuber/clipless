@@ -44,6 +44,11 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
       
       if (success) {
         setSettings(updatedSettings);
+        
+        // Notify other windows about the settings change
+        if (window.api.settingsChanged) {
+          await window.api.settingsChanged(updatedSettings);
+        }
       } else {
         console.error('Failed to save settings');
       }

@@ -21,7 +21,6 @@ export default defineConfig({
         input: {
           main: resolve('src/renderer/index.html'),
           settings: resolve('src/renderer/settings.html'),
-          'settings-css': resolve('src/renderer/settings.css')
         }
       }
     },

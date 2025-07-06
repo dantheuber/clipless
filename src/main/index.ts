@@ -41,8 +41,12 @@ function createSettingsWindow(): void {
     settingsWindow = null;
   });
 
-  // Load the settings HTML file
-  settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'));
+  // Load the settings HTML file - use dev server in development mode
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    settingsWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/settings.html');
+  } else {
+    settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'));
+  }
 }
 
 function createWindow(): void {

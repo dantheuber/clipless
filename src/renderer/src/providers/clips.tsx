@@ -175,6 +175,30 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     loadStoredData();
   }, []); // Empty dependency array - only run once on mount
 
+  // Listen for settings updates from other windows (like settings window)
+  useEffect(() => {
+    if (!window.api?.onSettingsUpdated) return;
+
+    const handleSettingsUpdate = (updatedSettings: any) => {
+      console.log('Received settings update from other window:', updatedSettings);
+      if (updatedSettings && typeof updatedSettings.maxClips === 'number') {
+        setMaxClips(updatedSettings.maxClips);
+        
+        // Update clips array to match new max clips limit
+        setClips(prevClips => updateClipsLength(prevClips, updatedSettings.maxClips));
+      }
+    };
+
+    window.api.onSettingsUpdated(handleSettingsUpdate);
+
+    // Cleanup listener on unmount
+    return () => {
+      if (window.api?.removeSettingsListeners) {
+        window.api.removeSettingsListeners();
+      }
+    };
+  }, []);
+
   // Save clips to storage whenever they change
   useEffect(() => {
     // Don't save during initial loading
