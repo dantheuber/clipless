@@ -1,0 +1,90 @@
+/* Versions Component */
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.versionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.versionCard.dark {
+  background-color: #374151;
+  border-color: #4b5563;
+}
+
+.icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.iconElectron {
+  color: #2563eb;
+}
+
+.iconElectron.dark {
+  color: #60a5fa;
+}
+
+.iconChrome {
+  color: #16a34a;
+}
+
+.iconChrome.dark {
+  color: #4ade80;
+}
+
+.iconNode {
+  color: #ca8a04;
+}
+
+.iconNode.dark {
+  color: #facc15;
+}
+
+.version {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.version.dark {
+  color: white;
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.label.dark {
+  color: #9ca3af;
+}
+
+.footer {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.footer.dark {
+  color: #9ca3af;
+  border-top-color: #4b5563;
+}

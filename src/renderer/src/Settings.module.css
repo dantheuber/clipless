@@ -1,0 +1,41 @@
+/* Settings Main Container */
+.container {
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+}
+
+.container.dark {
+  background-color: #111827;
+}
+
+.scrollContainer {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.content {
+  max-width: 64rem;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.section {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  padding: 1.5rem;
+}
+
+.section.dark {
+  background-color: #1f2937;
+}
