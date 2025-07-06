@@ -5,6 +5,7 @@ import { ClipsProvider } from './providers/clips'
 import { ThemeProvider, useTheme } from './providers/theme'
 import { LanguageDetectionProvider } from './providers/languageDetection'
 import { StorageSettings } from './components/settings/StorageSettings'
+import { UserSettings } from './components/settings/UserSettings'
 import styles from './Settings.module.css'
 
 function SettingsContent(): React.JSX.Element {
@@ -17,14 +18,19 @@ function SettingsContent(): React.JSX.Element {
           <LanguageDetectionProvider>
             <ClipsProvider>
               <div className={styles.grid}>
-                {/* Storage Settings Section */}
+                {/* User Settings */}
                 <section className={classNames(styles.section, { [styles.light]: isLight })}>
-                  <StorageSettings />
+                  <UserSettings />
                 </section>
 
                 {/* App Updates Section */}
                 <section className={classNames(styles.section, { [styles.light]: isLight })}>
                   <UpdaterControl />
+                </section>
+
+                {/* Storage Statistics and Data Management */}
+                <section className={classNames(styles.section, { [styles.light]: isLight })}>
+                  <StorageSettings />
                 </section>
 
                 {/* Version Information */}
