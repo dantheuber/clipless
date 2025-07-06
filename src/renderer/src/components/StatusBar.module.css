@@ -22,6 +22,12 @@
   gap: 1rem;
 }
 
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .statItem {
   display: flex;
   align-items: center;

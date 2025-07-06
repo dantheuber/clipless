@@ -21,6 +21,9 @@ import {
   faFileCode,
   faScrewdriverWrench,
   faClipboardCheck,
+  faFileText,
+  faSpinner,
+  faChevronUp,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -44,5 +47,8 @@ library.add(
   faPaperclip,
   faWrench,
   faFileCode,
-  faScrewdriverWrench
+  faScrewdriverWrench,
+  faFileText,
+  faSpinner,
+  faChevronUp
 );

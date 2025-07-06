@@ -3,6 +3,7 @@ import { useClips } from '../providers/clips';
 import { useTheme } from '../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
+import { TemplateSelector } from './TemplateSelector';
 import styles from './StatusBar.module.css';
 
 interface StatusBarProps {
@@ -49,14 +50,18 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
         )}
       </div>
 
-      <button
-        onClick={handleOpenSettings}
-        className={classNames(styles.settingsButton, { [styles.light]: isLight })}
-        title="Open Settings"
-      >
-        <FontAwesomeIcon icon="screwdriver-wrench" className={styles.icon} />
-        <span>Settings</span>
-      </button>
+      <div className={styles.rightSection}>
+        <TemplateSelector />
+        
+        <button
+          onClick={handleOpenSettings}
+          className={classNames(styles.settingsButton, { [styles.light]: isLight })}
+          title="Open Settings"
+        >
+          <FontAwesomeIcon icon="screwdriver-wrench" className={styles.icon} />
+          <span>Settings</span>
+        </button>
+      </div>
     </div>
   );
 };
