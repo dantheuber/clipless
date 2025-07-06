@@ -13,7 +13,6 @@
   padding: 1px;
   display: flex;
   height: 2.5rem;
-  min-height: 2.5rem;
   gap: 2px;
   z-index: 1000;
   animation: slideLeft 0.15s ease-out;
@@ -96,10 +95,8 @@
   justify-content: center;
   width: 28px;
   height: 2.5rem;
-  min-height: 2.5rem;
   transition: all 0.2s ease;
   font-size: 12px;
-  align-self: flex-start;
 }
 
 .toggleButton.light {

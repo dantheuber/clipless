@@ -337,6 +337,33 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
               <option value="dark">Dark</option>
             </select>
           </div>
+
+          {/* Code Detection Setting */}
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
+            <div className={styles.settingContent}>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Code Detection & Highlighting</span>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
+                Automatically detect programming languages and apply syntax highlighting when editing
+              </p>
+            </div>
+            <label className={styles.toggleLabel}>
+              <input
+                type="checkbox"
+                checked={settings.codeDetectionEnabled ?? true}
+                onChange={(e) => handleSettingChange('codeDetectionEnabled', e.target.checked)}
+                disabled={saving}
+                className={styles.toggleInput}
+              />
+              <div className={classNames(styles.toggleSwitch, {
+                [styles.light]: isLight,
+                [styles.toggleSwitchChecked]: settings.codeDetectionEnabled ?? true
+              })}>
+                <div className={classNames(styles.toggleSlider, {
+                  [styles.toggleSliderChecked]: settings.codeDetectionEnabled ?? true
+                })}></div>
+              </div>
+            </label>
+          </div>
         </div>
       </div>
 

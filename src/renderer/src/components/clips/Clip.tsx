@@ -1,7 +1,11 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import classNames from 'classnames';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark, materialLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ClipItem, useClips } from '../../providers/clips';
 import { useTheme } from '../../providers/theme';
+import { useLanguageDetection } from '../../providers/languageDetection';
+import { mapToSyntaxHighlighterLanguage } from '../../utils/languageDetection';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
 
@@ -13,6 +17,7 @@ interface ClipProps {
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
   const { copyClipToClipboard, clipCopyIndex, updateClip } = useClips();
   const { isLight } = useTheme();
+  const { isCodeDetectionEnabled } = useLanguageDetection();
   const popoverRef = useRef<HTMLDivElement>(null);
   
   // State for inline editing
@@ -138,26 +143,101 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
     switch (clip.type) {
       case 'text':
         if (isEditing) {
-          return (
-            <div className={styles.textEditorWrapper}>
-              <textarea
-                ref={textareaRef}
-                value={editValue}
-                onChange={handleTextChange}
-                onBlur={handleTextBlur}
-                onKeyDown={handleTextKeyDown}
-                className={classNames(styles.textEditor, { [styles.light]: isLight })}
-                autoFocus
-                rows={1}
-                style={{ 
-                  resize: 'none',
-                  minHeight: '1.2em',
-                  overflow: 'hidden'
-                }}
-              />
-            </div>
-          );
+          // Check if syntax highlighting should be applied
+          const shouldHighlight = isCodeDetectionEnabled && clip.isCode && clip.language;
+          
+          if (shouldHighlight) {
+            const syntaxLanguage = mapToSyntaxHighlighterLanguage(clip.language!);
+            const syntaxStyle = isLight ? materialLight : materialDark;
+            const borderColor = isLight ? '#d0d0d0' : '#404040';
+            const backgroundColor = isLight ? '#f8f8f8' : '#404040';
+            
+            return (
+              <div className={styles.textEditorWrapper}>
+                <div className={styles.syntaxHighlightContainer}>
+                  <SyntaxHighlighter
+                    language={syntaxLanguage}
+                    style={syntaxStyle}
+                    customStyle={{
+                      margin: 0,
+                      padding: 0,
+                      background: backgroundColor,
+                      fontSize: 'inherit',
+                      fontFamily: 'inherit',
+                      lineHeight: 'inherit',
+                      border: `1px solid ${borderColor}`,
+                      borderRadius: '0.25rem',
+                      overflow: 'hidden',
+                      boxSizing: 'border-box',
+                    }}
+                    codeTagProps={{
+                      style: {
+                        fontFamily: 'inherit',
+                        fontSize: 'inherit',
+                        lineHeight: 'inherit',
+                        background: 'transparent !important',
+                        padding: 0,
+                        margin: 0,
+                      }
+                    }}
+                    preTag="pre"
+                    PreTag={({ children, ...props }) => (
+                      <pre {...props} style={{ ...props.style, margin: 0, padding: '0.125rem 0.25rem' }}>
+                        {children}
+                      </pre>
+                    )}
+                  >
+                    {editValue}
+                  </SyntaxHighlighter>
+                  <textarea
+                    ref={textareaRef}
+                    value={editValue}
+                    onChange={handleTextChange}
+                    onBlur={handleTextBlur}
+                    onKeyDown={handleTextKeyDown}
+                    className={classNames(styles.textEditor, styles.syntaxOverlay, { [styles.light]: isLight })}
+                    autoFocus
+                    rows={1}
+                    style={{ 
+                      resize: 'none',
+                      minHeight: '1.2em',
+                      overflow: 'hidden',
+                      color: 'transparent',
+                      caretColor: isLight ? '#000' : '#fff',
+                      lineHeight: 'inherit',
+                    }}
+                  />
+                </div>
+              </div>
+            );
+          } else {
+            // Regular textarea without syntax highlighting
+            return (
+              <div className={styles.textEditorWrapper}>
+                <textarea
+                  ref={textareaRef}
+                  value={editValue}
+                  onChange={handleTextChange}
+                  onBlur={handleTextBlur}
+                  onKeyDown={handleTextKeyDown}
+                  className={classNames(styles.textEditor, { [styles.light]: isLight })}
+                  autoFocus
+                  rows={1}
+                  style={{ 
+                    resize: 'none',
+                    minHeight: '1.2em',
+                    overflow: 'hidden'
+                  }}
+                />
+              </div>
+            );
+          }
         } else {
+          // Display mode - single line with no language indicators
+          // Convert multiline text to single line for display
+          const displayContent = clip.content.trim() === '' ? '(empty)' : 
+            clip.content.replace(/\r?\n/g, ' ').replace(/\s+/g, ' ');
+          
           return (
             <span 
               onClick={handleTextClick}
@@ -168,7 +248,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
               )}
               title={clip.content.trim() === '' ? 'Empty clip' : 'Click to edit'}
             >
-              {clip.content.trim() === '' ? '(empty)' : clip.content}
+              {displayContent}
             </span>
           );
         }
@@ -248,7 +328,11 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
 
   return (
     <li className={styles.clip}>
-      <div className={classNames(styles.clipRow, { [styles.light]: isLight })}>
+      <div className={classNames(
+        styles.clipRow, 
+        { [styles.light]: isLight },
+        { [styles.expanded]: isEditing }
+      )}>
         {/* Row number */}
         <div 
           className={classNames(

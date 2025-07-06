@@ -1,6 +1,7 @@
 import { Clips } from './components/clips/Clips'
 import { ClipsProvider } from './providers/clips'
 import { ThemeProvider, useTheme } from './providers/theme'
+import { LanguageDetectionProvider } from './providers/languageDetection'
 import { StatusBar } from './components/StatusBar'
 import classNames from 'classnames'
 import styles from './App.module.css'
@@ -11,12 +12,14 @@ function AppContent(): React.JSX.Element {
   return (
     <div className={classNames(styles.app, { [styles.light]: isLight })}>
       {/* <UpdaterControl /> */}
-      <ClipsProvider>
-        <div className={styles.mainContent}>
-          <Clips />
-        </div>
-        <StatusBar />
-      </ClipsProvider>
+      <LanguageDetectionProvider>
+        <ClipsProvider>
+          <div className={styles.mainContent}>
+            <Clips />
+          </div>
+          <StatusBar />
+        </ClipsProvider>
+      </LanguageDetectionProvider>
       {/* <Versions></Versions> */}
     </div>
   )

@@ -7,6 +7,8 @@ import {
   useEffect,
 } from 'react';
 import { DEFAULT_MAX_CLIPS } from './constants';
+import { detectLanguage, isCode } from '../utils/languageDetection';
+import { useLanguageDetection } from './languageDetection';
 
 /**
  * ClipsContext provides a context for managing clipboard clips.
@@ -27,6 +29,8 @@ export interface ClipItem {
   content: string;
   title?: string; // for bookmark type
   url?: string;   // for bookmark type
+  language?: string; // detected programming language
+  isCode?: boolean; // whether the content appears to be code
 }
 
 /**
@@ -40,10 +44,22 @@ const createEmptyClip = (): ClipItem => ({
 /**
  * Utility functions for creating different types of clips
  */
-export const createTextClip = (content: string): ClipItem => ({
-  type: 'text',
-  content,
-});
+export const createTextClip = (content: string, enableDetection: boolean = true): ClipItem => {
+  let language: string | undefined;
+  let isCodeContent: boolean | undefined;
+
+  if (enableDetection) {
+    language = detectLanguage(content) || undefined;
+    isCodeContent = isCode(content);
+  }
+
+  return {
+    type: 'text',
+    content,
+    ...(language && { language }),
+    ...(isCodeContent !== undefined && { isCode: isCodeContent }),
+  };
+};
 
 export const createHtmlClip = (content: string): ClipItem => ({
   type: 'html',
@@ -120,6 +136,16 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   // Track if we're still loading initial data to prevent saves during load
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
 
+  // Use language detection settings from the context
+  const { isCodeDetectionEnabled } = useLanguageDetection();
+
+  /**
+   * Create a text clip with language detection based on current settings
+   */
+  const createTextClipWithDetection = useCallback((content: string): ClipItem => {
+    return createTextClip(content, isCodeDetectionEnabled);
+  }, [isCodeDetectionEnabled]);
+
   // Load data from storage on mount
   useEffect(() => {
     const loadStoredData = async () => {
@@ -134,6 +160,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         if (settings && typeof settings.maxClips === 'number') {
           setMaxClips(settings.maxClips);
         }
+        // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
 
         // Load clips from storage
         const storedClips = await window.api.storageGetClips();
@@ -188,6 +215,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         // Update clips array to match new max clips limit
         setClips(prevClips => updateClipsLength(prevClips, updatedSettings.maxClips));
       }
+      // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };
 
     window.api.onSettingsUpdated(handleSettingsUpdate);
@@ -382,7 +410,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
       // Convert clipboard data to ClipItem based on type
       switch (clipData.type) {
         case 'text':
-          newClip = createTextClip(clipData.content);
+          newClip = createTextClipWithDetection(clipData.content);
           break;
         case 'rtf':
           newClip = createRtfClip(clipData.content);
@@ -399,11 +427,11 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
             newClip = createBookmarkClip(bookmarkData.title || 'Bookmark', bookmarkData.url);
           } catch (error) {
             console.error('Failed to parse bookmark data:', error);
-            newClip = createTextClip(clipData.content);
+            newClip = createTextClipWithDetection(clipData.content);
           }
           break;
         default:
-          newClip = createTextClip(clipData.content);
+          newClip = createTextClipWithDetection(clipData.content);
       }
 
       if (newClip && !isDuplicateOfMostRecent(newClip)) {
@@ -499,7 +527,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
             console.log('Clipboard change detected:', clipData);
             switch (clipData.type) {
               case 'text':
-                newClip = createTextClip(clipData.content);
+                newClip = createTextClipWithDetection(clipData.content);
                 break;
               case 'rtf':
                 newClip = createRtfClip(clipData.content);
@@ -516,11 +544,11 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
                   newClip = createBookmarkClip(bookmarkData.title || 'Bookmark', bookmarkData.url);
                 } catch (error) {
                   console.error('Failed to parse bookmark data:', error);
-                  newClip = createTextClip(clipData.content);
+                  newClip = createTextClipWithDetection(clipData.content);
                 }
                 break;
               default:
-                newClip = createTextClip(clipData.content);
+                newClip = createTextClipWithDetection(clipData.content);
             }
             
             // Only trigger clipboard updated if it's not a duplicate

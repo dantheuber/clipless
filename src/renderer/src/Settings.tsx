@@ -3,6 +3,7 @@ import UpdaterControl from './components/settings/UpdaterControl'
 import Versions from './components/settings/Versions'
 import { ClipsProvider } from './providers/clips'
 import { ThemeProvider, useTheme } from './providers/theme'
+import { LanguageDetectionProvider } from './providers/languageDetection'
 import { StorageSettings } from './components/settings/StorageSettings'
 import styles from './Settings.module.css'
 
@@ -13,24 +14,26 @@ function SettingsContent(): React.JSX.Element {
     <div className={classNames(styles.container, { [styles.light]: isLight })}>
       <div className={styles.scrollContainer}>
         <div className={styles.content}>
-          <ClipsProvider>
-            <div className={styles.grid}>
-              {/* Storage Settings Section */}
-              <section className={classNames(styles.section, { [styles.light]: isLight })}>
-                <StorageSettings />
-              </section>
+          <LanguageDetectionProvider>
+            <ClipsProvider>
+              <div className={styles.grid}>
+                {/* Storage Settings Section */}
+                <section className={classNames(styles.section, { [styles.light]: isLight })}>
+                  <StorageSettings />
+                </section>
 
-              {/* App Updates Section */}
-              <section className={classNames(styles.section, { [styles.light]: isLight })}>
-                <UpdaterControl />
-              </section>
+                {/* App Updates Section */}
+                <section className={classNames(styles.section, { [styles.light]: isLight })}>
+                  <UpdaterControl />
+                </section>
 
-              {/* Version Information */}
-              <section className={classNames(styles.section, { [styles.light]: isLight })}>
-                <Versions />
-              </section>
-            </div>
-          </ClipsProvider>
+                {/* Version Information */}
+                <section className={classNames(styles.section, { [styles.light]: isLight })}>
+                  <Versions />
+                </section>
+              </div>
+            </ClipsProvider>
+          </LanguageDetectionProvider>
         </div>
       </div>
     </div>

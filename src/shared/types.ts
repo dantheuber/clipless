@@ -16,6 +16,8 @@ export interface ClipItem {
   content: string;
   title?: string; // for bookmark type
   url?: string;   // for bookmark type
+  language?: string; // detected programming language
+  isCode?: boolean; // whether the content appears to be code
 }
 
 /**
@@ -37,6 +39,7 @@ export interface UserSettings {
   autoStart: boolean;
   hotkey?: string;
   theme?: 'light' | 'dark' | 'system';
+  codeDetectionEnabled?: boolean;
 }
 
 /**
