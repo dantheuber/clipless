@@ -20,6 +20,7 @@ import {
   faWrench,
   faFileCode,
   faScrewdriverWrench,
+  faClipboardCheck,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -35,6 +36,7 @@ library.add(
   faCheckSquare,
   faSignOutAlt,
   faClipboardList,
+  faClipboardCheck,
   faFileImport,
   faAngleUp,
   faAngleDown,

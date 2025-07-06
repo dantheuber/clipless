@@ -8,6 +8,7 @@ import { useLanguageDetection } from '../../providers/languageDetection';
 import { mapToSyntaxHighlighterLanguage } from '../../utils/languageDetection';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface ClipProps {
   clip: ClipItem;
@@ -284,16 +285,6 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
                 alt="Large image preview"
                 className={classNames(styles.popoverImage, { [styles.light]: isLight })}
               />
-              {/* <div className={classNames(styles.popoverInfo, { [styles.light]: isLight })}>
-                <div className={classNames(styles.popoverFilename, { [styles.light]: isLight })}>
-                  {clip.content.startsWith('data:image/') ? 
-                    clip.content.split(';')[0].split('/')[1].toUpperCase() + ' Image' : 
-                    'Image'}
-                </div>
-                <div className={classNames(styles.popoverSize, { [styles.light]: isLight })}>
-                  {Math.round(clip.content.length * 0.75 / 1024)} KB
-                </div>
-              </div> */}
             </div>
             <div className={styles.imageInfo}>
               <span className={classNames(styles.imageFilename, { [styles.light]: isLight })}>
@@ -326,6 +317,8 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
     }
   };
 
+  const isCurrentCopiedClip = clipCopyIndex === index;
+
   return (
     <li className={styles.clip}>
       <div className={classNames(
@@ -339,13 +332,13 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
             styles.rowNumber,
             { [styles.light]: isLight },
             {
-              [styles.currentCopiedClip]: clipCopyIndex === index,
+              [styles.currentCopiedClip]: isCurrentCopiedClip,
             }
           )}
           onClick={handleRowNumberClick}
           title="Click to copy this clip to clipboard"
         >
-          {index + 1}
+          {isCurrentCopiedClip ? <FontAwesomeIcon icon="clipboard-check" /> : index + 1}
         </div>
         
         {/* Content area */}
