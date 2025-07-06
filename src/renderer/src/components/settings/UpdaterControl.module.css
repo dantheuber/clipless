@@ -1,4 +1,4 @@
-/* UpdaterControl Component */
+/* UpdaterControl Component - Default to dark theme */
 .container {
   display: flex;
   flex-direction: column;
@@ -7,14 +7,14 @@
 
 .statusCard {
   padding: 1rem;
-  background-color: #f9fafb;
+  background-color: #374151;
   border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #4b5563;
 }
 
-.statusCard.dark {
-  background-color: #374151;
-  border-color: #4b5563;
+.statusCard.light {
+  background-color: #f9fafb;
+  border-color: #e5e7eb;
 }
 
 .statusContent {
@@ -58,19 +58,19 @@
 .statusText {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #374151;
-}
-
-.statusText.dark {
   color: #d1d5db;
 }
 
-.statusValue {
-  color: #111827;
+.statusText.light {
+  color: #374151;
 }
 
-.statusValue.dark {
+.statusValue {
   color: white;
+}
+
+.statusValue.light {
+  color: #111827;
 }
 
 .buttonContainer {
@@ -146,9 +146,9 @@
 
 .helperText {
   font-size: 0.75rem;
-  color: #6b7280;
+  color: #9ca3af;
 }
 
-.helperText.dark {
-  color: #9ca3af;
+.helperText.light {
+  color: #6b7280;
 }

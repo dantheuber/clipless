@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import classNames from 'classnames';
 import { ClipItem, useClips } from '../../providers/clips';
+import { useTheme } from '../../providers/theme';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
 
@@ -11,6 +12,7 @@ interface ClipProps {
 
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
   const { copyClipToClipboard, clipCopyIndex } = useClips();
+  const { isLight } = useTheme();
   const popoverRef = useRef<HTMLDivElement>(null);
 
   const handleRowNumberClick = async () => {
@@ -65,7 +67,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
       case 'html':
         return (
           <div>
-            <span className={styles.typeLabel}>HTML:</span>
+            <span className={classNames(styles.typeLabel, { [styles.light]: isLight })}>HTML:</span>
             <span>{clip.content}</span>
           </div>
         );
@@ -75,7 +77,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
             <img 
               src={clip.content}
               alt="Clipboard image preview"
-              className={styles.imagePreview}
+              className={classNames(styles.imagePreview, { [styles.light]: isLight })}
               onMouseEnter={handleImageMouseEnter}
               onError={(e) => {
                 // Fallback to text if image fails to load
@@ -83,35 +85,35 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
                 target.style.display = 'none';
                 const fallback = document.createElement('span');
                 fallback.textContent = 'Invalid image data';
-                fallback.style.color = 'rgb(156 163 175)';
+                fallback.style.color = isLight ? '#666666' : 'rgb(156 163 175)';
                 fallback.style.fontSize = '0.75rem';
                 target.parentNode?.appendChild(fallback);
               }}
             />
-            <div ref={popoverRef} className={styles.imagePopover}>
+            <div ref={popoverRef} className={classNames(styles.imagePopover, { [styles.light]: isLight })}>
               <img 
                 src={clip.content} 
                 alt="Large image preview"
-                className={styles.popoverImage}
+                className={classNames(styles.popoverImage, { [styles.light]: isLight })}
               />
-              {/* <div className={styles.popoverInfo}>
-                <div className={styles.popoverFilename}>
+              {/* <div className={classNames(styles.popoverInfo, { [styles.light]: isLight })}>
+                <div className={classNames(styles.popoverFilename, { [styles.light]: isLight })}>
                   {clip.content.startsWith('data:image/') ? 
                     clip.content.split(';')[0].split('/')[1].toUpperCase() + ' Image' : 
                     'Image'}
                 </div>
-                <div className={styles.popoverSize}>
+                <div className={classNames(styles.popoverSize, { [styles.light]: isLight })}>
                   {Math.round(clip.content.length * 0.75 / 1024)} KB
                 </div>
               </div> */}
             </div>
             <div className={styles.imageInfo}>
-              <span className={styles.imageFilename}>
+              <span className={classNames(styles.imageFilename, { [styles.light]: isLight })}>
                 Image ({clip.content.startsWith('data:image/') ? 
                   clip.content.split(';')[0].split('/')[1].toUpperCase() : 
                   'Unknown format'})
               </span>
-              <span className={styles.imageSize}>
+              <span className={classNames(styles.imageSize, { [styles.light]: isLight })}>
                 {Math.round(clip.content.length * 0.75 / 1024)} KB
               </span>
             </div>
@@ -120,14 +122,14 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
       case 'rtf':
         return (
           <div>
-            <span className={styles.typeLabel}>RTF:</span>
+            <span className={classNames(styles.typeLabel, { [styles.light]: isLight })}>RTF:</span>
             <span>{clip.content}</span>
           </div>
         );
       case 'bookmark':
         return (
           <div>
-            <span className={styles.typeLabel}>Bookmark:</span>
+            <span className={classNames(styles.typeLabel, { [styles.light]: isLight })}>Bookmark:</span>
             <span>{clip.title || 'Untitled'} - {clip.url}</span>
           </div>
         );
@@ -138,11 +140,12 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
 
   return (
     <li className={styles.clip}>
-      <div className={styles.clipRow}>
+      <div className={classNames(styles.clipRow, { [styles.light]: isLight })}>
         {/* Row number */}
         <div 
           className={classNames(
             styles.rowNumber,
+            { [styles.light]: isLight },
             {
               [styles.currentCopiedClip]: clipCopyIndex === index,
             }
@@ -154,7 +157,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
         </div>
         
         {/* Content area */}
-        <div className={styles.contentArea}>
+        <div className={classNames(styles.contentArea, { [styles.light]: isLight })}>
           {renderClipContent()}
         </div>
         

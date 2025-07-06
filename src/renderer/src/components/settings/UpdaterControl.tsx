@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import classNames from 'classnames'
+import { useTheme } from '../../providers/theme'
 import styles from './UpdaterControl.module.css'
 
 function UpdaterControl(): React.JSX.Element {
   const [updateStatus, setUpdateStatus] = useState<string>('Ready')
   const [isChecking, setIsChecking] = useState(false)
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+  
+  const { isLight } = useTheme()
 
   const handleCheckForUpdates = async (): Promise<void> => {
     setIsChecking(true)
@@ -42,11 +44,11 @@ function UpdaterControl(): React.JSX.Element {
   return (
     <div className={styles.container}>
       {/* Status Display */}
-      <div className={classNames(styles.statusCard, { [styles.dark]: isDark })}>
+      <div className={classNames(styles.statusCard, { [styles.light]: isLight })}>
         <div className={styles.statusContent}>
           <div className={classNames(styles.statusDot, getStatusDotClass())}></div>
-          <span className={classNames(styles.statusText, { [styles.dark]: isDark })}>
-            Status: <span className={classNames(styles.statusValue, { [styles.dark]: isDark })}>{updateStatus}</span>
+          <span className={classNames(styles.statusText, { [styles.light]: isLight })}>
+            Status: <span className={classNames(styles.statusValue, { [styles.light]: isLight })}>{updateStatus}</span>
           </span>
         </div>
       </div>
@@ -57,7 +59,7 @@ function UpdaterControl(): React.JSX.Element {
           onClick={handleCheckForUpdates} 
           disabled={isChecking}
           className={classNames(styles.button, styles.buttonPrimary, {
-            [styles.dark]: isChecking && isDark
+            [styles.light]: isLight && isChecking
           })}
         >
           {isChecking ? (
@@ -84,7 +86,7 @@ function UpdaterControl(): React.JSX.Element {
       </div>
 
       {/* Helper Text */}
-      <p className={classNames(styles.helperText, { [styles.dark]: isDark })}>
+      <p className={classNames(styles.helperText, { [styles.light]: isLight })}>
         Updates are automatically downloaded. You'll be notified when a restart is required to complete the installation.
       </p>
     </div>

@@ -116,9 +116,12 @@ function createWindow(): void {
       // Save settings to storage
       await storage.saveSettings(settings);
       
-      // Relay settings changes to main window
+      // Relay settings changes to all windows
       if (mainWindow) {
         mainWindow.webContents.send('settings-updated', settings);
+      }
+      if (settingsWindow) {
+        settingsWindow.webContents.send('settings-updated', settings);
       }
       
       return true;

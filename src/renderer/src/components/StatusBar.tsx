@@ -1,6 +1,9 @@
 import React from 'react';
 import { useClips } from '../providers/clips';
+import { useTheme } from '../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import classNames from 'classnames';
+import styles from './StatusBar.module.css';
 
 interface StatusBarProps {
   onOpenSettings?: () => void;
@@ -8,6 +11,7 @@ interface StatusBarProps {
 
 export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
   const { clips, maxClips, isClipLocked } = useClips();
+  const { isLight } = useTheme();
   
   // Count non-empty clips
   const activeClipsCount = clips.filter(clip => clip.content.trim() !== '').length;
@@ -28,18 +32,18 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
   };
 
   return (
-    <div className="flex items-center justify-between bg-gray-100 dark:bg-gray-800 px-4 py-2 text-sm text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex items-center space-x-4">
-        <span className="flex items-center space-x-1">
-          <FontAwesomeIcon icon="clipboard" className="w-4 h-4" />
+    <div className={classNames(styles.statusBar, { [styles.light]: isLight })}>
+      <div className={styles.leftSection}>
+        <span className={styles.statItem}>
+          <FontAwesomeIcon icon="clipboard" className={styles.icon} />
           <span>
             {activeClipsCount} / {maxClips} clips
           </span>
         </span>
         
         {lockedClipsCount > 0 && (
-          <span className="flex items-center space-x-1">
-            <FontAwesomeIcon icon="lock" className="w-4 h-4" />
+          <span className={styles.statItem}>
+            <FontAwesomeIcon icon="lock" className={styles.icon} />
             <span>{lockedClipsCount} locked</span>
           </span>
         )}
@@ -47,10 +51,10 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
 
       <button
         onClick={handleOpenSettings}
-        className="flex items-center space-x-1 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+        className={classNames(styles.settingsButton, { [styles.light]: isLight })}
         title="Open Settings"
       >
-        <FontAwesomeIcon icon="screwdriver-wrench" className="w-4 h-4" />
+        <FontAwesomeIcon icon="screwdriver-wrench" className={styles.icon} />
         <span>Settings</span>
       </button>
     </div>

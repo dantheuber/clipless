@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
+import { useTheme } from '../../providers/theme';
 import type { UserSettings, StorageStats } from '../../../../shared/types';
 import styles from './StorageSettings.module.css';
 
@@ -12,7 +13,8 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
   const [stats, setStats] = useState<StorageStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  const { isLight } = useTheme();
 
   // Load settings and stats on mount
   useEffect(() => {
@@ -137,7 +139,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
           </svg>
-          <span className={classNames(styles.loadingText, { [styles.dark]: isDark })}>Loading storage settings...</span>
+          <span className={classNames(styles.loadingText, { [styles.light]: isLight })}>Loading storage settings...</span>
         </div>
       </div>
     );
@@ -150,8 +152,8 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
           <svg className={styles.errorIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.96-.833-2.73 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
-          <p className={classNames(styles.errorTitle, { [styles.dark]: isDark })}>Failed to load settings</p>
-          <p className={classNames(styles.errorDescription, { [styles.dark]: isDark })}>Please try refreshing the application</p>
+          <p className={classNames(styles.errorTitle, { [styles.light]: isLight })}>Failed to load settings</p>
+          <p className={classNames(styles.errorDescription, { [styles.light]: isLight })}>Please try refreshing the application</p>
         </div>
       </div>
     );
@@ -161,44 +163,44 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
     <div className={styles.container}>
       {/* Storage Statistics */}
       <div className={styles.section}>
-        <h3 className={classNames(styles.sectionTitle, { [styles.dark]: isDark })}>Storage Statistics</h3>
+        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Storage Statistics</h3>
         {stats && (
           <div className={styles.statsGrid}>
-            <div className={classNames(styles.statCard, styles.statCardBlue, { [styles.dark]: isDark })}>
+            <div className={classNames(styles.statCard, styles.statCardBlue, { [styles.light]: isLight })}>
               <div className={styles.statIconContainer}>
-                <svg className={classNames(styles.statIcon, styles.statIconBlue, { [styles.dark]: isDark })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={classNames(styles.statIcon, styles.statIconBlue, { [styles.light]: isLight })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
               </div>
               <div className={styles.statContent}>
-                <div className={classNames(styles.statValue, styles.statValueBlue, { [styles.dark]: isDark })}>{stats.clipCount}</div>
-                <div className={classNames(styles.statLabel, styles.statLabelBlue, { [styles.dark]: isDark })}>Total Clips</div>
+                <div className={classNames(styles.statValue, styles.statValueBlue, { [styles.light]: isLight })}>{stats.clipCount}</div>
+                <div className={classNames(styles.statLabel, styles.statLabelBlue, { [styles.light]: isLight })}>Total Clips</div>
               </div>
             </div>
             
-            <div className={classNames(styles.statCard, styles.statCardGreen, { [styles.dark]: isDark })}>
+            <div className={classNames(styles.statCard, styles.statCardGreen, { [styles.light]: isLight })}>
               <div className={styles.statIconContainer}>
-                <svg className={classNames(styles.statIcon, styles.statIconGreen, { [styles.dark]: isDark })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={classNames(styles.statIcon, styles.statIconGreen, { [styles.light]: isLight })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                 </svg>
               </div>
               <div className={styles.statContent}>
-                <div className={classNames(styles.statValue, styles.statValueGreen, { [styles.dark]: isDark })}>{stats.lockedCount}</div>
-                <div className={classNames(styles.statLabel, styles.statLabelGreen, { [styles.dark]: isDark })}>Locked</div>
+                <div className={classNames(styles.statValue, styles.statValueGreen, { [styles.light]: isLight })}>{stats.lockedCount}</div>
+                <div className={classNames(styles.statLabel, styles.statLabelGreen, { [styles.light]: isLight })}>Locked</div>
               </div>
             </div>
             
-            <div className={classNames(styles.statCard, styles.statCardPurple, { [styles.dark]: isDark })}>
+            <div className={classNames(styles.statCard, styles.statCardPurple, { [styles.light]: isLight })}>
               <div className={styles.statIconContainer}>
-                <svg className={classNames(styles.statIcon, styles.statIconPurple, { [styles.dark]: isDark })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className={classNames(styles.statIcon, styles.statIconPurple, { [styles.light]: isLight })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/>
                 </svg>
               </div>
               <div className={styles.statContent}>
-                <div className={classNames(styles.statValue, styles.statValuePurple, { [styles.dark]: isDark })}>
+                <div className={classNames(styles.statValue, styles.statValuePurple, { [styles.light]: isLight })}>
                   {(stats.dataSize / 1024).toFixed(1)} KB
                 </div>
-                <div className={classNames(styles.statLabel, styles.statLabelPurple, { [styles.dark]: isDark })}>Storage Size</div>
+                <div className={classNames(styles.statLabel, styles.statLabelPurple, { [styles.light]: isLight })}>Storage Size</div>
               </div>
             </div>
           </div>
@@ -207,16 +209,16 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
 
       {/* Application Settings */}
       <div className={styles.section}>
-        <h3 className={classNames(styles.sectionTitle, { [styles.dark]: isDark })}>Application Settings</h3>
+        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Application Settings</h3>
         
         <div className={styles.settingsContainer}>
           {/* Maximum Clips Setting */}
-          <div className={classNames(styles.settingItem, { [styles.dark]: isDark })}>
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <label htmlFor="maxClips" className={classNames(styles.settingLabel, { [styles.dark]: isDark })}>
+              <label htmlFor="maxClips" className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
                 Maximum Clips
               </label>
-              <p className={classNames(styles.settingDescription, { [styles.dark]: isDark })}>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Maximum number of clipboard items to store (5-100)
               </p>
             </div>
@@ -228,15 +230,15 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
               value={settings.maxClips}
               onChange={(e) => handleSettingChange('maxClips', parseInt(e.target.value))}
               disabled={saving}
-              className={classNames(styles.input, { [styles.dark]: isDark })}
+              className={classNames(styles.input, { [styles.light]: isLight })}
             />
           </div>
 
           {/* Monitor Clipboard Setting */}
-          <div className={classNames(styles.settingItem, { [styles.dark]: isDark })}>
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.dark]: isDark })}>Monitor Clipboard</span>
-              <p className={classNames(styles.settingDescription, { [styles.dark]: isDark })}>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Monitor Clipboard</span>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Automatically capture new clipboard content
               </p>
             </div>
@@ -249,7 +251,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
                 className={styles.toggleInput}
               />
               <div className={classNames(styles.toggleSwitch, {
-                [styles.dark]: isDark,
+                [styles.light]: isLight,
                 [styles.toggleSwitchChecked]: settings.monitorClipboard
               })}>
                 <div className={classNames(styles.toggleSlider, {
@@ -260,10 +262,10 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
           </div>
 
           {/* Start Minimized Setting */}
-          <div className={classNames(styles.settingItem, { [styles.dark]: isDark })}>
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.dark]: isDark })}>Start Minimized</span>
-              <p className={classNames(styles.settingDescription, { [styles.dark]: isDark })}>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Start Minimized</span>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Launch the application minimized to system tray
               </p>
             </div>
@@ -276,7 +278,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
                 className={styles.toggleInput}
               />
               <div className={classNames(styles.toggleSwitch, {
-                [styles.dark]: isDark,
+                [styles.light]: isLight,
                 [styles.toggleSwitchChecked]: settings.startMinimized
               })}>
                 <div className={classNames(styles.toggleSlider, {
@@ -287,10 +289,10 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
           </div>
 
           {/* Auto Start Setting */}
-          <div className={classNames(styles.settingItem, { [styles.dark]: isDark })}>
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.dark]: isDark })}>Auto Start with System</span>
-              <p className={classNames(styles.settingDescription, { [styles.dark]: isDark })}>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Auto Start with System</span>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Start Clipless automatically when your computer boots up
               </p>
             </div>
@@ -303,7 +305,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
                 className={styles.toggleInput}
               />
               <div className={classNames(styles.toggleSwitch, {
-                [styles.dark]: isDark,
+                [styles.light]: isLight,
                 [styles.toggleSwitchChecked]: settings.autoStart
               })}>
                 <div className={classNames(styles.toggleSlider, {
@@ -314,12 +316,12 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
           </div>
 
           {/* Theme Setting */}
-          <div className={classNames(styles.settingItem, { [styles.dark]: isDark })}>
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <label htmlFor="theme" className={classNames(styles.settingLabel, { [styles.dark]: isDark })}>
+              <label htmlFor="theme" className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
                 Theme
               </label>
-              <p className={classNames(styles.settingDescription, { [styles.dark]: isDark })}>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Choose your preferred color scheme
               </p>
             </div>
@@ -328,7 +330,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
               value={settings.theme || 'system'}
               onChange={(e) => handleSettingChange('theme', e.target.value as 'light' | 'dark' | 'system')}
               disabled={saving}
-              className={classNames(styles.select, { [styles.dark]: isDark })}
+              className={classNames(styles.select, { [styles.light]: isLight })}
             >
               <option value="system">System</option>
               <option value="light">Light</option>
@@ -340,7 +342,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
 
       {/* Data Management */}
       <div className={styles.section}>
-        <h3 className={classNames(styles.sectionTitle, { [styles.dark]: isDark })}>Data Management</h3>
+        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Data Management</h3>
         
         <div className={styles.buttonGrid}>
           <button 
@@ -378,14 +380,14 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
           </button>
         </div>
         
-        <div className={classNames(styles.warningCard, { [styles.dark]: isDark })}>
+        <div className={classNames(styles.warningCard, { [styles.light]: isLight })}>
           <div className={styles.warningContent}>
-            <svg className={classNames(styles.warningIcon, { [styles.dark]: isDark })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className={classNames(styles.warningIcon, { [styles.light]: isLight })} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.96-.833-2.73 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
             </svg>
             <div>
-              <p className={classNames(styles.warningTitle, { [styles.dark]: isDark })}>Data Management Warning</p>
-              <p className={classNames(styles.warningDescription, { [styles.dark]: isDark })}>
+              <p className={classNames(styles.warningTitle, { [styles.light]: isLight })}>Data Management Warning</p>
+              <p className={classNames(styles.warningDescription, { [styles.light]: isLight })}>
                 Clearing all data is permanent and cannot be undone. Consider exporting your data first as a backup.
               </p>
             </div>
@@ -405,7 +407,7 @@ export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => 
       )}
       
       {onClose && (
-        <div className={`${styles.closeButtonContainer} ${isDark ? styles.dark : ''}`}>
+        <div className={classNames(styles.closeButtonContainer, { [styles.light]: isLight })}>
           <button 
             onClick={onClose} 
             className={styles.closeButton}

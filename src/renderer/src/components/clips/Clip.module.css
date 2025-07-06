@@ -7,14 +7,22 @@
 .clipRow {
   display: flex;
   align-items: center;
-  background-color: rgb(75 85 99); /* bg-gray-600 */
+  background-color: #404040;
   width: 100%;
   min-width: 0;
   transition: background-color 0.15s ease-in-out;
 }
 
+.clipRow.light {
+  background-color: #f8f8f8;
+}
+
 .clipRow:hover {
-  background-color: rgb(107 114 128); /* bg-gray-500 */
+  background-color: #505050;
+}
+
+.clipRow.light:hover {
+  background-color: #e8e8e8;
 }
 
 .rowNumber {
@@ -24,31 +32,45 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgb(55 65 81); /* bg-gray-700 */
-  color: white;
-  font-size: 0.875rem; /* text-sm */
-  font-weight: 500; /* font-medium */
+  background-color: #2a2a2a;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: background-color 0.15s ease-in-out;
 }
 
-.rowNumber:hover {
-  background-color: rgb(75 85 99); /* bg-gray-600 */
+.rowNumber.light {
+  background-color: #e0e0e0;
+  color: #1a1a1a;
 }
+
+.rowNumber:hover {
+  background-color: #404040;
+}
+
+.rowNumber.light:hover {
+  background-color: #d0d0d0;
+}
+
 .currentCopiedClip {
-  background-color: rgb(34 197 94); /* bg-green-500 */
-  color: white;
+  background-color: #22c55e !important;
+  color: white !important;
 }
 
 .contentArea {
   flex: 1;
   padding: 0.25rem .5rem;
-  color: white;
+  color: #ffffff;
   font-size: 0.875rem; 
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; /* font-mono */
+  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* truncate */
+  text-overflow: ellipsis;
+}
+
+.contentArea.light {
+  color: #1a1a1a;
 }
 
 .settingsContainer {
@@ -57,110 +79,153 @@
 
 .settingsButton {
   flex-shrink: 0;
-  width: 3rem; /* w-12 */
-  height: 3rem; /* h-12 */
+  width: 3rem;
+  height: 3rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #ffffff;
   transition: background-color 0.15s ease-in-out;
   background: none;
   border: none;
   cursor: pointer;
 }
 
+.settingsButton.light {
+  color: #1a1a1a;
+}
+
 .settingsButton:hover {
-  background-color: rgb(107 114 128); /* bg-gray-500 */
+  background-color: #505050;
+}
+
+.settingsButton.light:hover {
+  background-color: #e8e8e8;
 }
 
 .settingsIcon {
-  width: 1.25rem; /* w-5 */
-  height: 1.25rem; /* h-5 */
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 .expandedMenu {
   position: absolute;
   right: 0;
   top: 0;
-  height: 3rem; /* h-12 */
-  background-color: rgb(31 41 55); /* bg-gray-800 */
-  border-left: 1px solid rgb(107 114 128); /* border-l border-gray-500 */
+  height: 3rem;
+  background-color: #1a1a1a;
+  border-left: 1px solid #505050;
   display: flex;
   align-items: center;
   z-index: 10;
 }
 
+.expandedMenu.light {
+  background-color: #f0f0f0;
+  border-left-color: #d0d0d0;
+}
+
 .menuButton {
-  padding: 0 0.75rem; /* px-3 */
+  padding: 0 0.75rem;
   height: 100%;
-  color: white;
-  font-size: 0.875rem; /* text-sm */
+  color: #ffffff;
+  font-size: 0.875rem;
   transition: background-color 0.15s ease-in-out;
   background: none;
   border: none;
   cursor: pointer;
+}
+
+.menuButton.light {
+  color: #1a1a1a;
 }
 
 .menuButton:hover {
-  background-color: rgb(55 65 81); /* bg-gray-700 */
+  background-color: #2a2a2a;
+}
+
+.menuButton.light:hover {
+  background-color: #e0e0e0;
 }
 
 .menuButtonBorder {
-  padding: 0 0.75rem; /* px-3 */
+  padding: 0 0.75rem;
   height: 100%;
-  color: white;
-  font-size: 0.875rem; /* text-sm */
+  color: #ffffff;
+  font-size: 0.875rem;
   transition: background-color 0.15s ease-in-out;
   background: none;
   border: none;
-  border-left: 1px solid rgb(75 85 99); /* border-l border-gray-600 */
+  border-left: 1px solid #404040;
   cursor: pointer;
+}
+
+.menuButtonBorder.light {
+  color: #1a1a1a;
+  border-left-color: #d0d0d0;
 }
 
 .menuButtonBorder:hover {
-  background-color: rgb(55 65 81); /* bg-gray-700 */
+  background-color: #2a2a2a;
+}
+
+.menuButtonBorder.light:hover {
+  background-color: #e0e0e0;
 }
 
 .deleteButton {
-  padding: 0 0.75rem; /* px-3 */
+  padding: 0 0.75rem;
   height: 100%;
-  color: white;
-  font-size: 0.875rem; /* text-sm */
+  color: #ffffff;
+  font-size: 0.875rem;
   transition: background-color 0.15s ease-in-out;
   background: none;
   border: none;
-  border-left: 1px solid rgb(75 85 99); /* border-l border-gray-600 */
+  border-left: 1px solid #404040;
   cursor: pointer;
 }
 
+.deleteButton.light {
+  color: #1a1a1a;
+  border-left-color: #d0d0d0;
+}
+
 .deleteButton:hover {
-  background-color: rgb(220 38 38); /* bg-red-600 */
+  background-color: #dc2626;
 }
 
 .typeLabel {
-  color: rgb(156 163 175); /* text-gray-400 */
-  font-weight: 500; /* font-medium */
-  margin-right: 0.5rem; /* mr-2 */
-  font-size: 0.75rem; /* text-xs */
+  color: #a0a0a0;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.typeLabel.light {
+  color: #666666;
 }
 
 .imagePreviewContainer {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  height: 100%; /* Match parent row height */
+  height: 100%;
   position: relative;
 }
 
 .imagePreview {
-  width: 1.75rem; /* w-7 - slightly smaller to fit better */
-  height: 1.75rem; /* h-7 */
+  width: 1.75rem;
+  height: 1.75rem;
   object-fit: cover;
-  border-radius: 0.25rem; /* rounded */
-  border: 1px solid rgb(107 114 128); /* border-gray-500 */
+  border-radius: 0.25rem;
+  border: 1px solid #505050;
   flex-shrink: 0;
   cursor: pointer;
   transition: opacity 0.2s ease;
+}
+
+.imagePreview.light {
+  border-color: #d0d0d0;
 }
 
 .imagePreview:hover {
@@ -170,30 +235,38 @@
 .imageInfo {
   display: flex;
   flex-direction: column;
-  min-width: 0; /* Allow text truncation */
-  justify-content: center; /* Center vertically */
+  min-width: 0;
+  justify-content: center;
 }
 
 .imageFilename {
-  color: white;
-  font-size: 0.875rem; /* text-sm */
+  color: #ffffff;
+  font-size: 0.875rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
 }
 
+.imageFilename.light {
+  color: #1a1a1a;
+}
+
 .imageSize {
-  color: rgb(156 163 175); /* text-gray-400 */
-  font-size: 0.75rem; /* text-xs */
+  color: #a0a0a0;
+  font-size: 0.75rem;
   line-height: 1.2;
+}
+
+.imageSize.light {
+  color: #666666;
 }
 
 .imagePopover {
   position: fixed;
-  background: rgb(31 41 55); /* bg-gray-800 */
-  border: 1px solid rgb(107 114 128); /* border-gray-500 */
-  border-radius: 0.5rem; /* rounded-lg */
+  background: #1a1a1a;
+  border: 1px solid #505050;
+  border-radius: 0.5rem;
   padding: 0.75rem;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   z-index: 9999;
@@ -201,49 +274,71 @@
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
   pointer-events: none;
-  max-width: 20rem; /* max-w-xs */
-  max-height: 20rem; /* max-h-xs */
+  max-width: 20rem;
+  max-height: 20rem;
+}
+
+.imagePopover.light {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
 .imagePreviewContainer:hover .imagePopover {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition-delay: 0.5s; /* Show after 500ms hover */
+  transition-delay: 0.5s;
 }
 
 .imagePopover:hover {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  transition-delay: 0s; /* No delay when hovering the popover itself */
+  transition-delay: 0s;
 }
 
 .popoverImage {
   width: 100%;
   height: auto;
-  max-width: 18rem; /* Slightly smaller than container */
+  max-width: 18rem;
   max-height: 18rem;
   object-fit: contain;
   border-radius: 0.25rem;
-  border: 1px solid rgb(107 114 128);
+  border: 1px solid #505050;
+}
+
+.popoverImage.light {
+  border-color: #d0d0d0;
 }
 
 .popoverInfo {
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid rgb(75 85 99);
+  border-top: 1px solid #404040;
   text-align: center;
 }
 
+.popoverInfo.light {
+  border-top-color: #e0e0e0;
+}
+
 .popoverFilename {
-  color: white;
+  color: #ffffff;
   font-size: 0.875rem;
   font-weight: 500;
   margin-bottom: 0.25rem;
 }
 
+.popoverFilename.light {
+  color: #1a1a1a;
+}
+
 .popoverSize {
-  color: rgb(156 163 175);
+  color: #a0a0a0;
   font-size: 0.75rem;
+}
+
+.popoverSize.light {
+  color: #666666;
 }

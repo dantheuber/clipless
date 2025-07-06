@@ -30,7 +30,12 @@ const api = {
   closeSettings: () => electronAPI.ipcRenderer.invoke('close-settings'),
   getSettings: () => electronAPI.ipcRenderer.invoke('get-settings'),
   settingsChanged: (settings: any) => electronAPI.ipcRenderer.invoke('settings-changed', settings),
-  onSettingsUpdated: (callback: (settings: any) => void) => electronAPI.ipcRenderer.on('settings-updated', (_event, settings) => callback(settings)),
+  onSettingsUpdated: (callback: (settings: any) => void) => {
+    const listener = (_event: any, settings: any) => callback(settings);
+    electronAPI.ipcRenderer.on('settings-updated', listener);
+    // Return a cleanup function that removes only this specific listener
+    return () => electronAPI.ipcRenderer.removeListener('settings-updated', listener);
+  },
   removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated'),
 
   // Storage APIs
