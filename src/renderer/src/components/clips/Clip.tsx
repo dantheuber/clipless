@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect, useCallback } from 'react';
 import classNames from 'classnames';
 import { ClipItem, useClips } from '../../providers/clips';
 import { useTheme } from '../../providers/theme';
@@ -11,9 +11,83 @@ interface ClipProps {
 }
 
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
-  const { copyClipToClipboard, clipCopyIndex } = useClips();
+  const { copyClipToClipboard, clipCopyIndex, updateClip } = useClips();
   const { isLight } = useTheme();
   const popoverRef = useRef<HTMLDivElement>(null);
+  
+  // State for inline editing
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState('');
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Auto-resize textarea
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      const textarea = textareaRef.current;
+      textarea.style.height = 'auto';
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [isEditing, editValue]);
+
+  // Debounced update function
+  const debouncedUpdate = useCallback((newContent: string) => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+    }
+    
+    debounceRef.current = setTimeout(() => {
+      if (newContent !== clip.content) {
+        updateClip(index, { ...clip, content: newContent });
+      }
+    }, 500); // 500ms debounce
+  }, [clip, index, updateClip]);
+
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    };
+  }, []);
+
+  const handleTextClick = () => {
+    if (clip.type === 'text' && clip.content.trim() !== '') {
+      setIsEditing(true);
+      setEditValue(clip.content);
+    }
+  };
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setEditValue(newValue);
+    debouncedUpdate(newValue);
+  };
+
+  const handleTextBlur = () => {
+    setIsEditing(false);
+    // Force immediate update on blur if there are pending changes
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      if (editValue !== clip.content) {
+        updateClip(index, { ...clip, content: editValue });
+      }
+    }
+  };
+
+  const handleTextKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleTextBlur();
+    } else if (e.key === 'Escape') {
+      setEditValue(clip.content); // Reset to original value
+      setIsEditing(false);
+      if (debounceRef.current) {
+        clearTimeout(debounceRef.current);
+      }
+    }
+  };
 
   const handleRowNumberClick = async () => {
     await copyClipToClipboard(index);
@@ -63,7 +137,41 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
   const renderClipContent = () => {
     switch (clip.type) {
       case 'text':
-        return <span>{clip.content}</span>;
+        if (isEditing) {
+          return (
+            <div className={styles.textEditorWrapper}>
+              <textarea
+                ref={textareaRef}
+                value={editValue}
+                onChange={handleTextChange}
+                onBlur={handleTextBlur}
+                onKeyDown={handleTextKeyDown}
+                className={classNames(styles.textEditor, { [styles.light]: isLight })}
+                autoFocus
+                rows={1}
+                style={{ 
+                  resize: 'none',
+                  minHeight: '1.2em',
+                  overflow: 'hidden'
+                }}
+              />
+            </div>
+          );
+        } else {
+          return (
+            <span 
+              onClick={handleTextClick}
+              className={classNames(
+                styles.editableText, 
+                { [styles.light]: isLight },
+                { [styles.emptyText]: clip.content.trim() === '' }
+              )}
+              title={clip.content.trim() === '' ? 'Empty clip' : 'Click to edit'}
+            >
+              {clip.content.trim() === '' ? '(empty)' : clip.content}
+            </span>
+          );
+        }
       case 'html':
         return (
           <div>

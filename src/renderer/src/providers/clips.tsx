@@ -100,6 +100,7 @@ export type ClipsContextType = {
   copyClipToClipboard: (index: number) => Promise<void>;
   clipCopyIndex: number|null;
   emptyClip: (index: number) => void;
+  updateClip: (index: number, updatedClip: ClipItem) => void;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
 };
@@ -255,6 +256,18 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     newClips[index] = createEmptyClip(); // replace the clip at the specified index
     setClips(newClips);
   }, [clips, setClips]);
+
+  /**
+   * Update a clip at the specified index with new content
+   * @param index the index of the clip to update
+   * @param updatedClip the updated clip content
+   */
+  const updateClip = useCallback((index: number, updatedClip: ClipItem): void => {
+    const newClips = [...clips];
+    newClips[index] = updatedClip;
+    setClips(newClips);
+  }, [clips, setClips]);
+
   /**
    * Toggle the lock state of a clip at the specified index.
    * If the clip is locked, it will be unlocked, and vice versa.
@@ -567,6 +580,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     setClips,
     getClip,
     emptyClip,
+    updateClip,
     // clip locking
     toggleClipLock,
     isClipLocked,
@@ -579,7 +593,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     setMaxClips,
     maxClips,
   }),
-  [clips, setClips, getClip, toggleClipLock, isClipLocked, clipboardUpdated, readCurrentClipboard, copyClipToClipboard, setMaxClips, maxClips]);
+  [clips, setClips, getClip, emptyClip, updateClip, toggleClipLock, isClipLocked, clipboardUpdated, readCurrentClipboard, copyClipToClipboard, clipCopyIndex, setMaxClips, maxClips]);
 
   return (
     <ClipsContext.Provider value={providerValue}>
