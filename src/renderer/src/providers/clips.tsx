@@ -174,12 +174,18 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
           storedClips.forEach((storedClip: any) => {
             if (storedClip.clip && storedClip.clip.content && storedClip.clip.content.trim() !== '') {
               loadedClips.push(storedClip.clip); // Use push instead of index assignment
-              if (storedClip.isLocked) {
+              // Only allow locking for clips at index 1 and higher
+              if (storedClip.isLocked && clipIndex > 0) {
                 loadedLocks[clipIndex] = true;
               }
               clipIndex++;
             }
           });
+
+          // Ensure the first clip (index 0) is never locked
+          if (loadedLocks[0]) {
+            delete loadedLocks[0];
+          }
 
           // Always update clips state, even if empty, to ensure proper initialization
           const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
@@ -280,6 +286,12 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   }, [clips]);
 
   const emptyClip = useCallback((index: number): void => {
+    // Prevent emptying the first clip (index 0)
+    if (index === 0) {
+      console.log('Cannot empty the first clip (index 0)');
+      return;
+    }
+    
     const newClips = [...clips];
     newClips[index] = createEmptyClip(); // replace the clip at the specified index
     setClips(newClips);
@@ -299,9 +311,16 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   /**
    * Toggle the lock state of a clip at the specified index.
    * If the clip is locked, it will be unlocked, and vice versa.
+   * Note: The first clip (index 0) cannot be locked.
    * @param index the index of the clip to toggle lock state.
    */
   const toggleClipLock = useCallback((index: number): void => {
+    // Prevent locking the first clip (index 0)
+    if (index === 0) {
+      console.log('Cannot lock the first clip (index 0)');
+      return;
+    }
+    
     const lockValue = lockedClips[index];
     setLockedClips({
       ...lockedClips,
@@ -311,22 +330,27 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
 
   /**
    * Check if a clip at the specified index is locked.
+   * Note: The first clip (index 0) is never locked.
    * @param index the index of the clip to check.
    * @returns true if the clip is locked, false otherwise.
    */
-  const isClipLocked = useCallback((index: number): boolean => 
-    lockedClips[index] === true,
-    [lockedClips]
-  );
+  const isClipLocked = useCallback((index: number): boolean => {
+    // The first clip (index 0) can never be locked
+    if (index === 0) return false;
+    
+    return lockedClips[index] === true;
+  }, [lockedClips]);
 
   /**
-   * Check if a clip item matches the most recent clip in the array
+   * Check if a clip item matches the most recent clip in the array.
+   * Since the first clip (index 0) can never be locked, it's always the target for new clips.
    * @param newClip the clip to check for duplicates
    * @returns true if the clip is a duplicate of the most recent clip
    */
   const isDuplicateOfMostRecent = useCallback((newClip: ClipItem): boolean => {
     if (clips.length === 0) return false;
     
+    // Since the first clip can never be locked, always check against it
     const mostRecentClip = clips[0];
     
     // Check if type and content match

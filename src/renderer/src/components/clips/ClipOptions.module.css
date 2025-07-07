@@ -90,6 +90,18 @@
   animation: pulse 2s infinite;
 }
 
+.optionButton.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.optionButton.disabled:hover {
+  background: transparent !important;
+  color: inherit !important;
+  transform: none !important;
+}
+
 @keyframes pulse {
   0%,
   100% {

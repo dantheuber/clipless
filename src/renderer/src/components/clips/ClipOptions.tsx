@@ -24,6 +24,9 @@ export const ClipOptions = ({ index }): React.JSX.Element => {
 
   const clip = getClip(index);
   
+  // Check if this is the first clip (cannot be locked or emptied)
+  const isFirstClip = index === 0;
+  
   // Check if this clip has patterns (we'll do a simple check)
   const [hasPatterns, setHasPatterns] = useState(false);
   
@@ -69,15 +72,29 @@ export const ClipOptions = ({ index }): React.JSX.Element => {
           <div className={classNames(styles.optionsMenu, { [styles.light]: isLight })}>
             <button 
               key="trash" 
-              className={classNames(styles.optionButton, styles.trash, { [styles.light]: isLight })}
-              onClick={() => emptyClip(index)}
+              className={classNames(
+                styles.optionButton, 
+                styles.trash, 
+                { [styles.light]: isLight },
+                { [styles.disabled]: isFirstClip }
+              )}
+              onClick={() => !isFirstClip && emptyClip(index)}
+              disabled={isFirstClip}
+              title={isFirstClip ? "Cannot empty the first clip" : "Empty this clip"}
             >
               <FontAwesomeIcon icon="trash" />
             </button>
             <button 
               key="lock" 
-              className={classNames(styles.optionButton, styles.lock, { [styles.light]: isLight })}
-              onClick={() => toggleClipLock(index)}
+              className={classNames(
+                styles.optionButton, 
+                styles.lock, 
+                { [styles.light]: isLight },
+                { [styles.disabled]: isFirstClip }
+              )}
+              onClick={() => !isFirstClip && toggleClipLock(index)}
+              disabled={isFirstClip}
+              title={isFirstClip ? "Cannot lock the first clip" : (isClipLocked(index) ? "Unlock this clip" : "Lock this clip")}
             >
               <FontAwesomeIcon icon={isClipLocked(index) ? 'lock-open' : 'lock'} />
             </button>
