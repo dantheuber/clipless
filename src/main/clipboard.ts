@@ -537,7 +537,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
           urlsToOpen.add(tool.url);
         } else {
           // Process each token
-          const tokenReplacements: Array<{ token: string; values: string[] }> = [];
+          const tokenReplacements: Array<{ token: string; values: string[]; isUrl: boolean }> = [];
 
           for (const tokenMatch of tokens) {
             const fullToken = tokenMatch[0]; // e.g., "{email|domain|phone}"
@@ -546,43 +546,58 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
 
             // Find values for this token from the matches
             const values: string[] = [];
+            let isUrl = false;
             for (const group of captureGroups) {
               if (group in match.captures && match.captures[group]) {
                 values.push(match.captures[group]);
+                // Check if this is a URL capture group
+                if (group === 'url') {
+                  isUrl = true;
+                }
               }
             }
 
-            tokenReplacements.push({ token: fullToken, values });
+            tokenReplacements.push({ token: fullToken, values, isUrl });
           }
 
           // Generate URLs for each combination of values
           if (tokenReplacements.every((tr) => tr.values.length > 0)) {
-            // Get all combinations of values
-            const generateCombinations = (replacements: typeof tokenReplacements): string[] => {
-              if (replacements.length === 0) return [''];
-              if (replacements.length === 1) {
-                return replacements[0].values.map((value) =>
-                  tool.url.replace(replacements[0].token, encodeURIComponent(value))
-                );
-              }
-
-              // For multiple tokens, generate all combinations
-              const [first, ...rest] = replacements;
-              const restCombinations = generateCombinations(rest);
-              const combinations: string[] = [];
-
-              for (const value of first.values) {
-                for (const restUrl of restCombinations) {
-                  const url = restUrl.replace(first.token, encodeURIComponent(value));
-                  combinations.push(url);
+            // Special case: if the tool URL is just a token that captures a URL, use it directly
+            if (tokenReplacements.length === 1 && tokenReplacements[0].isUrl && tool.url === tokenReplacements[0].token) {
+              tokenReplacements[0].values.forEach((url) => urlsToOpen.add(url));
+            } else {
+              // Get all combinations of values
+              const generateCombinations = (replacements: typeof tokenReplacements): string[] => {
+                if (replacements.length === 0) return [''];
+                if (replacements.length === 1) {
+                  const replacement = replacements[0];
+                  return replacement.values.map((value) => {
+                    // Don't encode URLs if they're being used as direct replacements for URL tokens
+                    const encodedValue = replacement.isUrl ? value : encodeURIComponent(value);
+                    return tool.url.replace(replacement.token, encodedValue);
+                  });
                 }
-              }
 
-              return combinations;
-            };
+                // For multiple tokens, generate all combinations
+                const [first, ...rest] = replacements;
+                const restCombinations = generateCombinations(rest);
+                const combinations: string[] = [];
 
-            const combinations = generateCombinations(tokenReplacements);
-            combinations.forEach((url) => urlsToOpen.add(url));
+                for (const value of first.values) {
+                  for (const restUrl of restCombinations) {
+                    // Don't encode URLs if they're being used as direct replacements for URL tokens
+                    const encodedValue = first.isUrl ? value : encodeURIComponent(value);
+                    const url = restUrl.replace(first.token, encodedValue);
+                    combinations.push(url);
+                  }
+                }
+
+                return combinations;
+              };
+
+              const combinations = generateCombinations(tokenReplacements);
+              combinations.forEach((url) => urlsToOpen.add(url));
+            }
           }
         }
 
