@@ -2,6 +2,8 @@ appId: com.electron.app
 productName: clipless
 directories:
   buildResources: build
+  output: dist
+icon: build/icon.png
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -13,6 +15,7 @@ asarUnpack:
   - resources/**
 win:
   executableName: clipless
+  icon: build/icon.ico
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -20,6 +23,7 @@ nsis:
   createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
+  icon: build/icon.icns
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
   notarize: false
@@ -32,6 +36,7 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
+  icon: build/icon.png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false

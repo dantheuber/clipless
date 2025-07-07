@@ -122,7 +122,7 @@ function createSettingsWindow(tab?: string): void {
     resizable: false,
     parent: mainWindow || undefined,
     modal: false,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -163,7 +163,7 @@ async function createWindow(): Promise<void> {
     height: 670,
     show: false,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    icon,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
