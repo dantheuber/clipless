@@ -8,7 +8,10 @@ const DEFAULT_SETTINGS: UserSettings = {
   maxClips: DEFAULT_MAX_CLIPS,
   startMinimized: false,
   autoStart: false,
-  theme: 'system'
+  theme: 'system',
+  windowTransparency: 0,
+  alwaysOnTop: false,
+  rememberWindowPosition: true
 };
 
 const DEFAULT_DATA: AppData = {
@@ -774,6 +777,32 @@ class SecureStorage {
     // Save only once at the end if there were changes
     if (hasChanges) {
       await this.saveData();
+    }
+  }
+
+  /**
+   * Save window bounds to storage
+   */
+  async saveWindowBounds(bounds: { x: number; y: number; width: number; height: number }): Promise<void> {
+    try {
+      const boundsPath = join(this.dataPath, 'window-bounds.json');
+      await fs.writeFile(boundsPath, JSON.stringify(bounds, null, 2));
+    } catch (error) {
+      console.error('Failed to save window bounds:', error);
+    }
+  }
+
+  /**
+   * Get window bounds from storage
+   */
+  async getWindowBounds(): Promise<{ x: number; y: number; width: number; height: number } | null> {
+    try {
+      const boundsPath = join(this.dataPath, 'window-bounds.json');
+      const data = await fs.readFile(boundsPath, 'utf-8');
+      return JSON.parse(data);
+    } catch (error) {
+      // File doesn't exist or is invalid, return null
+      return null;
     }
   }
 }

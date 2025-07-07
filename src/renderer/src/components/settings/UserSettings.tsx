@@ -228,6 +228,95 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
         </div>
       </div>
 
+      {/* Window Settings */}
+      <div className={styles.section}>
+        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Window Settings</h3>
+        
+        <div className={styles.settingsContainer}>
+          {/* Window Transparency Setting */}
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
+            <div className={styles.settingContent}>
+              <label htmlFor="windowTransparency" className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Window Transparency
+              </label>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
+                Set window transparency level (0% = fully opaque, 100% = fully transparent)
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input
+                type="range"
+                id="windowTransparency"
+                min="0"
+                max="100"
+                step="5"
+                value={settings.windowTransparency ?? 0}
+                onChange={(e) => handleSettingChange('windowTransparency', parseInt(e.target.value))}
+                disabled={saving}
+                className={classNames(styles.rangeSlider, { [styles.light]: isLight })}
+              />
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })} style={{ minWidth: '40px' }}>
+                {settings.windowTransparency ?? 0}%
+              </span>
+            </div>
+          </div>
+
+          {/* Always On Top Setting */}
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
+            <div className={styles.settingContent}>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Always On Top</span>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
+                Keep the main window always on top of other windows
+              </p>
+            </div>
+            <label className={styles.toggleLabel}>
+              <input
+                type="checkbox"
+                checked={settings.alwaysOnTop ?? false}
+                onChange={(e) => handleSettingChange('alwaysOnTop', e.target.checked)}
+                disabled={saving}
+                className={styles.toggleInput}
+              />
+              <div className={classNames(styles.toggleSwitch, {
+                [styles.light]: isLight,
+                [styles.toggleSwitchChecked]: settings.alwaysOnTop ?? false
+              })}>
+                <div className={classNames(styles.toggleSlider, {
+                  [styles.toggleSliderChecked]: settings.alwaysOnTop ?? false
+                })}></div>
+              </div>
+            </label>
+          </div>
+
+          {/* Remember Window Position Setting */}
+          <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
+            <div className={styles.settingContent}>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Remember Window Position</span>
+              <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
+                Save and restore window position when the application is closed and reopened
+              </p>
+            </div>
+            <label className={styles.toggleLabel}>
+              <input
+                type="checkbox"
+                checked={settings.rememberWindowPosition ?? true}
+                onChange={(e) => handleSettingChange('rememberWindowPosition', e.target.checked)}
+                disabled={saving}
+                className={styles.toggleInput}
+              />
+              <div className={classNames(styles.toggleSwitch, {
+                [styles.light]: isLight,
+                [styles.toggleSwitchChecked]: settings.rememberWindowPosition ?? true
+              })}>
+                <div className={classNames(styles.toggleSlider, {
+                  [styles.toggleSliderChecked]: settings.rememberWindowPosition ?? true
+                })}></div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
       {/* Saving Indicator */}
       {saving && (
         <div className={styles.savingIndicator}>

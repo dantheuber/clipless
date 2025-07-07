@@ -9,6 +9,56 @@ import icon from '../../resources/icon.png?asset'
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
+let windowBounds: { x: number; y: number; width: number; height: number } | null = null;
+
+// Window management functions
+async function loadWindowBounds(): Promise<void> {
+  try {
+    const settings = await storage.getSettings();
+    if (settings.rememberWindowPosition) {
+      const bounds = await storage.getWindowBounds();
+      if (bounds) {
+        windowBounds = bounds;
+      }
+    }
+  } catch (error) {
+    console.error('Failed to load window bounds:', error);
+  }
+}
+
+async function saveWindowBounds(): Promise<void> {
+  if (!mainWindow) return;
+  
+  try {
+    const settings = await storage.getSettings();
+    if (settings.rememberWindowPosition) {
+      const bounds = mainWindow.getBounds();
+      windowBounds = bounds;
+      await storage.saveWindowBounds(bounds);
+    }
+  } catch (error) {
+    console.error('Failed to save window bounds:', error);
+  }
+}
+
+async function applyWindowSettings(window: BrowserWindow): Promise<void> {
+  try {
+    const settings = await storage.getSettings();
+    
+    // Apply transparency
+    if (settings.windowTransparency && settings.windowTransparency > 0) {
+      const opacity = (100 - settings.windowTransparency) / 100;
+      window.setOpacity(opacity);
+    }
+    
+    // Apply always on top
+    if (settings.alwaysOnTop) {
+      window.setAlwaysOnTop(true);
+    }
+  } catch (error) {
+    console.error('Failed to apply window settings:', error);
+  }
+}
 
 function createSettingsWindow(tab?: string): void {
   if (settingsWindow) {     
@@ -65,7 +115,7 @@ function createSettingsWindow(tab?: string): void {
 
 function createWindow(): void {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  const windowOptions: any = {
     width: 900,
     height: 670,
     show: false,
@@ -75,11 +125,23 @@ function createWindow(): void {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
-  });
+  };
+
+  // Apply saved window bounds if available
+  if (windowBounds) {
+    windowOptions.x = windowBounds.x;
+    windowOptions.y = windowBounds.y;
+    windowOptions.width = windowBounds.width;
+    windowOptions.height = windowBounds.height;
+  }
+
+  mainWindow = new BrowserWindow(windowOptions);
 
   mainWindow.on('ready-to-show', () => {
     if (mainWindow) {
       mainWindow.show();
+      // Apply window settings after the window is ready
+      applyWindowSettings(mainWindow);
     }
   });
 
@@ -88,10 +150,15 @@ function createWindow(): void {
     if (!getIsQuitting()) {
       event.preventDefault();
       if (mainWindow) {
+        saveWindowBounds(); // Save bounds before hiding
         mainWindow.hide();
       }
     }
   });
+
+  // Save window bounds when moved or resized
+  mainWindow.on('moved', saveWindowBounds);
+  mainWindow.on('resized', saveWindowBounds);
 
   // Create system tray
   createTrayIcon(mainWindow, createSettingsWindow);
@@ -130,6 +197,11 @@ function createWindow(): void {
       // Save settings to storage
       await storage.saveSettings(settings);
       
+      // Apply window settings immediately
+      if (mainWindow) {
+        await applyWindowSettings(mainWindow);
+      }
+      
       // Relay settings changes to all windows
       if (mainWindow) {
         mainWindow.webContents.send('settings-updated', settings);
@@ -153,6 +225,16 @@ function createWindow(): void {
       return {};
     }
   });
+
+  // Apply saved window bounds if available
+  loadWindowBounds().then(() => {
+    if (mainWindow && windowBounds) {
+      mainWindow.setBounds(windowBounds);
+    }
+  });
+
+  // Apply window settings (transparency, always on top)
+  applyWindowSettings(mainWindow);
 }
 
 // Configure auto-updater
@@ -202,6 +284,9 @@ app.whenReady().then(async () => {
   } catch (error) {
     console.error('Failed to initialize secure storage:', error);
   }
+
+  // Load window bounds before creating the window
+  await loadWindowBounds();
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

@@ -39,6 +39,9 @@ export interface UserSettings {
   hotkey?: string;
   theme?: 'light' | 'dark' | 'system';
   codeDetectionEnabled?: boolean;
+  windowTransparency?: number; // 0-100, 0 = fully opaque, 100 = fully transparent
+  alwaysOnTop?: boolean;
+  rememberWindowPosition?: boolean;
 }
 
 /**
