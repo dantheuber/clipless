@@ -5,6 +5,13 @@ import { useTheme } from '../../providers/theme'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import styles from './QuickClipsScanner.module.css'
 
+interface CaptureItem {
+  groupName: string
+  value: string
+  searchTermId: string
+  uniqueKey: string
+}
+
 interface QuickClipsScannerProps {
   isOpen: boolean
   onClose: () => void
@@ -14,8 +21,9 @@ interface QuickClipsScannerProps {
 export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsScannerProps): React.JSX.Element {
   const { isLight } = useTheme()
   const [matches, setMatches] = useState<PatternMatch[]>([])
+  const [captureItems, setCaptureItems] = useState<CaptureItem[]>([])
   const [tools, setTools] = useState<QuickTool[]>([])
-  const [selectedMatches, setSelectedMatches] = useState<Set<string>>(new Set())
+  const [selectedCaptureItems, setSelectedCaptureItems] = useState<Set<string>>(new Set())
   const [availableTools, setAvailableTools] = useState<QuickTool[]>([])
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
@@ -51,26 +59,45 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
     }
   }, [isOpen])
 
-  // Update available tools when matches or selected matches change
+  // Update available tools when capture items or selected capture items change
   useEffect(() => {
-    if (matches.length > 0 && tools.length > 0) {
+    if (captureItems.length > 0 && tools.length > 0) {
       updateAvailableTools()
     }
-  }, [matches, tools, selectedMatches])
+  }, [captureItems, tools, selectedCaptureItems])
 
   const scanContent = async () => {
     setLoading(true)
     try {
       const scanResults = await window.api.quickClipsScanText(clipContent)
       setMatches(scanResults)
-      // Auto-select all matches initially
-      const matchKeys = scanResults.map((match, index) => 
-        `${match.searchTermId}-${index}-${Object.keys(match.captures).join('-')}`
-      )
-      setSelectedMatches(new Set(matchKeys))
+      
+      // Extract individual capture items and deduplicate
+      const captureMap = new Map<string, CaptureItem>()
+      
+      scanResults.forEach((match) => {
+        Object.entries(match.captures).forEach(([groupName, value]) => {
+          const uniqueKey = `${groupName}-${value}`
+          if (!captureMap.has(uniqueKey)) {
+            captureMap.set(uniqueKey, {
+              groupName,
+              value: String(value),
+              searchTermId: match.searchTermId,
+              uniqueKey
+            })
+          }
+        })
+      })
+      
+      const items = Array.from(captureMap.values())
+      setCaptureItems(items)
+      
+      // Auto-select all capture items initially
+      setSelectedCaptureItems(new Set(items.map(item => item.uniqueKey)))
     } catch (error) {
       console.error('Failed to scan content:', error)
       setMatches([])
+      setCaptureItems([])
     } finally {
       setLoading(false)
     }
@@ -87,13 +114,12 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
   }
 
   const updateAvailableTools = () => {
-    // Get all capture groups from selected matches
+    // Get all capture group names from selected capture items
     const selectedCaptureGroups = new Set<string>()
     
-    matches.forEach((match, index) => {
-      const matchKey = `${match.searchTermId}-${index}-${Object.keys(match.captures).join('-')}`
-      if (selectedMatches.has(matchKey)) {
-        Object.keys(match.captures).forEach(group => selectedCaptureGroups.add(group))
+    captureItems.forEach((item) => {
+      if (selectedCaptureItems.has(item.uniqueKey)) {
+        selectedCaptureGroups.add(item.groupName)
       }
     })
 
@@ -109,14 +135,14 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
     setSelectedTools(prev => new Set([...prev].filter(id => availableToolIds.has(id))))
   }
 
-  const handleMatchToggle = (matchKey: string) => {
-    const newSelected = new Set(selectedMatches)
-    if (newSelected.has(matchKey)) {
-      newSelected.delete(matchKey)
+  const handleCaptureItemToggle = (uniqueKey: string) => {
+    const newSelected = new Set(selectedCaptureItems)
+    if (newSelected.has(uniqueKey)) {
+      newSelected.delete(uniqueKey)
     } else {
-      newSelected.add(matchKey)
+      newSelected.add(uniqueKey)
     }
-    setSelectedMatches(newSelected)
+    setSelectedCaptureItems(newSelected)
   }
 
   const handleToolToggle = (toolId: string) => {
@@ -130,24 +156,40 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
   }
 
   const handleOpenTools = async () => {
-    if (selectedMatches.size === 0 || selectedTools.size === 0) return
+    if (selectedCaptureItems.size === 0 || selectedTools.size === 0) return
 
     try {
-      // Get the actual match objects for selected matches
-      const selectedMatchObjects = matches.filter((match, index) => {
-        const matchKey = `${match.searchTermId}-${index}-${Object.keys(match.captures).join('-')}`
-        return selectedMatches.has(matchKey)
+      // Create a map of searchTermId to searchTermName from original matches
+      const searchTermMap = new Map<string, string>()
+      matches.forEach(match => {
+        searchTermMap.set(match.searchTermId, match.searchTermName)
       })
+
+      // Create PatternMatch objects from selected capture items
+      const selectedMatchObjects = captureItems
+        .filter(item => selectedCaptureItems.has(item.uniqueKey))
+        .reduce((acc, item) => {
+          // Group by searchTermId to reconstruct PatternMatch objects
+          const existing = acc.find(match => match.searchTermId === item.searchTermId)
+          if (existing) {
+            existing.captures[item.groupName] = item.value
+          } else {
+            acc.push({
+              searchTermId: item.searchTermId,
+              searchTermName: searchTermMap.get(item.searchTermId) || '',
+              captures: {
+                [item.groupName]: item.value
+              }
+            })
+          }
+          return acc
+        }, [] as PatternMatch[])
 
       await window.api.quickClipsOpenTools(selectedMatchObjects, Array.from(selectedTools))
       onClose()
     } catch (error) {
       console.error('Failed to open tools:', error)
     }
-  }
-
-  const getMatchKey = (match: PatternMatch, index: number): string => {
-    return `${match.searchTermId}-${index}-${Object.keys(match.captures).join('-')}`
   }
 
   // Handle overlay click to close
@@ -189,7 +231,7 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
               <FontAwesomeIcon icon="spinner" spin />
               <span>Scanning content...</span>
             </div>
-          ) : matches.length === 0 ? (
+          ) : captureItems.length === 0 ? (
             <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
               <FontAwesomeIcon icon="search" className={styles.emptyIcon} />
               <p>No patterns found in this clip content.</p>
@@ -199,19 +241,18 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
             </div>
           ) : (
             <>
-              {/* Left Side - Matches Section */}
+              {/* Left Side - Capture Items Section */}
               <div className={classNames(styles.section, styles.leftSection)}>
                 <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
-                  Found Patterns ({matches.length})
+                  Found Patterns ({captureItems.length})
                 </h3>
                 <div className={styles.matchesList}>
-                  {matches.map((match, index) => {
-                    const matchKey = getMatchKey(match, index)
-                    const isSelected = selectedMatches.has(matchKey)
+                  {captureItems.map((item) => {
+                    const isSelected = selectedCaptureItems.has(item.uniqueKey)
                     
                     return (
                       <div
-                        key={matchKey}
+                        key={item.uniqueKey}
                         className={classNames(
                           styles.matchItem,
                           { [styles.light]: isLight },
@@ -222,17 +263,15 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => handleMatchToggle(matchKey)}
+                            onChange={() => handleCaptureItemToggle(item.uniqueKey)}
                             className={styles.checkbox}
                           />
                           <div className={styles.matchDetails}>
                             <div className={styles.matchCaptures}>
-                              {Object.entries(match.captures).map(([group, value]) => (
-                                <div key={group} className={styles.capture}>
-                                  <span className={classNames(styles.captureGroup, { [styles.light]: isLight })}>{group}:</span>
-                                  <span className={classNames(styles.captureValue, { [styles.light]: isLight })}>{value}</span>
-                                </div>
-                              ))}
+                              <div className={styles.capture}>
+                                <span className={classNames(styles.captureGroup, { [styles.light]: isLight })}>{item.groupName}:</span>
+                                <span className={classNames(styles.captureValue, { [styles.light]: isLight })}>{item.value}</span>
+                              </div>
                             </div>
                           </div>
                         </label>
@@ -302,11 +341,11 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
         </div>
 
         {/* Footer */}
-        {matches.length > 0 && (
+        {captureItems.length > 0 && (
           <div className={classNames(styles.footer, { [styles.light]: isLight })}>
             <div className={styles.stats}>
               <span className={classNames(styles.statText, { [styles.light]: isLight })}>
-                {selectedMatches.size} patterns, {selectedTools.size} tools selected
+                {selectedCaptureItems.size} patterns, {selectedTools.size} tools selected
               </span>
             </div>
             <div className={styles.actions}>
@@ -319,7 +358,7 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
               <button
                 className={classNames(styles.openButton, { [styles.light]: isLight })}
                 onClick={handleOpenTools}
-                disabled={selectedMatches.size === 0 || selectedTools.size === 0}
+                disabled={selectedCaptureItems.size === 0 || selectedTools.size === 0}
               >
                 Open Tools
               </button>

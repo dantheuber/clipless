@@ -18,7 +18,7 @@ const BUILTIN_PATTERNS = [
   },
   {
     name: 'Domain Name',
-    pattern: `(?<domainName>\\b[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\\.${TLD_PATTERN}\\b)`
+    pattern: `(?<domainName>\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+(${TLD_PATTERN})\\b)`
   },
   {
     name: 'Phone Number',
@@ -26,7 +26,7 @@ const BUILTIN_PATTERNS = [
   },
   {
     name: 'URL',
-    pattern: '(?<url>https?:\\/\\/[^\\s]+)'
+    pattern: '(?<url>https?:\\/\\/(?<domainName>[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?)*)(?:\\/[^\\s]*)?)'
   },
   {
     name: 'MAC Address',
