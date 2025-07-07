@@ -48,6 +48,8 @@ export interface AppData {
   clips: StoredClip[];
   settings: UserSettings;
   templates: Template[];
+  searchTerms: SearchTerm[];
+  quickTools: QuickTool[];
   version: string;
 }
 
@@ -100,4 +102,82 @@ export interface TemplateOperations {
   reorder: (templates: Template[]) => Promise<void>;
   getAll: () => Promise<Template[]>;
   generateText: (templateId: string, clipContents: string[]) => Promise<string>;
+}
+
+/**
+ * Search term for extracting data from clipboard content
+ */
+export interface SearchTerm {
+  id: string; // UUID
+  name: string;
+  pattern: string; // Regular expression with named capture groups
+  enabled: boolean;
+  createdAt: number;
+  updatedAt: number;
+  order: number;
+}
+
+/**
+ * Tool for opening web resources with extracted data
+ */
+export interface QuickTool {
+  id: string; // UUID
+  name: string;
+  url: string; // URL template with {captureGroupName} tokens
+  captureGroups: string[]; // Which capture groups this tool can use
+  createdAt: number;
+  updatedAt: number;
+  order: number;
+}
+
+/**
+ * Result of pattern matching on clipboard content
+ */
+export interface PatternMatch {
+  searchTermId: string;
+  searchTermName: string;
+  captures: Record<string, string>; // capture group name -> extracted value
+}
+
+/**
+ * Quick Clips configuration export/import format
+ */
+export interface QuickClipsConfig {
+  searchTerms: SearchTerm[];
+  tools: QuickTool[];
+  version: string;
+}
+
+/**
+ * Search term management operations
+ */
+export interface SearchTermOperations {
+  create: (name: string, pattern: string) => Promise<SearchTerm>;
+  update: (id: string, updates: Partial<SearchTerm>) => Promise<SearchTerm>;
+  delete: (id: string) => Promise<void>;
+  reorder: (searchTerms: SearchTerm[]) => Promise<void>;
+  getAll: () => Promise<SearchTerm[]>;
+  test: (pattern: string, testText: string) => Promise<PatternMatch[]>;
+}
+
+/**
+ * Quick tool management operations
+ */
+export interface QuickToolOperations {
+  create: (name: string, url: string, captureGroups: string[]) => Promise<QuickTool>;
+  update: (id: string, updates: Partial<QuickTool>) => Promise<QuickTool>;
+  delete: (id: string) => Promise<void>;
+  reorder: (tools: QuickTool[]) => Promise<void>;
+  getAll: () => Promise<QuickTool[]>;
+  validateUrl: (url: string, captureGroups: string[]) => Promise<{ isValid: boolean; errors: string[] }>;
+}
+
+/**
+ * Quick Clips scanning operations
+ */
+export interface QuickClipsOperations {
+  scanText: (text: string) => Promise<PatternMatch[]>;
+  openTools: (matches: PatternMatch[], toolIds: string[]) => Promise<void>;
+  exportConfig: () => Promise<QuickClipsConfig>;
+  importConfig: (config: QuickClipsConfig) => Promise<void>;
 }

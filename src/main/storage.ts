@@ -1,7 +1,7 @@
 import { safeStorage, app } from 'electron';
 import { join } from 'path';
 import { promises as fs } from 'fs';
-import type { ClipItem, StoredClip, UserSettings, AppData, StorageStats, Template } from '../shared/types';
+import type { ClipItem, StoredClip, UserSettings, AppData, StorageStats, Template, SearchTerm, QuickTool } from '../shared/types';
 import { DEFAULT_MAX_CLIPS } from '../shared/constants';
 
 const DEFAULT_SETTINGS: UserSettings = {
@@ -15,6 +15,8 @@ const DEFAULT_DATA: AppData = {
   clips: [],
   settings: DEFAULT_SETTINGS,
   templates: [],
+  searchTerms: [],
+  quickTools: [],
   version: '1.0.0'
 };
 
@@ -156,6 +158,34 @@ class SecureStorage {
         typeof template.createdAt === 'number' &&
         typeof template.updatedAt === 'number' &&
         typeof template.order === 'number'
+      );
+    }
+
+    // Copy over valid search terms
+    if (data.searchTerms && Array.isArray(data.searchTerms)) {
+      migratedData.searchTerms = data.searchTerms.filter((searchTerm: any) => 
+        searchTerm && 
+        typeof searchTerm.id === 'string' &&
+        typeof searchTerm.name === 'string' &&
+        typeof searchTerm.pattern === 'string' &&
+        typeof searchTerm.enabled === 'boolean' &&
+        typeof searchTerm.createdAt === 'number' &&
+        typeof searchTerm.updatedAt === 'number' &&
+        typeof searchTerm.order === 'number'
+      );
+    }
+
+    // Copy over valid quick tools
+    if (data.quickTools && Array.isArray(data.quickTools)) {
+      migratedData.quickTools = data.quickTools.filter((quickTool: any) => 
+        quickTool && 
+        typeof quickTool.id === 'string' &&
+        typeof quickTool.name === 'string' &&
+        typeof quickTool.url === 'string' &&
+        Array.isArray(quickTool.captureGroups) &&
+        typeof quickTool.createdAt === 'number' &&
+        typeof quickTool.updatedAt === 'number' &&
+        typeof quickTool.order === 'number'
       );
     }
 
@@ -307,6 +337,13 @@ class SecureStorage {
   }
 
   /**
+   * Generate a unique ID for any entity
+   */
+  private generateId(): string {
+    return Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
+
+  /**
    * Get all templates
    */
   async getTemplates(): Promise<Template[]> {
@@ -429,6 +466,210 @@ class SecureStorage {
     });
 
     return result;
+  }
+
+  // ===== SEARCH TERMS METHODS =====
+
+  /**
+   * Get all search terms
+   */
+  async getSearchTerms(): Promise<SearchTerm[]> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return [...this.data.searchTerms].sort((a, b) => a.order - b.order);
+  }
+
+  /**
+   * Create a new search term
+   */
+  async createSearchTerm(name: string, pattern: string): Promise<SearchTerm> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const searchTerm: SearchTerm = {
+      id: this.generateId(),
+      name,
+      pattern,
+      enabled: true,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      order: this.data.searchTerms.length
+    };
+
+    this.data.searchTerms.push(searchTerm);
+    await this.saveData();
+    return searchTerm;
+  }
+
+  /**
+   * Update an existing search term
+   */
+  async updateSearchTerm(id: string, updates: Partial<SearchTerm>): Promise<SearchTerm> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const searchTermIndex = this.data.searchTerms.findIndex(t => t.id === id);
+    if (searchTermIndex === -1) {
+      throw new Error('Search term not found');
+    }
+
+    const updatedSearchTerm: SearchTerm = {
+      ...this.data.searchTerms[searchTermIndex],
+      ...updates,
+      updatedAt: Date.now()
+    };
+
+    this.data.searchTerms[searchTermIndex] = updatedSearchTerm;
+    await this.saveData();
+    return updatedSearchTerm;
+  }
+
+  /**
+   * Delete a search term
+   */
+  async deleteSearchTerm(id: string): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const searchTermIndex = this.data.searchTerms.findIndex(t => t.id === id);
+    if (searchTermIndex === -1) {
+      throw new Error('Search term not found');
+    }
+
+    this.data.searchTerms.splice(searchTermIndex, 1);
+
+    // Reorder remaining search terms
+    this.data.searchTerms.forEach((searchTerm, index) => {
+      searchTerm.order = index;
+    });
+
+    await this.saveData();
+  }
+
+  /**
+   * Reorder search terms
+   */
+  async reorderSearchTerms(searchTerms: SearchTerm[]): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    searchTerms.forEach((searchTerm, index) => {
+      const existingSearchTerm = this.data.searchTerms.find(t => t.id === searchTerm.id);
+      if (existingSearchTerm) {
+        existingSearchTerm.order = index;
+      }
+    });
+
+    // Sort search terms by order
+    this.data.searchTerms.sort((a, b) => a.order - b.order);
+    await this.saveData();
+  }
+
+  // ===== QUICK TOOLS METHODS =====
+
+  /**
+   * Get all quick tools
+   */
+  async getQuickTools(): Promise<QuickTool[]> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return [...this.data.quickTools].sort((a, b) => a.order - b.order);
+  }
+
+  /**
+   * Create a new quick tool
+   */
+  async createQuickTool(name: string, url: string, captureGroups: string[]): Promise<QuickTool> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const quickTool: QuickTool = {
+      id: this.generateId(),
+      name,
+      url,
+      captureGroups: [...captureGroups],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      order: this.data.quickTools.length
+    };
+
+    this.data.quickTools.push(quickTool);
+    await this.saveData();
+    return quickTool;
+  }
+
+  /**
+   * Update an existing quick tool
+   */
+  async updateQuickTool(id: string, updates: Partial<QuickTool>): Promise<QuickTool> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const quickToolIndex = this.data.quickTools.findIndex(t => t.id === id);
+    if (quickToolIndex === -1) {
+      throw new Error('Quick tool not found');
+    }
+
+    const updatedQuickTool: QuickTool = {
+      ...this.data.quickTools[quickToolIndex],
+      ...updates,
+      updatedAt: Date.now()
+    };
+
+    this.data.quickTools[quickToolIndex] = updatedQuickTool;
+    await this.saveData();
+    return updatedQuickTool;
+  }
+
+  /**
+   * Delete a quick tool
+   */
+  async deleteQuickTool(id: string): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    const quickToolIndex = this.data.quickTools.findIndex(t => t.id === id);
+    if (quickToolIndex === -1) {
+      throw new Error('Quick tool not found');
+    }
+
+    this.data.quickTools.splice(quickToolIndex, 1);
+
+    // Reorder remaining quick tools
+    this.data.quickTools.forEach((quickTool, index) => {
+      quickTool.order = index;
+    });
+
+    await this.saveData();
+  }
+
+  /**
+   * Reorder quick tools
+   */
+  async reorderQuickTools(quickTools: QuickTool[]): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    quickTools.forEach((quickTool, index) => {
+      const existingQuickTool = this.data.quickTools.find(t => t.id === quickTool.id);
+      if (existingQuickTool) {
+        existingQuickTool.order = index;
+      }
+    });
+
+    // Sort quick tools by order
+    this.data.quickTools.sort((a, b) => a.order - b.order);
+    await this.saveData();
   }
 }
 

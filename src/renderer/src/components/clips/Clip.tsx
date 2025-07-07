@@ -5,6 +5,7 @@ import { materialDark, materialLight } from 'react-syntax-highlighter/dist/esm/s
 import { ClipItem, useClips } from '../../providers/clips';
 import { useTheme } from '../../providers/theme';
 import { useLanguageDetection } from '../../providers/languageDetection';
+import { usePatternDetection } from '../../hooks/usePatternDetection';
 import { mapToSyntaxHighlighterLanguage } from '../../utils/languageDetection';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
@@ -19,6 +20,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
   const { copyClipToClipboard, clipCopyIndex, updateClip } = useClips();
   const { isLight } = useTheme();
   const { isCodeDetectionEnabled } = useLanguageDetection();
+  const { hasPatterns } = usePatternDetection(clip.content);
   const popoverRef = useRef<HTMLDivElement>(null);
   
   // State for inline editing
@@ -343,6 +345,11 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
         
         {/* Content area */}
         <div className={classNames(styles.contentArea, { [styles.light]: isLight })}>
+          {hasPatterns && (
+            <div className={classNames(styles.patternIndicator, { [styles.light]: isLight })} title="Quick Clips patterns detected">
+              <FontAwesomeIcon icon="search" />
+            </div>
+          )}
           {renderClipContent()}
         </div>
         

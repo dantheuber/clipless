@@ -1,6 +1,6 @@
 import { clipboard, nativeImage, BrowserWindow, ipcMain } from 'electron'
 import { storage } from './storage'
-import type { ClipItem } from '../shared/types'
+import type { ClipItem, PatternMatch } from '../shared/types'
 
 // Clipboard monitoring state
 let lastClipboardContent = '';
@@ -280,6 +280,293 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       return await storage.generateTextFromTemplate(templateId, clipContents);
     } catch (error) {
       console.error('Failed to generate text from template:', error);
+      throw error;
+    }
+  });
+
+  // ===== SEARCH TERMS IPC HANDLERS =====
+  
+  ipcMain.handle('search-terms-get-all', async () => {
+    try {
+      return await storage.getSearchTerms();
+    } catch (error) {
+      console.error('Failed to get search terms:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('search-terms-create', async (_event, name: string, pattern: string) => {
+    try {
+      return await storage.createSearchTerm(name, pattern);
+    } catch (error) {
+      console.error('Failed to create search term:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('search-terms-update', async (_event, id: string, updates: any) => {
+    try {
+      return await storage.updateSearchTerm(id, updates);
+    } catch (error) {
+      console.error('Failed to update search term:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('search-terms-delete', async (_event, id: string) => {
+    try {
+      await storage.deleteSearchTerm(id);
+    } catch (error) {
+      console.error('Failed to delete search term:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('search-terms-reorder', async (_event, searchTerms: any[]) => {
+    try {
+      await storage.reorderSearchTerms(searchTerms);
+    } catch (error) {
+      console.error('Failed to reorder search terms:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('search-terms-test', async (_event, pattern: string, testText: string) => {
+    try {
+      // Test a single pattern against text
+      const regex = new RegExp(pattern, 'g');
+      const matches: PatternMatch[] = [];
+      let match;
+      
+      while ((match = regex.exec(testText)) !== null) {
+        const captures: Record<string, string> = {};
+        
+        // Extract named groups
+        if (match.groups) {
+          Object.entries(match.groups).forEach(([groupName, value]) => {
+            if (value !== undefined && value !== null && typeof value === 'string') {
+              captures[groupName] = value;
+            }
+          });
+        }
+        
+        if (Object.keys(captures).length > 0) {
+          matches.push({
+            searchTermId: 'test',
+            searchTermName: 'Test Pattern',
+            captures
+          });
+        }
+      }
+      
+      return matches;
+    } catch (error) {
+      console.error('Failed to test search term:', error);
+      throw error;
+    }
+  });
+
+  // ===== QUICK TOOLS IPC HANDLERS =====
+  
+  ipcMain.handle('quick-tools-get-all', async () => {
+    try {
+      return await storage.getQuickTools();
+    } catch (error) {
+      console.error('Failed to get quick tools:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-tools-create', async (_event, name: string, url: string, captureGroups: string[]) => {
+    try {
+      return await storage.createQuickTool(name, url, captureGroups);
+    } catch (error) {
+      console.error('Failed to create quick tool:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-tools-update', async (_event, id: string, updates: any) => {
+    try {
+      return await storage.updateQuickTool(id, updates);
+    } catch (error) {
+      console.error('Failed to update quick tool:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-tools-delete', async (_event, id: string) => {
+    try {
+      await storage.deleteQuickTool(id);
+    } catch (error) {
+      console.error('Failed to delete quick tool:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-tools-reorder', async (_event, tools: any[]) => {
+    try {
+      await storage.reorderQuickTools(tools);
+    } catch (error) {
+      console.error('Failed to reorder quick tools:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-tools-validate-url', async (_event, url: string, captureGroups: string[]) => {
+    try {
+      const errors: string[] = [];
+      
+      // Check if URL is valid
+      try {
+        new URL(url.replace(/\{[^}]+\}/g, 'test')); // Replace tokens with test values
+      } catch {
+        errors.push('Invalid URL format');
+      }
+      
+      // Check if all capture groups in URL are in the provided list
+      const urlTokens = url.match(/\{([^}]+)\}/g) || [];
+      const urlCaptureGroups = urlTokens.map(token => token.slice(1, -1));
+      
+      for (const group of urlCaptureGroups) {
+        if (!captureGroups.includes(group)) {
+          errors.push(`Token '{${group}}' is not in the selected capture groups`);
+        }
+      }
+      
+      return {
+        isValid: errors.length === 0,
+        errors
+      };
+    } catch (error) {
+      console.error('Failed to validate tool URL:', error);
+      throw error;
+    }
+  });
+
+  // ===== QUICK CLIPS SCANNING IPC HANDLERS =====
+  
+  ipcMain.handle('quick-clips-scan-text', async (_event, text: string) => {
+    try {
+      const searchTerms = await storage.getSearchTerms();
+      const matches: PatternMatch[] = [];
+      
+      for (const searchTerm of searchTerms) {
+        if (!searchTerm.enabled) continue;
+        
+        try {
+          const regex = new RegExp(searchTerm.pattern, 'g');
+          let match;
+          
+          while ((match = regex.exec(text)) !== null) {
+            const captures: Record<string, string> = {};
+            
+            // Extract named groups
+            if (match.groups) {
+              Object.entries(match.groups).forEach(([groupName, value]) => {
+                if (value !== undefined && value !== null && typeof value === 'string') {
+                  captures[groupName] = value;
+                }
+              });
+            }
+            
+            if (Object.keys(captures).length > 0) {
+              matches.push({
+                searchTermId: searchTerm.id,
+                searchTermName: searchTerm.name,
+                captures
+              });
+            }
+          }
+        } catch (error) {
+          console.error(`Failed to test pattern for search term ${searchTerm.name}:`, error);
+          // Continue with other patterns
+        }
+      }
+      
+      return matches;
+    } catch (error) {
+      console.error('Failed to scan text:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-clips-open-tools', async (_event, matches: any[], toolIds: string[]) => {
+    try {
+      const { shell } = require('electron');
+      const tools = await storage.getQuickTools();
+      
+      for (const toolId of toolIds) {
+        const tool = tools.find(t => t.id === toolId);
+        if (!tool) continue;
+        
+        // Find matches that contain capture groups needed by this tool
+        const applicableMatches = matches.filter(match => 
+          tool.captureGroups.some(group => group in match.captures)
+        );
+        
+        if (applicableMatches.length === 0) continue;
+        
+        // Use the first applicable match to build the URL
+        const match = applicableMatches[0];
+        let url = tool.url;
+        
+        // Replace tokens with captured values
+        for (const group of tool.captureGroups) {
+          if (group in match.captures) {
+            url = url.replace(new RegExp(`\\{${group}\\}`, 'g'), encodeURIComponent(match.captures[group]));
+          }
+        }
+        
+        // Open the URL
+        await shell.openExternal(url);
+      }
+    } catch (error) {
+      console.error('Failed to open tools:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-clips-export-config', async () => {
+    try {
+      const searchTerms = await storage.getSearchTerms();
+      const tools = await storage.getQuickTools();
+      
+      return {
+        searchTerms,
+        tools,
+        version: '1.0.0'
+      };
+    } catch (error) {
+      console.error('Failed to export quick clips config:', error);
+      throw error;
+    }
+  });
+
+  ipcMain.handle('quick-clips-import-config', async (_event, config: any) => {
+    try {
+      // Validate config structure
+      if (!config || typeof config !== 'object') {
+        throw new Error('Invalid config format');
+      }
+      
+      if (config.searchTerms && Array.isArray(config.searchTerms)) {
+        for (const searchTerm of config.searchTerms) {
+          await storage.createSearchTerm(searchTerm.name || 'Imported Search Term', searchTerm.pattern || '(?<value>.*)');
+        }
+      }
+      
+      if (config.tools && Array.isArray(config.tools)) {
+        for (const tool of config.tools) {
+          await storage.createQuickTool(
+            tool.name || 'Imported Tool', 
+            tool.url || 'https://example.com/?q={value}', 
+            tool.captureGroups || []
+          );
+        }
+      }
+    } catch (error) {
+      console.error('Failed to import quick clips config:', error);
       throw error;
     }
   });

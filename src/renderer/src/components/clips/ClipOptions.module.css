@@ -84,6 +84,22 @@
   color: #ffffff !important;
 }
 
+.optionButton.scan.hasPatterns {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .toggleButton {
   background: transparent;
   border: none;

@@ -54,7 +54,29 @@ const api = {
   templatesUpdate: (id: string, updates: any) => electronAPI.ipcRenderer.invoke('templates-update', id, updates),
   templatesDelete: (id: string) => electronAPI.ipcRenderer.invoke('templates-delete', id),
   templatesReorder: (templates: any[]) => electronAPI.ipcRenderer.invoke('templates-reorder', templates),
-  templatesGenerateText: (templateId: string, clipContents: string[]) => electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents)
+  templatesGenerateText: (templateId: string, clipContents: string[]) => electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents),
+
+  // Quick Clips - Search Terms APIs
+  searchTermsGetAll: () => electronAPI.ipcRenderer.invoke('search-terms-get-all'),
+  searchTermsCreate: (name: string, pattern: string) => electronAPI.ipcRenderer.invoke('search-terms-create', name, pattern),
+  searchTermsUpdate: (id: string, updates: any) => electronAPI.ipcRenderer.invoke('search-terms-update', id, updates),
+  searchTermsDelete: (id: string) => electronAPI.ipcRenderer.invoke('search-terms-delete', id),
+  searchTermsReorder: (searchTerms: any[]) => electronAPI.ipcRenderer.invoke('search-terms-reorder', searchTerms),
+  searchTermsTest: (pattern: string, testText: string) => electronAPI.ipcRenderer.invoke('search-terms-test', pattern, testText),
+
+  // Quick Clips - Tools APIs
+  quickToolsGetAll: () => electronAPI.ipcRenderer.invoke('quick-tools-get-all'),
+  quickToolsCreate: (name: string, url: string, captureGroups: string[]) => electronAPI.ipcRenderer.invoke('quick-tools-create', name, url, captureGroups),
+  quickToolsUpdate: (id: string, updates: any) => electronAPI.ipcRenderer.invoke('quick-tools-update', id, updates),
+  quickToolsDelete: (id: string) => electronAPI.ipcRenderer.invoke('quick-tools-delete', id),
+  quickToolsReorder: (tools: any[]) => electronAPI.ipcRenderer.invoke('quick-tools-reorder', tools),
+  quickToolsValidateUrl: (url: string, captureGroups: string[]) => electronAPI.ipcRenderer.invoke('quick-tools-validate-url', url, captureGroups),
+
+  // Quick Clips - Scanning APIs
+  quickClipsScanText: (text: string) => electronAPI.ipcRenderer.invoke('quick-clips-scan-text', text),
+  quickClipsOpenTools: (matches: any[], toolIds: string[]) => electronAPI.ipcRenderer.invoke('quick-clips-open-tools', matches, toolIds),
+  quickClipsExportConfig: () => electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
+  quickClipsImportConfig: (config: any) => electronAPI.ipcRenderer.invoke('quick-clips-import-config', config)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

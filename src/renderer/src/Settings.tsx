@@ -8,6 +8,7 @@ import { LanguageDetectionProvider } from './providers/languageDetection'
 import { StorageSettings } from './components/settings/StorageSettings'
 import { UserSettings } from './components/settings/UserSettings'
 import { TemplateManager } from './components/settings/TemplateManager'
+import { QuickClipsManager } from './components/settings/QuickClipsManager'
 import styles from './Settings.module.css'
 
 type TabType = 'general' | 'templates' | 'quickClips'
@@ -77,11 +78,7 @@ function SettingsContent(): React.JSX.Element {
         return (
           <div className={styles.grid}>
             <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <h2 className={styles.sectionTitle}>Quick Clips</h2>
-              <p className={styles.placeholder}>
-                Quick Clips settings will be available here. This will allow you to configure 
-                frequently used clipboard items for quick access.
-              </p>
+              <QuickClipsManager />
             </section>
           </div>
         )

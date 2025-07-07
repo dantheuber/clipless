@@ -1,13 +1,15 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useClips } from '../../providers/clips';
 import { useTheme } from '../../providers/theme';
+import { QuickClipsScanner } from './QuickClipsScanner';
 import styles from './ClipOptions.module.css';
 import classNames from 'classnames';
 
 export const ClipOptions = ({ index }): React.JSX.Element => {
   const [visible, setVisible] = useState<boolean>(false);
+  const [scannerOpen, setScannerOpen] = useState<boolean>(false);
   const { isLight } = useTheme();
   const toggleVisibility = useCallback(() => {
     setVisible(!visible);
@@ -16,8 +18,49 @@ export const ClipOptions = ({ index }): React.JSX.Element => {
   const {
     isClipLocked,
     toggleClipLock,
-    emptyClip
+    emptyClip,
+    getClip
   } = useClips();
+
+  const clip = getClip(index);
+  
+  // Check if this clip has patterns (we'll do a simple check)
+  const [hasPatterns, setHasPatterns] = useState(false);
+  
+  // Check for patterns when component mounts or clip content changes
+  useEffect(() => {
+    let isCancelled = false;
+    
+    const checkPatterns = async () => {
+      if (!clip.content || clip.content.trim().length === 0) {
+        setHasPatterns(false);
+        return;
+      }
+      
+      try {
+        const matches = await window.api.quickClipsScanText(clip.content);
+        if (!isCancelled) {
+          setHasPatterns(matches.length > 0);
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setHasPatterns(false);
+        }
+      }
+    };
+    
+    const timeoutId = setTimeout(checkPatterns, 200);
+    
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
+  }, [clip.content]);
+
+  const handleScanClick = () => {
+    setScannerOpen(true);
+    setVisible(false); // Close the options menu
+  };
 
   return (
     <div className={styles.optionsContainer}>
@@ -40,8 +83,14 @@ export const ClipOptions = ({ index }): React.JSX.Element => {
             </button>
             <button 
               key="scan" 
-              className={classNames(styles.optionButton, styles.scan, { [styles.light]: isLight })}
-              onClick={() => console.log('Scan functionality not implemented')}
+              className={classNames(
+                styles.optionButton, 
+                styles.scan, 
+                { [styles.light]: isLight },
+                { [styles.hasPatterns]: hasPatterns }
+              )}
+              onClick={handleScanClick}
+              title={hasPatterns ? "Quick Clips patterns detected!" : "Scan for Quick Clips patterns"}
             >
               <FontAwesomeIcon icon="search" />
             </button>
@@ -61,6 +110,12 @@ export const ClipOptions = ({ index }): React.JSX.Element => {
           <FontAwesomeIcon icon={isClipLocked(index) ? 'lock' : 'gear'} />
         </button>
       </OutsideClickHandler>
+      
+      <QuickClipsScanner 
+        isOpen={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        clipContent={clip.content}
+      />
     </div>
   );
 };

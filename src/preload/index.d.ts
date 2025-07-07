@@ -44,6 +44,25 @@ declare global {
       templatesDelete: (id: string) => Promise<void>
       templatesReorder: (templates: any[]) => Promise<void>
       templatesGenerateText: (templateId: string, clipContents: string[]) => Promise<string>
+      // Quick Clips - Search Terms APIs
+      searchTermsGetAll: () => Promise<any[]>
+      searchTermsCreate: (name: string, pattern: string) => Promise<any>
+      searchTermsUpdate: (id: string, updates: any) => Promise<any>
+      searchTermsDelete: (id: string) => Promise<void>
+      searchTermsReorder: (searchTerms: any[]) => Promise<void>
+      searchTermsTest: (pattern: string, testText: string) => Promise<any[]>
+      // Quick Clips - Tools APIs
+      quickToolsGetAll: () => Promise<any[]>
+      quickToolsCreate: (name: string, url: string, captureGroups: string[]) => Promise<any>
+      quickToolsUpdate: (id: string, updates: any) => Promise<any>
+      quickToolsDelete: (id: string) => Promise<void>
+      quickToolsReorder: (tools: any[]) => Promise<void>
+      quickToolsValidateUrl: (url: string, captureGroups: string[]) => Promise<{ isValid: boolean; errors: string[] }>
+      // Quick Clips - Scanning APIs
+      quickClipsScanText: (text: string) => Promise<any[]>
+      quickClipsOpenTools: (matches: any[], toolIds: string[]) => Promise<void>
+      quickClipsExportConfig: () => Promise<any>
+      quickClipsImportConfig: (config: any) => Promise<void>
     }
   }
 }
