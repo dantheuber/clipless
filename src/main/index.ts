@@ -46,17 +46,49 @@ async function applyWindowSettings(window: BrowserWindow): Promise<void> {
     const settings = await storage.getSettings();
     
     // Apply transparency
-    if (settings.windowTransparency && settings.windowTransparency > 0) {
+    if (settings.transparencyEnabled && settings.windowTransparency && settings.windowTransparency > 0) {
       const opacity = (100 - settings.windowTransparency) / 100;
       window.setOpacity(opacity);
+    } else {
+      // Reset to fully opaque if transparency is disabled
+      window.setOpacity(1.0);
     }
     
     // Apply always on top
     if (settings.alwaysOnTop) {
       window.setAlwaysOnTop(true);
+    } else {
+      window.setAlwaysOnTop(false);
     }
   } catch (error) {
     console.error('Failed to apply window settings:', error);
+  }
+}
+
+async function handleWindowFocus(window: BrowserWindow): Promise<void> {
+  try {
+    const settings = await storage.getSettings();
+    
+    // Make window opaque when focused if the option is enabled
+    if (settings.transparencyEnabled && settings.opaqueWhenFocused) {
+      window.setOpacity(1.0);
+    }
+  } catch (error) {
+    console.error('Failed to handle window focus:', error);
+  }
+}
+
+async function handleWindowBlur(window: BrowserWindow): Promise<void> {
+  try {
+    const settings = await storage.getSettings();
+    
+    // Restore transparency when window loses focus
+    if (settings.transparencyEnabled && settings.opaqueWhenFocused && settings.windowTransparency && settings.windowTransparency > 0) {
+      const opacity = (100 - settings.windowTransparency) / 100;
+      window.setOpacity(opacity);
+    }
+  } catch (error) {
+    console.error('Failed to handle window blur:', error);
   }
 }
 
@@ -159,6 +191,10 @@ function createWindow(): void {
   // Save window bounds when moved or resized
   mainWindow.on('moved', saveWindowBounds);
   mainWindow.on('resized', saveWindowBounds);
+
+  // Handle focus/blur for transparency settings
+  mainWindow.on('focus', () => handleWindowFocus(mainWindow!));
+  mainWindow.on('blur', () => handleWindowBlur(mainWindow!));
 
   // Create system tray
   createTrayIcon(mainWindow, createSettingsWindow);

@@ -10,6 +10,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   autoStart: false,
   theme: 'system',
   windowTransparency: 0,
+  transparencyEnabled: false,
+  opaqueWhenFocused: true,
   alwaysOnTop: false,
   rememberWindowPosition: true
 };

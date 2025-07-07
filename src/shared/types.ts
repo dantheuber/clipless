@@ -40,6 +40,8 @@ export interface UserSettings {
   theme?: 'light' | 'dark' | 'system';
   codeDetectionEnabled?: boolean;
   windowTransparency?: number; // 0-100, 0 = fully opaque, 100 = fully transparent
+  transparencyEnabled?: boolean;
+  opaqueWhenFocused?: boolean;
   alwaysOnTop?: boolean;
   rememberWindowPosition?: boolean;
 }

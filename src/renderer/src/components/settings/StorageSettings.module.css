@@ -267,6 +267,10 @@
   border-color: #e5e7eb;
 }
 
+.settingItemDisabled {
+  opacity: 0.6;
+}
+
 .settingContent {
   flex: 1;
 }
@@ -381,6 +385,11 @@
 
 .toggleSwitch.light {
   background-color: #e5e7eb;
+}
+
+.toggleSwitchDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .toggleSwitchChecked {
@@ -564,6 +573,19 @@
 
 .rangeSlider:hover {
   opacity: 1;
+}
+
+.rangeSlider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.rangeSlider:disabled::-webkit-slider-thumb {
+  cursor: not-allowed;
+}
+
+.rangeSlider:disabled::-moz-range-thumb {
+  cursor: not-allowed;
 }
 
 .rangeSlider::-webkit-slider-thumb {

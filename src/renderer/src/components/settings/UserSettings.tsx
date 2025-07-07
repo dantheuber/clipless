@@ -233,13 +233,49 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
         <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Window Settings</h3>
         
         <div className={styles.settingsContainer}>
-          {/* Window Transparency Setting */}
+          {/* Enable Window Transparency Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <label htmlFor="windowTransparency" className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
-                Window Transparency
-              </label>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Enable Window Transparency</span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
+                Allow the window to be made transparent
+              </p>
+            </div>
+            <label className={styles.toggleLabel}>
+              <input
+                type="checkbox"
+                checked={settings.transparencyEnabled ?? false}
+                onChange={(e) => handleSettingChange('transparencyEnabled', e.target.checked)}
+                disabled={saving}
+                className={styles.toggleInput}
+              />
+              <div className={classNames(styles.toggleSwitch, {
+                [styles.light]: isLight,
+                [styles.toggleSwitchChecked]: settings.transparencyEnabled ?? false
+              })}>
+                <div className={classNames(styles.toggleSlider, {
+                  [styles.toggleSliderChecked]: settings.transparencyEnabled ?? false
+                })}></div>
+              </div>
+            </label>
+          </div>
+
+          {/* Window Transparency Setting */}
+          <div className={classNames(styles.settingItem, { 
+            [styles.light]: isLight,
+            [styles.settingItemDisabled]: !(settings.transparencyEnabled ?? false)
+          })}>
+            <div className={styles.settingContent}>
+              <label htmlFor="windowTransparency" className={classNames(styles.settingLabel, { 
+                [styles.light]: isLight,
+                [styles.disabled]: !(settings.transparencyEnabled ?? false)
+              })}>
+                Window Transparency Level
+              </label>
+              <p className={classNames(styles.settingDescription, { 
+                [styles.light]: isLight,
+                [styles.disabled]: !(settings.transparencyEnabled ?? false)
+              })}>
                 Set window transparency level (0% = fully opaque, 100% = fully transparent)
               </p>
             </div>
@@ -252,13 +288,53 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 step="5"
                 value={settings.windowTransparency ?? 0}
                 onChange={(e) => handleSettingChange('windowTransparency', parseInt(e.target.value))}
-                disabled={saving}
+                disabled={saving || !(settings.transparencyEnabled ?? false)}
                 className={classNames(styles.rangeSlider, { [styles.light]: isLight })}
               />
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })} style={{ minWidth: '40px' }}>
+              <span className={classNames(styles.settingLabel, { 
+                [styles.light]: isLight,
+                [styles.disabled]: !(settings.transparencyEnabled ?? false)
+              })} style={{ minWidth: '40px' }}>
                 {settings.windowTransparency ?? 0}%
               </span>
             </div>
+          </div>
+
+          {/* Opaque When Focused Setting */}
+          <div className={classNames(styles.settingItem, { 
+            [styles.light]: isLight,
+            [styles.settingItemDisabled]: !(settings.transparencyEnabled ?? false)
+          })}>
+            <div className={styles.settingContent}>
+              <span className={classNames(styles.settingLabel, { 
+                [styles.light]: isLight,
+                [styles.disabled]: !(settings.transparencyEnabled ?? false)
+              })}>Opaque When Focused</span>
+              <p className={classNames(styles.settingDescription, { 
+                [styles.light]: isLight,
+                [styles.disabled]: !(settings.transparencyEnabled ?? false)
+              })}>
+                Make window fully opaque when it has focus, transparent when it doesn't
+              </p>
+            </div>
+            <label className={styles.toggleLabel}>
+              <input
+                type="checkbox"
+                checked={settings.opaqueWhenFocused ?? true}
+                onChange={(e) => handleSettingChange('opaqueWhenFocused', e.target.checked)}
+                disabled={saving || !(settings.transparencyEnabled ?? false)}
+                className={styles.toggleInput}
+              />
+              <div className={classNames(styles.toggleSwitch, {
+                [styles.light]: isLight,
+                [styles.toggleSwitchChecked]: settings.opaqueWhenFocused ?? true,
+                [styles.toggleSwitchDisabled]: !(settings.transparencyEnabled ?? false)
+              })}>
+                <div className={classNames(styles.toggleSlider, {
+                  [styles.toggleSliderChecked]: settings.opaqueWhenFocused ?? true
+                })}></div>
+              </div>
+            </label>
           </div>
 
           {/* Always On Top Setting */}
