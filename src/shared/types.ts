@@ -30,13 +30,35 @@ export interface StoredClip {
 }
 
 /**
+ * Hotkey configuration for specific actions
+ */
+export interface HotkeyConfig {
+  enabled: boolean;
+  key: string; // Key combination (e.g., 'CommandOrControl+Shift+C')
+}
+
+/**
+ * All hotkey settings
+ */
+export interface HotkeySettings {
+  enabled: boolean; // Global enable/disable for all hotkeys
+  focusWindow: HotkeyConfig;
+  quickClip1: HotkeyConfig;
+  quickClip2: HotkeyConfig;
+  quickClip3: HotkeyConfig;
+  quickClip4: HotkeyConfig;
+  quickClip5: HotkeyConfig;
+}
+
+/**
  * User settings and preferences
  */
 export interface UserSettings {
   maxClips: number;
   startMinimized: boolean;
   autoStart: boolean;
-  hotkey?: string;
+  hotkey?: string; // Legacy hotkey - will be migrated to hotkeys
+  hotkeys?: HotkeySettings;
   theme?: 'light' | 'dark' | 'system';
   codeDetectionEnabled?: boolean;
   windowTransparency?: number; // 0-100, 0 = fully opaque, 100 = fully transparent

@@ -4,6 +4,7 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { autoUpdater } from 'electron-updater'
 import { createTray as createTrayIcon, getTray, setIsQuitting, getIsQuitting } from './tray'
 import { initializeClipboardMonitoring, setupClipboardIPC } from './clipboard'
+import { hotkeyManager } from './hotkeys'
 import { storage } from './storage'
 import icon from '../../resources/icon.png?asset'
 
@@ -145,7 +146,7 @@ function createSettingsWindow(tab?: string): void {
   }
 }
 
-function createWindow(): void {
+async function createWindow(): Promise<void> {
   // Create the browser window.
   const windowOptions: any = {
     width: 900,
@@ -216,6 +217,10 @@ function createWindow(): void {
   initializeClipboardMonitoring(mainWindow);
   setupClipboardIPC(mainWindow);
 
+  // Initialize hotkey manager
+  hotkeyManager.setMainWindow(mainWindow);
+  await hotkeyManager.initialize();
+
   // Settings window IPC handlers
   ipcMain.handle('open-settings', (_event, tab?: string) => {
     createSettingsWindow(tab);
@@ -237,6 +242,9 @@ function createWindow(): void {
       if (mainWindow) {
         await applyWindowSettings(mainWindow);
       }
+      
+      // Update hotkeys if settings changed
+      await hotkeyManager.onSettingsChanged();
       
       // Relay settings changes to all windows
       if (mainWindow) {
@@ -377,6 +385,7 @@ app.on('window-all-closed', () => {
 // Handle app before quit to set the quitting flag
 app.on('before-quit', () => {
   setIsQuitting(true);
+  hotkeyManager.cleanup();
 });
 
 // In this file you can include the rest of your app's specific main process

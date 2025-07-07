@@ -1,8 +1,36 @@
 import { safeStorage, app } from 'electron';
 import { join } from 'path';
 import { promises as fs } from 'fs';
-import type { ClipItem, StoredClip, UserSettings, AppData, StorageStats, Template, SearchTerm, QuickTool } from '../shared/types';
+import type { ClipItem, StoredClip, UserSettings, AppData, StorageStats, Template, SearchTerm, QuickTool, HotkeySettings } from '../shared/types';
 import { DEFAULT_MAX_CLIPS } from '../shared/constants';
+
+const DEFAULT_HOTKEY_SETTINGS: HotkeySettings = {
+  enabled: false,
+  focusWindow: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+V'
+  },
+  quickClip1: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+1'
+  },
+  quickClip2: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+2'
+  },
+  quickClip3: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+3'
+  },
+  quickClip4: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+4'
+  },
+  quickClip5: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+5'
+  }
+};
 
 const DEFAULT_SETTINGS: UserSettings = {
   maxClips: DEFAULT_MAX_CLIPS,
@@ -13,7 +41,8 @@ const DEFAULT_SETTINGS: UserSettings = {
   transparencyEnabled: false,
   opaqueWhenFocused: true,
   alwaysOnTop: false,
-  rememberWindowPosition: true
+  rememberWindowPosition: true,
+  hotkeys: DEFAULT_HOTKEY_SETTINGS
 };
 
 const DEFAULT_DATA: AppData = {
@@ -276,7 +305,17 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return { ...this.data.settings };
+    
+    // Ensure hotkey settings exist with defaults if not present
+    const settings = { ...this.data.settings };
+    if (!settings.hotkeys) {
+      settings.hotkeys = DEFAULT_HOTKEY_SETTINGS;
+      // Save the updated settings
+      this.data.settings = settings;
+      await this.saveData();
+    }
+    
+    return settings;
   }
 
   /**

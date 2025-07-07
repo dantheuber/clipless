@@ -9,9 +9,10 @@ import { StorageSettings } from './components/settings/StorageSettings'
 import { UserSettings } from './components/settings/UserSettings'
 import { TemplateManager } from './components/settings/TemplateManager'
 import { QuickClipsManager } from './components/settings/QuickClipsManager'
+import HotkeyManager from './components/settings/HotkeyManager'
 import styles from './Settings.module.css'
 
-type TabType = 'general' | 'templates' | 'quickClips'
+type TabType = 'general' | 'templates' | 'quickClips' | 'hotkeys'
 
 interface Tab {
   id: TabType
@@ -22,7 +23,8 @@ interface Tab {
 const tabs: Tab[] = [
   { id: 'general', label: 'General' },
   { id: 'templates', label: 'Templates' },
-  { id: 'quickClips', label: 'Quick Clips' }
+  { id: 'quickClips', label: 'Quick Clips' },
+  { id: 'hotkeys', label: 'Hotkeys' }
 ]
 
 function SettingsContent(): React.JSX.Element {
@@ -79,6 +81,15 @@ function SettingsContent(): React.JSX.Element {
           <div className={styles.grid}>
             <section className={classNames(styles.section, { [styles.light]: isLight })}>
               <QuickClipsManager />
+            </section>
+          </div>
+        )
+
+      case 'hotkeys':
+        return (
+          <div className={styles.grid}>
+            <section className={classNames(styles.section, { [styles.light]: isLight })}>
+              <HotkeyManager />
             </section>
           </div>
         )
