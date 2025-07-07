@@ -919,8 +919,9 @@
   margin: 0;
 }
 
-.builtinDropdown {
-  background-color: var(--text-inverse);
+.builtinDropdown,
+.builtinSelect {
+  background-color: var(--bg-quaternary);
   border: 1px solid var(--border-primary);
   border-radius: 0.25rem;
   padding: 0.25rem 0.5rem;
@@ -928,6 +929,20 @@
   cursor: pointer;
   min-width: 150px;
   color: var(--text-primary);
+}
+
+.builtinDropdown:focus,
+.builtinSelect:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: var(--focus-ring);
+}
+
+.builtinDropdown option,
+.builtinSelect option {
+  background-color: var(--bg-quaternary);
+  color: var(--text-primary);
+  padding: 0.5rem;
 }
 
 /* Edit Actions */
