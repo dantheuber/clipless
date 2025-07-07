@@ -13,28 +13,28 @@ const defaultHotkeySettings: HotkeySettings = {
   enabled: false,
   focusWindow: {
     enabled: true,
-    key: 'CommandOrControl+Shift+V'
+    key: 'CommandOrControl+Shift+V',
   },
   quickClip1: {
     enabled: true,
-    key: 'CommandOrControl+Shift+1'
+    key: 'CommandOrControl+Shift+1',
   },
   quickClip2: {
     enabled: true,
-    key: 'CommandOrControl+Shift+2'
+    key: 'CommandOrControl+Shift+2',
   },
   quickClip3: {
     enabled: true,
-    key: 'CommandOrControl+Shift+3'
+    key: 'CommandOrControl+Shift+3',
   },
   quickClip4: {
     enabled: true,
-    key: 'CommandOrControl+Shift+4'
+    key: 'CommandOrControl+Shift+4',
   },
   quickClip5: {
     enabled: true,
-    key: 'CommandOrControl+Shift+5'
-  }
+    key: 'CommandOrControl+Shift+5',
+  },
 };
 
 const hotkeyDescriptions = {
@@ -43,7 +43,7 @@ const hotkeyDescriptions = {
   quickClip2: 'Copy 2nd Recent Clip',
   quickClip3: 'Copy 3rd Recent Clip',
   quickClip4: 'Copy 4th Recent Clip',
-  quickClip5: 'Copy 5th Recent Clip'
+  quickClip5: 'Copy 5th Recent Clip',
 };
 
 export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
@@ -53,7 +53,7 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
   const [saving, setSaving] = useState(false);
   const [editingHotkey, setEditingHotkey] = useState<string | null>(null);
   const [listeningForKey, setListeningForKey] = useState(false);
-  
+
   const { isLight } = useTheme();
 
   // Load settings on mount
@@ -64,7 +64,7 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
       try {
         const loadedSettings = await window.api.storageGetSettings();
         setSettings(loadedSettings);
-        
+
         // Use existing hotkey settings or defaults
         if (loadedSettings.hotkeys) {
           setHotkeySettings(loadedSettings.hotkeys);
@@ -86,13 +86,13 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
 
     setSaving(true);
     try {
-      const updatedSettings: UserSettings = { 
-        ...settings, 
-        hotkeys: newHotkeySettings 
+      const updatedSettings: UserSettings = {
+        ...settings,
+        hotkeys: newHotkeySettings,
       };
-      
+
       const success = await window.api.storageSaveSettings(updatedSettings);
-      
+
       if (success) {
         setSettings(updatedSettings);
         setHotkeySettings(newHotkeySettings);
@@ -112,18 +112,24 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
     await saveSettings(updatedSettings);
   };
 
-  const handleHotkeyToggle = async (hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>, enabled: boolean) => {
+  const handleHotkeyToggle = async (
+    hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>,
+    enabled: boolean
+  ) => {
     const updatedSettings = {
       ...hotkeySettings,
-      [hotkeyKey]: { ...hotkeySettings[hotkeyKey], enabled }
+      [hotkeyKey]: { ...hotkeySettings[hotkeyKey], enabled },
     };
     await saveSettings(updatedSettings);
   };
 
-  const handleHotkeyChange = async (hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>, key: string) => {
+  const handleHotkeyChange = async (
+    hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>,
+    key: string
+  ) => {
     const updatedSettings = {
       ...hotkeySettings,
-      [hotkeyKey]: { ...hotkeySettings[hotkeyKey], key }
+      [hotkeyKey]: { ...hotkeySettings[hotkeyKey], key },
     };
     await saveSettings(updatedSettings);
     setEditingHotkey(null);
@@ -173,7 +179,7 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
       }
 
       const keyCombo = modifiers.length > 0 ? `${modifiers.join('+')}+${mainKey}` : mainKey;
-      
+
       // Ensure we have at least one modifier for global hotkeys
       if (modifiers.length === 0) {
         alert('Global hotkeys must include at least one modifier key (Ctrl/Cmd, Shift, or Alt)');
@@ -201,8 +207,8 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
     <div className={classNames(styles.container, { [styles.light]: isLight })}>
       <div className={styles.header}>
         <p className={styles.description}>
-          Configure global hotkeys for quick access to Clipless features. 
-          Hotkeys work even when the application is minimized or in the background.
+          Configure global hotkeys for quick access to Clipless features. Hotkeys work even when the
+          application is minimized or in the background.
         </p>
       </div>
 
@@ -216,10 +222,12 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
         </div>
         <div className={styles.settingControl}>
           <div className={styles.toggleContainer}>
-            <span className={classNames(styles.toggleLabel, { 
-              [styles.enabled]: hotkeySettings.enabled,
-              [styles.disabled]: !hotkeySettings.enabled 
-            })}>
+            <span
+              className={classNames(styles.toggleLabel, {
+                [styles.enabled]: hotkeySettings.enabled,
+                [styles.disabled]: !hotkeySettings.enabled,
+              })}
+            >
               {hotkeySettings.enabled ? 'ON' : 'OFF'}
             </span>
             <label className={classNames(styles.toggle, { [styles.light]: isLight })}>
@@ -260,19 +268,25 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
                 <div className={styles.hotkeyControls}>
                   <button
                     className={classNames(styles.editButton, { [styles.light]: isLight })}
-                    onClick={() => isEditing ? cancelKeyCapture() : startKeyCapture(key)}
+                    onClick={() => (isEditing ? cancelKeyCapture() : startKeyCapture(key))}
                     disabled={saving}
                   >
                     {isEditing ? 'Cancel' : 'Edit'}
                   </button>
                   <div className={styles.toggleContainer}>
-                    <span className={classNames(styles.toggleLabel, { 
-                      [styles.enabled]: config.enabled,
-                      [styles.disabled]: !config.enabled 
-                    })}>
+                    <span
+                      className={classNames(styles.toggleLabel, {
+                        [styles.enabled]: config.enabled,
+                        [styles.disabled]: !config.enabled,
+                      })}
+                    >
                       {config.enabled ? 'ON' : 'OFF'}
                     </span>
-                    <label className={classNames(styles.toggle, styles.small, { [styles.light]: isLight })}>
+                    <label
+                      className={classNames(styles.toggle, styles.small, {
+                        [styles.light]: isLight,
+                      })}
+                    >
                       <input
                         type="checkbox"
                         checked={config.enabled}
@@ -300,17 +314,13 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
             <li>Use the toggle switches to enable/disable individual hotkeys</li>
           </ul>
           <p className={styles.note}>
-            <strong>Note:</strong> Hotkeys may conflict with other applications. 
-            Choose combinations that aren't commonly used by your system or other software.
+            <strong>Note:</strong> Hotkeys may conflict with other applications. Choose combinations
+            that aren't commonly used by your system or other software.
           </p>
         </div>
       )}
 
-      {saving && (
-        <div className={styles.savingIndicator}>
-          Saving settings...
-        </div>
-      )}
+      {saving && <div className={styles.savingIndicator}>Saving settings...</div>}
     </div>
   );
 };

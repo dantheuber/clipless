@@ -7,6 +7,7 @@ The clips provider has been extended to support multiple clipboard data types ba
 ## Features
 
 ### Automatic Clipboard Monitoring
+
 - **Real-time Detection**: Monitors clipboard changes every 500ms
 - **Multi-format Support**: Detects text, HTML, RTF, images, and bookmarks
 - **Background Monitoring**: Runs continuously while the app is open
@@ -14,6 +15,7 @@ The clips provider has been extended to support multiple clipboard data types ba
 - **Duplicate Prevention**: Automatically prevents adding the same content twice in a row
 
 ### Supported Clipboard Types
+
 - **Text**: Plain text content
 - **HTML**: HTML markup with visual indicators
 - **RTF**: Rich Text Format with labels
@@ -23,6 +25,7 @@ The clips provider has been extended to support multiple clipboard data types ba
 ## Implementation Details
 
 ### Main Process (Electron)
+
 - **Clipboard API Integration**: Uses Electron's native clipboard module
 - **IPC Handlers**: Provides secure communication with renderer process
 - **Polling System**: Checks clipboard every 500ms for changes
@@ -31,11 +34,13 @@ The clips provider has been extended to support multiple clipboard data types ba
 - **Single-Source Logic**: Prevents duplicate detection bugs by tracking one prioritized format
 
 ### Preload Script
+
 - **API Exposure**: Safely exposes clipboard functions to renderer
 - **Event Handling**: Manages clipboard change notifications
 - **Type Safety**: Full TypeScript support for all functions
 
 ### React Provider
+
 - **Automatic Integration**: Starts monitoring on component mount
 - **State Management**: Manages clips array with automatic updates
 - **Manual Control**: Provides functions for manual clipboard reading
@@ -44,6 +49,7 @@ The clips provider has been extended to support multiple clipboard data types ba
 - **Cleanup**: Properly stops monitoring when component unmounts
 
 ### User Interface
+
 - **Visual Indicators**: Type labels for HTML, RTF, images, and bookmarks
 - **Clickable Row Numbers**: Click the row number to copy clip content to clipboard
 - **Hover Effects**: Visual feedback for interactive elements
@@ -52,6 +58,7 @@ The clips provider has been extended to support multiple clipboard data types ba
 ## Changes Made
 
 ### 1. Main Process Updates (`src/main/index.ts`)
+
 ```typescript
 // New single-source clipboard monitoring system
 const getCurrentClipboardData = (): { type: string; content: string } | null => {
@@ -69,9 +76,10 @@ let lastClipboardType = '';
 
 const checkClipboard = () => {
   const currentClipData = getCurrentClipboardData();
-  if (currentClipData && 
-      (currentClipData.content !== lastClipboardContent || 
-       currentClipData.type !== lastClipboardType)) {
+  if (
+    currentClipData &&
+    (currentClipData.content !== lastClipboardContent || currentClipData.type !== lastClipboardType)
+  ) {
     // Send single change notification
     mainWindow.webContents.send('clipboard-changed', currentClipData);
     lastClipboardContent = currentClipData.content;
@@ -81,15 +89,16 @@ const checkClipboard = () => {
 ```
 
 ### 2. Preload Script Updates (`src/preload/index.ts`)
+
 ```typescript
 const api = {
   // Individual clipboard format readers
   getClipboardText: () => electronAPI.ipcRenderer.invoke('get-clipboard-text'),
   getClipboardHTML: () => electronAPI.ipcRenderer.invoke('get-clipboard-html'),
-  
+
   // NEW: Prioritized clipboard data getter
   getCurrentClipboardData: () => electronAPI.ipcRenderer.invoke('get-current-clipboard-data'),
-  
+
   // Monitoring controls
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   onClipboardChanged: (callback) => electronAPI.ipcRenderer.on('clipboard-changed', callback),
@@ -97,6 +106,7 @@ const api = {
 ```
 
 ### 3. ClipsProvider Updates (`src/renderer/src/providers/clips.tsx`)
+
 ```typescript
 // Enhanced manual clipboard reading using prioritized data
 const readCurrentClipboard = useCallback(async (): Promise<void> => {
@@ -105,40 +115,51 @@ const readCurrentClipboard = useCallback(async (): Promise<void> => {
 
   let newClip: ClipItem | null = null;
   switch (clipData.type) {
-    case 'text': newClip = createTextClip(clipData.content); break;
-    case 'rtf': newClip = createRtfClip(clipData.content); break;
-    case 'html': newClip = createHtmlClip(clipData.content); break;
+    case 'text':
+      newClip = createTextClip(clipData.content);
+      break;
+    case 'rtf':
+      newClip = createRtfClip(clipData.content);
+      break;
+    case 'html':
+      newClip = createHtmlClip(clipData.content);
+      break;
     // ... handle other types
   }
-  
+
   if (newClip && !isDuplicateOfMostRecent(newClip)) {
     clipboardUpdated(newClip);
   }
 }, []);
 
 // Duplicate detection function
-const isDuplicateOfMostRecent = useCallback((newClip: ClipItem): boolean => {
-  if (clips.length === 0) return false;
-  const mostRecentClip = clips[0];
-  return mostRecentClip.type === newClip.type && 
-         mostRecentClip.content === newClip.content;
-}, [clips]);
+const isDuplicateOfMostRecent = useCallback(
+  (newClip: ClipItem): boolean => {
+    if (clips.length === 0) return false;
+    const mostRecentClip = clips[0];
+    return mostRecentClip.type === newClip.type && mostRecentClip.content === newClip.content;
+  },
+  [clips]
+);
 
 // Enhanced clipboard update with duplicate prevention
-const clipboardUpdated = useCallback((newClip: ClipItem): void => {
-  if (isDuplicateOfMostRecent(newClip)) {
-    console.log('Duplicate clip detected, not adding to array');
-    return; // Skip adding duplicate
-  }
-  // ... proceed with adding clip
-}, [clips, isDuplicateOfMostRecent]);
+const clipboardUpdated = useCallback(
+  (newClip: ClipItem): void => {
+    if (isDuplicateOfMostRecent(newClip)) {
+      console.log('Duplicate clip detected, not adding to array');
+      return; // Skip adding duplicate
+    }
+    // ... proceed with adding clip
+  },
+  [clips, isDuplicateOfMostRecent]
+);
 
 // Automatic clipboard monitoring with single-change detection
 useEffect(() => {
   const startMonitoring = async () => {
     await readCurrentClipboard(); // Read initial content
     await window.api.startClipboardMonitoring(); // Start monitoring
-    
+
     // Listen for clipboard changes - now receives single prioritized change
     window.api.onClipboardChanged((clipData) => {
       const newClip = createClipFromData(clipData);
@@ -147,7 +168,7 @@ useEffect(() => {
       }
     });
   };
-  
+
   startMonitoring();
 }, []);
 ```
@@ -155,6 +176,7 @@ useEffect(() => {
 ## API Reference
 
 ### ClipsProvider Context
+
 ```typescript
 interface ClipsContextType {
   clips: ClipItem[];
@@ -165,6 +187,7 @@ interface ClipsContextType {
 ```
 
 ### Clipboard API (window.api)
+
 ```typescript
 interface ClipboardAPI {
   // Individual format readers
@@ -172,11 +195,11 @@ interface ClipboardAPI {
   getClipboardHTML: () => Promise<string>;
   getClipboardRTF: () => Promise<string>;
   getClipboardImage: () => Promise<string | null>;
-  getClipboardBookmark: () => Promise<{title: string, url: string} | null>;
-  
+  getClipboardBookmark: () => Promise<{ title: string; url: string } | null>;
+
   // NEW: Prioritized clipboard data getter
   getCurrentClipboardData: () => Promise<{ type: string; content: string } | null>;
-  
+
   // Control functions
   startClipboardMonitoring: () => Promise<boolean>;
   stopClipboardMonitoring: () => Promise<boolean>;
@@ -188,16 +211,17 @@ interface ClipboardAPI {
 ## UI Implementation
 
 ### Clip Component Updates (`src/renderer/src/components/clips/Clip.tsx`)
+
 ```typescript
 export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
   const { copyClipToClipboard } = useClips();
-  
+
   const handleRowNumberClick = async () => {
     await copyClipToClipboard(index);
   };
-  
+
   return (
-    <div 
+    <div
       className={styles.rowNumber}
       onClick={handleRowNumberClick}
       title="Click to copy this clip to clipboard"
@@ -209,6 +233,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
 ```
 
 ### CSS Updates (`src/renderer/src/components/clips/Clip.module.css`)
+
 ```css
 .rowNumber {
   /* ...existing styles... */
@@ -222,6 +247,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
 ```
 
 ### Features
+
 - **Clickable Row Numbers**: Click any row number to copy that clip's content to clipboard
 - **Visual Feedback**: Hover effects and pointer cursor indicate clickable state
 - **Tooltip**: Helpful tooltip explains the click functionality
@@ -230,6 +256,7 @@ export const Clip = ({ clip, index }: ClipProps): React.JSX.Element => {
 ## Usage Examples
 
 ### Automatic Operation
+
 The clipboard monitoring starts automatically when the ClipsProvider mounts:
 
 ```typescript
@@ -244,10 +271,11 @@ function App() {
 ```
 
 ### Manual Control
+
 ```typescript
 function ClipboardControls() {
   const { readCurrentClipboard } = useClips();
-  
+
   return (
     <button onClick={readCurrentClipboard}>
       Refresh from Clipboard
@@ -257,7 +285,9 @@ function ClipboardControls() {
 ```
 
 ### Testing
+
 Use the test buttons in the app:
+
 - **"Add Test Clips"**: Adds sample clips of different types
 - **"Read Current Clipboard"**: Manually reads current clipboard content
 

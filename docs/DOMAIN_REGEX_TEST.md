@@ -5,6 +5,7 @@
 The domain name regex has been updated to use a comprehensive list of Top-Level Domains (TLDs) from IANA and Wikipedia. The new pattern is much more strict and only matches domains with valid TLD extensions.
 
 ### Pattern Structure
+
 ```regex
 (?<domainName>\b[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.(com|org|net|edu|gov|mil|...1500+ TLDs)\b)
 ```
@@ -24,6 +25,7 @@ The domain name regex has been updated to use a comprehensive list of Top-Level 
 ### Test Cases
 
 **Valid Domains (Will Match):**
+
 - ✅ `google.com`
 - ✅ `github.io`
 - ✅ `example.org`
@@ -34,6 +36,7 @@ The domain name regex has been updated to use a comprehensive list of Top-Level 
 - ✅ `api.tech`
 
 **Invalid Domains (Will NOT Match):**
+
 - ❌ `example.invalidtld`
 - ❌ `test.randomext`
 - ❌ `site.fake123`
@@ -42,6 +45,7 @@ The domain name regex has been updated to use a comprehensive list of Top-Level 
 ### Implementation Details
 
 The TLD list is stored in a separate file (`src/renderer/src/utils/tlds.ts`) which:
+
 - Contains arrays of different TLD categories
 - Exports a combined pattern for use in regex
 - Provides utility functions for TLD validation

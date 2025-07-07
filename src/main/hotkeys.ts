@@ -12,7 +12,7 @@ class HotkeyManager {
 
   async initialize() {
     if (this.isInitialized) return;
-    
+
     try {
       await this.registerHotkeys();
       this.isInitialized = true;
@@ -46,7 +46,7 @@ class HotkeyManager {
         { config: hotkeys.quickClip2, index: 1 },
         { config: hotkeys.quickClip3, index: 2 },
         { config: hotkeys.quickClip4, index: 3 },
-        { config: hotkeys.quickClip5, index: 4 }
+        { config: hotkeys.quickClip5, index: 4 },
       ];
 
       for (const { config, index } of quickClipHotkeys) {
@@ -56,7 +56,6 @@ class HotkeyManager {
           });
         }
       }
-
     } catch (error) {
       console.error('Failed to register hotkeys:', error);
     }
@@ -83,7 +82,7 @@ class HotkeyManager {
   }
 
   private unregisterAllHotkeys() {
-    this.currentHotkeys.forEach(accelerator => {
+    this.currentHotkeys.forEach((accelerator) => {
       try {
         globalShortcut.unregister(accelerator);
       } catch (error) {
@@ -100,10 +99,10 @@ class HotkeyManager {
       if (this.mainWindow.isMinimized()) {
         this.mainWindow.restore();
       }
-      
+
       this.mainWindow.show();
       this.mainWindow.focus();
-      
+
       // On macOS, we need to bring the app to front
       if (process.platform === 'darwin') {
         require('electron').app.focus();
@@ -129,7 +128,7 @@ class HotkeyManager {
 
       // Import clipboard at runtime to avoid circular dependencies
       const { clipboard } = require('electron');
-      
+
       switch (clipToCopy.clip.type) {
         case 'text':
           clipboard.writeText(clipToCopy.clip.content);
@@ -157,10 +156,9 @@ class HotkeyManager {
       }
 
       console.log(`Copied clip ${index + 1} to clipboard`);
-      
+
       // Optional: Show a brief notification or update tray
       this.showQuickClipNotification(index + 1);
-      
     } catch (error) {
       console.error(`Error copying quick clip ${index}:`, error);
     }
@@ -174,7 +172,7 @@ class HotkeyManager {
 
   async onSettingsChanged() {
     if (!this.isInitialized) return;
-    
+
     try {
       await this.registerHotkeys();
     } catch (error) {

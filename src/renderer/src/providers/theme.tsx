@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from 'react';
 import type { UserSettings } from '../../../shared/types';
 
 export type Theme = 'light' | 'dark' | 'system';
@@ -118,11 +125,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     isDark: effectiveTheme === 'dark',
   };
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 };
 
 export const useTheme = (): ThemeContextType => {

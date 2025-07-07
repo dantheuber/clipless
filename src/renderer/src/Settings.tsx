@@ -1,23 +1,23 @@
-import classNames from 'classnames'
-import { useState, useEffect } from 'react'
-import UpdaterControl from './components/settings/UpdaterControl'
-import Versions from './components/settings/Versions'
-import { ClipsProvider } from './providers/clips'
-import { ThemeProvider, useTheme } from './providers/theme'
-import { LanguageDetectionProvider } from './providers/languageDetection'
-import { StorageSettings } from './components/settings/StorageSettings'
-import { UserSettings } from './components/settings/UserSettings'
-import { TemplateManager } from './components/settings/TemplateManager'
-import { QuickClipsManager } from './components/settings/QuickClipsManager'
-import HotkeyManager from './components/settings/HotkeyManager'
-import styles from './Settings.module.css'
+import classNames from 'classnames';
+import { useState, useEffect } from 'react';
+import UpdaterControl from './components/settings/UpdaterControl';
+import Versions from './components/settings/Versions';
+import { ClipsProvider } from './providers/clips';
+import { ThemeProvider, useTheme } from './providers/theme';
+import { LanguageDetectionProvider } from './providers/languageDetection';
+import { StorageSettings } from './components/settings/StorageSettings';
+import { UserSettings } from './components/settings/UserSettings';
+import { TemplateManager } from './components/settings/TemplateManager';
+import { QuickClipsManager } from './components/settings/QuickClipsManager';
+import HotkeyManager from './components/settings/HotkeyManager';
+import styles from './Settings.module.css';
 
-type TabType = 'general' | 'templates' | 'quickClips' | 'hotkeys'
+type TabType = 'general' | 'templates' | 'quickClips' | 'hotkeys';
 
 interface Tab {
-  id: TabType
-  label: string
-  icon?: string
+  id: TabType;
+  label: string;
+  icon?: string;
 }
 
 const tabs: Tab[] = [
@@ -25,20 +25,20 @@ const tabs: Tab[] = [
   { id: 'hotkeys', label: 'Hotkeys' },
   { id: 'templates', label: 'Templates' },
   { id: 'quickClips', label: 'Quick Clips' },
-]
+];
 
 function SettingsContent(): React.JSX.Element {
-  const { isLight } = useTheme()
-  const [activeTab, setActiveTab] = useState<TabType>('general')
+  const { isLight } = useTheme();
+  const [activeTab, setActiveTab] = useState<TabType>('general');
 
   // Check for URL parameters to set initial tab
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const tabParam = urlParams.get('tab') as TabType
-    if (tabParam && tabs.some(tab => tab.id === tabParam)) {
-      setActiveTab(tabParam)
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab') as TabType;
+    if (tabParam && tabs.some((tab) => tab.id === tabParam)) {
+      setActiveTab(tabParam);
     }
-  }, [])
+  }, []);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -65,7 +65,7 @@ function SettingsContent(): React.JSX.Element {
               <Versions />
             </section>
           </div>
-        )
+        );
 
       case 'templates':
         return (
@@ -74,7 +74,7 @@ function SettingsContent(): React.JSX.Element {
               <TemplateManager />
             </section>
           </div>
-        )
+        );
 
       case 'quickClips':
         return (
@@ -83,7 +83,7 @@ function SettingsContent(): React.JSX.Element {
               <QuickClipsManager />
             </section>
           </div>
-        )
+        );
 
       case 'hotkeys':
         return (
@@ -92,12 +92,12 @@ function SettingsContent(): React.JSX.Element {
               <HotkeyManager />
             </section>
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className={classNames(styles.container, { [styles.light]: isLight })}>
@@ -124,9 +124,7 @@ function SettingsContent(): React.JSX.Element {
       <div className={styles.scrollContainer}>
         <div className={styles.content}>
           <LanguageDetectionProvider>
-            <ClipsProvider>
-              {renderTabContent()}
-            </ClipsProvider>
+            <ClipsProvider>{renderTabContent()}</ClipsProvider>
           </LanguageDetectionProvider>
         </div>
       </div>
@@ -142,4 +140,4 @@ function App(): React.JSX.Element {
   );
 }
 
-export default App
+export default App;

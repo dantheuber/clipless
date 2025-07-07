@@ -1,10 +1,10 @@
-import classNames from 'classnames'
-import { useTheme } from '../../providers/theme'
-import styles from './Versions.module.css'
+import classNames from 'classnames';
+import { useTheme } from '../../providers/theme';
+import styles from './Versions.module.css';
 
 function Versions(): React.JSX.Element {
-  const appVersion = '1.0.0'
-  const { isLight } = useTheme()
+  const appVersion = '1.0.0';
+  const { isLight } = useTheme();
 
   return (
     <div className={styles.container}>
@@ -14,7 +14,7 @@ function Versions(): React.JSX.Element {
         </span>
       </div>
     </div>
-  )
+  );
 }
 
-export default Versions
+export default Versions;

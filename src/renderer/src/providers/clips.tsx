@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
-} from 'react';
+import { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import { DEFAULT_MAX_CLIPS } from './constants';
 import { detectLanguage, isCode } from '../utils/languageDetection';
 import { useLanguageDetection } from './languageDetection';
@@ -28,7 +21,7 @@ export interface ClipItem {
   type: ClipType;
   content: string;
   title?: string; // for bookmark type
-  url?: string;   // for bookmark type
+  url?: string; // for bookmark type
   language?: string; // detected programming language
   isCode?: boolean; // whether the content appears to be code
 }
@@ -114,7 +107,7 @@ export type ClipsContextType = {
   clipboardUpdated: (newClip: ClipItem) => void;
   readCurrentClipboard: () => Promise<void>;
   copyClipToClipboard: (index: number) => Promise<void>;
-  clipCopyIndex: number|null;
+  clipCopyIndex: number | null;
   emptyClip: (index: number) => void;
   updateClip: (index: number, updatedClip: ClipItem) => void;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
@@ -123,10 +116,10 @@ export type ClipsContextType = {
 
 export const useClips = (): ClipsContextType => useContext(ClipsContext) as ClipsContextType;
 
-export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
+export function ClipsProvider({ children }: { children: React.ReactNode }) {
   // the array of clip values
   const [clips, setClips] = useState<ClipItem[]>(updateClipsLength([], DEFAULT_MAX_CLIPS));
-  const [clipCopyIndex, setClipCopyIndex] = useState<number|null>(null)
+  const [clipCopyIndex, setClipCopyIndex] = useState<number | null>(null);
   // the maximum number of clips to store
   const [maxClips, setMaxClips] = useState<number>(DEFAULT_MAX_CLIPS);
 
@@ -142,9 +135,12 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
   /**
    * Create a text clip with language detection based on current settings
    */
-  const createTextClipWithDetection = useCallback((content: string): ClipItem => {
-    return createTextClip(content, isCodeDetectionEnabled);
-  }, [isCodeDetectionEnabled]);
+  const createTextClipWithDetection = useCallback(
+    (content: string): ClipItem => {
+      return createTextClip(content, isCodeDetectionEnabled);
+    },
+    [isCodeDetectionEnabled]
+  );
 
   // Load data from storage on mount
   useEffect(() => {
@@ -164,7 +160,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
 
         // Load clips from storage
         const storedClips = await window.api.storageGetClips();
-        
+
         if (storedClips && storedClips.length > 0) {
           const loadedClips: ClipItem[] = [];
           const loadedLocks: Record<number, boolean> = {};
@@ -172,7 +168,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
           // Process stored clips and rebuild the array properly
           let clipIndex = 0;
           storedClips.forEach((storedClip: any) => {
-            if (storedClip.clip && storedClip.clip.content && storedClip.clip.content.trim() !== '') {
+            if (storedClip.clip?.content && storedClip.clip.content.trim() !== '') {
               loadedClips.push(storedClip.clip); // Use push instead of index assignment
               // Only allow locking for clips at index 1 and higher
               if (storedClip.isLocked && clipIndex > 0) {
@@ -192,7 +188,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
           const paddedClips = updateClipsLength(loadedClips, currentMaxClips);
           setClips(paddedClips);
           setLockedClips(loadedLocks);
-          
+
           if (loadedClips.length > 0) {
             console.log(`Successfully loaded ${loadedClips.length} clips from storage`);
           }
@@ -217,9 +213,9 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
       console.log('Received settings update from other window:', updatedSettings);
       if (updatedSettings && typeof updatedSettings.maxClips === 'number') {
         setMaxClips(updatedSettings.maxClips);
-        
+
         // Update clips array to match new max clips limit
-        setClips(prevClips => updateClipsLength(prevClips, updatedSettings.maxClips));
+        setClips((prevClips) => updateClipsLength(prevClips, updatedSettings.maxClips));
       }
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };
@@ -281,32 +277,41 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
    * @param index the index of the clip to retrieve.
    * @returns the clip at the specified index, or an empty clip if the index is out of bounds.
    */
-  const getClip = useCallback((index: number): ClipItem => {
-    return clips[index] || createEmptyClip();
-  }, [clips]);
+  const getClip = useCallback(
+    (index: number): ClipItem => {
+      return clips[index] || createEmptyClip();
+    },
+    [clips]
+  );
 
-  const emptyClip = useCallback((index: number): void => {
-    // Prevent emptying the first clip (index 0)
-    if (index === 0) {
-      console.log('Cannot empty the first clip (index 0)');
-      return;
-    }
-    
-    const newClips = [...clips];
-    newClips[index] = createEmptyClip(); // replace the clip at the specified index
-    setClips(newClips);
-  }, [clips, setClips]);
+  const emptyClip = useCallback(
+    (index: number): void => {
+      // Prevent emptying the first clip (index 0)
+      if (index === 0) {
+        console.log('Cannot empty the first clip (index 0)');
+        return;
+      }
+
+      const newClips = [...clips];
+      newClips[index] = createEmptyClip(); // replace the clip at the specified index
+      setClips(newClips);
+    },
+    [clips, setClips]
+  );
 
   /**
    * Update a clip at the specified index with new content
    * @param index the index of the clip to update
    * @param updatedClip the updated clip content
    */
-  const updateClip = useCallback((index: number, updatedClip: ClipItem): void => {
-    const newClips = [...clips];
-    newClips[index] = updatedClip;
-    setClips(newClips);
-  }, [clips, setClips]);
+  const updateClip = useCallback(
+    (index: number, updatedClip: ClipItem): void => {
+      const newClips = [...clips];
+      newClips[index] = updatedClip;
+      setClips(newClips);
+    },
+    [clips, setClips]
+  );
 
   /**
    * Toggle the lock state of a clip at the specified index.
@@ -314,19 +319,22 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
    * Note: The first clip (index 0) cannot be locked.
    * @param index the index of the clip to toggle lock state.
    */
-  const toggleClipLock = useCallback((index: number): void => {
-    // Prevent locking the first clip (index 0)
-    if (index === 0) {
-      console.log('Cannot lock the first clip (index 0)');
-      return;
-    }
-    
-    const lockValue = lockedClips[index];
-    setLockedClips({
-      ...lockedClips,
-      [index]: !lockValue, // toggle the lock state
-    });
-  }, [setLockedClips, lockedClips]);
+  const toggleClipLock = useCallback(
+    (index: number): void => {
+      // Prevent locking the first clip (index 0)
+      if (index === 0) {
+        console.log('Cannot lock the first clip (index 0)');
+        return;
+      }
+
+      const lockValue = lockedClips[index];
+      setLockedClips({
+        ...lockedClips,
+        [index]: !lockValue, // toggle the lock state
+      });
+    },
+    [setLockedClips, lockedClips]
+  );
 
   /**
    * Check if a clip at the specified index is locked.
@@ -334,12 +342,15 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
    * @param index the index of the clip to check.
    * @returns true if the clip is locked, false otherwise.
    */
-  const isClipLocked = useCallback((index: number): boolean => {
-    // The first clip (index 0) can never be locked
-    if (index === 0) return false;
-    
-    return lockedClips[index] === true;
-  }, [lockedClips]);
+  const isClipLocked = useCallback(
+    (index: number): boolean => {
+      // The first clip (index 0) can never be locked
+      if (index === 0) return false;
+
+      return lockedClips[index] === true;
+    },
+    [lockedClips]
+  );
 
   /**
    * Check if a clip item matches the most recent clip in the array.
@@ -347,72 +358,79 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
    * @param newClip the clip to check for duplicates
    * @returns true if the clip is a duplicate of the most recent clip
    */
-  const isDuplicateOfMostRecent = useCallback((newClip: ClipItem): boolean => {
-    if (clips.length === 0) return false;
-    
-    // Since the first clip can never be locked, always check against it
-    const mostRecentClip = clips[0];
-    
-    // Check if type and content match
-    if (mostRecentClip.type !== newClip.type || mostRecentClip.content !== newClip.content) {
-      return false;
-    }
-    
-    // For bookmark type, also check title and url
-    if (newClip.type === 'bookmark') {
-      return mostRecentClip.title === newClip.title && mostRecentClip.url === newClip.url;
-    }
-    
-    return true;
-  }, [clips]);
+  const isDuplicateOfMostRecent = useCallback(
+    (newClip: ClipItem): boolean => {
+      if (clips.length === 0) return false;
 
-  const clipboardUpdated = useCallback((newClip: ClipItem): void => {
-    if (clipCopyIndex !== null
-        // If a clip is being copied, check if the new clip is the same as the copied one
-        && clips[clipCopyIndex] 
-        && clips[clipCopyIndex].content === newClip.content
-        && clips[clipCopyIndex].type === newClip.type
-    ) {
-      console.log('Clipboard update matches copied clip, not adding:', newClip);
-      return; // Skip adding if it's the same as the copied clip
-    } else {
-      console.log('New clipboard content detected:', newClip);
-      setClipCopyIndex(null); // Reset copy index since we're adding a new clip
-    }
-    // Check if this clip is a duplicate of the most recent clip
-    if (isDuplicateOfMostRecent(newClip)) {
-      console.log('Duplicate clip detected, not adding to array:', newClip);
-      return; // Skip adding duplicate
-    }
+      // Since the first clip can never be locked, always check against it
+      const mostRecentClip = clips[0];
 
-    // Create new clips array by shifting existing clips down
-    const newClips = [...clips];
-    let lastClip = newClip;
-    
-    for (let index = 0; index < maxClips; index++) {
-      if (lockedClips[index]) {
-        // if the clip is locked, maintain its current value
-        continue;
+      // Check if type and content match
+      if (mostRecentClip.type !== newClip.type || mostRecentClip.content !== newClip.content) {
+        return false;
       }
-      
-      // Shift the clip down
-      const currentClip = newClips[index] || createEmptyClip();
-      newClips[index] = lastClip;
-      lastClip = currentClip;
-    }
-    
-    // Ensure the array has the correct length
-    const finalClips = updateClipsLength(newClips, maxClips);
-    setClips(finalClips);
-  }, [
-    clips,
-    maxClips,
-    lockedClips,
-    setClips,
-    clipCopyIndex,
-    setClipCopyIndex,
-    isDuplicateOfMostRecent
-  ]);
+
+      // For bookmark type, also check title and url
+      if (newClip.type === 'bookmark') {
+        return mostRecentClip.title === newClip.title && mostRecentClip.url === newClip.url;
+      }
+
+      return true;
+    },
+    [clips]
+  );
+
+  const clipboardUpdated = useCallback(
+    (newClip: ClipItem): void => {
+      if (
+        clipCopyIndex !== null &&
+        // If a clip is being copied, check if the new clip is the same as the copied one
+        clips[clipCopyIndex] &&
+        clips[clipCopyIndex].content === newClip.content &&
+        clips[clipCopyIndex].type === newClip.type
+      ) {
+        console.log('Clipboard update matches copied clip, not adding:', newClip);
+        return; // Skip adding if it's the same as the copied clip
+      } else {
+        console.log('New clipboard content detected:', newClip);
+        setClipCopyIndex(null); // Reset copy index since we're adding a new clip
+      }
+      // Check if this clip is a duplicate of the most recent clip
+      if (isDuplicateOfMostRecent(newClip)) {
+        console.log('Duplicate clip detected, not adding to array:', newClip);
+        return; // Skip adding duplicate
+      }
+
+      // Create new clips array by shifting existing clips down
+      const newClips = [...clips];
+      let lastClip = newClip;
+
+      for (let index = 0; index < maxClips; index++) {
+        if (lockedClips[index]) {
+          // if the clip is locked, maintain its current value
+          continue;
+        }
+
+        // Shift the clip down
+        const currentClip = newClips[index] || createEmptyClip();
+        newClips[index] = lastClip;
+        lastClip = currentClip;
+      }
+
+      // Ensure the array has the correct length
+      const finalClips = updateClipsLength(newClips, maxClips);
+      setClips(finalClips);
+    },
+    [
+      clips,
+      maxClips,
+      lockedClips,
+      setClips,
+      clipCopyIndex,
+      setClipCopyIndex,
+      isDuplicateOfMostRecent,
+    ]
+  );
 
   /**
    * Manually read the current clipboard content and add it to clips
@@ -423,7 +441,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // Use the new prioritized clipboard data getter
       const clipData = await window.api.getCurrentClipboardData();
-      
+
       if (!clipData) {
         console.log('No clipboard content available');
         return;
@@ -472,67 +490,71 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
    * Copy a clip's content to the system clipboard
    * @param index the index of the clip to copy
    */
-  const copyClipToClipboard = useCallback(async (index: number): Promise<void> => {
-    if (!window.api) return;
-    setClipCopyIndex(index);
-    const clip = getClip(index);
-    if (!clip || !clip.content) {
-      console.warn('No clip content to copy at index:', index);
-      return;
-    }
+  const copyClipToClipboard = useCallback(
+    async (index: number): Promise<void> => {
+      if (!window.api) return;
+      setClipCopyIndex(index);
+      const clip = getClip(index);
+      if (!clip?.content) {
+        console.warn('No clip content to copy at index:', index);
+        return;
+      }
 
-    try {
-      // Copy the clip content with the appropriate format based on its type
-      switch (clip.type) {
-        case 'text':
-          await window.api.setClipboardText(clip.content);
-          console.log('Copied text to clipboard');
-          break;
-          
-        case 'html':
-          await window.api.setClipboardHTML(clip.content);
-          console.log('Copied HTML to clipboard');
-          break;
-          
-        case 'rtf':
-          await window.api.setClipboardRTF(clip.content);
-          console.log('Copied RTF to clipboard');
-          break;
-          
-        case 'image':
-          await window.api.setClipboardImage(clip.content);
-          console.log('Copied image to clipboard');
-          break;
-          
-        case 'bookmark':
-          // For bookmarks, we'll write both text (URL) and HTML (formatted link)
-          const bookmarkData = {
-            text: clip.url || clip.content,
-            html: `<a href="${clip.url || clip.content}">${clip.title || clip.url || clip.content}</a>`,
-            title: clip.title,
-            url: clip.url || clip.content
-          };
-          await window.api.setClipboardBookmark(bookmarkData);
-          console.log('Copied bookmark to clipboard:', clip.title, clip.url);
-          break;
-          
-        default:
-          // Fallback to text for unknown types
-          await window.api.setClipboardText(clip.content);
-          console.log('Copied unknown type as text to clipboard');
-      }
-    } catch (error) {
-      console.error('Failed to copy clip to clipboard:', error);
-      
-      // Fallback: try to copy as plain text if the specific format failed
       try {
-        await window.api.setClipboardText(clip.content);
-        console.log('Fallback: copied as text to clipboard');
-      } catch (fallbackError) {
-        console.error('Fallback copy also failed:', fallbackError);
+        // Copy the clip content with the appropriate format based on its type
+        switch (clip.type) {
+          case 'text':
+            await window.api.setClipboardText(clip.content);
+            console.log('Copied text to clipboard');
+            break;
+
+          case 'html':
+            await window.api.setClipboardHTML(clip.content);
+            console.log('Copied HTML to clipboard');
+            break;
+
+          case 'rtf':
+            await window.api.setClipboardRTF(clip.content);
+            console.log('Copied RTF to clipboard');
+            break;
+
+          case 'image':
+            await window.api.setClipboardImage(clip.content);
+            console.log('Copied image to clipboard');
+            break;
+
+          case 'bookmark': {
+            // For bookmarks, we'll write both text (URL) and HTML (formatted link)
+            const bookmarkData = {
+              text: clip.url || clip.content,
+              html: `<a href="${clip.url || clip.content}">${clip.title || clip.url || clip.content}</a>`,
+              title: clip.title,
+              url: clip.url || clip.content,
+            };
+            await window.api.setClipboardBookmark(bookmarkData);
+            console.log('Copied bookmark to clipboard:', clip.title, clip.url);
+            break;
+          }
+
+          default:
+            // Fallback to text for unknown types
+            await window.api.setClipboardText(clip.content);
+            console.log('Copied unknown type as text to clipboard');
+        }
+      } catch (error) {
+        console.error('Failed to copy clip to clipboard:', error);
+
+        // Fallback: try to copy as plain text if the specific format failed
+        try {
+          await window.api.setClipboardText(clip.content);
+          console.log('Fallback: copied as text to clipboard');
+        } catch (fallbackError) {
+          console.error('Fallback copy also failed:', fallbackError);
+        }
       }
-    }
-  }, [getClip, setClipCopyIndex]);
+    },
+    [getClip, setClipCopyIndex]
+  );
 
   // Start clipboard monitoring when component mounts
   useEffect(() => {
@@ -541,10 +563,10 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         try {
           // Read current clipboard content first
           await readCurrentClipboard();
-          
+
           // Then start monitoring for changes
           await window.api.startClipboardMonitoring();
-          
+
           // Set up clipboard change listener
           window.api.onClipboardChanged((clipData: { type: string; content: string }) => {
             let newClip: ClipItem;
@@ -574,7 +596,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
               default:
                 newClip = createTextClipWithDetection(clipData.content);
             }
-            
+
             // Only trigger clipboard updated if it's not a duplicate
             if (!isDuplicateOfMostRecent(newClip)) {
               clipboardUpdated(newClip);
@@ -597,11 +619,7 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         window.api.removeClipboardListeners();
       }
     };
-  }, [
-    clipboardUpdated,
-    readCurrentClipboard,
-    isDuplicateOfMostRecent
-  ]); // Include all dependencies
+  }, [clipboardUpdated, readCurrentClipboard, isDuplicateOfMostRecent]); // Include all dependencies
 
   // Settings listener
   useEffect(() => {
@@ -618,34 +636,46 @@ export const ClipsProvider = ({ children }: { children: React.ReactNode }) => {
         }
       };
     }
-    
+
     return () => {}; // Return empty cleanup function if window.api is not available
   }, []);
 
-  const providerValue = useMemo(() => ({
-    // clips management
-    clips,
-    setClips,
-    getClip,
-    emptyClip,
-    updateClip,
-    // clip locking
-    toggleClipLock,
-    isClipLocked,
-    // clipboard management
-    clipboardUpdated,
-    readCurrentClipboard,
-    copyClipToClipboard,
-    clipCopyIndex,
-    // max clips management
-    setMaxClips,
-    maxClips,
-  }),
-  [clips, setClips, getClip, emptyClip, updateClip, toggleClipLock, isClipLocked, clipboardUpdated, readCurrentClipboard, copyClipToClipboard, clipCopyIndex, setMaxClips, maxClips]);
-
-  return (
-    <ClipsContext.Provider value={providerValue}>
-      {children}
-    </ClipsContext.Provider>
+  const providerValue = useMemo(
+    () => ({
+      // clips management
+      clips,
+      setClips,
+      getClip,
+      emptyClip,
+      updateClip,
+      // clip locking
+      toggleClipLock,
+      isClipLocked,
+      // clipboard management
+      clipboardUpdated,
+      readCurrentClipboard,
+      copyClipToClipboard,
+      clipCopyIndex,
+      // max clips management
+      setMaxClips,
+      maxClips,
+    }),
+    [
+      clips,
+      setClips,
+      getClip,
+      emptyClip,
+      updateClip,
+      toggleClipLock,
+      isClipLocked,
+      clipboardUpdated,
+      readCurrentClipboard,
+      copyClipToClipboard,
+      clipCopyIndex,
+      setMaxClips,
+      maxClips,
+    ]
   );
-};
+
+  return <ClipsContext.Provider value={providerValue}>{children}</ClipsContext.Provider>;
+}

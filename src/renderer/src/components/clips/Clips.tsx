@@ -4,7 +4,7 @@ import { Clip } from './Clip';
 import classNames from 'classnames';
 import styles from './Clips.module.css';
 
-export const Clips = (): React.JSX.Element => {
+export function Clips(): React.JSX.Element {
   const { clips } = useClips();
   const { isLight } = useTheme();
 
@@ -17,4 +17,4 @@ export const Clips = (): React.JSX.Element => {
       </ol>
     </div>
   );
-};
+}

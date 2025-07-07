@@ -15,7 +15,7 @@ export interface ClipItem {
   type: ClipType;
   content: string;
   title?: string; // for bookmark type
-  url?: string;   // for bookmark type
+  url?: string; // for bookmark type
   language?: string; // detected programming language
   isCode?: boolean; // whether the content appears to be code
 }
@@ -196,7 +196,10 @@ export interface QuickToolOperations {
   delete: (id: string) => Promise<void>;
   reorder: (tools: QuickTool[]) => Promise<void>;
   getAll: () => Promise<QuickTool[]>;
-  validateUrl: (url: string, captureGroups: string[]) => Promise<{ isValid: boolean; errors: string[] }>;
+  validateUrl: (
+    url: string,
+    captureGroups: string[]
+  ) => Promise<{ isValid: boolean; errors: string[] }>;
 }
 
 /**

@@ -1,24 +1,24 @@
-import React from 'react'
-import classNames from 'classnames'
-import { QuickTool } from '../../../../../shared/types'
-import { useTheme } from '../../../providers/theme'
-import { InfoTooltip } from './InfoTooltip'
-import styles from '../QuickClipsManager.module.css'
+import React from 'react';
+import classNames from 'classnames';
+import { QuickTool } from '../../../../../shared/types';
+import { useTheme } from '../../../providers/theme';
+import { InfoTooltip } from './InfoTooltip';
+import styles from '../QuickClipsManager.module.css';
 
 interface ToolsSectionProps {
-  tools: QuickTool[]
-  editingToolId: string | null
-  editingToolName: string
-  editingToolUrl: string
-  expandedToolId: string | null
-  onCreateTool: () => Promise<void>
-  onSaveTool: () => Promise<void>
-  onCancelToolEdit: () => void
-  onStartToolEdit: (tool: QuickTool) => void
-  onDeleteTool: (id: string) => void
-  onEditingToolNameChange: (name: string) => void
-  onEditingToolUrlChange: (url: string) => void
-  onExpandedToolIdChange: (id: string | null) => void
+  tools: QuickTool[];
+  editingToolId: string | null;
+  editingToolName: string;
+  editingToolUrl: string;
+  expandedToolId: string | null;
+  onCreateTool: () => Promise<void>;
+  onSaveTool: () => Promise<void>;
+  onCancelToolEdit: () => void;
+  onStartToolEdit: (tool: QuickTool) => void;
+  onDeleteTool: (id: string) => void;
+  onEditingToolNameChange: (name: string) => void;
+  onEditingToolUrlChange: (url: string) => void;
+  onExpandedToolIdChange: (id: string | null) => void;
 }
 
 export function ToolsSection({
@@ -34,25 +34,25 @@ export function ToolsSection({
   onDeleteTool,
   onEditingToolNameChange,
   onEditingToolUrlChange,
-  onExpandedToolIdChange
+  onExpandedToolIdChange,
 }: ToolsSectionProps): React.JSX.Element {
-  const { isLight } = useTheme()
+  const { isLight } = useTheme();
 
   // Extract all capture groups from a tool URL (supports pipe syntax)
   const extractCaptureGroupsFromUrl = (url: string): string[] => {
-    const tokenRegex = /\{([^}]+)\}/g
-    const groups = new Set<string>()
-    
-    let match
+    const tokenRegex = /\{([^}]+)\}/g;
+    const groups = new Set<string>();
+
+    let match;
     while ((match = tokenRegex.exec(url)) !== null) {
-      const tokenContent = match[1]
+      const tokenContent = match[1];
       // Split by pipe to handle multi-group tokens
-      const captureGroups = tokenContent.split('|').map(g => g.trim())
-      captureGroups.forEach(group => groups.add(group))
+      const captureGroups = tokenContent.split('|').map((g) => g.trim());
+      captureGroups.forEach((group) => groups.add(group));
     }
-    
-    return Array.from(groups)
-  }
+
+    return Array.from(groups);
+  };
 
   return (
     <div className={styles.tabContent}>
@@ -66,12 +66,20 @@ export function ToolsSection({
         <InfoTooltip
           content={
             <>
-              Tools are web URLs that can be opened with extracted data from search terms. 
-              Use tokens like <code>{'{'}email{'}'}</code> in the URL to insert captured values.
-              <br /><br />
-              <strong>Multi-group tokens:</strong> Use <code>{'{'}email|domainName|phoneNumber{'}'}</code> 
-              to support multiple capture groups. If any of these groups are found, each match 
-              will open in its own tab.
+              Tools are web URLs that can be opened with extracted data from search terms. Use
+              tokens like{' '}
+              <code>
+                {'{'}email{'}'}
+              </code>{' '}
+              in the URL to insert captured values.
+              <br />
+              <br />
+              <strong>Multi-group tokens:</strong> Use{' '}
+              <code>
+                {'{'}email|domainName|phoneNumber{'}'}
+              </code>
+              to support multiple capture groups. If any of these groups are found, each match will
+              open in its own tab.
             </>
           }
         />
@@ -115,13 +123,15 @@ export function ToolsSection({
                         Detected capture groups:
                       </span>
                       <div className={styles.captureGroupsPreview}>
-                        {extractCaptureGroupsFromUrl(editingToolUrl).map(group => (
+                        {extractCaptureGroupsFromUrl(editingToolUrl).map((group) => (
                           <span key={group} className={styles.captureGroup}>
                             {group}
                           </span>
                         ))}
                         {extractCaptureGroupsFromUrl(editingToolUrl).length === 0 && (
-                          <span className={classNames(styles.noGroups, { [styles.light]: isLight })}>
+                          <span
+                            className={classNames(styles.noGroups, { [styles.light]: isLight })}
+                          >
                             No capture groups found in URL
                           </span>
                         )}
@@ -146,9 +156,11 @@ export function ToolsSection({
               ) : (
                 <div className={styles.itemView}>
                   <div className={styles.itemHeader}>
-                    <h4 
+                    <h4
                       className={classNames(styles.itemName, { [styles.light]: isLight })}
-                      onClick={() => onExpandedToolIdChange(expandedToolId === tool.id ? null : tool.id)}
+                      onClick={() =>
+                        onExpandedToolIdChange(expandedToolId === tool.id ? null : tool.id)
+                      }
                     >
                       {tool.name}
                     </h4>
@@ -167,20 +179,22 @@ export function ToolsSection({
                       </button>
                     </div>
                   </div>
-                  
+
                   {expandedToolId === tool.id && (
                     <div className={styles.itemDetails}>
                       <div className={styles.urlDisplay}>
-                        <span className={classNames(styles.label, { [styles.light]: isLight })}>URL:</span>
+                        <span className={classNames(styles.label, { [styles.light]: isLight })}>
+                          URL:
+                        </span>
                         <code className={classNames(styles.code, { [styles.light]: isLight })}>
                           {tool.url}
                         </code>
                       </div>
                       <div className={styles.captureGroupsPreview}>
                         <span className={classNames(styles.label, { [styles.light]: isLight })}>
-                          Supported Groups: 
+                          Supported Groups:
                         </span>
-                        {extractCaptureGroupsFromUrl(tool.url).map(group => (
+                        {extractCaptureGroupsFromUrl(tool.url).map((group) => (
                           <span key={group} className={styles.captureGroup}>
                             {group}
                           </span>
@@ -195,5 +209,5 @@ export function ToolsSection({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -113,7 +113,12 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--warning-color), var(--error-color), var(--accent-tertiary));
+  background: linear-gradient(
+    90deg,
+    var(--warning-color),
+    var(--error-color),
+    var(--accent-tertiary)
+  );
   border-radius: 0 0 0.375rem 0.375rem;
 }
 

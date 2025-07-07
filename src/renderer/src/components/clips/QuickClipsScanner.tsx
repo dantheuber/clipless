@@ -1,195 +1,199 @@
-import React, { useState, useEffect } from 'react'
-import classNames from 'classnames'
-import { PatternMatch, QuickTool } from '../../../../shared/types'
-import { useTheme } from '../../providers/theme'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import styles from './QuickClipsScanner.module.css'
+import React, { useState, useEffect } from 'react';
+import classNames from 'classnames';
+import { PatternMatch, QuickTool } from '../../../../shared/types';
+import { useTheme } from '../../providers/theme';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import styles from './QuickClipsScanner.module.css';
 
 interface CaptureItem {
-  groupName: string
-  value: string
-  searchTermId: string
-  uniqueKey: string
+  groupName: string;
+  value: string;
+  searchTermId: string;
+  uniqueKey: string;
 }
 
 interface QuickClipsScannerProps {
-  isOpen: boolean
-  onClose: () => void
-  clipContent: string
+  isOpen: boolean;
+  onClose: () => void;
+  clipContent: string;
 }
 
-export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsScannerProps): React.JSX.Element {
-  const { isLight } = useTheme()
-  const [matches, setMatches] = useState<PatternMatch[]>([])
-  const [captureItems, setCaptureItems] = useState<CaptureItem[]>([])
-  const [tools, setTools] = useState<QuickTool[]>([])
-  const [selectedCaptureItems, setSelectedCaptureItems] = useState<Set<string>>(new Set())
-  const [availableTools, setAvailableTools] = useState<QuickTool[]>([])
-  const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set())
-  const [loading, setLoading] = useState(false)
+export function QuickClipsScanner({
+  isOpen,
+  onClose,
+  clipContent,
+}: QuickClipsScannerProps): React.JSX.Element {
+  const { isLight } = useTheme();
+  const [matches, setMatches] = useState<PatternMatch[]>([]);
+  const [captureItems, setCaptureItems] = useState<CaptureItem[]>([]);
+  const [tools, setTools] = useState<QuickTool[]>([]);
+  const [selectedCaptureItems, setSelectedCaptureItems] = useState<Set<string>>(new Set());
+  const [availableTools, setAvailableTools] = useState<QuickTool[]>([]);
+  const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
 
   // Add escape key listener
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && isOpen) {
-        onClose()
+        onClose();
       }
-    }
+    };
 
     if (isOpen) {
-      document.addEventListener('keydown', handleEscape)
-      return () => document.removeEventListener('keydown', handleEscape)
+      document.addEventListener('keydown', handleEscape);
+      return () => document.removeEventListener('keydown', handleEscape);
     }
-    
+
     // Return empty cleanup function for when not open
-    return () => {}
-  }, [isOpen, onClose])
+    return () => {};
+  }, [isOpen, onClose]);
 
   // Scan the clip content when modal opens
   useEffect(() => {
     if (isOpen && clipContent) {
-      scanContent()
+      scanContent();
     }
-  }, [isOpen, clipContent])
+  }, [isOpen, clipContent]);
 
   // Load available tools
   useEffect(() => {
     if (isOpen) {
-      loadTools()
+      loadTools();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   // Update available tools when capture items or selected capture items change
   useEffect(() => {
     if (captureItems.length > 0 && tools.length > 0) {
-      updateAvailableTools()
+      updateAvailableTools();
     }
-  }, [captureItems, tools, selectedCaptureItems])
+  }, [captureItems, tools, selectedCaptureItems]);
 
   const scanContent = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
-      const scanResults = await window.api.quickClipsScanText(clipContent)
-      setMatches(scanResults)
-      
+      const scanResults = await window.api.quickClipsScanText(clipContent);
+      setMatches(scanResults);
+
       // Extract individual capture items and deduplicate
-      const captureMap = new Map<string, CaptureItem>()
-      
+      const captureMap = new Map<string, CaptureItem>();
+
       scanResults.forEach((match) => {
         Object.entries(match.captures).forEach(([groupName, value]) => {
-          const uniqueKey = `${groupName}-${value}`
+          const uniqueKey = `${groupName}-${value}`;
           if (!captureMap.has(uniqueKey)) {
             captureMap.set(uniqueKey, {
               groupName,
               value: String(value),
               searchTermId: match.searchTermId,
-              uniqueKey
-            })
+              uniqueKey,
+            });
           }
-        })
-      })
-      
-      const items = Array.from(captureMap.values())
-      setCaptureItems(items)
-      
+        });
+      });
+
+      const items = Array.from(captureMap.values());
+      setCaptureItems(items);
+
       // Auto-select all capture items initially
-      setSelectedCaptureItems(new Set(items.map(item => item.uniqueKey)))
+      setSelectedCaptureItems(new Set(items.map((item) => item.uniqueKey)));
     } catch (error) {
-      console.error('Failed to scan content:', error)
-      setMatches([])
-      setCaptureItems([])
+      console.error('Failed to scan content:', error);
+      setMatches([]);
+      setCaptureItems([]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const loadTools = async () => {
     try {
-      const loadedTools = await window.api.quickToolsGetAll()
-      setTools(loadedTools)
+      const loadedTools = await window.api.quickToolsGetAll();
+      setTools(loadedTools);
     } catch (error) {
-      console.error('Failed to load tools:', error)
-      setTools([])
+      console.error('Failed to load tools:', error);
+      setTools([]);
     }
-  }
+  };
 
   const updateAvailableTools = () => {
     // Get all capture group names from selected capture items
-    const selectedCaptureGroups = new Set<string>()
-    
+    const selectedCaptureGroups = new Set<string>();
+
     captureItems.forEach((item) => {
       if (selectedCaptureItems.has(item.uniqueKey)) {
-        selectedCaptureGroups.add(item.groupName)
+        selectedCaptureGroups.add(item.groupName);
       }
-    })
+    });
 
     // Find tools that can work with the selected capture groups
-    const compatibleTools = tools.filter(tool => 
-      tool.captureGroups.some(group => selectedCaptureGroups.has(group))
-    )
+    const compatibleTools = tools.filter((tool) =>
+      tool.captureGroups.some((group) => selectedCaptureGroups.has(group))
+    );
 
-    setAvailableTools(compatibleTools)
-    
+    setAvailableTools(compatibleTools);
+
     // Auto-select tools that were previously selected and are still available
-    const availableToolIds = new Set(compatibleTools.map(tool => tool.id))
-    setSelectedTools(prev => new Set([...prev].filter(id => availableToolIds.has(id))))
-  }
+    const availableToolIds = new Set(compatibleTools.map((tool) => tool.id));
+    setSelectedTools((prev) => new Set([...prev].filter((id) => availableToolIds.has(id))));
+  };
 
   const handleCaptureItemToggle = (uniqueKey: string) => {
-    const newSelected = new Set(selectedCaptureItems)
+    const newSelected = new Set(selectedCaptureItems);
     if (newSelected.has(uniqueKey)) {
-      newSelected.delete(uniqueKey)
+      newSelected.delete(uniqueKey);
     } else {
-      newSelected.add(uniqueKey)
+      newSelected.add(uniqueKey);
     }
-    setSelectedCaptureItems(newSelected)
-  }
+    setSelectedCaptureItems(newSelected);
+  };
 
   const handleToolToggle = (toolId: string) => {
-    const newSelected = new Set(selectedTools)
+    const newSelected = new Set(selectedTools);
     if (newSelected.has(toolId)) {
-      newSelected.delete(toolId)
+      newSelected.delete(toolId);
     } else {
-      newSelected.add(toolId)
+      newSelected.add(toolId);
     }
-    setSelectedTools(newSelected)
-  }
+    setSelectedTools(newSelected);
+  };
 
   const handleOpenTools = async () => {
-    if (selectedCaptureItems.size === 0 || selectedTools.size === 0) return
+    if (selectedCaptureItems.size === 0 || selectedTools.size === 0) return;
 
     try {
       // Create a single PatternMatch object containing all selected capture groups
-      const selectedCaptures: Record<string, string> = {}
-      
+      const selectedCaptures: Record<string, string> = {};
+
       captureItems
-        .filter(item => selectedCaptureItems.has(item.uniqueKey))
-        .forEach(item => {
-          selectedCaptures[item.groupName] = item.value
-        })
+        .filter((item) => selectedCaptureItems.has(item.uniqueKey))
+        .forEach((item) => {
+          selectedCaptures[item.groupName] = item.value;
+        });
 
       // Create a single PatternMatch object with all selected captures
       const combinedMatch: PatternMatch = {
         searchTermId: 'combined',
         searchTermName: 'Combined Selection',
-        captures: selectedCaptures
-      }
+        captures: selectedCaptures,
+      };
 
-      await window.api.quickClipsOpenTools([combinedMatch], Array.from(selectedTools))
-      onClose()
+      await window.api.quickClipsOpenTools([combinedMatch], Array.from(selectedTools));
+      onClose();
     } catch (error) {
-      console.error('Failed to open tools:', error)
+      console.error('Failed to open tools:', error);
     }
-  }
+  };
 
   // Handle overlay click to close
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (event.target === event.currentTarget) {
-      onClose()
+      onClose();
     }
-  }
+  };
 
-  if (!isOpen) return <></>
+  if (!isOpen) return <></>;
 
   return (
     <div className={styles.overlay} onClick={handleOverlayClick}>
@@ -211,11 +215,14 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
           </button>
         </div>
 
-        <div className={classNames(styles.content, { [styles.light]: isLight })} style={{ 
-          flexDirection: loading || matches.length === 0 ? 'column' : 'row',
-          justifyContent: loading || matches.length === 0 ? 'center' : 'flex-start',
-          alignItems: loading || matches.length === 0 ? 'center' : 'stretch'
-        }}>
+        <div
+          className={classNames(styles.content, { [styles.light]: isLight })}
+          style={{
+            flexDirection: loading || matches.length === 0 ? 'column' : 'row',
+            justifyContent: loading || matches.length === 0 ? 'center' : 'flex-start',
+            alignItems: loading || matches.length === 0 ? 'center' : 'stretch',
+          }}
+        >
           {loading ? (
             <div className={classNames(styles.loading, { [styles.light]: isLight })}>
               <FontAwesomeIcon icon="spinner" spin />
@@ -238,8 +245,8 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                 </h3>
                 <div className={styles.matchesList}>
                   {captureItems.map((item) => {
-                    const isSelected = selectedCaptureItems.has(item.uniqueKey)
-                    
+                    const isSelected = selectedCaptureItems.has(item.uniqueKey);
+
                     return (
                       <div
                         key={item.uniqueKey}
@@ -259,14 +266,26 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                           <div className={styles.matchDetails}>
                             <div className={styles.matchCaptures}>
                               <div className={styles.capture}>
-                                <span className={classNames(styles.captureGroup, { [styles.light]: isLight })}>{item.groupName}:</span>
-                                <span className={classNames(styles.captureValue, { [styles.light]: isLight })}>{item.value}</span>
+                                <span
+                                  className={classNames(styles.captureGroup, {
+                                    [styles.light]: isLight,
+                                  })}
+                                >
+                                  {item.groupName}:
+                                </span>
+                                <span
+                                  className={classNames(styles.captureValue, {
+                                    [styles.light]: isLight,
+                                  })}
+                                >
+                                  {item.value}
+                                </span>
                               </div>
                             </div>
                           </div>
                         </label>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               </div>
@@ -279,9 +298,9 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                       Available Tools ({availableTools.length})
                     </h3>
                     <div className={styles.toolsList}>
-                      {availableTools.map(tool => {
-                        const isSelected = selectedTools.has(tool.id)
-                        
+                      {availableTools.map((tool) => {
+                        const isSelected = selectedTools.has(tool.id);
+
                         return (
                           <div
                             key={tool.id}
@@ -299,15 +318,31 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                                 className={styles.checkbox}
                               />
                               <div className={styles.toolDetails}>
-                                <div className={classNames(styles.toolName, { [styles.light]: isLight })}>{tool.name}</div>
-                                <div className={classNames(styles.toolUrl, { [styles.light]: isLight })}>{tool.url}</div>
-                                <div className={classNames(styles.toolGroups, { [styles.light]: isLight })}>
+                                <div
+                                  className={classNames(styles.toolName, {
+                                    [styles.light]: isLight,
+                                  })}
+                                >
+                                  {tool.name}
+                                </div>
+                                <div
+                                  className={classNames(styles.toolUrl, {
+                                    [styles.light]: isLight,
+                                  })}
+                                >
+                                  {tool.url}
+                                </div>
+                                <div
+                                  className={classNames(styles.toolGroups, {
+                                    [styles.light]: isLight,
+                                  })}
+                                >
                                   Supports: {tool.captureGroups.join(', ')}
                                 </div>
                               </div>
                             </label>
                           </div>
-                        )
+                        );
                       })}
                     </div>
                   </>
@@ -319,9 +354,7 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                     <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
                       <FontAwesomeIcon icon="wrench" className={styles.emptyIcon} />
                       <p>No compatible tools available.</p>
-                      <p className={styles.emptyHint}>
-                        Select patterns to see available tools.
-                      </p>
+                      <p className={styles.emptyHint}>Select patterns to see available tools.</p>
                     </div>
                   </>
                 )}
@@ -357,5 +390,5 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useCallback,
-  useMemo,
-  useState,
-  useEffect,
-} from 'react';
+import { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import { detectLanguage, isCode, mapToSyntaxHighlighterLanguage } from '../utils/languageDetection';
 
 /**
@@ -26,7 +19,7 @@ export interface LanguageDetectionContextType {
   // Settings
   settings: LanguageDetectionSettings;
   updateSettings: (newSettings: Partial<LanguageDetectionSettings>) => void;
-  
+
   // Language detection functions
   detectTextLanguage: (text: string) => DetectedLanguageInfo;
   isCodeDetectionEnabled: boolean;
@@ -43,10 +36,10 @@ export const LanguageDetectionContext = createContext<LanguageDetectionContextTy
   isCodeDetectionEnabled: true,
 });
 
-export const useLanguageDetection = (): LanguageDetectionContextType => 
+export const useLanguageDetection = (): LanguageDetectionContextType =>
   useContext(LanguageDetectionContext);
 
-export const LanguageDetectionProvider = ({ children }: { children: React.ReactNode }) => {
+export function LanguageDetectionProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettings] = useState<LanguageDetectionSettings>(defaultSettings);
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
 
@@ -61,9 +54,10 @@ export const LanguageDetectionProvider = ({ children }: { children: React.ReactN
       try {
         const storedSettings = await window.api.storageGetSettings();
         if (storedSettings) {
-          setSettings(prevSettings => ({
+          setSettings((prevSettings) => ({
             ...prevSettings,
-            codeDetectionEnabled: storedSettings.codeDetectionEnabled ?? defaultSettings.codeDetectionEnabled,
+            codeDetectionEnabled:
+              storedSettings.codeDetectionEnabled ?? defaultSettings.codeDetectionEnabled,
           }));
         }
       } catch (error) {
@@ -85,7 +79,7 @@ export const LanguageDetectionProvider = ({ children }: { children: React.ReactN
 
       try {
         // Get current settings and merge with language detection settings
-        const currentSettings = await window.api.storageGetSettings() || {};
+        const currentSettings = (await window.api.storageGetSettings()) || {};
         const updatedSettings = {
           ...currentSettings,
           codeDetectionEnabled: settings.codeDetectionEnabled,
@@ -107,7 +101,7 @@ export const LanguageDetectionProvider = ({ children }: { children: React.ReactN
 
     const handleSettingsUpdate = (updatedSettings: any) => {
       if (updatedSettings && typeof updatedSettings.codeDetectionEnabled === 'boolean') {
-        setSettings(prevSettings => ({
+        setSettings((prevSettings) => ({
           ...prevSettings,
           codeDetectionEnabled: updatedSettings.codeDetectionEnabled,
         }));
@@ -127,7 +121,7 @@ export const LanguageDetectionProvider = ({ children }: { children: React.ReactN
    * Update language detection settings
    */
   const updateSettings = useCallback((newSettings: Partial<LanguageDetectionSettings>) => {
-    setSettings(prevSettings => ({
+    setSettings((prevSettings) => ({
       ...prevSettings,
       ...newSettings,
     }));
@@ -136,38 +130,46 @@ export const LanguageDetectionProvider = ({ children }: { children: React.ReactN
   /**
    * Detect the language of a text snippet
    */
-  const detectTextLanguage = useCallback((text: string): DetectedLanguageInfo => {
-    if (!settings.codeDetectionEnabled) {
+  const detectTextLanguage = useCallback(
+    (text: string): DetectedLanguageInfo => {
+      if (!settings.codeDetectionEnabled) {
+        return {
+          language: null,
+          isCode: false,
+          syntaxHighlighterLanguage: 'text',
+        };
+      }
+
+      const detectedLanguage = detectLanguage(text);
+      const appearsToBeCode = isCode(text);
+      const syntaxHighlighterLanguage = detectedLanguage
+        ? mapToSyntaxHighlighterLanguage(detectedLanguage)
+        : appearsToBeCode
+          ? 'text'
+          : 'text';
+
       return {
-        language: null,
-        isCode: false,
-        syntaxHighlighterLanguage: 'text',
+        language: detectedLanguage,
+        isCode: appearsToBeCode,
+        syntaxHighlighterLanguage,
       };
-    }
+    },
+    [settings.codeDetectionEnabled]
+  );
 
-    const detectedLanguage = detectLanguage(text);
-    const appearsToBeCode = isCode(text);
-    const syntaxHighlighterLanguage = detectedLanguage 
-      ? mapToSyntaxHighlighterLanguage(detectedLanguage)
-      : (appearsToBeCode ? 'text' : 'text');
-
-    return {
-      language: detectedLanguage,
-      isCode: appearsToBeCode,
-      syntaxHighlighterLanguage,
-    };
-  }, [settings.codeDetectionEnabled]);
-
-  const providerValue = useMemo(() => ({
-    settings,
-    updateSettings,
-    detectTextLanguage,
-    isCodeDetectionEnabled: settings.codeDetectionEnabled,
-  }), [settings, updateSettings, detectTextLanguage]);
+  const providerValue = useMemo(
+    () => ({
+      settings,
+      updateSettings,
+      detectTextLanguage,
+      isCodeDetectionEnabled: settings.codeDetectionEnabled,
+    }),
+    [settings, updateSettings, detectTextLanguage]
+  );
 
   return (
     <LanguageDetectionContext.Provider value={providerValue}>
       {children}
     </LanguageDetectionContext.Provider>
   );
-};
+}

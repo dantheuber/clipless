@@ -1,58 +1,63 @@
-import React from 'react'
-import classNames from 'classnames'
-import { SearchTerm } from '../../../../../shared/types'
-import { useTheme } from '../../../providers/theme'
-import { InfoTooltip } from './InfoTooltip'
-import { TLD_PATTERN } from '../../../utils/tlds'
-import styles from '../QuickClipsManager.module.css'
+import React from 'react';
+import classNames from 'classnames';
+import { SearchTerm } from '../../../../../shared/types';
+import { useTheme } from '../../../providers/theme';
+import { InfoTooltip } from './InfoTooltip';
+import { TLD_PATTERN } from '../../../utils/tlds';
+import styles from '../QuickClipsManager.module.css';
 
 // Built-in common patterns
 const BUILTIN_PATTERNS = [
   {
     name: 'Email Address',
-    pattern: '(?<email>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})'
+    pattern: '(?<email>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})',
   },
   {
     name: 'IP Address',
-    pattern: '(?<ipAddress>\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b)'
+    pattern:
+      '(?<ipAddress>\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\b)',
   },
   {
     name: 'Domain Name',
-    pattern: `(?<domainName>\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+(${TLD_PATTERN})\\b)`
+    pattern: `(?<domainName>\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+(${TLD_PATTERN})\\b)`,
   },
   {
     name: 'Phone Number',
-    pattern: '(?<phoneNumber>\\b(?:\\+?1[-.]?)?\\(?([0-9]{3})\\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\\b)'
+    pattern:
+      '(?<phoneNumber>\\b(?:\\+?1[-.]?)?\\(?([0-9]{3})\\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\\b)',
   },
   {
     name: 'URL',
-    pattern: '(?<url>https?:\\/\\/(?<domainName>[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?)*)(?:\\/[^\\s]*)?)'
+    pattern:
+      '(?<url>https?:\\/\\/(?<domainName>[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?)*)(?:\\/[^\\s]*)?)',
   },
   {
     name: 'MAC Address',
-    pattern: '(?<macAddress>\\b[0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}\\b)'
+    pattern:
+      '(?<macAddress>\\b[0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}\\b)',
   },
   {
     name: 'IPv6 Address',
-    pattern: '(?<ipv6Address>\\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\b|\\b::1\\b|\\b::ffff:[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\b)'
-  }
-]
+    pattern:
+      '(?<ipv6Address>\\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\b|\\b::1\\b|\\b::ffff:[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\b)',
+  },
+];
 
 interface SearchTermsSectionProps {
-  searchTerms: SearchTerm[]
-  editingSearchTermId: string | null
-  editingSearchTermName: string
-  editingSearchTermPattern: string
-  expandedSearchTermId: string | null
-  onCreateSearchTerm: () => Promise<void>
-  onCreateFromBuiltin: (builtin: typeof BUILTIN_PATTERNS[0]) => Promise<void>
-  onSaveSearchTerm: () => Promise<void>
-  onCancelSearchTermEdit: () => void
-  onStartSearchTermEdit: (term: SearchTerm) => void
-  onDeleteSearchTerm: (id: string) => void
-  onEditingSearchTermNameChange: (name: string) => void
-  onEditingSearchTermPatternChange: (pattern: string) => void
-  onExpandedSearchTermIdChange: (id: string | null) => void
+  searchTerms: SearchTerm[];
+  editingSearchTermId: string | null;
+  editingSearchTermName: string;
+  editingSearchTermPattern: string;
+  expandedSearchTermId: string | null;
+  onCreateSearchTerm: () => Promise<void>;
+  onCreateFromBuiltin: (builtin: (typeof BUILTIN_PATTERNS)[0]) => Promise<void>;
+  onSaveSearchTerm: () => Promise<void>;
+  onCancelSearchTermEdit: () => void;
+  onStartSearchTermEdit: (term: SearchTerm) => void;
+  onDeleteSearchTerm: (id: string) => void;
+  onEditingSearchTermNameChange: (name: string) => void;
+  onEditingSearchTermPatternChange: (pattern: string) => void;
+  onExpandedSearchTermIdChange: (id: string | null) => void;
 }
 
 export function SearchTermsSection({
@@ -69,19 +74,21 @@ export function SearchTermsSection({
   onDeleteSearchTerm,
   onEditingSearchTermNameChange,
   onEditingSearchTermPatternChange,
-  onExpandedSearchTermIdChange
+  onExpandedSearchTermIdChange,
 }: SearchTermsSectionProps): React.JSX.Element {
-  const { isLight } = useTheme()
+  const { isLight } = useTheme();
 
   const extractCaptureGroups = (pattern: string): string[] => {
-    const matches = pattern.match(/\(\?<(\w+)>/g)
-    if (!matches) return []
-    
-    return matches.map(match => {
-      const groupName = match.match(/\(\?<(\w+)>/)?.[1]
-      return groupName || ''
-    }).filter(Boolean)
-  }
+    const matches = pattern.match(/\(\?<(\w+)>/g);
+    if (!matches) return [];
+
+    return matches
+      .map((match) => {
+        const groupName = match.match(/\(\?<(\w+)>/)?.[1];
+        return groupName || '';
+      })
+      .filter(Boolean);
+  };
 
   return (
     <div className={styles.tabContent}>
@@ -90,17 +97,19 @@ export function SearchTermsSection({
           <select
             className={classNames(styles.builtinSelect, { [styles.light]: isLight })}
             onChange={(e) => {
-              const index = parseInt(e.target.value)
+              const index = parseInt(e.target.value);
               if (!isNaN(index)) {
-                onCreateFromBuiltin(BUILTIN_PATTERNS[index])
-                e.target.value = ''
+                onCreateFromBuiltin(BUILTIN_PATTERNS[index]);
+                e.target.value = '';
               }
             }}
             value=""
           >
             <option value="">Add Built-in Pattern...</option>
             {BUILTIN_PATTERNS.map((pattern, index) => (
-              <option key={index} value={index}>{pattern.name}</option>
+              <option key={index} value={index}>
+                {pattern.name}
+              </option>
             ))}
           </select>
           <button
@@ -113,8 +122,11 @@ export function SearchTermsSection({
         <InfoTooltip
           content={
             <>
-              Search terms use regular expressions with named capture groups to extract data from clipboard content. 
-              Use patterns like <code>(?&lt;email&gt;[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{'{'}2,{'}'})</code> 
+              Search terms use regular expressions with named capture groups to extract data from
+              clipboard content. Use patterns like{' '}
+              <code>
+                (?&lt;email&gt;[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{'{'}2,{'}'})
+              </code>
               to capture email addresses.
             </>
           }
@@ -134,7 +146,10 @@ export function SearchTermsSection({
                 styles.itemCard,
                 { [styles.light]: isLight },
                 { [styles.editing]: editingSearchTermId === term.id },
-                { [styles.expanded]: expandedSearchTermId === term.id || editingSearchTermId === term.id }
+                {
+                  [styles.expanded]:
+                    expandedSearchTermId === term.id || editingSearchTermId === term.id,
+                }
               )}
             >
               {editingSearchTermId === term.id ? (
@@ -155,9 +170,9 @@ export function SearchTermsSection({
                   />
                   <div className={styles.captureGroupsPreview}>
                     <span className={classNames(styles.label, { [styles.light]: isLight })}>
-                      Capture Groups: 
+                      Capture Groups:
                     </span>
-                    {extractCaptureGroups(editingSearchTermPattern).map(group => (
+                    {extractCaptureGroups(editingSearchTermPattern).map((group) => (
                       <span key={group} className={styles.captureGroup}>
                         {group}
                       </span>
@@ -181,9 +196,13 @@ export function SearchTermsSection({
               ) : (
                 <div className={styles.itemView}>
                   <div className={styles.itemHeader}>
-                    <h4 
+                    <h4
                       className={classNames(styles.itemName, { [styles.light]: isLight })}
-                      onClick={() => onExpandedSearchTermIdChange(expandedSearchTermId === term.id ? null : term.id)}
+                      onClick={() =>
+                        onExpandedSearchTermIdChange(
+                          expandedSearchTermId === term.id ? null : term.id
+                        )
+                      }
                     >
                       {term.name}
                     </h4>
@@ -202,14 +221,14 @@ export function SearchTermsSection({
                       </button>
                     </div>
                   </div>
-                  
+
                   {expandedSearchTermId === term.id && (
                     <div className={styles.itemDetails}>
                       <div className={styles.captureGroupsPreview}>
                         <span className={classNames(styles.label, { [styles.light]: isLight })}>
-                          Capture Groups: 
+                          Capture Groups:
                         </span>
-                        {extractCaptureGroups(term.pattern).map(group => (
+                        {extractCaptureGroups(term.pattern).map((group) => (
                           <span key={group} className={styles.captureGroup}>
                             {group}
                           </span>
@@ -224,5 +243,5 @@ export function SearchTermsSection({
         </div>
       )}
     </div>
-  )
+  );
 }

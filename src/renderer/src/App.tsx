@@ -1,10 +1,10 @@
-import { Clips } from './components/clips/Clips'
-import { ClipsProvider } from './providers/clips'
-import { ThemeProvider, useTheme } from './providers/theme'
-import { LanguageDetectionProvider } from './providers/languageDetection'
-import { StatusBar } from './components/StatusBar'
-import classNames from 'classnames'
-import styles from './App.module.css'
+import { Clips } from './components/clips/Clips';
+import { ClipsProvider } from './providers/clips';
+import { ThemeProvider, useTheme } from './providers/theme';
+import { LanguageDetectionProvider } from './providers/languageDetection';
+import { StatusBar } from './components/StatusBar';
+import classNames from 'classnames';
+import styles from './App.module.css';
 
 function AppContent(): React.JSX.Element {
   const { isLight } = useTheme();
@@ -22,7 +22,7 @@ function AppContent(): React.JSX.Element {
       </LanguageDetectionProvider>
       {/* <Versions></Versions> */}
     </div>
-  )
+  );
 }
 
 function App(): React.JSX.Element {
@@ -30,7 +30,7 @@ function App(): React.JSX.Element {
     <ThemeProvider>
       <AppContent />
     </ThemeProvider>
-  )
+  );
 }
 
-export default App
+export default App;

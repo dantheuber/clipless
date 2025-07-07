@@ -13,10 +13,10 @@ interface StatusBarProps {
 export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
   const { clips, maxClips, isClipLocked } = useClips();
   const { isLight } = useTheme();
-  
+
   // Count non-empty clips
-  const activeClipsCount = clips.filter(clip => clip.content.trim() !== '').length;
-  
+  const activeClipsCount = clips.filter((clip) => clip.content.trim() !== '').length;
+
   // Count locked clips
   const lockedClipsCount = clips.filter((_, index) => isClipLocked(index)).length;
 
@@ -41,7 +41,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
             {activeClipsCount} / {maxClips} clips
           </span>
         </span>
-        
+
         {lockedClipsCount > 0 && (
           <span className={styles.statItem}>
             <FontAwesomeIcon icon="lock" className={styles.icon} />
@@ -52,7 +52,7 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
 
       <div className={styles.rightSection}>
         <TemplateSelector />
-        
+
         <button
           onClick={handleOpenSettings}
           className={classNames(styles.settingsButton, { [styles.light]: isLight })}

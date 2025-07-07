@@ -13,7 +13,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
   const [settings, setSettings] = useState<UserSettingsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+
   const { isLight } = useTheme();
   const { updateSettings: updateLanguageSettings } = useLanguageDetection();
 
@@ -42,15 +42,15 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
     try {
       const updatedSettings = { ...settings, [key]: value };
       const success = await window.api.storageSaveSettings(updatedSettings);
-      
+
       if (success) {
         setSettings(updatedSettings);
-        
+
         // Update language detection settings if code detection was changed
         if (key === 'codeDetectionEnabled') {
           updateLanguageSettings({ codeDetectionEnabled: value });
         }
-        
+
         // Notify other windows about the settings change
         if (window.api.settingsChanged) {
           await window.api.settingsChanged(updatedSettings);
@@ -70,10 +70,24 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
       <div className={styles.loadingContainer}>
         <div className={styles.loadingContent}>
           <svg className={styles.spinner} viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+              fill="none"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
-          <span className={classNames(styles.loadingText, { [styles.light]: isLight })}>Loading settings...</span>
+          <span className={classNames(styles.loadingText, { [styles.light]: isLight })}>
+            Loading settings...
+          </span>
         </div>
       </div>
     );
@@ -84,10 +98,19 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
       <div className={styles.errorContainer}>
         <div className={styles.errorContent}>
           <svg className={styles.errorIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.96-.833-2.73 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.96-.833-2.73 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+            />
           </svg>
-          <p className={classNames(styles.errorTitle, { [styles.light]: isLight })}>Failed to load settings</p>
-          <p className={classNames(styles.errorDescription, { [styles.light]: isLight })}>Please try refreshing the application</p>
+          <p className={classNames(styles.errorTitle, { [styles.light]: isLight })}>
+            Failed to load settings
+          </p>
+          <p className={classNames(styles.errorDescription, { [styles.light]: isLight })}>
+            Please try refreshing the application
+          </p>
         </div>
       </div>
     );
@@ -97,13 +120,18 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
     <div className={styles.container}>
       {/* Application Settings */}
       <div className={styles.section}>
-        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Application Settings</h3>
-        
+        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
+          Application Settings
+        </h3>
+
         <div className={styles.settingsContainer}>
           {/* Maximum Clips Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <label htmlFor="maxClips" className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+              <label
+                htmlFor="maxClips"
+                className={classNames(styles.settingLabel, { [styles.light]: isLight })}
+              >
                 Maximum Clips
               </label>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
@@ -125,7 +153,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           {/* Start Minimized Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Start Minimized</span>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Start Minimized
+              </span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Launch the application minimized to system tray
               </p>
@@ -138,13 +168,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.startMinimized
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.startMinimized
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.startMinimized,
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.startMinimized,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
@@ -152,7 +186,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           {/* Auto Start Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Auto Start with System</span>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Auto Start with System
+              </span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Start Clipless automatically when your computer boots up
               </p>
@@ -165,13 +201,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.autoStart
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.autoStart
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.autoStart,
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.autoStart,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
@@ -179,7 +219,10 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           {/* Theme Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <label htmlFor="theme" className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+              <label
+                htmlFor="theme"
+                className={classNames(styles.settingLabel, { [styles.light]: isLight })}
+              >
                 Theme
               </label>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
@@ -189,7 +232,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
             <select
               id="theme"
               value={settings.theme || 'system'}
-              onChange={(e) => handleSettingChange('theme', e.target.value as 'light' | 'dark' | 'system')}
+              onChange={(e) =>
+                handleSettingChange('theme', e.target.value as 'light' | 'dark' | 'system')
+              }
               disabled={saving}
               className={classNames(styles.select, { [styles.light]: isLight })}
             >
@@ -202,9 +247,12 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           {/* Code Detection Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Code Detection & Highlighting</span>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Code Detection & Highlighting
+              </span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
-                Automatically detect programming languages and apply syntax highlighting when editing
+                Automatically detect programming languages and apply syntax highlighting when
+                editing
               </p>
             </div>
             <label className={styles.toggleLabel}>
@@ -215,13 +263,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.codeDetectionEnabled ?? true
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.codeDetectionEnabled ?? true
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.codeDetectionEnabled ?? true,
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.codeDetectionEnabled ?? true,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
@@ -230,13 +282,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
 
       {/* Window Settings */}
       <div className={styles.section}>
-        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>Window Settings</h3>
-        
+        <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
+          Window Settings
+        </h3>
+
         <div className={styles.settingsContainer}>
           {/* Enable Window Transparency Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Enable Window Transparency</span>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Enable Window Transparency
+              </span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Allow the window to be made transparent
               </p>
@@ -249,33 +305,44 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.transparencyEnabled ?? false
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.transparencyEnabled ?? false
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.transparencyEnabled ?? false,
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.transparencyEnabled ?? false,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
 
           {/* Window Transparency Setting */}
-          <div className={classNames(styles.settingItem, { 
-            [styles.light]: isLight,
-            [styles.settingItemDisabled]: !(settings.transparencyEnabled ?? false)
-          })}>
+          <div
+            className={classNames(styles.settingItem, {
+              [styles.light]: isLight,
+              [styles.settingItemDisabled]: !(settings.transparencyEnabled ?? false),
+            })}
+          >
             <div className={styles.settingContent}>
-              <label htmlFor="windowTransparency" className={classNames(styles.settingLabel, { 
-                [styles.light]: isLight,
-                [styles.disabled]: !(settings.transparencyEnabled ?? false)
-              })}>
+              <label
+                htmlFor="windowTransparency"
+                className={classNames(styles.settingLabel, {
+                  [styles.light]: isLight,
+                  [styles.disabled]: !(settings.transparencyEnabled ?? false),
+                })}
+              >
                 Window Transparency Level
               </label>
-              <p className={classNames(styles.settingDescription, { 
-                [styles.light]: isLight,
-                [styles.disabled]: !(settings.transparencyEnabled ?? false)
-              })}>
+              <p
+                className={classNames(styles.settingDescription, {
+                  [styles.light]: isLight,
+                  [styles.disabled]: !(settings.transparencyEnabled ?? false),
+                })}
+              >
                 Set window transparency level (0% = fully opaque, 100% = fully transparent)
               </p>
             </div>
@@ -287,33 +354,46 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 max="100"
                 step="5"
                 value={settings.windowTransparency ?? 0}
-                onChange={(e) => handleSettingChange('windowTransparency', parseInt(e.target.value))}
+                onChange={(e) =>
+                  handleSettingChange('windowTransparency', parseInt(e.target.value))
+                }
                 disabled={saving || !(settings.transparencyEnabled ?? false)}
                 className={classNames(styles.rangeSlider, { [styles.light]: isLight })}
               />
-              <span className={classNames(styles.settingLabel, { 
-                [styles.light]: isLight,
-                [styles.disabled]: !(settings.transparencyEnabled ?? false)
-              })} style={{ minWidth: '40px' }}>
+              <span
+                className={classNames(styles.settingLabel, {
+                  [styles.light]: isLight,
+                  [styles.disabled]: !(settings.transparencyEnabled ?? false),
+                })}
+                style={{ minWidth: '40px' }}
+              >
                 {settings.windowTransparency ?? 0}%
               </span>
             </div>
           </div>
 
           {/* Opaque When Focused Setting */}
-          <div className={classNames(styles.settingItem, { 
-            [styles.light]: isLight,
-            [styles.settingItemDisabled]: !(settings.transparencyEnabled ?? false)
-          })}>
+          <div
+            className={classNames(styles.settingItem, {
+              [styles.light]: isLight,
+              [styles.settingItemDisabled]: !(settings.transparencyEnabled ?? false),
+            })}
+          >
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { 
-                [styles.light]: isLight,
-                [styles.disabled]: !(settings.transparencyEnabled ?? false)
-              })}>Opaque When Focused</span>
-              <p className={classNames(styles.settingDescription, { 
-                [styles.light]: isLight,
-                [styles.disabled]: !(settings.transparencyEnabled ?? false)
-              })}>
+              <span
+                className={classNames(styles.settingLabel, {
+                  [styles.light]: isLight,
+                  [styles.disabled]: !(settings.transparencyEnabled ?? false),
+                })}
+              >
+                Opaque When Focused
+              </span>
+              <p
+                className={classNames(styles.settingDescription, {
+                  [styles.light]: isLight,
+                  [styles.disabled]: !(settings.transparencyEnabled ?? false),
+                })}
+              >
                 Make window fully opaque when it has focus, transparent when it doesn't
               </p>
             </div>
@@ -325,14 +405,18 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving || !(settings.transparencyEnabled ?? false)}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.opaqueWhenFocused ?? true,
-                [styles.toggleSwitchDisabled]: !(settings.transparencyEnabled ?? false)
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.opaqueWhenFocused ?? true
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.opaqueWhenFocused ?? true,
+                  [styles.toggleSwitchDisabled]: !(settings.transparencyEnabled ?? false),
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.opaqueWhenFocused ?? true,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
@@ -340,7 +424,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           {/* Always On Top Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Always On Top</span>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Always On Top
+              </span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Keep the main window always on top of other windows
               </p>
@@ -353,13 +439,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.alwaysOnTop ?? false
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.alwaysOnTop ?? false
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.alwaysOnTop ?? false,
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.alwaysOnTop ?? false,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
@@ -367,7 +457,9 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           {/* Remember Window Position Setting */}
           <div className={classNames(styles.settingItem, { [styles.light]: isLight })}>
             <div className={styles.settingContent}>
-              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>Remember Window Position</span>
+              <span className={classNames(styles.settingLabel, { [styles.light]: isLight })}>
+                Remember Window Position
+              </span>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
                 Save and restore window position when the application is closed and reopened
               </p>
@@ -380,13 +472,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 disabled={saving}
                 className={styles.toggleInput}
               />
-              <div className={classNames(styles.toggleSwitch, {
-                [styles.light]: isLight,
-                [styles.toggleSwitchChecked]: settings.rememberWindowPosition ?? true
-              })}>
-                <div className={classNames(styles.toggleSlider, {
-                  [styles.toggleSliderChecked]: settings.rememberWindowPosition ?? true
-                })}></div>
+              <div
+                className={classNames(styles.toggleSwitch, {
+                  [styles.light]: isLight,
+                  [styles.toggleSwitchChecked]: settings.rememberWindowPosition ?? true,
+                })}
+              >
+                <div
+                  className={classNames(styles.toggleSlider, {
+                    [styles.toggleSliderChecked]: settings.rememberWindowPosition ?? true,
+                  })}
+                ></div>
               </div>
             </label>
           </div>
@@ -397,19 +493,28 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
       {saving && (
         <div className={styles.savingIndicator}>
           <svg className={styles.spinner} viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+              fill="none"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            />
           </svg>
           <span className={styles.savingText}>Saving...</span>
         </div>
       )}
-      
+
       {onClose && (
         <div className={classNames(styles.closeButtonContainer, { [styles.light]: isLight })}>
-          <button 
-            onClick={onClose} 
-            className={styles.closeButton}
-          >
+          <button onClick={onClose} className={styles.closeButton}>
             Close Settings
           </button>
         </div>

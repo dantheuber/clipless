@@ -22,6 +22,7 @@ Quick Clips is a powerful feature that allows users to automatically detect patt
 Search terms use regular expressions with named capture groups to extract specific data patterns from clipboard content.
 
 **Built-in Patterns Included:**
+
 - Email addresses (`(?<email>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})`)
 - IP addresses (`(?<ipAddress>\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)`)
 - Domain names (`(?<domainName>\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+(${TLD_PATTERN})\b)`)
@@ -38,6 +39,7 @@ The URL pattern now includes nested capture groups, extracting both the complete
 Tools are web URLs that can be opened with extracted data. They use token replacement to insert captured values.
 
 **Example Tool:**
+
 - Name: "MX Toolbox"
 - URL: `https://mxtoolbox.com/SuperTool.aspx?action=mx%3a{domainName}&run=toolpage`
 - Supported Groups: `domainName`
@@ -47,21 +49,25 @@ Tools are web URLs that can be opened with extracted data. They use token replac
 #### Settings (Settings > Quick Clips)
 
 **Three tabs available:**
+
 1. **Search Terms** - Create and manage pattern detection rules
 2. **Tools** - Configure web tools for opening with extracted data
 3. **Test Patterns** - Test patterns against sample text
 
 **Export/Import:**
+
 - Export configuration as JSON for sharing
 - Import configuration from JSON files
 
 #### Main Application
 
 **Visual Indicators:**
+
 - Small blue search icon appears on clips with detected patterns
 - Scan button in clip options highlights when patterns are detected
 
 **Quick Clips Scanner:**
+
 - Accessed via the scan button (search icon) in clip options
 - **Individual Capture Group Selection**: Shows each extracted value as a separate, selectable item
 - **Automatic Deduplication**: Identical values from different patterns are merged (e.g., same domain from multiple URLs)
@@ -70,6 +76,7 @@ Tools are web URLs that can be opened with extracted data. They use token replac
 - **Combined Data Passing**: Selected capture groups are combined into a single data object for each tool
 
 **Enhanced Scanner Features:**
+
 - Each capture group value is individually selectable (e.g., `domainName: example.com`, `url: https://example.com/page`)
 - Tools receive all selected capture groups, regardless of which search terms they originated from
 - Deduplication ensures unique values are shown only once
@@ -82,11 +89,13 @@ Tools are web URLs that can be opened with extracted data. They use token replac
 The Quick Clips Scanner has been redesigned to provide granular control over data extraction:
 
 **Previous Behavior:**
+
 - Pattern matches were grouped by search term
 - All capture groups from a pattern were selected together
 - Tools received separate PatternMatch objects for each search term
 
 **Current Behavior:**
+
 - Individual capture group values are extracted and made selectable
 - Deduplication occurs at the value level using `${groupName}-${value}` keys
 - Selected values are combined into a single PatternMatch object for all tools
@@ -94,16 +103,18 @@ The Quick Clips Scanner has been redesigned to provide granular control over dat
 ### Data Structures
 
 **CaptureItem Interface:**
+
 ```typescript
 interface CaptureItem {
-  groupName: string      // The capture group name (e.g., "domainName")
-  value: string         // The extracted value (e.g., "example.com")
-  searchTermId: string  // ID of the source search term
-  uniqueKey: string     // Combination key for deduplication
+  groupName: string; // The capture group name (e.g., "domainName")
+  value: string; // The extracted value (e.g., "example.com")
+  searchTermId: string; // ID of the source search term
+  uniqueKey: string; // Combination key for deduplication
 }
 ```
 
 **Processing Pipeline:**
+
 1. **Extraction**: Raw matches are processed to create individual CaptureItem objects
 2. **Deduplication**: Items with identical `groupName-value` combinations are merged
 3. **Selection**: Users can select/deselect individual capture group values
@@ -122,6 +133,7 @@ interface CaptureItem {
 ### Data Storage
 
 Quick Clips data is stored separately from other application data:
+
 - Search terms and tools are stored in the main application database
 - Separate export/import functionality for sharing configurations
 - Migration support for future updates
@@ -129,6 +141,7 @@ Quick Clips data is stored separately from other application data:
 ### API Structure
 
 **Search Terms API:**
+
 - `searchTermsGetAll()` - Get all search terms
 - `searchTermsCreate(name, pattern)` - Create new search term
 - `searchTermsUpdate(id, updates)` - Update existing search term
@@ -136,6 +149,7 @@ Quick Clips data is stored separately from other application data:
 - `searchTermsTest(pattern, text)` - Test pattern against text
 
 **Tools API:**
+
 - `quickToolsGetAll()` - Get all tools
 - `quickToolsCreate(name, url, captureGroups)` - Create new tool
 - `quickToolsUpdate(id, updates)` - Update existing tool
@@ -143,6 +157,7 @@ Quick Clips data is stored separately from other application data:
 - `quickToolsValidateUrl(url, captureGroups)` - Validate tool URL
 
 **Scanning API:**
+
 - `quickClipsScanText(text)` - Scan text for patterns
 - `quickClipsOpenTools(matches, toolIds)` - Open tools with extracted data
 - `quickClipsExportConfig()` - Export configuration
@@ -151,6 +166,7 @@ Quick Clips data is stored separately from other application data:
 ### Pattern Matching
 
 The system uses JavaScript's built-in RegExp engine with named capture groups:
+
 - Patterns are tested against clipboard content automatically
 - Results include the source search term and all captured values
 - **Individual Value Extraction**: Each capture group value becomes a separate selectable item
@@ -159,6 +175,7 @@ The system uses JavaScript's built-in RegExp engine with named capture groups:
 - Tools are matched based on their supported capture groups
 
 **Scanner Data Flow:**
+
 1. Raw pattern matches are processed to extract individual capture group values
 2. Duplicate values are automatically filtered using `${groupName}-${value}` keys
 3. Each unique capture group value becomes an individually selectable item
@@ -216,6 +233,7 @@ The system uses JavaScript's built-in RegExp engine with named capture groups:
 ## Configuration Sharing
 
 Users can share Quick Clips configurations by:
+
 1. Exporting their configuration to a JSON file
 2. Sharing the file with other users
 3. Other users can import the configuration to get the same search terms and tools

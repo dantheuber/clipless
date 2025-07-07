@@ -1,18 +1,18 @@
-import React from 'react'
-import classNames from 'classnames'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { useTheme } from '../providers/theme'
-import styles from './ConfirmDialog.module.css'
+import React from 'react';
+import classNames from 'classnames';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useTheme } from '../providers/theme';
+import styles from './ConfirmDialog.module.css';
 
 interface ConfirmDialogProps {
-  isOpen: boolean
-  title: string
-  message: string
-  confirmText?: string
-  cancelText?: string
-  onConfirm: () => void
-  onCancel: () => void
-  type?: 'danger' | 'warning' | 'info'
+  isOpen: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  type?: 'danger' | 'warning' | 'info';
 }
 
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -23,30 +23,30 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  type = 'danger'
+  type = 'danger',
 }) => {
-  const { isLight } = useTheme()
+  const { isLight } = useTheme();
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const getIcon = () => {
     switch (type) {
       case 'danger':
-        return 'trash'
+        return 'trash';
       case 'warning':
-        return 'exclamation-triangle'
+        return 'exclamation-triangle';
       case 'info':
-        return 'info-circle'
+        return 'info-circle';
       default:
-        return 'question-circle'
+        return 'question-circle';
     }
-  }
+  };
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
-      onCancel()
+      onCancel();
     }
-  }
+  };
 
   return (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
@@ -55,17 +55,13 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div className={classNames(styles.iconContainer, styles[type])}>
             <FontAwesomeIcon icon={getIcon()} className={styles.icon} />
           </div>
-          <h3 className={classNames(styles.title, { [styles.light]: isLight })}>
-            {title}
-          </h3>
+          <h3 className={classNames(styles.title, { [styles.light]: isLight })}>{title}</h3>
         </div>
-        
+
         <div className={styles.content}>
-          <p className={classNames(styles.message, { [styles.light]: isLight })}>
-            {message}
-          </p>
+          <p className={classNames(styles.message, { [styles.light]: isLight })}>{message}</p>
         </div>
-        
+
         <div className={styles.actions}>
           <button
             onClick={onCancel}
@@ -75,12 +71,14 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            className={classNames(styles.button, styles.confirmButton, styles[type], { [styles.light]: isLight })}
+            className={classNames(styles.button, styles.confirmButton, styles[type], {
+              [styles.light]: isLight,
+            })}
           >
             {confirmText}
           </button>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

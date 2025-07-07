@@ -1,24 +1,24 @@
-import React from 'react'
-import classNames from 'classnames'
-import { PatternMatch } from '../../../../../shared/types'
-import { useTheme } from '../../../providers/theme'
-import { InfoTooltip } from './InfoTooltip'
-import styles from '../QuickClipsManager.module.css'
+import React from 'react';
+import classNames from 'classnames';
+import { PatternMatch } from '../../../../../shared/types';
+import { useTheme } from '../../../providers/theme';
+import { InfoTooltip } from './InfoTooltip';
+import styles from '../QuickClipsManager.module.css';
 
 interface TestPatternsSectionProps {
-  testText: string
-  testResults: PatternMatch[]
-  onTestTextChange: (text: string) => void
-  onTestPattern: () => Promise<void>
+  testText: string;
+  testResults: PatternMatch[];
+  onTestTextChange: (text: string) => void;
+  onTestPattern: () => Promise<void>;
 }
 
 export function TestPatternsSection({
   testText,
   testResults,
   onTestTextChange,
-  onTestPattern
+  onTestPattern,
 }: TestPatternsSectionProps): React.JSX.Element {
-  const { isLight } = useTheme()
+  const { isLight } = useTheme();
 
   return (
     <div className={styles.tabContent}>
@@ -32,9 +32,7 @@ export function TestPatternsSection({
         </button>
         <InfoTooltip
           content={
-            <>
-              Test your search patterns against sample text to see what data would be extracted.
-            </>
+            <>Test your search patterns against sample text to see what data would be extracted.</>
           }
         />
       </div>
@@ -47,14 +45,17 @@ export function TestPatternsSection({
           placeholder="Enter text to test against your search patterns..."
           rows={6}
         />
-        
+
         {testResults.length > 0 && (
           <div className={styles.testResults}>
             <h4 className={classNames(styles.resultsTitle, { [styles.light]: isLight })}>
               Test Results
             </h4>
             {testResults.map((result, index) => (
-              <div key={index} className={classNames(styles.testResult, { [styles.light]: isLight })}>
+              <div
+                key={index}
+                className={classNames(styles.testResult, { [styles.light]: isLight })}
+              >
                 <div className={styles.resultHeader}>
                   <strong>{result.searchTermName}</strong>
                 </div>
@@ -72,5 +73,5 @@ export function TestPatternsSection({
         )}
       </div>
     </div>
-  )
+  );
 }

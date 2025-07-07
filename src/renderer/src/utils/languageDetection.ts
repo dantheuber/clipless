@@ -38,7 +38,21 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
   {
     name: 'javascript',
     extensions: ['.js', '.jsx', '.mjs'],
-    keywords: ['function', 'const', 'let', 'var', 'class', 'extends', 'import', 'export', 'async', 'await', 'console.log', 'if', 'else'],
+    keywords: [
+      'function',
+      'const',
+      'let',
+      'var',
+      'class',
+      'extends',
+      'import',
+      'export',
+      'async',
+      'await',
+      'console.log',
+      'if',
+      'else',
+    ],
     patterns: [
       /console\.log\s*\(/,
       /function\s+\w+\s*\(/,
@@ -51,16 +65,27 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /const\s+\w+\s*=/,
       /let\s+\w+\s*=/,
       /var\s+\w+\s*=/,
-      /\w+\.\w+\s*\(/,             // Method calls
-      /if\s*\(/,                   // Conditionals
-      /\{\s*\w+/,                  // Object literals
+      /\w+\.\w+\s*\(/, // Method calls
+      /if\s*\(/, // Conditionals
+      /\{\s*\w+/, // Object literals
     ],
-    priority: 6  // Increased priority
+    priority: 6, // Increased priority
   },
   {
     name: 'typescript',
     extensions: ['.ts', '.tsx'],
-    keywords: ['interface', 'type', 'enum', 'const', 'namespace', 'declare', 'readonly', 'private', 'public', 'protected'],
+    keywords: [
+      'interface',
+      'type',
+      'enum',
+      'const',
+      'namespace',
+      'declare',
+      'readonly',
+      'private',
+      'public',
+      'protected',
+    ],
     patterns: [
       /interface\s+\w+/,
       /type\s+\w+\s*=/,
@@ -68,14 +93,30 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /enum\s+\w+/,
       /<.*>/,
       /React\.FC/,
-      /useState|useEffect|useCallback/
+      /useState|useEffect|useCallback/,
     ],
-    priority: 7
+    priority: 7,
   },
   {
     name: 'python',
     extensions: ['.py', '.pyw'],
-    keywords: ['def', 'class', 'import', 'from', 'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'as', 'lambda'],
+    keywords: [
+      'def',
+      'class',
+      'import',
+      'from',
+      'if',
+      'elif',
+      'else',
+      'for',
+      'while',
+      'try',
+      'except',
+      'finally',
+      'with',
+      'as',
+      'lambda',
+    ],
     patterns: [
       /def\s+\w+\s*\(/,
       /class\s+\w+.*:/,
@@ -84,14 +125,26 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /from\s+\w+\s+import/,
       /print\s*\(/,
       /range\s*\(/,
-      /len\s*\(/
+      /len\s*\(/,
     ],
-    priority: 6
+    priority: 6,
   },
   {
     name: 'java',
     extensions: ['.java'],
-    keywords: ['public', 'private', 'protected', 'static', 'final', 'abstract', 'class', 'interface', 'extends', 'implements', 'package'],
+    keywords: [
+      'public',
+      'private',
+      'protected',
+      'static',
+      'final',
+      'abstract',
+      'class',
+      'interface',
+      'extends',
+      'implements',
+      'package',
+    ],
     patterns: [
       /public\s+static\s+void\s+main/,
       /public\s+class\s+\w+/,
@@ -99,14 +152,27 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /package\s+[\w.]+;/,
       /import\s+[\w.]+;/,
       /@Override/,
-      /new\s+\w+\s*\(/
+      /new\s+\w+\s*\(/,
     ],
-    priority: 6
+    priority: 6,
   },
   {
     name: 'csharp',
     extensions: ['.cs'],
-    keywords: ['using', 'namespace', 'class', 'interface', 'struct', 'enum', 'public', 'private', 'protected', 'internal', 'static', 'readonly'],
+    keywords: [
+      'using',
+      'namespace',
+      'class',
+      'interface',
+      'struct',
+      'enum',
+      'public',
+      'private',
+      'protected',
+      'internal',
+      'static',
+      'readonly',
+    ],
     patterns: [
       /using\s+System/,
       /namespace\s+\w+/,
@@ -114,14 +180,25 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /Console\.WriteLine/,
       /string\[\]\s+args/,
       /\[.*Attribute.*\]/,
-      /var\s+\w+\s*=/
+      /var\s+\w+\s*=/,
     ],
-    priority: 6
+    priority: 6,
   },
   {
     name: 'cpp',
     extensions: ['.cpp', '.cc', '.cxx', '.c++'],
-    keywords: ['#include', 'using', 'namespace', 'class', 'struct', 'template', 'typename', 'public', 'private', 'protected'],
+    keywords: [
+      '#include',
+      'using',
+      'namespace',
+      'class',
+      'struct',
+      'template',
+      'typename',
+      'public',
+      'private',
+      'protected',
+    ],
     patterns: [
       /#include\s*<.*>/,
       /std::/,
@@ -129,14 +206,26 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /using\s+namespace\s+std/,
       /template\s*<.*>/,
       /class\s+\w+.*{/,
-      /int\s+main\s*\(/
+      /int\s+main\s*\(/,
     ],
-    priority: 6
+    priority: 6,
   },
   {
     name: 'c',
     extensions: ['.c', '.h'],
-    keywords: ['#include', '#define', 'int', 'char', 'float', 'double', 'void', 'struct', 'typedef', 'static', 'extern'],
+    keywords: [
+      '#include',
+      '#define',
+      'int',
+      'char',
+      'float',
+      'double',
+      'void',
+      'struct',
+      'typedef',
+      'static',
+      'extern',
+    ],
     patterns: [
       /#include\s*<stdio\.h>/,
       /#include\s*<stdlib\.h>/,
@@ -144,9 +233,9 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /scanf\s*\(/,
       /malloc\s*\(/,
       /free\s*\(/,
-      /int\s+main\s*\(/
+      /int\s+main\s*\(/,
     ],
-    priority: 5
+    priority: 5,
   },
   {
     name: 'html',
@@ -158,14 +247,25 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /<\/?\w+.*>/,
       /<\w+\s+.*=.*>/,
       /<script.*>/,
-      /<style.*>/
+      /<style.*>/,
     ],
-    priority: 8
+    priority: 8,
   },
   {
     name: 'css',
     extensions: ['.css'],
-    keywords: ['color', 'background', 'margin', 'padding', 'border', 'font', 'display', 'position', 'width', 'height'],
+    keywords: [
+      'color',
+      'background',
+      'margin',
+      'padding',
+      'border',
+      'font',
+      'display',
+      'position',
+      'width',
+      'height',
+    ],
     patterns: [
       /\w+\s*:\s*[^;]+;/,
       /\.\w+\s*{/,
@@ -174,9 +274,9 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /@import/,
       /rgb\s*\(/,
       /rgba\s*\(/,
-      /:\s*hover/
+      /:\s*hover/,
     ],
-    priority: 7
+    priority: 7,
   },
   {
     name: 'json',
@@ -187,26 +287,33 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /^\s*\[[\s\S]*\]\s*$/,
       /"[^"]*"\s*:\s*"[^"]*"/,
       /"[^"]*"\s*:\s*\d+/,
-      /"[^"]*"\s*:\s*(true|false|null)/
+      /"[^"]*"\s*:\s*(true|false|null)/,
     ],
-    priority: 9
+    priority: 9,
   },
   {
     name: 'xml',
     extensions: ['.xml', '.xsd', '.xsl'],
     keywords: ['<?xml', '</', '<!--'],
-    patterns: [
-      /<\?xml.*\?>/,
-      /<\/?\w+.*>/,
-      /<!--.*-->/,
-      /<\w+\s+.*=.*\/>/
-    ],
-    priority: 7
+    patterns: [/<\?xml.*\?>/, /<\/?\w+.*>/, /<!--.*-->/, /<\w+\s+.*=.*\/>/],
+    priority: 7,
   },
   {
     name: 'sql',
     extensions: ['.sql'],
-    keywords: ['SELECT', 'FROM', 'WHERE', 'INSERT', 'UPDATE', 'DELETE', 'CREATE', 'DROP', 'ALTER', 'TABLE', 'INDEX'],
+    keywords: [
+      'SELECT',
+      'FROM',
+      'WHERE',
+      'INSERT',
+      'UPDATE',
+      'DELETE',
+      'CREATE',
+      'DROP',
+      'ALTER',
+      'TABLE',
+      'INDEX',
+    ],
     patterns: [
       /SELECT\s+.*\s+FROM/i,
       /INSERT\s+INTO/i,
@@ -214,24 +321,27 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /DELETE\s+FROM/i,
       /CREATE\s+TABLE/i,
       /DROP\s+TABLE/i,
-      /ALTER\s+TABLE/i
+      /ALTER\s+TABLE/i,
     ],
-    priority: 8
+    priority: 8,
   },
   {
     name: 'bash',
     extensions: ['.sh', '.bash'],
-    keywords: ['#!/bin/bash', '#!/bin/sh', 'echo', 'cd', 'ls', 'grep', 'awk', 'sed', 'chmod', 'chown'],
-    patterns: [
-      /^#!/,
-      /\$\w+/,
-      /echo\s+/,
-      /\|\s*grep/,
-      /\|\s*awk/,
-      /chmod\s+/,
-      /cd\s+/
+    keywords: [
+      '#!/bin/bash',
+      '#!/bin/sh',
+      'echo',
+      'cd',
+      'ls',
+      'grep',
+      'awk',
+      'sed',
+      'chmod',
+      'chown',
     ],
-    priority: 6
+    patterns: [/^#!/, /\$\w+/, /echo\s+/, /\|\s*grep/, /\|\s*awk/, /chmod\s+/, /cd\s+/],
+    priority: 6,
   },
   {
     name: 'powershell',
@@ -244,10 +354,10 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
       /\$\w+/,
       /\|\s*ForEach-Object/,
       /\|\s*Where-Object/,
-      /Write-Host/
+      /Write-Host/,
     ],
-    priority: 6
-  }
+    priority: 6,
+  },
 ];
 
 /**
@@ -256,24 +366,25 @@ const LANGUAGE_PATTERNS: LanguagePattern[] = [
  * @returns The detected language name or null if no language detected
  */
 export function detectLanguage(text: string): string | null {
-  if (!text || text.trim().length < 5) { // Reduced from 10 to 5
+  if (!text || text.trim().length < 5) {
+    // Reduced from 10 to 5
     return null; // Too short to reliably detect
   }
 
   const scores: Record<string, number> = {};
 
   // Initialize scores
-  LANGUAGE_PATTERNS.forEach(lang => {
+  LANGUAGE_PATTERNS.forEach((lang) => {
     scores[lang.name] = 0;
   });
 
   const lowerText = text.toLowerCase();
 
-  LANGUAGE_PATTERNS.forEach(lang => {
+  LANGUAGE_PATTERNS.forEach((lang) => {
     let score = 0;
 
     // Check for keywords
-    lang.keywords.forEach(keyword => {
+    lang.keywords.forEach((keyword) => {
       const regex = new RegExp(`\\b${keyword.toLowerCase()}\\b`, 'g');
       const matches = lowerText.match(regex);
       if (matches) {
@@ -282,7 +393,7 @@ export function detectLanguage(text: string): string | null {
     });
 
     // Check for patterns
-    lang.patterns.forEach(pattern => {
+    lang.patterns.forEach((pattern) => {
       const matches = text.match(pattern);
       if (matches) {
         score += matches.length * 3; // Patterns are worth 3 points each
@@ -290,7 +401,7 @@ export function detectLanguage(text: string): string | null {
     });
 
     // Bonus for file extension mentions (if any)
-    lang.extensions.forEach(ext => {
+    lang.extensions.forEach((ext) => {
       if (lowerText.includes(ext)) {
         score += 5;
       }
@@ -307,7 +418,8 @@ export function detectLanguage(text: string): string | null {
   let detectedLanguage: string | null = null;
 
   Object.entries(scores).forEach(([lang, score]) => {
-    if (score > maxScore && score > 6) { // Reduced threshold from 10 to 6
+    if (score > maxScore && score > 6) {
+      // Reduced threshold from 10 to 6
       maxScore = score;
       detectedLanguage = lang;
     }
@@ -322,7 +434,8 @@ export function detectLanguage(text: string): string | null {
  * @returns true if the text appears to be code
  */
 export function isCode(text: string): boolean {
-  if (!text || text.trim().length < 3) { // Reduced from 5 to 3
+  if (!text || text.trim().length < 3) {
+    // Reduced from 5 to 3
     return false;
   }
 
@@ -333,37 +446,37 @@ export function isCode(text: string): boolean {
 
   // Enhanced code indicators with more patterns
   const codeIndicators = [
-    /[{}();]/g,                    // Brackets, parentheses, semicolons
-    /\w+\s*=\s*\w+/g,             // Assignments
-    /\w+\s*:\s*\w+/g,             // Type annotations, object properties
-    /=>\s*[{(]/g,                 // Arrow functions
-    /function\s*\(/g,             // Function declarations
-    /if\s*\(/g,                   // Conditional statements
-    /for\s*\(/g,                  // Loops
-    /while\s*\(/g,                // While loops
-    /class\s+\w+/g,               // Class declarations
-    /interface\s+\w+/g,           // Interface declarations
-    /type\s+\w+\s*=/g,           // Type definitions
-    /import\s+/g,                 // Import statements
-    /export\s+/g,                 // Export statements
-    /include\s*</g,               // Include statements
-    /console\./g,                 // Console methods
-    /\$\w+/g,                     // Variables (shell, PHP, etc.)
-    /<\/?\w+.*>/g,                // HTML/XML tags
-    /\w+\s*:\s*[^;]+;/g,          // CSS properties
-    /SELECT\s+.*\s+FROM/ig,       // SQL queries
-    /const\s+\w+/g,               // const declarations
-    /let\s+\w+/g,                 // let declarations
-    /var\s+\w+/g,                 // var declarations
-    /\.\w+\(/g,                   // Method calls
-    /new\s+\w+/g,                 // Object instantiation
-    /\w+\[\w*\]/g,                // Array/object access
+    /[{}();]/g, // Brackets, parentheses, semicolons
+    /\w+\s*=\s*\w+/g, // Assignments
+    /\w+\s*:\s*\w+/g, // Type annotations, object properties
+    /=>\s*[{(]/g, // Arrow functions
+    /function\s*\(/g, // Function declarations
+    /if\s*\(/g, // Conditional statements
+    /for\s*\(/g, // Loops
+    /while\s*\(/g, // While loops
+    /class\s+\w+/g, // Class declarations
+    /interface\s+\w+/g, // Interface declarations
+    /type\s+\w+\s*=/g, // Type definitions
+    /import\s+/g, // Import statements
+    /export\s+/g, // Export statements
+    /include\s*</g, // Include statements
+    /console\./g, // Console methods
+    /\$\w+/g, // Variables (shell, PHP, etc.)
+    /<\/?\w+.*>/g, // HTML/XML tags
+    /\w+\s*:\s*[^;]+;/g, // CSS properties
+    /SELECT\s+.*\s+FROM/gi, // SQL queries
+    /const\s+\w+/g, // const declarations
+    /let\s+\w+/g, // let declarations
+    /var\s+\w+/g, // var declarations
+    /\.\w+\(/g, // Method calls
+    /new\s+\w+/g, // Object instantiation
+    /\w+\[\w*\]/g, // Array/object access
   ];
 
   let indicatorCount = 0;
   let totalMatches = 0;
-  
-  codeIndicators.forEach(pattern => {
+
+  codeIndicators.forEach((pattern) => {
     const matches = text.match(pattern);
     if (matches) {
       indicatorCount += 1;
@@ -373,7 +486,7 @@ export function isCode(text: string): boolean {
 
   // More lenient detection for small snippets
   const textLength = text.trim().length;
-  
+
   if (textLength < 20) {
     // Very small snippets: need at least 1 strong indicator
     return indicatorCount >= 1 && totalMatches >= 1;
@@ -392,19 +505,19 @@ export function isCode(text: string): boolean {
  */
 function hasStrongCodeIndicators(text: string): boolean {
   const strongIndicators = [
-    /const\s+\w+\s*=\s*\(/,                    // const handleX = (
-    /\w+\s*:\s*\w+\s*\)\s*=>/,                // parameter: Type) =>
-    /if\s*\(\s*\w+\.\w+/,                     // if (object.property
-    /\w+\.\w+\(/,                             // method calls
-    /setThemeState|updateEffectiveTheme/,      // Specific React/state patterns
-    /updatedSettings\.\w+/,                    // Object property access
-    /\}\s*;?\s*$/,                            // Code block ending
-    /\w+Settings\s*:\s*\w+/,                  // Settings type patterns
-    /=>\s*\{/,                                // Arrow function with block
-    /\w+\s*:\s*\w+\s*\)\s*=>/,                // Typed parameters in arrow functions
+    /const\s+\w+\s*=\s*\(/, // const handleX = (
+    /\w+\s*:\s*\w+\s*\)\s*=>/, // parameter: Type) =>
+    /if\s*\(\s*\w+\.\w+/, // if (object.property
+    /\w+\.\w+\(/, // method calls
+    /setThemeState|updateEffectiveTheme/, // Specific React/state patterns
+    /updatedSettings\.\w+/, // Object property access
+    /\}\s*;?\s*$/, // Code block ending
+    /\w+Settings\s*:\s*\w+/, // Settings type patterns
+    /=>\s*\{/, // Arrow function with block
+    /\w+\s*:\s*\w+\s*\)\s*=>/, // Typed parameters in arrow functions
   ];
 
-  return strongIndicators.some(pattern => pattern.test(text));
+  return strongIndicators.some((pattern) => pattern.test(text));
 }
 
 /**
@@ -412,20 +525,20 @@ function hasStrongCodeIndicators(text: string): boolean {
  */
 export function mapToSyntaxHighlighterLanguage(detectedLanguage: string): string {
   const languageMap: Record<string, string> = {
-    'javascript': 'javascript',
-    'typescript': 'typescript',
-    'python': 'python',
-    'java': 'java',
-    'csharp': 'csharp',
-    'cpp': 'cpp',
-    'c': 'c',
-    'html': 'markup',
-    'css': 'css',
-    'json': 'json',
-    'xml': 'xml',
-    'sql': 'sql',
-    'bash': 'bash',
-    'powershell': 'powershell'
+    javascript: 'javascript',
+    typescript: 'typescript',
+    python: 'python',
+    java: 'java',
+    csharp: 'csharp',
+    cpp: 'cpp',
+    c: 'c',
+    html: 'markup',
+    css: 'css',
+    json: 'json',
+    xml: 'xml',
+    sql: 'sql',
+    bash: 'bash',
+    powershell: 'powershell',
   };
 
   return languageMap[detectedLanguage] || 'text';

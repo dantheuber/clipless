@@ -68,10 +68,11 @@
 
 .contentArea {
   flex: 1;
-  padding: 0.625rem .5rem;
+  padding: 0.625rem 0.5rem;
   color: #ffffff;
-  font-size: 0.875rem; 
-  font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  font-size: 0.875rem;
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -312,7 +313,9 @@
   z-index: 9999;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
   pointer-events: none;
   max-width: 20rem;
   max-height: 20rem;

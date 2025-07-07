@@ -1,12 +1,12 @@
-import { app, shell, BrowserWindow, ipcMain } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import { autoUpdater } from 'electron-updater'
-import { createTray as createTrayIcon, getTray, setIsQuitting, getIsQuitting } from './tray'
-import { initializeClipboardMonitoring, setupClipboardIPC } from './clipboard'
-import { hotkeyManager } from './hotkeys'
-import { storage } from './storage'
-import icon from '../../resources/icon.png?asset'
+import { app, shell, BrowserWindow, ipcMain } from 'electron';
+import { join } from 'path';
+import { electronApp, optimizer, is } from '@electron-toolkit/utils';
+import { autoUpdater } from 'electron-updater';
+import { createTray as createTrayIcon, getTray, setIsQuitting, getIsQuitting } from './tray';
+import { initializeClipboardMonitoring, setupClipboardIPC } from './clipboard';
+import { hotkeyManager } from './hotkeys';
+import { storage } from './storage';
+import icon from '../../resources/icon.png?asset';
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
@@ -29,7 +29,7 @@ async function loadWindowBounds(): Promise<void> {
 
 async function saveWindowBounds(): Promise<void> {
   if (!mainWindow) return;
-  
+
   try {
     const settings = await storage.getSettings();
     if (settings.rememberWindowPosition) {
@@ -45,16 +45,20 @@ async function saveWindowBounds(): Promise<void> {
 async function applyWindowSettings(window: BrowserWindow): Promise<void> {
   try {
     const settings = await storage.getSettings();
-    
+
     // Apply transparency
-    if (settings.transparencyEnabled && settings.windowTransparency && settings.windowTransparency > 0) {
+    if (
+      settings.transparencyEnabled &&
+      settings.windowTransparency &&
+      settings.windowTransparency > 0
+    ) {
       const opacity = (100 - settings.windowTransparency) / 100;
       window.setOpacity(opacity);
     } else {
       // Reset to fully opaque if transparency is disabled
       window.setOpacity(1.0);
     }
-    
+
     // Apply always on top
     if (settings.alwaysOnTop) {
       window.setAlwaysOnTop(true);
@@ -69,7 +73,7 @@ async function applyWindowSettings(window: BrowserWindow): Promise<void> {
 async function handleWindowFocus(window: BrowserWindow): Promise<void> {
   try {
     const settings = await storage.getSettings();
-    
+
     // Make window opaque when focused if the option is enabled
     if (settings.transparencyEnabled && settings.opaqueWhenFocused) {
       window.setOpacity(1.0);
@@ -82,9 +86,14 @@ async function handleWindowFocus(window: BrowserWindow): Promise<void> {
 async function handleWindowBlur(window: BrowserWindow): Promise<void> {
   try {
     const settings = await storage.getSettings();
-    
+
     // Restore transparency when window loses focus
-    if (settings.transparencyEnabled && settings.opaqueWhenFocused && settings.windowTransparency && settings.windowTransparency > 0) {
+    if (
+      settings.transparencyEnabled &&
+      settings.opaqueWhenFocused &&
+      settings.windowTransparency &&
+      settings.windowTransparency > 0
+    ) {
       const opacity = (100 - settings.windowTransparency) / 100;
       window.setOpacity(opacity);
     }
@@ -94,7 +103,7 @@ async function handleWindowBlur(window: BrowserWindow): Promise<void> {
 }
 
 function createSettingsWindow(tab?: string): void {
-  if (settingsWindow) {     
+  if (settingsWindow) {
     settingsWindow.focus();
     // If window exists and we have a tab parameter, send message to change tab
     if (tab) {
@@ -116,8 +125,8 @@ function createSettingsWindow(tab?: string): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
+      sandbox: false,
+    },
   });
 
   settingsWindow.on('ready-to-show', () => {
@@ -131,17 +140,18 @@ function createSettingsWindow(tab?: string): void {
   });
 
   // Load the settings HTML file - use dev server in development mode
-  const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] 
-    ? process.env['ELECTRON_RENDERER_URL'] 
-    : 'file://' + join(__dirname, '../renderer');
-  
+  const baseUrl =
+    is.dev && process.env['ELECTRON_RENDERER_URL']
+      ? process.env['ELECTRON_RENDERER_URL']
+      : 'file://' + join(__dirname, '../renderer');
+
   const url = baseUrl + '/settings.html' + (tab ? `?tab=${tab}` : '');
-  
+
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     settingsWindow.loadURL(url);
   } else {
     settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'), {
-      search: tab ? `tab=${tab}` : undefined
+      search: tab ? `tab=${tab}` : undefined,
     });
   }
 }
@@ -156,8 +166,8 @@ async function createWindow(): Promise<void> {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
-    }
+      sandbox: false,
+    },
   };
 
   // Apply saved window bounds if available
@@ -237,15 +247,15 @@ async function createWindow(): Promise<void> {
     try {
       // Save settings to storage
       await storage.saveSettings(settings);
-      
+
       // Apply window settings immediately
       if (mainWindow) {
         await applyWindowSettings(mainWindow);
       }
-      
+
       // Update hotkeys if settings changed
       await hotkeyManager.onSettingsChanged();
-      
+
       // Relay settings changes to all windows
       if (mainWindow) {
         mainWindow.webContents.send('settings-updated', settings);
@@ -253,7 +263,7 @@ async function createWindow(): Promise<void> {
       if (settingsWindow) {
         settingsWindow.webContents.send('settings-updated', settings);
       }
-      
+
       return true;
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -285,34 +295,34 @@ async function createWindow(): Promise<void> {
 if (!is.dev) {
   // Only enable auto-updater in production
   autoUpdater.checkForUpdatesAndNotify();
-  
+
   // Auto-updater events
   autoUpdater.on('checking-for-update', () => {
     console.log('Checking for update...');
   });
-  
+
   autoUpdater.on('update-available', (info) => {
     console.log('Update available:', info);
   });
-  
+
   autoUpdater.on('update-not-available', (info) => {
     console.log('Update not available:', info);
   });
-  
+
   autoUpdater.on('error', (err) => {
     console.error('Error in auto-updater:', err);
   });
-  
+
   autoUpdater.on('download-progress', (progressObj) => {
     console.log('Download progress:', Math.round(progressObj.percent) + '%');
   });
-  
+
   autoUpdater.on('update-downloaded', (info) => {
     console.log('Update downloaded:', info);
     // Auto-install and restart
     autoUpdater.quitAndInstall();
   });
-};
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
@@ -368,7 +378,7 @@ app.whenReady().then(async () => {
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
 });
 
@@ -378,7 +388,7 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   // Don't quit the app when all windows are closed if we have a tray
   if (process.platform !== 'darwin' && !getTray()) {
-    app.quit()
+    app.quit();
   }
 });
 

@@ -1,15 +1,18 @@
-import { Tray, Menu, nativeImage, BrowserWindow, app } from 'electron'
-import icon from '../../resources/icon.png?asset'
+import { Tray, Menu, nativeImage, BrowserWindow, app } from 'electron';
+import icon from '../../resources/icon.png?asset';
 
 let tray: Tray | null = null;
 let isQuitting = false;
 
-export function createTray(mainWindow: BrowserWindow | null, createSettingsWindow: (tab?: string) => void): Tray | null {
+export function createTray(
+  mainWindow: BrowserWindow | null,
+  createSettingsWindow: (tab?: string) => void
+): Tray | null {
   const trayIcon = nativeImage.createFromPath(icon);
   trayIcon.setTemplateImage(true);
-  
+
   tray = new Tray(trayIcon);
-  
+
   const contextMenu = Menu.buildFromTemplate([
     {
       label: 'Show Clipless',
@@ -19,14 +22,14 @@ export function createTray(mainWindow: BrowserWindow | null, createSettingsWindo
           mainWindow.show();
           mainWindow.focus();
         }
-      }
+      },
     },
     { type: 'separator' },
     {
       label: 'Settings...',
       click: () => {
         createSettingsWindow();
-      }
+      },
     },
     { type: 'separator' },
     {
@@ -34,13 +37,13 @@ export function createTray(mainWindow: BrowserWindow | null, createSettingsWindo
       click: () => {
         setIsQuitting(true);
         app.quit();
-      }
-    }
+      },
+    },
   ]);
-  
+
   tray.setContextMenu(contextMenu);
   tray.setToolTip('Clipless - Clipboard Manager');
-  
+
   // Double-click to show main window
   tray.on('double-click', () => {
     if (mainWindow) {

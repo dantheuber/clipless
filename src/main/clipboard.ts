@@ -1,6 +1,6 @@
-import { clipboard, nativeImage, BrowserWindow, ipcMain } from 'electron'
-import { storage } from './storage'
-import type { ClipItem, PatternMatch } from '../shared/types'
+import { clipboard, nativeImage, BrowserWindow, ipcMain } from 'electron';
+import { storage } from './storage';
+import type { ClipItem, PatternMatch } from '../shared/types';
 
 // Clipboard monitoring state
 let lastClipboardContent = '';
@@ -35,7 +35,7 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
     if (bookmark && bookmark.url) {
       return { type: 'bookmark', content: JSON.stringify(bookmark) };
     }
-  } catch (error) {
+  } catch {
     // Bookmark not available on all platforms
   }
 
@@ -55,17 +55,17 @@ export function initializeClipboardMonitoring(_mainWindow: BrowserWindow | null)
 // Clipboard change detection function
 export const checkClipboard = (mainWindow: BrowserWindow | null) => {
   const currentClipData = getCurrentClipboardData();
-  
+
   // Check if clipboard content has changed
-  if (currentClipData && 
-      (currentClipData.content !== lastClipboardContent || 
-       currentClipData.type !== lastClipboardType)) {
-    
+  if (
+    currentClipData &&
+    (currentClipData.content !== lastClipboardContent || currentClipData.type !== lastClipboardType)
+  ) {
     // Send clipboard change to renderer (renderer will handle duplicate detection)
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('clipboard-changed', currentClipData);
     }
-    
+
     // Update last known values
     lastClipboardContent = currentClipData.content;
     lastClipboardType = currentClipData.type;
@@ -88,7 +88,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('get-clipboard-bookmark', () => {
     try {
       return clipboard.readBookmark();
-    } catch (error) {
+    } catch {
       return null; // Not available on all platforms
     }
   });
@@ -122,18 +122,21 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     }
   });
 
-  ipcMain.handle('set-clipboard-bookmark', (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) => {
-    try {
-      // Write both text and HTML formats for maximum compatibility
-      clipboard.write({
-        text: bookmarkData.text,
-        html: bookmarkData.html
-      });
-    } catch (error) {
-      console.error('Failed to write bookmark to clipboard:', error);
-      throw error;
+  ipcMain.handle(
+    'set-clipboard-bookmark',
+    (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) => {
+      try {
+        // Write both text and HTML formats for maximum compatibility
+        clipboard.write({
+          text: bookmarkData.text,
+          html: bookmarkData.html,
+        });
+      } catch (error) {
+        console.error('Failed to write bookmark to clipboard:', error);
+        throw error;
+      }
     }
-  });
+  );
 
   // Clipboard monitoring control
   ipcMain.handle('start-clipboard-monitoring', () => {
@@ -162,15 +165,18 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     }
   });
 
-  ipcMain.handle('storage-save-clips', async (_event, clips: ClipItem[], lockedIndices: Record<number, boolean>) => {
-    try {
-      await storage.saveClips(clips, lockedIndices);
-      return true;
-    } catch (error) {
-      console.error('Failed to save clips to storage:', error);
-      return false;
+  ipcMain.handle(
+    'storage-save-clips',
+    async (_event, clips: ClipItem[], lockedIndices: Record<number, boolean>) => {
+      try {
+        await storage.saveClips(clips, lockedIndices);
+        return true;
+      } catch (error) {
+        console.error('Failed to save clips to storage:', error);
+        return false;
+      }
     }
-  });
+  );
 
   ipcMain.handle('storage-get-settings', async () => {
     try {
@@ -275,17 +281,20 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     }
   });
 
-  ipcMain.handle('templates-generate-text', async (_event, templateId: string, clipContents: string[]) => {
-    try {
-      return await storage.generateTextFromTemplate(templateId, clipContents);
-    } catch (error) {
-      console.error('Failed to generate text from template:', error);
-      throw error;
+  ipcMain.handle(
+    'templates-generate-text',
+    async (_event, templateId: string, clipContents: string[]) => {
+      try {
+        return await storage.generateTextFromTemplate(templateId, clipContents);
+      } catch (error) {
+        console.error('Failed to generate text from template:', error);
+        throw error;
+      }
     }
-  });
+  );
 
   // ===== SEARCH TERMS IPC HANDLERS =====
-  
+
   ipcMain.handle('search-terms-get-all', async () => {
     try {
       return await storage.getSearchTerms();
@@ -337,10 +346,10 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       const regex = new RegExp(pattern, 'g');
       const matches: PatternMatch[] = [];
       let match;
-      
+
       while ((match = regex.exec(testText)) !== null) {
         const captures: Record<string, string> = {};
-        
+
         // Extract named groups
         if (match.groups) {
           Object.entries(match.groups).forEach(([groupName, value]) => {
@@ -349,16 +358,16 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
             }
           });
         }
-        
+
         if (Object.keys(captures).length > 0) {
           matches.push({
             searchTermId: 'test',
             searchTermName: 'Test Pattern',
-            captures
+            captures,
           });
         }
       }
-      
+
       return matches;
     } catch (error) {
       console.error('Failed to test search term:', error);
@@ -367,7 +376,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   });
 
   // ===== QUICK TOOLS IPC HANDLERS =====
-  
+
   ipcMain.handle('quick-tools-get-all', async () => {
     try {
       return await storage.getQuickTools();
@@ -377,14 +386,17 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     }
   });
 
-  ipcMain.handle('quick-tools-create', async (_event, name: string, url: string, captureGroups: string[]) => {
-    try {
-      return await storage.createQuickTool(name, url, captureGroups);
-    } catch (error) {
-      console.error('Failed to create quick tool:', error);
-      throw error;
+  ipcMain.handle(
+    'quick-tools-create',
+    async (_event, name: string, url: string, captureGroups: string[]) => {
+      try {
+        return await storage.createQuickTool(name, url, captureGroups);
+      } catch (error) {
+        console.error('Failed to create quick tool:', error);
+        throw error;
+      }
     }
-  });
+  );
 
   ipcMain.handle('quick-tools-update', async (_event, id: string, updates: any) => {
     try {
@@ -413,54 +425,57 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     }
   });
 
-  ipcMain.handle('quick-tools-validate-url', async (_event, url: string, captureGroups: string[]) => {
-    try {
-      const errors: string[] = [];
-      
-      // Check if URL is valid
+  ipcMain.handle(
+    'quick-tools-validate-url',
+    async (_event, url: string, captureGroups: string[]) => {
       try {
-        new URL(url.replace(/\{[^}]+\}/g, 'test')); // Replace tokens with test values
-      } catch {
-        errors.push('Invalid URL format');
-      }
-      
-      // Check if all capture groups in URL are in the provided list
-      const urlTokens = url.match(/\{([^}]+)\}/g) || [];
-      const urlCaptureGroups = urlTokens.map(token => token.slice(1, -1));
-      
-      for (const group of urlCaptureGroups) {
-        if (!captureGroups.includes(group)) {
-          errors.push(`Token '{${group}}' is not in the selected capture groups`);
+        const errors: string[] = [];
+
+        // Check if URL is valid
+        try {
+          new URL(url.replace(/\{[^}]+\}/g, 'test')); // Replace tokens with test values
+        } catch {
+          errors.push('Invalid URL format');
         }
+
+        // Check if all capture groups in URL are in the provided list
+        const urlTokens = url.match(/\{([^}]+)\}/g) || [];
+        const urlCaptureGroups = urlTokens.map((token) => token.slice(1, -1));
+
+        for (const group of urlCaptureGroups) {
+          if (!captureGroups.includes(group)) {
+            errors.push(`Token '{${group}}' is not in the selected capture groups`);
+          }
+        }
+
+        return {
+          isValid: errors.length === 0,
+          errors,
+        };
+      } catch (error) {
+        console.error('Failed to validate tool URL:', error);
+        throw error;
       }
-      
-      return {
-        isValid: errors.length === 0,
-        errors
-      };
-    } catch (error) {
-      console.error('Failed to validate tool URL:', error);
-      throw error;
     }
-  });
+  );
 
   // ===== QUICK CLIPS SCANNING IPC HANDLERS =====
-  
+
   ipcMain.handle('quick-clips-scan-text', async (_event, text: string) => {
     try {
       const searchTerms = await storage.getSearchTerms();
       const matches: PatternMatch[] = [];
-      
+
       for (const searchTerm of searchTerms) {
         if (!searchTerm.enabled) continue;
-        
+
         try {
           const regex = new RegExp(searchTerm.pattern, 'g');
           let match;
-          
+
           while ((match = regex.exec(text)) !== null) {
             const captures: Record<string, string> = {};
-            
+
             // Extract named groups
             if (match.groups) {
               Object.entries(match.groups).forEach(([groupName, value]) => {
@@ -469,12 +484,12 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
                 }
               });
             }
-            
+
             if (Object.keys(captures).length > 0) {
               matches.push({
                 searchTermId: searchTerm.id,
                 searchTermName: searchTerm.name,
-                captures
+                captures,
               });
             }
           }
@@ -483,7 +498,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
           // Continue with other patterns
         }
       }
-      
+
       return matches;
     } catch (error) {
       console.error('Failed to scan text:', error);
@@ -495,40 +510,40 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     try {
       const { shell } = require('electron');
       const tools = await storage.getQuickTools();
-      
+
       for (const toolId of toolIds) {
-        const tool = tools.find(t => t.id === toolId);
+        const tool = tools.find((t) => t.id === toolId);
         if (!tool) continue;
-        
+
         // Find matches that contain capture groups needed by this tool
-        const applicableMatches = matches.filter(match => 
-          tool.captureGroups.some(group => group in match.captures)
+        const applicableMatches = matches.filter((match) =>
+          tool.captureGroups.some((group) => group in match.captures)
         );
-        
+
         if (applicableMatches.length === 0) continue;
-        
+
         // Parse the URL to find tokens with multiple capture groups (e.g., {email|domain|phone})
         const multiTokenRegex = /\{([^}]+)\}/g;
         const urlsToOpen = new Set<string>();
-        
+
         // Use the first applicable match to build the URL(s)
         const match = applicableMatches[0];
-        
+
         // Find all tokens in the URL
         const tokens = [...tool.url.matchAll(multiTokenRegex)];
-        
+
         if (tokens.length === 0) {
           // No tokens, just open the URL as-is
           urlsToOpen.add(tool.url);
         } else {
           // Process each token
           const tokenReplacements: Array<{ token: string; values: string[] }> = [];
-          
+
           for (const tokenMatch of tokens) {
             const fullToken = tokenMatch[0]; // e.g., "{email|domain|phone}"
             const tokenContent = tokenMatch[1]; // e.g., "email|domain|phone"
-            const captureGroups = tokenContent.split('|').map(g => g.trim());
-            
+            const captureGroups = tokenContent.split('|').map((g) => g.trim());
+
             // Find values for this token from the matches
             const values: string[] = [];
             for (const group of captureGroups) {
@@ -536,41 +551,41 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
                 values.push(match.captures[group]);
               }
             }
-            
+
             tokenReplacements.push({ token: fullToken, values });
           }
-          
+
           // Generate URLs for each combination of values
-          if (tokenReplacements.every(tr => tr.values.length > 0)) {
+          if (tokenReplacements.every((tr) => tr.values.length > 0)) {
             // Get all combinations of values
             const generateCombinations = (replacements: typeof tokenReplacements): string[] => {
               if (replacements.length === 0) return [''];
               if (replacements.length === 1) {
-                return replacements[0].values.map(value => 
+                return replacements[0].values.map((value) =>
                   tool.url.replace(replacements[0].token, encodeURIComponent(value))
                 );
               }
-              
+
               // For multiple tokens, generate all combinations
               const [first, ...rest] = replacements;
               const restCombinations = generateCombinations(rest);
               const combinations: string[] = [];
-              
+
               for (const value of first.values) {
                 for (const restUrl of restCombinations) {
                   const url = restUrl.replace(first.token, encodeURIComponent(value));
                   combinations.push(url);
                 }
               }
-              
+
               return combinations;
             };
-            
+
             const combinations = generateCombinations(tokenReplacements);
-            combinations.forEach(url => urlsToOpen.add(url));
+            combinations.forEach((url) => urlsToOpen.add(url));
           }
         }
-        
+
         // Open all generated URLs
         for (const url of urlsToOpen) {
           await shell.openExternal(url);
@@ -586,11 +601,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     try {
       const searchTerms = await storage.getSearchTerms();
       const tools = await storage.getQuickTools();
-      
+
       return {
         searchTerms,
         tools,
-        version: '1.0.0'
+        version: '1.0.0',
       };
     } catch (error) {
       console.error('Failed to export quick clips config:', error);
