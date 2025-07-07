@@ -6,7 +6,14 @@ Quick Clips is a powerful feature that allows users to automatically detect patt
 
 1. **Search Terms** - Regular expressions with named capture groups that extract data from clipboard content
 2. **Tools** - Web URLs that can be opened with the extracted data
-3. **Pattern Scanning** - Automatic detection and manual scanning of clipboard content
+3. **Pattern Scanning** - Automatic detection and manual scanning of clipboard content with individual capture group selection
+
+## Key Features
+
+- **Individual Capture Group Selection**: Each extracted value is selectable independently, allowing granular control over which data to use with tools
+- **Automatic Deduplication**: Identical capture group values from different patterns are automatically deduplicated
+- **Multi-Tool Support**: Selected capture groups can be opened with multiple tools simultaneously
+- **Enhanced Pattern Library**: Built-in patterns include nested capture groups for comprehensive data extraction
 
 ## Components
 
@@ -17,11 +24,14 @@ Search terms use regular expressions with named capture groups to extract specif
 **Built-in Patterns Included:**
 - Email addresses (`(?<email>[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})`)
 - IP addresses (`(?<ipAddress>\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b)`)
-- Domain names (`(?<domainName>\b[a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.[a-zA-Z]{2,}\b)`)
+- Domain names (`(?<domainName>\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+(${TLD_PATTERN})\b)`)
 - Phone numbers (`(?<phoneNumber>\b(?:\+?1[-.]?)?\(?([0-9]{3})\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\b)`)
-- URLs (`(?<url>https?:\/\/[^\s]+)`)
+- URLs with domain extraction (`(?<url>https?:\/\/(?<domainName>[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?)*)(?:\/[^\s]*)?)`) - Extracts both full URL and domain name
 - MAC addresses (`(?<macAddress>\b[0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}[:-][0-9A-Fa-f]{2}\b)`)
 - IPv6 addresses (`(?<ipv6Address>\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\b|\b::1\b|\b::ffff:[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\b)`)
+
+**Enhanced URL Pattern:**
+The URL pattern now includes nested capture groups, extracting both the complete URL and the domain name separately. This allows tools to work with either the full URL or just the domain, and provides automatic deduplication when multiple URLs from the same domain are detected.
 
 ### Tools
 
@@ -53,9 +63,59 @@ Tools are web URLs that can be opened with extracted data. They use token replac
 
 **Quick Clips Scanner:**
 - Accessed via the scan button (search icon) in clip options
-- Shows all detected patterns and their extracted values
-- Lists compatible tools for the selected patterns
-- Allows bulk opening of multiple tools with selected data
+- **Individual Capture Group Selection**: Shows each extracted value as a separate, selectable item
+- **Automatic Deduplication**: Identical values from different patterns are merged (e.g., same domain from multiple URLs)
+- **Smart Tool Compatibility**: Lists compatible tools based on selected capture groups
+- **Bulk Operations**: Allows opening multiple tools simultaneously with all selected capture groups
+- **Combined Data Passing**: Selected capture groups are combined into a single data object for each tool
+
+**Enhanced Scanner Features:**
+- Each capture group value is individually selectable (e.g., `domainName: example.com`, `url: https://example.com/page`)
+- Tools receive all selected capture groups, regardless of which search terms they originated from
+- Deduplication ensures unique values are shown only once
+- Multi-tool support allows opening several tools with the same data set
+
+## Technical Implementation Details
+
+### Scanner Architecture Changes
+
+The Quick Clips Scanner has been redesigned to provide granular control over data extraction:
+
+**Previous Behavior:**
+- Pattern matches were grouped by search term
+- All capture groups from a pattern were selected together
+- Tools received separate PatternMatch objects for each search term
+
+**Current Behavior:**
+- Individual capture group values are extracted and made selectable
+- Deduplication occurs at the value level using `${groupName}-${value}` keys
+- Selected values are combined into a single PatternMatch object for all tools
+
+### Data Structures
+
+**CaptureItem Interface:**
+```typescript
+interface CaptureItem {
+  groupName: string      // The capture group name (e.g., "domainName")
+  value: string         // The extracted value (e.g., "example.com")
+  searchTermId: string  // ID of the source search term
+  uniqueKey: string     // Combination key for deduplication
+}
+```
+
+**Processing Pipeline:**
+1. **Extraction**: Raw matches are processed to create individual CaptureItem objects
+2. **Deduplication**: Items with identical `groupName-value` combinations are merged
+3. **Selection**: Users can select/deselect individual capture group values
+4. **Combination**: Selected items are combined into a single PatternMatch object
+5. **Distribution**: The combined object is sent to all selected tools
+
+### Benefits of the New Architecture
+
+- **Granular Control**: Users can select exactly which data to use
+- **Reduced Noise**: Duplicate values are automatically filtered
+- **Multi-Tool Efficiency**: One data object works with multiple tools
+- **Flexible Workflows**: Mix and match data from different search patterns
 
 ## Implementation Details
 
@@ -93,7 +153,17 @@ Quick Clips data is stored separately from other application data:
 The system uses JavaScript's built-in RegExp engine with named capture groups:
 - Patterns are tested against clipboard content automatically
 - Results include the source search term and all captured values
+- **Individual Value Extraction**: Each capture group value becomes a separate selectable item
+- **Deduplication Logic**: Values with identical capture group names and values are merged
+- **Multi-Pattern Support**: Capture groups from different search terms can be selected together
 - Tools are matched based on their supported capture groups
+
+**Scanner Data Flow:**
+1. Raw pattern matches are processed to extract individual capture group values
+2. Duplicate values are automatically filtered using `${groupName}-${value}` keys
+3. Each unique capture group value becomes an individually selectable item
+4. Selected items are combined into a single PatternMatch object for tool consumption
+5. All selected tools receive the same combined data object
 
 ### Error Handling
 
@@ -104,25 +174,44 @@ The system uses JavaScript's built-in RegExp engine with named capture groups:
 
 ## Usage Examples
 
-### Example 1: Domain Analysis
+### Example 1: Enhanced URL Analysis
 
-1. Create search term: "Domain" with pattern `(?<domain>[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})`
-2. Create tools:
-   - "Whois Lookup": `https://whois.net/{domain}`
-   - "DNS Checker": `https://dnschecker.org/#{domain}`
-3. Copy domain name to clipboard
-4. Click scan button on the clip
-5. Select detected domain and both tools
-6. Click "Open Tools" to launch both websites
+1. Copy URL to clipboard: `https://www.example.com/page`
+2. URL pattern extracts two values:
+   - `url: https://www.example.com/page`
+   - `domainName: www.example.com`
+3. Create tools:
+   - "Whois Lookup": `https://whois.net/{domainName}`
+   - "URL Analyzer": `https://analyzer.com/?url={url}`
+   - "Domain Tools": `https://tools.com/{domainName}`
+4. In scanner, select both capture groups and all three tools
+5. All tools open with appropriate data (domain tools get domain, URL analyzer gets full URL)
 
-### Example 2: IP Address Investigation
+### Example 2: Multi-Pattern Data Extraction
 
-1. Use built-in IP address pattern
-2. Create tools:
-   - "IP Geolocation": `https://whatismyipaddress.com/ip/{ipAddress}`
-   - "Ping Test": `https://ping.eu/ping/?host={ipAddress}`
-3. Copy IP address to clipboard
-4. Scan and open tools as needed
+1. Copy mixed content: `Contact john@example.com or visit https://example.com for more info`
+2. Scanner extracts:
+   - `email: john@example.com`
+   - `url: https://example.com`
+   - `domainName: example.com` (from URL pattern)
+3. Create tools:
+   - "Email Validator": `https://validator.com/{email}`
+   - "Domain Checker": `https://checker.com/{domainName}`
+   - "Multi-Tool": `https://tools.com/?email={email}&domain={domainName}&url={url}`
+4. Select all capture groups and the multi-tool
+5. Multi-tool receives all three values in a single request
+
+### Example 3: Deduplication in Action
+
+1. Copy content with multiple URLs from same domain:
+   ```
+   Visit https://github.com/user/repo1 and https://github.com/user/repo2
+   ```
+2. Scanner shows:
+   - `url: https://github.com/user/repo1`
+   - `url: https://github.com/user/repo2`
+   - `domainName: github.com` (only shown once, deduplicated)
+3. Selecting the domain and a domain analysis tool opens the tool once with `github.com`
 
 ## Configuration Sharing
 

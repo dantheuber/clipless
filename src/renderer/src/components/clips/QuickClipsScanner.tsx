@@ -159,33 +159,23 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
     if (selectedCaptureItems.size === 0 || selectedTools.size === 0) return
 
     try {
-      // Create a map of searchTermId to searchTermName from original matches
-      const searchTermMap = new Map<string, string>()
-      matches.forEach(match => {
-        searchTermMap.set(match.searchTermId, match.searchTermName)
-      })
-
-      // Create PatternMatch objects from selected capture items
-      const selectedMatchObjects = captureItems
+      // Create a single PatternMatch object containing all selected capture groups
+      const selectedCaptures: Record<string, string> = {}
+      
+      captureItems
         .filter(item => selectedCaptureItems.has(item.uniqueKey))
-        .reduce((acc, item) => {
-          // Group by searchTermId to reconstruct PatternMatch objects
-          const existing = acc.find(match => match.searchTermId === item.searchTermId)
-          if (existing) {
-            existing.captures[item.groupName] = item.value
-          } else {
-            acc.push({
-              searchTermId: item.searchTermId,
-              searchTermName: searchTermMap.get(item.searchTermId) || '',
-              captures: {
-                [item.groupName]: item.value
-              }
-            })
-          }
-          return acc
-        }, [] as PatternMatch[])
+        .forEach(item => {
+          selectedCaptures[item.groupName] = item.value
+        })
 
-      await window.api.quickClipsOpenTools(selectedMatchObjects, Array.from(selectedTools))
+      // Create a single PatternMatch object with all selected captures
+      const combinedMatch: PatternMatch = {
+        searchTermId: 'combined',
+        searchTermName: 'Combined Selection',
+        captures: selectedCaptures
+      }
+
+      await window.api.quickClipsOpenTools([combinedMatch], Array.from(selectedTools))
       onClose()
     } catch (error) {
       console.error('Failed to open tools:', error)
