@@ -507,19 +507,74 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
         
         if (applicableMatches.length === 0) continue;
         
-        // Use the first applicable match to build the URL
-        const match = applicableMatches[0];
-        let url = tool.url;
+        // Parse the URL to find tokens with multiple capture groups (e.g., {email|domain|phone})
+        const multiTokenRegex = /\{([^}]+)\}/g;
+        const urlsToOpen = new Set<string>();
         
-        // Replace tokens with captured values
-        for (const group of tool.captureGroups) {
-          if (group in match.captures) {
-            url = url.replace(new RegExp(`\\{${group}\\}`, 'g'), encodeURIComponent(match.captures[group]));
+        // Use the first applicable match to build the URL(s)
+        const match = applicableMatches[0];
+        
+        // Find all tokens in the URL
+        const tokens = [...tool.url.matchAll(multiTokenRegex)];
+        
+        if (tokens.length === 0) {
+          // No tokens, just open the URL as-is
+          urlsToOpen.add(tool.url);
+        } else {
+          // Process each token
+          const tokenReplacements: Array<{ token: string; values: string[] }> = [];
+          
+          for (const tokenMatch of tokens) {
+            const fullToken = tokenMatch[0]; // e.g., "{email|domain|phone}"
+            const tokenContent = tokenMatch[1]; // e.g., "email|domain|phone"
+            const captureGroups = tokenContent.split('|').map(g => g.trim());
+            
+            // Find values for this token from the matches
+            const values: string[] = [];
+            for (const group of captureGroups) {
+              if (group in match.captures && match.captures[group]) {
+                values.push(match.captures[group]);
+              }
+            }
+            
+            tokenReplacements.push({ token: fullToken, values });
+          }
+          
+          // Generate URLs for each combination of values
+          if (tokenReplacements.every(tr => tr.values.length > 0)) {
+            // Get all combinations of values
+            const generateCombinations = (replacements: typeof tokenReplacements): string[] => {
+              if (replacements.length === 0) return [''];
+              if (replacements.length === 1) {
+                return replacements[0].values.map(value => 
+                  tool.url.replace(replacements[0].token, encodeURIComponent(value))
+                );
+              }
+              
+              // For multiple tokens, generate all combinations
+              const [first, ...rest] = replacements;
+              const restCombinations = generateCombinations(rest);
+              const combinations: string[] = [];
+              
+              for (const value of first.values) {
+                for (const restUrl of restCombinations) {
+                  const url = restUrl.replace(first.token, encodeURIComponent(value));
+                  combinations.push(url);
+                }
+              }
+              
+              return combinations;
+            };
+            
+            const combinations = generateCombinations(tokenReplacements);
+            combinations.forEach(url => urlsToOpen.add(url));
           }
         }
         
-        // Open the URL
-        await shell.openExternal(url);
+        // Open all generated URLs
+        for (const url of urlsToOpen) {
+          await shell.openExternal(url);
+        }
       }
     } catch (error) {
       console.error('Failed to open tools:', error);

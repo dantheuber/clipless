@@ -10,9 +10,7 @@ interface ToolsSectionProps {
   editingToolId: string | null
   editingToolName: string
   editingToolUrl: string
-  editingToolCaptureGroups: string[]
   expandedToolId: string | null
-  availableCaptureGroups: string[]
   onCreateTool: () => Promise<void>
   onSaveTool: () => Promise<void>
   onCancelToolEdit: () => void
@@ -20,7 +18,6 @@ interface ToolsSectionProps {
   onDeleteTool: (id: string) => void
   onEditingToolNameChange: (name: string) => void
   onEditingToolUrlChange: (url: string) => void
-  onToggleCaptureGroup: (groupName: string) => void
   onExpandedToolIdChange: (id: string | null) => void
 }
 
@@ -29,9 +26,7 @@ export function ToolsSection({
   editingToolId,
   editingToolName,
   editingToolUrl,
-  editingToolCaptureGroups,
   expandedToolId,
-  availableCaptureGroups,
   onCreateTool,
   onSaveTool,
   onCancelToolEdit,
@@ -39,10 +34,25 @@ export function ToolsSection({
   onDeleteTool,
   onEditingToolNameChange,
   onEditingToolUrlChange,
-  onToggleCaptureGroup,
   onExpandedToolIdChange
 }: ToolsSectionProps): React.JSX.Element {
   const { isLight } = useTheme()
+
+  // Extract all capture groups from a tool URL (supports pipe syntax)
+  const extractCaptureGroupsFromUrl = (url: string): string[] => {
+    const tokenRegex = /\{([^}]+)\}/g
+    const groups = new Set<string>()
+    
+    let match
+    while ((match = tokenRegex.exec(url)) !== null) {
+      const tokenContent = match[1]
+      // Split by pipe to handle multi-group tokens
+      const captureGroups = tokenContent.split('|').map(g => g.trim())
+      captureGroups.forEach(group => groups.add(group))
+    }
+    
+    return Array.from(groups)
+  }
 
   return (
     <div className={styles.tabContent}>
@@ -57,8 +67,11 @@ export function ToolsSection({
           content={
             <>
               Tools are web URLs that can be opened with extracted data from search terms. 
-              Use tokens like <code>{'{'}email{'}'}</code> or <code>{'{'}domainName{'}'}</code> in the URL 
-              to insert captured values.
+              Use tokens like <code>{'{'}email{'}'}</code> in the URL to insert captured values.
+              <br /><br />
+              <strong>Multi-group tokens:</strong> Use <code>{'{'}email|domainName|phoneNumber{'}'}</code> 
+              to support multiple capture groups. If any of these groups are found, each match 
+              will open in its own tab.
             </>
           }
         />
@@ -94,28 +107,27 @@ export function ToolsSection({
                     value={editingToolUrl}
                     onChange={(e) => onEditingToolUrlChange(e.target.value)}
                     className={classNames(styles.urlInput, { [styles.light]: isLight })}
-                    placeholder="URL with {captureGroupName} tokens"
+                    placeholder="URL with {captureGroup} or {group1|group2|group3} tokens"
                   />
-                  <div className={styles.captureGroupsSelection}>
-                    <span className={classNames(styles.label, { [styles.light]: isLight })}>
-                      Supported Capture Groups:
-                    </span>
-                    <div className={styles.captureGroupsList}>
-                      {availableCaptureGroups.map(group => (
-                        <label 
-                          key={group} 
-                          className={classNames(styles.captureGroupOption, { [styles.light]: isLight })}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={editingToolCaptureGroups.includes(group)}
-                            onChange={() => onToggleCaptureGroup(group)}
-                          />
-                          {group}
-                        </label>
-                      ))}
+                  {editingToolUrl && (
+                    <div className={styles.urlPreview}>
+                      <span className={classNames(styles.label, { [styles.light]: isLight })}>
+                        Detected capture groups:
+                      </span>
+                      <div className={styles.captureGroupsPreview}>
+                        {extractCaptureGroupsFromUrl(editingToolUrl).map(group => (
+                          <span key={group} className={styles.captureGroup}>
+                            {group}
+                          </span>
+                        ))}
+                        {extractCaptureGroupsFromUrl(editingToolUrl).length === 0 && (
+                          <span className={classNames(styles.noGroups, { [styles.light]: isLight })}>
+                            No capture groups found in URL
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className={styles.editActions}>
                     <button
                       className={classNames(styles.saveButton, { [styles.light]: isLight })}
@@ -168,7 +180,7 @@ export function ToolsSection({
                         <span className={classNames(styles.label, { [styles.light]: isLight })}>
                           Supported Groups: 
                         </span>
-                        {tool.captureGroups.map(group => (
+                        {extractCaptureGroupsFromUrl(tool.url).map(group => (
                           <span key={group} className={styles.captureGroup}>
                             {group}
                           </span>

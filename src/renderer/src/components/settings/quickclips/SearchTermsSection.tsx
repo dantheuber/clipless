@@ -3,6 +3,7 @@ import classNames from 'classnames'
 import { SearchTerm } from '../../../../../shared/types'
 import { useTheme } from '../../../providers/theme'
 import { InfoTooltip } from './InfoTooltip'
+import { TLD_PATTERN } from '../../../utils/tlds'
 import styles from '../QuickClipsManager.module.css'
 
 // Built-in common patterns
@@ -17,7 +18,7 @@ const BUILTIN_PATTERNS = [
   },
   {
     name: 'Domain Name',
-    pattern: '(?<domainName>\\b[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.[a-zA-Z]{2,}\\b)'
+    pattern: `(?<domainName>\\b[a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\\.${TLD_PATTERN}\\b)`
   },
   {
     name: 'Phone Number',
@@ -204,12 +205,6 @@ export function SearchTermsSection({
                   
                   {expandedSearchTermId === term.id && (
                     <div className={styles.itemDetails}>
-                      <div className={styles.patternDisplay}>
-                        <span className={classNames(styles.label, { [styles.light]: isLight })}>Pattern:</span>
-                        <code className={classNames(styles.code, { [styles.light]: isLight })}>
-                          {term.pattern}
-                        </code>
-                      </div>
                       <div className={styles.captureGroupsPreview}>
                         <span className={classNames(styles.label, { [styles.light]: isLight })}>
                           Capture Groups: 

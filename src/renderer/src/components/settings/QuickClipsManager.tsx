@@ -54,9 +54,7 @@ export function QuickClipsManager(): React.JSX.Element {
   const [editingToolId, setEditingToolId] = useState<string | null>(null)
   const [editingToolName, setEditingToolName] = useState('')
   const [editingToolUrl, setEditingToolUrl] = useState('')
-  const [editingToolCaptureGroups, setEditingToolCaptureGroups] = useState<string[]>([])
   const [expandedToolId, setExpandedToolId] = useState<string | null>(null)
-  const [availableCaptureGroups, setAvailableCaptureGroups] = useState<string[]>([])
   
   // Test state
   const [testText, setTestText] = useState('')
@@ -93,7 +91,6 @@ export function QuickClipsManager(): React.JSX.Element {
         })
       }
     })
-    setAvailableCaptureGroups(Array.from(groups).sort())
   }, [searchTerms])
 
   // Data loading functions
@@ -185,12 +182,11 @@ export function QuickClipsManager(): React.JSX.Element {
   // Tool handlers
   const handleCreateTool = async () => {
     try {
-      const newTool = await window.api.quickToolsCreate('New Tool', 'https://example.com/?q={value}', [])
+      const newTool = await window.api.quickToolsCreate('New Tool', 'https://example.com/?q={email|domainName}', [])
       setTools(prev => [...prev, newTool])
       setEditingToolId(newTool.id)
       setEditingToolName(newTool.name)
       setEditingToolUrl(newTool.url)
-      setEditingToolCaptureGroups(newTool.captureGroups)
     } catch (error) {
       console.error('Failed to create tool:', error)
     }
@@ -200,10 +196,28 @@ export function QuickClipsManager(): React.JSX.Element {
     if (!editingToolId) return
 
     try {
+      // Extract capture groups from the URL automatically
+      const extractCaptureGroupsFromUrl = (url: string): string[] => {
+        const tokenRegex = /\{([^}]+)\}/g
+        const groups = new Set<string>()
+        
+        let match
+        while ((match = tokenRegex.exec(url)) !== null) {
+          const tokenContent = match[1]
+          // Split by pipe to handle multi-group tokens
+          const captureGroups = tokenContent.split('|').map(g => g.trim())
+          captureGroups.forEach(group => groups.add(group))
+        }
+        
+        return Array.from(groups)
+      }
+
+      const detectedCaptureGroups = extractCaptureGroupsFromUrl(editingToolUrl)
+
       const updatedTool = await window.api.quickToolsUpdate(editingToolId, {
         name: editingToolName,
         url: editingToolUrl,
-        captureGroups: editingToolCaptureGroups
+        captureGroups: detectedCaptureGroups
       })
 
       setTools(prev => prev.map(t => 
@@ -212,7 +226,6 @@ export function QuickClipsManager(): React.JSX.Element {
       setEditingToolId(null)
       setEditingToolName('')
       setEditingToolUrl('')
-      setEditingToolCaptureGroups([])
     } catch (error) {
       console.error('Failed to update tool:', error)
     }
@@ -222,14 +235,12 @@ export function QuickClipsManager(): React.JSX.Element {
     setEditingToolId(null)
     setEditingToolName('')
     setEditingToolUrl('')
-    setEditingToolCaptureGroups([])
   }
 
   const handleStartToolEdit = (tool: QuickTool) => {
     setEditingToolId(tool.id)
     setEditingToolName(tool.name)
     setEditingToolUrl(tool.url)
-    setEditingToolCaptureGroups(tool.captureGroups)
     setExpandedToolId(tool.id)
   }
 
@@ -243,14 +254,6 @@ export function QuickClipsManager(): React.JSX.Element {
       id,
       name: tool.name
     })
-  }
-
-  const handleToggleCaptureGroup = (groupName: string) => {
-    setEditingToolCaptureGroups(prev => 
-      prev.includes(groupName) 
-        ? prev.filter(g => g !== groupName)
-        : [...prev, groupName]
-    )
   }
 
   // Test handlers
@@ -424,9 +427,7 @@ export function QuickClipsManager(): React.JSX.Element {
           editingToolId={editingToolId}
           editingToolName={editingToolName}
           editingToolUrl={editingToolUrl}
-          editingToolCaptureGroups={editingToolCaptureGroups}
           expandedToolId={expandedToolId}
-          availableCaptureGroups={availableCaptureGroups}
           onCreateTool={handleCreateTool}
           onSaveTool={handleSaveTool}
           onCancelToolEdit={handleCancelToolEdit}
@@ -434,7 +435,6 @@ export function QuickClipsManager(): React.JSX.Element {
           onDeleteTool={handleDeleteTool}
           onEditingToolNameChange={setEditingToolName}
           onEditingToolUrlChange={setEditingToolUrl}
-          onToggleCaptureGroup={handleToggleCaptureGroup}
           onExpandedToolIdChange={setExpandedToolId}
         />
       )}
