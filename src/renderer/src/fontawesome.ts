@@ -25,6 +25,7 @@ import {
   faSpinner,
   faChevronUp,
   faInfoCircle,
+  faTimes,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -52,5 +53,6 @@ library.add(
   faFileText,
   faSpinner,
   faChevronUp,
-  faInfoCircle
+  faInfoCircle,
+  faTimes
 );

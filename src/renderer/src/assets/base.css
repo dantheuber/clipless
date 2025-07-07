@@ -39,12 +39,15 @@
   --bg-accent-hover: rgba(74, 144, 226, 0.15);
   --bg-success: rgba(16, 185, 129, 0.1);
   --bg-error: rgba(239, 68, 68, 0.1);
+  --bg-disabled: #333333;
   
   --text-primary: #e5e5e5;
   --text-secondary: #a0a0a0;
   --text-tertiary: #666666;
   --text-muted: rgba(235, 235, 245, 0.6);
   --text-inverse: #1a1a1a;
+  --text-on-accent: #ffffff;
+  --text-disabled: #666666;
   
   --border-primary: #444444;
   --border-secondary: #333333;
@@ -133,12 +136,15 @@ body.light {
   --bg-accent-hover: rgba(74, 144, 226, 0.08);
   --bg-success: rgba(16, 185, 129, 0.08);
   --bg-error: rgba(239, 68, 68, 0.08);
+  --bg-disabled: #e8e8e8;
   
   --text-primary: #1a1a1a;
   --text-secondary: #666666;
   --text-tertiary: #999999;
   --text-muted: rgba(26, 26, 26, 0.6);
   --text-inverse: #ffffff;
+  --text-on-accent: #ffffff;
+  --text-disabled: #999999;
   
   --border-primary: #d0d0d0;
   --border-secondary: #e0e0e0;

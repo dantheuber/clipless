@@ -179,7 +179,11 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
           </button>
         </div>
 
-        <div className={classNames(styles.content, { [styles.light]: isLight })}>
+        <div className={classNames(styles.content, { [styles.light]: isLight })} style={{ 
+          flexDirection: loading || matches.length === 0 ? 'column' : 'row',
+          justifyContent: loading || matches.length === 0 ? 'center' : 'flex-start',
+          alignItems: loading || matches.length === 0 ? 'center' : 'stretch'
+        }}>
           {loading ? (
             <div className={classNames(styles.loading, { [styles.light]: isLight })}>
               <FontAwesomeIcon icon="spinner" spin />
@@ -195,8 +199,8 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
             </div>
           ) : (
             <>
-              {/* Matches Section */}
-              <div className={styles.section}>
+              {/* Left Side - Matches Section */}
+              <div className={classNames(styles.section, styles.leftSection)}>
                 <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
                   Found Patterns ({matches.length})
                 </h3>
@@ -222,9 +226,6 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                             className={styles.checkbox}
                           />
                           <div className={styles.matchDetails}>
-                            <div className={classNames(styles.matchSource, { [styles.light]: isLight })}>
-                              {match.searchTermName}
-                            </div>
                             <div className={styles.matchCaptures}>
                               {Object.entries(match.captures).map(([group, value]) => (
                                 <div key={group} className={styles.capture}>
@@ -241,52 +242,67 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                 </div>
               </div>
 
-              {/* Tools Section */}
-              {availableTools.length > 0 && (
-                <div className={styles.section}>
-                  <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
-                    Available Tools ({availableTools.length})
-                  </h3>
-                  <div className={styles.toolsList}>
-                    {availableTools.map(tool => {
-                      const isSelected = selectedTools.has(tool.id)
-                      
-                      return (
-                        <div
-                          key={tool.id}
-                          className={classNames(
-                            styles.toolItem,
-                            { [styles.light]: isLight },
-                            { [styles.selected]: isSelected }
-                          )}
-                        >
-                          <label className={styles.toolLabel}>
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToolToggle(tool.id)}
-                              className={styles.checkbox}
-                            />
-                            <div className={styles.toolDetails}>
-                              <div className={classNames(styles.toolName, { [styles.light]: isLight })}>{tool.name}</div>
-                              <div className={classNames(styles.toolUrl, { [styles.light]: isLight })}>{tool.url}</div>
-                              <div className={classNames(styles.toolGroups, { [styles.light]: isLight })}>
-                                Supports: {tool.captureGroups.join(', ')}
+              {/* Right Side - Tools Section */}
+              <div className={classNames(styles.section, styles.rightSection)}>
+                {availableTools.length > 0 ? (
+                  <>
+                    <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
+                      Available Tools ({availableTools.length})
+                    </h3>
+                    <div className={styles.toolsList}>
+                      {availableTools.map(tool => {
+                        const isSelected = selectedTools.has(tool.id)
+                        
+                        return (
+                          <div
+                            key={tool.id}
+                            className={classNames(
+                              styles.toolItem,
+                              { [styles.light]: isLight },
+                              { [styles.selected]: isSelected }
+                            )}
+                          >
+                            <label className={styles.toolLabel}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToolToggle(tool.id)}
+                                className={styles.checkbox}
+                              />
+                              <div className={styles.toolDetails}>
+                                <div className={classNames(styles.toolName, { [styles.light]: isLight })}>{tool.name}</div>
+                                <div className={classNames(styles.toolUrl, { [styles.light]: isLight })}>{tool.url}</div>
+                                <div className={classNames(styles.toolGroups, { [styles.light]: isLight })}>
+                                  Supports: {tool.captureGroups.join(', ')}
+                                </div>
                               </div>
-                            </div>
-                          </label>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
+                            </label>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
+                      Tools
+                    </h3>
+                    <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
+                      <FontAwesomeIcon icon="wrench" className={styles.emptyIcon} />
+                      <p>No compatible tools available.</p>
+                      <p className={styles.emptyHint}>
+                        Select patterns to see available tools.
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
             </>
           )}
         </div>
 
         {/* Footer */}
-        {matches.length > 0 && availableTools.length > 0 && (
+        {matches.length > 0 && (
           <div className={classNames(styles.footer, { [styles.light]: isLight })}>
             <div className={styles.stats}>
               <span className={classNames(styles.statText, { [styles.light]: isLight })}>
