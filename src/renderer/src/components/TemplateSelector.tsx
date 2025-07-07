@@ -23,6 +23,23 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ className })
     loadTemplates()
   }, [])
 
+  // Listen for template changes
+  useEffect(() => {
+    const handleTemplatesChanged = () => {
+      loadTemplates()
+    }
+
+    window.addEventListener('templatesChanged', handleTemplatesChanged)
+    return () => window.removeEventListener('templatesChanged', handleTemplatesChanged)
+  }, [])
+
+  // Reload templates when dropdown opens (to catch any changes)
+  useEffect(() => {
+    if (isOpen) {
+      loadTemplates()
+    }
+  }, [isOpen])
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -70,6 +87,15 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ className })
     }
   }
 
+  const handleOpenTemplateSettings = async () => {
+    try {
+      await window.api.openSettings('templates')
+      setIsOpen(false) // Close the dropdown
+    } catch (error) {
+      console.error('Failed to open settings:', error)
+    }
+  }
+
   const extractTokens = (content: string): string[] => {
     const tokenRegex = /\{c(\d+)\}/g
     const tokens: string[] = []
@@ -84,30 +110,7 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ className })
     return tokens.sort()
   }
 
-  const getPreviewText = (template: Template): string => {
-    const tokens = extractTokens(template.content)
-    if (tokens.length === 0) return template.content
-    
-    const maxLength = 100
-    let preview = template.content
-    
-    // Replace tokens with clip previews or placeholders
-    tokens.forEach(token => {
-      const match = token.match(/\{c(\d+)\}/)
-      if (match) {
-        const clipIndex = parseInt(match[1]) - 1
-        const clipContent = clips[clipIndex]?.content || `[No clip ${match[1]}]`
-        const shortContent = clipContent.length > 20 ? clipContent.substring(0, 20) + '...' : clipContent
-        preview = preview.replace(token, shortContent)
-      }
-    })
-    
-    return preview.length > maxLength ? preview.substring(0, maxLength) + '...' : preview
-  }
-
-  if (templates.length === 0) {
-    return null // Don't show button if no templates
-  }
+  // Always show the button - if no templates, show the "create templates" option
 
   return (
     <div className={classNames(styles.container, className)} ref={dropdownRef}>
@@ -135,27 +138,39 @@ export const TemplateSelector: React.FC<TemplateSelectorProps> = ({ className })
           </div>
           
           <div className={styles.templateList}>
-            {templates.map((template) => (
+            {templates.length === 0 ? (
               <button
-                key={template.id}
-                onClick={() => handleTemplateSelect(template)}
-                className={classNames(styles.templateItem, { [styles.light]: isLight })}
+                onClick={handleOpenTemplateSettings}
+                className={classNames(styles.templateItem, styles.noTemplatesButton, { [styles.light]: isLight })}
+                title="Click to create templates"
               >
                 <div className={styles.templateInfo}>
-                  <span className={styles.templateName}>{template.name}</span>
-                  <span className={styles.templatePreview}>
-                    {getPreviewText(template)}
-                  </span>
-                  <div className={styles.templateTokens}>
-                    {extractTokens(template.content).map(token => (
-                      <span key={token} className={styles.token}>
-                        {token}
-                      </span>
-                    ))}
+                  <span className={styles.templateName}>No templates available</span>
+                  <div className={styles.templateMeta}>
+                    <span className={styles.tokenCount}>
+                      Click to create templates in Settings
+                    </span>
                   </div>
                 </div>
               </button>
-            ))}
+            ) : (
+              templates.map((template) => (
+                <button
+                  key={template.id}
+                  onClick={() => handleTemplateSelect(template)}
+                  className={classNames(styles.templateItem, { [styles.light]: isLight })}
+                >
+                  <div className={styles.templateInfo}>
+                    <span className={styles.templateName}>{template.name}</span>
+                    <div className={styles.templateMeta}>
+                      <span className={styles.tokenCount}>
+                        {extractTokens(template.content).length} tokens
+                      </span>
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
           </div>
         </div>
       )}

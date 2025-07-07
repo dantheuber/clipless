@@ -26,7 +26,7 @@ const api = {
   removeClipboardListeners: () => electronAPI.ipcRenderer.removeAllListeners('clipboard-changed'),
   
   // Settings APIs
-  openSettings: () => electronAPI.ipcRenderer.invoke('open-settings'),
+  openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),
   closeSettings: () => electronAPI.ipcRenderer.invoke('close-settings'),
   getSettings: () => electronAPI.ipcRenderer.invoke('get-settings'),
   settingsChanged: (settings: any) => electronAPI.ipcRenderer.invoke('settings-changed', settings),

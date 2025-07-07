@@ -4,7 +4,7 @@ import icon from '../../resources/icon.png?asset'
 let tray: Tray | null = null;
 let isQuitting = false;
 
-export function createTray(mainWindow: BrowserWindow | null, createSettingsWindow: () => void): Tray | null {
+export function createTray(mainWindow: BrowserWindow | null, createSettingsWindow: (tab?: string) => void): Tray | null {
   const trayIcon = nativeImage.createFromPath(icon);
   trayIcon.setTemplateImage(true);
   

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import classNames from 'classnames'
 import { Template } from '../../../../shared/types'
 import { useTheme } from '../../providers/theme'
+import { ConfirmDialog } from '../ConfirmDialog'
 import styles from './TemplateManager.module.css'
 
 const DEFAULT_TEMPLATE_CONTENT = `Customer Name: {c1}
@@ -18,6 +19,11 @@ export function TemplateManager(): React.JSX.Element {
   const [editingContent, setEditingContent] = useState('')
   const [draggedId, setDraggedId] = useState<string | null>(null)
   const [dragOverId, setDragOverId] = useState<string | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; templateId: string; templateName: string }>({
+    show: false,
+    templateId: '',
+    templateName: ''
+  })
 
   // Load templates on mount
   useEffect(() => {
@@ -40,6 +46,8 @@ export function TemplateManager(): React.JSX.Element {
       setEditingId(newTemplate.id)
       setEditingName(newTemplate.name)
       setEditingContent(newTemplate.content)
+      // Notify template selector about the change
+      window.dispatchEvent(new CustomEvent('templatesChanged'))
     } catch (error) {
       console.error('Failed to create template:', error)
     }
@@ -60,6 +68,8 @@ export function TemplateManager(): React.JSX.Element {
       setEditingId(null)
       setEditingName('')
       setEditingContent('')
+      // Notify template selector about the change
+      window.dispatchEvent(new CustomEvent('templatesChanged'))
     } catch (error) {
       console.error('Failed to update template:', error)
     }
@@ -72,17 +82,36 @@ export function TemplateManager(): React.JSX.Element {
   }
 
   const handleDeleteTemplate = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this template?')) return
+    const template = templates.find(t => t.id === id)
+    if (!template) return
+    
+    setDeleteConfirm({
+      show: true,
+      templateId: id,
+      templateName: template.name
+    })
+  }
 
+  const handleConfirmDelete = async () => {
+    const { templateId } = deleteConfirm
+    
     try {
-      await window.api.templatesDelete(id)
-      setTemplates(prev => prev.filter(t => t.id !== id))
-      if (editingId === id) {
+      await window.api.templatesDelete(templateId)
+      setTemplates(prev => prev.filter(t => t.id !== templateId))
+      if (editingId === templateId) {
         handleCancelEdit()
       }
+      // Notify template selector about the change
+      window.dispatchEvent(new CustomEvent('templatesChanged'))
     } catch (error) {
       console.error('Failed to delete template:', error)
+    } finally {
+      setDeleteConfirm({ show: false, templateId: '', templateName: '' })
     }
+  }
+
+  const handleCancelDelete = () => {
+    setDeleteConfirm({ show: false, templateId: '', templateName: '' })
   }
 
   const handleStartEdit = (template: Template) => {
@@ -144,6 +173,8 @@ export function TemplateManager(): React.JSX.Element {
 
     try {
       await window.api.templatesReorder(reorderedTemplates)
+      // Notify template selector about the change
+      window.dispatchEvent(new CustomEvent('templatesChanged'))
     } catch (error) {
       console.error('Failed to reorder templates:', error)
       // Revert on error
@@ -315,6 +346,17 @@ export function TemplateManager(): React.JSX.Element {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={deleteConfirm.show}
+        title="Delete Template"
+        message={`Are you sure you want to delete the template "${deleteConfirm.templateName}"? This action cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        type="danger"
+      />
     </div>
   )
 }

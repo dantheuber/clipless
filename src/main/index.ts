@@ -10,9 +10,15 @@ import icon from '../../resources/icon.png?asset'
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
 
-function createSettingsWindow(): void {
+function createSettingsWindow(tab?: string): void {
   if (settingsWindow) {     
     settingsWindow.focus();
+    // If window exists and we have a tab parameter, send message to change tab
+    if (tab) {
+      settingsWindow.webContents.once('did-finish-load', () => {
+        settingsWindow?.webContents.send('settings-set-tab', tab);
+      });
+    }
     return;
   }
 
@@ -42,10 +48,18 @@ function createSettingsWindow(): void {
   });
 
   // Load the settings HTML file - use dev server in development mode
+  const baseUrl = is.dev && process.env['ELECTRON_RENDERER_URL'] 
+    ? process.env['ELECTRON_RENDERER_URL'] 
+    : 'file://' + join(__dirname, '../renderer');
+  
+  const url = baseUrl + '/settings.html' + (tab ? `?tab=${tab}` : '');
+  
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    settingsWindow.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/settings.html');
+    settingsWindow.loadURL(url);
   } else {
-    settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'));
+    settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'), {
+      search: tab ? `tab=${tab}` : undefined
+    });
   }
 }
 
@@ -100,8 +114,8 @@ function createWindow(): void {
   setupClipboardIPC(mainWindow);
 
   // Settings window IPC handlers
-  ipcMain.handle('open-settings', () => {
-    createSettingsWindow();
+  ipcMain.handle('open-settings', (_event, tab?: string) => {
+    createSettingsWindow(tab);
   });
 
   ipcMain.handle('close-settings', () => {

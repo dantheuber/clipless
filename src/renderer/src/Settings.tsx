@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import UpdaterControl from './components/settings/UpdaterControl'
 import Versions from './components/settings/Versions'
 import { ClipsProvider } from './providers/clips'
@@ -27,6 +27,15 @@ const tabs: Tab[] = [
 function SettingsContent(): React.JSX.Element {
   const { isLight } = useTheme()
   const [activeTab, setActiveTab] = useState<TabType>('general')
+
+  // Check for URL parameters to set initial tab
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const tabParam = urlParams.get('tab') as TabType
+    if (tabParam && tabs.some(tab => tab.id === tabParam)) {
+      setActiveTab(tabParam)
+    }
+  }, [])
 
   const renderTabContent = () => {
     switch (activeTab) {
