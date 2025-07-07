@@ -22,9 +22,9 @@ interface Tab {
 
 const tabs: Tab[] = [
   { id: 'general', label: 'General' },
+  { id: 'hotkeys', label: 'Hotkeys' },
   { id: 'templates', label: 'Templates' },
   { id: 'quickClips', label: 'Quick Clips' },
-  { id: 'hotkeys', label: 'Hotkeys' }
 ]
 
 function SettingsContent(): React.JSX.Element {
