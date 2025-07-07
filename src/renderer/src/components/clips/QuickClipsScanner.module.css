@@ -10,53 +10,81 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  cursor: pointer;
 }
 
 /* Modal */
 .modal {
-  background-color: var(--bg-primary);
+  background-color: #1a1a1a;
+  border: 1px solid #333;
   border-radius: 0.5rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.3),
+    0 10px 10px -5px rgba(0, 0, 0, 0.1);
   max-width: 600px;
   width: 90%;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  cursor: default;
 }
 
 .modal.light {
-  background-color: var(--bg-primary-light);
+  background-color: #ffffff;
+  border-color: #e0e0e0;
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Header */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 1rem 1.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #333;
+  background-color: #1a1a1a;
 }
 
 .header.light {
-  border-bottom-color: var(--border-color-light);
+  border-bottom-color: #e0e0e0;
+  background-color: #f8f8f8;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #e5e5e5;
   margin: 0;
 }
 
 .title.light {
-  color: var(--text-primary-light);
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: #a0a0a0;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.subtitle.light {
+  color: #666666;
 }
 
 .closeButton {
   background: none;
   border: none;
-  color: var(--text-secondary);
+  color: #a0a0a0;
   font-size: 1.25rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -65,17 +93,17 @@
 }
 
 .closeButton.light {
-  color: var(--text-secondary-light);
+  color: #666666;
 }
 
 .closeButton:hover {
-  color: var(--text-primary);
-  background-color: var(--bg-hover);
+  color: #e5e5e5;
+  background-color: #333;
 }
 
 .closeButton.light:hover {
-  color: var(--text-primary-light);
-  background-color: var(--bg-hover-light);
+  color: #1a1a1a;
+  background-color: #e0e0e0;
 }
 
 /* Content */
@@ -86,6 +114,11 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  background-color: #1a1a1a;
+}
+
+.content.light {
+  background-color: #ffffff;
 }
 
 /* Loading */
@@ -95,8 +128,12 @@
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  color: var(--text-secondary);
+  color: #a0a0a0;
   gap: 1rem;
+}
+
+.loading.light {
+  color: #666666;
 }
 
 .loading span {
@@ -111,11 +148,11 @@
   justify-content: center;
   padding: 2rem;
   text-align: center;
-  color: var(--text-secondary);
+  color: #a0a0a0;
 }
 
 .emptyState.light {
-  color: var(--text-secondary-light);
+  color: #666666;
 }
 
 .emptyIcon {
@@ -143,15 +180,15 @@
 .sectionTitle {
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: #e5e5e5;
   margin: 0;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid #333;
 }
 
 .sectionTitle.light {
-  color: var(--text-primary-light);
-  border-bottom-color: var(--border-color-light);
+  color: #1a1a1a;
+  border-bottom-color: #e0e0e0;
 }
 
 /* Matches List */
@@ -162,24 +199,24 @@
 }
 
 .matchItem {
-  border: 1px solid var(--border-color);
+  border: 1px solid #333;
   border-radius: 0.375rem;
   transition: all 0.2s ease;
-  background-color: var(--bg-secondary);
+  background-color: #262626;
 }
 
 .matchItem.light {
-  border-color: var(--border-color-light);
-  background-color: var(--bg-secondary-light);
+  border-color: #e0e0e0;
+  background-color: #f8f8f8;
 }
 
 .matchItem:hover {
-  border-color: var(--primary-color);
+  border-color: #4a90e2;
 }
 
 .matchItem.selected {
-  border-color: var(--primary-color);
-  background-color: rgba(59, 130, 246, 0.05);
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.1);
 }
 
 .matchLabel {
@@ -205,12 +242,12 @@
 
 .matchSource {
   font-weight: 600;
-  color: var(--text-primary);
+  color: #e5e5e5;
   font-size: 0.875rem;
 }
 
 .matchSource.light {
-  color: var(--text-primary-light);
+  color: #1a1a1a;
 }
 
 .matchCaptures {
@@ -227,18 +264,18 @@
 
 .captureGroup {
   font-weight: 500;
-  color: var(--text-secondary);
+  color: #a0a0a0;
   font-size: 0.75rem;
   min-width: 4rem;
 }
 
 .captureGroup.light {
-  color: var(--text-secondary-light);
+  color: #666666;
 }
 
 .captureValue {
-  background-color: var(--bg-tertiary);
-  color: var(--text-primary);
+  background-color: #333;
+  color: #e5e5e5;
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
   font-family: 'Courier New', monospace;
@@ -247,8 +284,8 @@
 }
 
 .captureValue.light {
-  background-color: var(--bg-tertiary-light);
-  color: var(--text-primary-light);
+  background-color: #e0e0e0;
+  color: #1a1a1a;
 }
 
 /* Tools List */
@@ -259,24 +296,24 @@
 }
 
 .toolItem {
-  border: 1px solid var(--border-color);
+  border: 1px solid #333;
   border-radius: 0.375rem;
   transition: all 0.2s ease;
-  background-color: var(--bg-secondary);
+  background-color: #262626;
 }
 
 .toolItem.light {
-  border-color: var(--border-color-light);
-  background-color: var(--bg-secondary-light);
+  border-color: #e0e0e0;
+  background-color: #f8f8f8;
 }
 
 .toolItem:hover {
-  border-color: var(--primary-color);
+  border-color: #4a90e2;
 }
 
 .toolItem.selected {
-  border-color: var(--primary-color);
-  background-color: rgba(59, 130, 246, 0.05);
+  border-color: #4a90e2;
+  background-color: rgba(74, 144, 226, 0.1);
 }
 
 .toolLabel {
@@ -297,33 +334,33 @@
 
 .toolName {
   font-weight: 600;
-  color: var(--text-primary);
+  color: #e5e5e5;
   font-size: 0.875rem;
 }
 
 .toolName.light {
-  color: var(--text-primary-light);
+  color: #1a1a1a;
 }
 
 .toolUrl {
-  color: var(--text-secondary);
+  color: #a0a0a0;
   font-size: 0.75rem;
   font-family: 'Courier New', monospace;
   word-break: break-all;
 }
 
 .toolUrl.light {
-  color: var(--text-secondary-light);
+  color: #666666;
 }
 
 .toolGroups {
-  color: var(--text-tertiary);
+  color: #808080;
   font-size: 0.675rem;
   font-style: italic;
 }
 
 .toolGroups.light {
-  color: var(--text-tertiary-light);
+  color: #888888;
 }
 
 /* Footer */
@@ -332,13 +369,13 @@
   justify-content: space-between;
   align-items: center;
   padding: 1rem 1.5rem;
-  border-top: 1px solid var(--border-color);
-  background-color: var(--bg-secondary);
+  border-top: 1px solid #333;
+  background-color: #262626;
 }
 
 .footer.light {
-  border-top-color: var(--border-color-light);
-  background-color: var(--bg-secondary-light);
+  border-top-color: #e0e0e0;
+  background-color: #f8f8f8;
 }
 
 .stats {
@@ -348,11 +385,11 @@
 
 .statText {
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  color: #a0a0a0;
 }
 
 .statText.light {
-  color: var(--text-secondary-light);
+  color: #666666;
 }
 
 .actions {
@@ -360,7 +397,8 @@
   gap: 0.75rem;
 }
 
-.cancelButton, .openButton {
+.cancelButton,
+.openButton {
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -371,31 +409,31 @@
 }
 
 .cancelButton {
-  background-color: var(--bg-hover);
-  color: var(--text-primary);
+  background-color: #333;
+  color: #e5e5e5;
 }
 
 .cancelButton.light {
-  background-color: var(--bg-hover-light);
-  color: var(--text-primary-light);
+  background-color: #e0e0e0;
+  color: #1a1a1a;
 }
 
 .cancelButton:hover {
-  background-color: var(--text-tertiary);
+  background-color: #666;
   color: white;
 }
 
 .openButton {
-  background-color: var(--primary-color);
+  background-color: #4a90e2;
   color: white;
 }
 
 .openButton:hover {
-  background-color: var(--primary-color-hover);
+  background-color: #357abd;
 }
 
 .openButton:disabled {
-  background-color: var(--text-tertiary);
+  background-color: #666;
   cursor: not-allowed;
   opacity: 0.5;
 }

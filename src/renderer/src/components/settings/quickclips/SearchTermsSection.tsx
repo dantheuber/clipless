@@ -2,6 +2,7 @@ import React from 'react'
 import classNames from 'classnames'
 import { SearchTerm } from '../../../../../shared/types'
 import { useTheme } from '../../../providers/theme'
+import { InfoTooltip } from './InfoTooltip'
 import styles from '../QuickClipsManager.module.css'
 
 // Built-in common patterns
@@ -83,7 +84,7 @@ export function SearchTermsSection({
 
   return (
     <div className={styles.tabContent}>
-      <div className={styles.header}>
+      <div className={styles.headerWithInfo}>
         <div className={styles.headerActions}>
           <select
             className={classNames(styles.builtinSelect, { [styles.light]: isLight })}
@@ -108,14 +109,15 @@ export function SearchTermsSection({
             Create Search Term
           </button>
         </div>
-      </div>
-
-      <div className={styles.description}>
-        <p className={classNames(styles.descriptionText, { [styles.light]: isLight })}>
-          Search terms use regular expressions with named capture groups to extract data from clipboard content. 
-          Use patterns like <code>(?&lt;email&gt;[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{'{'}2,{'}'})</code> 
-          to capture email addresses.
-        </p>
+        <InfoTooltip
+          content={
+            <>
+              Search terms use regular expressions with named capture groups to extract data from clipboard content. 
+              Use patterns like <code>(?&lt;email&gt;[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{'{'}2,{'}'})</code> 
+              to capture email addresses.
+            </>
+          }
+        />
       </div>
 
       {searchTerms.length === 0 ? (

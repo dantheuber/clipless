@@ -2,6 +2,7 @@ import React from 'react'
 import classNames from 'classnames'
 import { PatternMatch } from '../../../../../shared/types'
 import { useTheme } from '../../../providers/theme'
+import { InfoTooltip } from './InfoTooltip'
 import styles from '../QuickClipsManager.module.css'
 
 interface TestPatternsSectionProps {
@@ -21,7 +22,7 @@ export function TestPatternsSection({
 
   return (
     <div className={styles.tabContent}>
-      <div className={styles.header}>
+      <div className={styles.headerWithInfo}>
         <button
           className={classNames(styles.testButton, { [styles.light]: isLight })}
           onClick={onTestPattern}
@@ -29,12 +30,13 @@ export function TestPatternsSection({
         >
           Test Patterns
         </button>
-      </div>
-
-      <div className={styles.description}>
-        <p className={classNames(styles.descriptionText, { [styles.light]: isLight })}>
-          Test your search patterns against sample text to see what data would be extracted.
-        </p>
+        <InfoTooltip
+          content={
+            <>
+              Test your search patterns against sample text to see what data would be extracted.
+            </>
+          }
+        />
       </div>
 
       <div className={styles.testArea}>

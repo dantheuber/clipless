@@ -338,8 +338,8 @@ export function QuickClipsManager(): React.JSX.Element {
   }
 
   return (
-    <div className={styles.container}>
-      <div className={styles.header}>
+    <div className={classNames(styles.container, { [styles.light]: isLight })}>
+      <div className={classNames(styles.header, { [styles.light]: isLight })}>
         <div className={styles.headerActions}>
           <input
             type="file"

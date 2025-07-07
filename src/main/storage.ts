@@ -25,6 +25,7 @@ class SecureStorage {
   private encryptedDataPath: string;
   private isInitialized = false;
   private data: AppData = DEFAULT_DATA;
+  private savePromise: Promise<void> | null = null;
 
   constructor() {
     // Store data in the user data directory
@@ -104,6 +105,28 @@ class SecureStorage {
       throw new Error('Storage not initialized');
     }
 
+    // If a save operation is already in progress, wait for it to complete
+    if (this.savePromise) {
+      await this.savePromise;
+      return;
+    }
+
+    // Start a new save operation
+    this.savePromise = this.performSave();
+    
+    try {
+      await this.savePromise;
+    } finally {
+      this.savePromise = null;
+    }
+  }
+
+  /**
+   * Perform the actual save operation
+   */
+  private async performSave(): Promise<void> {
+    const tempPath = this.encryptedDataPath + '.tmp';
+    
     try {
       // Serialize data
       const jsonData = JSON.stringify(this.data, null, 2);
@@ -111,13 +134,26 @@ class SecureStorage {
       // Encrypt data
       const encryptedData = safeStorage.encryptString(jsonData);
       
+      // Clean up any existing temp file first
+      try {
+        await fs.unlink(tempPath);
+      } catch (error) {
+        // Ignore if temp file doesn't exist
+      }
+      
       // Write to file atomically
-      const tempPath = this.encryptedDataPath + '.tmp';
       await fs.writeFile(tempPath, encryptedData);
       await fs.rename(tempPath, this.encryptedDataPath);
       
       console.log('Data saved to secure storage');
     } catch (error) {
+      // Clean up temp file on error
+      try {
+        await fs.unlink(tempPath);
+      } catch (unlinkError) {
+        // Ignore cleanup errors
+      }
+      
       console.error('Failed to save data to storage:', error);
       throw error;
     }
@@ -670,6 +706,75 @@ class SecureStorage {
     // Sort quick tools by order
     this.data.quickTools.sort((a, b) => a.order - b.order);
     await this.saveData();
+  }
+
+  /**
+   * Import configuration data in batch (more efficient than individual imports)
+   */
+  async importQuickClipsConfig(config: any): Promise<void> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    // Validate config structure
+    if (!config || typeof config !== 'object') {
+      throw new Error('Invalid config format');
+    }
+
+    let hasChanges = false;
+
+    // Import search terms
+    if (config.searchTerms && Array.isArray(config.searchTerms)) {
+      for (const searchTermData of config.searchTerms) {
+        // Skip invalid entries
+        if (!searchTermData || typeof searchTermData !== 'object') {
+          continue;
+        }
+
+        const now = Date.now();
+        const searchTerm: SearchTerm = {
+          id: this.generateId(),
+          name: searchTermData.name || 'Imported Search Term',
+          pattern: searchTermData.pattern || '(?<value>.*)',
+          enabled: searchTermData.enabled !== false,
+          createdAt: now,
+          updatedAt: now,
+          order: this.data.searchTerms.length > 0 ? Math.max(...this.data.searchTerms.map(t => t.order)) + 1 : 0
+        };
+
+        this.data.searchTerms.push(searchTerm);
+        hasChanges = true;
+      }
+    }
+
+    // Import quick tools
+    if (config.tools && Array.isArray(config.tools)) {
+      for (const toolData of config.tools) {
+        // Skip invalid entries
+        if (!toolData || typeof toolData !== 'object') {
+          continue;
+        }
+
+        const now = Date.now();
+        const quickTool: QuickTool = {
+          id: this.generateId(),
+          name: toolData.name || 'Imported Tool',
+          url: toolData.url || 'https://example.com/?q={value}',
+          captureGroups: Array.isArray(toolData.captureGroups) ? toolData.captureGroups : [],
+          createdAt: now,
+          updatedAt: now,
+          order: this.data.quickTools.length > 0 ? Math.max(...this.data.quickTools.map(t => t.order)) + 1 : 0
+        };
+
+        this.data.quickTools.push(quickTool);
+        hasChanges = true;
+      }
+    }
+
+    // Save only once at the end if there were changes
+    if (hasChanges) {
+      await this.saveData();
+    }
   }
 }
 

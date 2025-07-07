@@ -20,6 +20,23 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set())
   const [loading, setLoading] = useState(false)
 
+  // Add escape key listener
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscape)
+      return () => document.removeEventListener('keydown', handleEscape)
+    }
+    
+    // Return empty cleanup function for when not open
+    return () => {}
+  }, [isOpen, onClose])
+
   // Scan the clip content when modal opens
   useEffect(() => {
     if (isOpen && clipContent) {
@@ -133,15 +150,27 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
     return `${match.searchTermId}-${index}-${Object.keys(match.captures).join('-')}`
   }
 
+  // Handle overlay click to close
+  const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target === event.currentTarget) {
+      onClose()
+    }
+  }
+
   if (!isOpen) return <></>
 
   return (
-    <div className={styles.overlay}>
+    <div className={styles.overlay} onClick={handleOverlayClick}>
       <div className={classNames(styles.modal, { [styles.light]: isLight })}>
         <div className={styles.header}>
-          <h2 className={classNames(styles.title, { [styles.light]: isLight })}>
-            Quick Clips Scanner
-          </h2>
+          <div className={styles.headerContent}>
+            <h2 className={classNames(styles.title, { [styles.light]: isLight })}>
+              Quick Clips Scanner
+            </h2>
+            <p className={classNames(styles.subtitle, { [styles.light]: isLight })}>
+              Press Esc or click outside to close
+            </p>
+          </div>
           <button
             className={classNames(styles.closeButton, { [styles.light]: isLight })}
             onClick={onClose}
@@ -150,9 +179,9 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
           </button>
         </div>
 
-        <div className={styles.content}>
+        <div className={classNames(styles.content, { [styles.light]: isLight })}>
           {loading ? (
-            <div className={styles.loading}>
+            <div className={classNames(styles.loading, { [styles.light]: isLight })}>
               <FontAwesomeIcon icon="spinner" spin />
               <span>Scanning content...</span>
             </div>
@@ -193,14 +222,14 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                             className={styles.checkbox}
                           />
                           <div className={styles.matchDetails}>
-                            <div className={styles.matchSource}>
+                            <div className={classNames(styles.matchSource, { [styles.light]: isLight })}>
                               {match.searchTermName}
                             </div>
                             <div className={styles.matchCaptures}>
                               {Object.entries(match.captures).map(([group, value]) => (
                                 <div key={group} className={styles.capture}>
-                                  <span className={styles.captureGroup}>{group}:</span>
-                                  <span className={styles.captureValue}>{value}</span>
+                                  <span className={classNames(styles.captureGroup, { [styles.light]: isLight })}>{group}:</span>
+                                  <span className={classNames(styles.captureValue, { [styles.light]: isLight })}>{value}</span>
                                 </div>
                               ))}
                             </div>
@@ -239,9 +268,9 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
                               className={styles.checkbox}
                             />
                             <div className={styles.toolDetails}>
-                              <div className={styles.toolName}>{tool.name}</div>
-                              <div className={styles.toolUrl}>{tool.url}</div>
-                              <div className={styles.toolGroups}>
+                              <div className={classNames(styles.toolName, { [styles.light]: isLight })}>{tool.name}</div>
+                              <div className={classNames(styles.toolUrl, { [styles.light]: isLight })}>{tool.url}</div>
+                              <div className={classNames(styles.toolGroups, { [styles.light]: isLight })}>
                                 Supports: {tool.captureGroups.join(', ')}
                               </div>
                             </div>
@@ -258,7 +287,7 @@ export function QuickClipsScanner({ isOpen, onClose, clipContent }: QuickClipsSc
 
         {/* Footer */}
         {matches.length > 0 && availableTools.length > 0 && (
-          <div className={styles.footer}>
+          <div className={classNames(styles.footer, { [styles.light]: isLight })}>
             <div className={styles.stats}>
               <span className={classNames(styles.statText, { [styles.light]: isLight })}>
                 {selectedMatches.size} patterns, {selectedTools.size} tools selected

@@ -2,6 +2,7 @@ import React from 'react'
 import classNames from 'classnames'
 import { QuickTool } from '../../../../../shared/types'
 import { useTheme } from '../../../providers/theme'
+import { InfoTooltip } from './InfoTooltip'
 import styles from '../QuickClipsManager.module.css'
 
 interface ToolsSectionProps {
@@ -45,21 +46,22 @@ export function ToolsSection({
 
   return (
     <div className={styles.tabContent}>
-      <div className={styles.header}>
+      <div className={styles.headerWithInfo}>
         <button
           className={classNames(styles.createButton, { [styles.light]: isLight })}
           onClick={onCreateTool}
         >
           Create Tool
         </button>
-      </div>
-
-      <div className={styles.description}>
-        <p className={classNames(styles.descriptionText, { [styles.light]: isLight })}>
-          Tools are web URLs that can be opened with extracted data from search terms. 
-          Use tokens like <code>{'{'}email{'}'}</code> or <code>{'{'}domainName{'}'}</code> in the URL 
-          to insert captured values.
-        </p>
+        <InfoTooltip
+          content={
+            <>
+              Tools are web URLs that can be opened with extracted data from search terms. 
+              Use tokens like <code>{'{'}email{'}'}</code> or <code>{'{'}domainName{'}'}</code> in the URL 
+              to insert captured values.
+            </>
+          }
+        />
       </div>
 
       {tools.length === 0 ? (

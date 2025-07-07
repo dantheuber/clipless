@@ -545,26 +545,8 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
 
   ipcMain.handle('quick-clips-import-config', async (_event, config: any) => {
     try {
-      // Validate config structure
-      if (!config || typeof config !== 'object') {
-        throw new Error('Invalid config format');
-      }
-      
-      if (config.searchTerms && Array.isArray(config.searchTerms)) {
-        for (const searchTerm of config.searchTerms) {
-          await storage.createSearchTerm(searchTerm.name || 'Imported Search Term', searchTerm.pattern || '(?<value>.*)');
-        }
-      }
-      
-      if (config.tools && Array.isArray(config.tools)) {
-        for (const tool of config.tools) {
-          await storage.createQuickTool(
-            tool.name || 'Imported Tool', 
-            tool.url || 'https://example.com/?q={value}', 
-            tool.captureGroups || []
-          );
-        }
-      }
+      // Use the new batch import method to avoid race conditions
+      await storage.importQuickClipsConfig(config);
     } catch (error) {
       console.error('Failed to import quick clips config:', error);
       throw error;
