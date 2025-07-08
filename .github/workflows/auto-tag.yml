@@ -1,0 +1,42 @@
+name: Auto Tag on Merge
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  create-tag:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history
+
+      - name: Get version and create tag
+        run: |
+          # Get current version from package.json
+          VERSION=$(node -p "require('./package.json').version")
+          TAG_NAME="v$VERSION"
+          
+          echo "Package.json version: $VERSION"
+          echo "Tag to create: $TAG_NAME"
+          
+          # Check if tag already exists
+          if git tag -l | grep -q "^$TAG_NAME$"; then
+            echo "❌ Tag $TAG_NAME already exists. Skipping tag creation."
+            echo "This might happen if the version wasn't bumped in the merged PR."
+            exit 0
+          fi
+          
+          # Create and push tag
+          echo "✅ Creating new tag: $TAG_NAME"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+          
+          echo "🚀 Tag $TAG_NAME created and pushed!"
+          echo "This will trigger the build workflow to create a draft release."

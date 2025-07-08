@@ -27,6 +27,8 @@ mac:
   extendInfo:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
   notarize: false
+  # Skip code signing for now - can be enabled later with proper certificates
+  identity: null
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -44,3 +46,4 @@ publish:
   provider: github
   owner: dantheuber
   repo: clipless
+  releaseType: draft
