@@ -209,6 +209,7 @@ export function Clip({ clip, index }: ClipProps): React.JSX.Element {
                     })}
                     autoFocus
                     rows={1}
+                    spellCheck={false}
                     style={{
                       resize: 'none',
                       minHeight: '1.2em',
@@ -234,6 +235,7 @@ export function Clip({ clip, index }: ClipProps): React.JSX.Element {
                   className={classNames(styles.textEditor, { [styles.light]: isLight })}
                   autoFocus
                   rows={1}
+                  spellCheck={false}
                   style={{
                     resize: 'none',
                     minHeight: '1.2em',
