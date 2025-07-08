@@ -26,7 +26,7 @@ function UpdaterControl(): React.JSX.Element {
       console.error('Update check failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       const normalizedErrorMessage = errorMessage.toLowerCase();
-      
+
       if (normalizedErrorMessage.includes('network') || normalizedErrorMessage.includes('fetch')) {
         setUpdateStatus('Error: Unable to connect to update server');
       } else if (normalizedErrorMessage.includes('timeout')) {

@@ -300,7 +300,7 @@ async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<a
         const timeoutId = setTimeout(() => {
           reject(new Error('Update check timeout'));
         }, timeout);
-        
+
         // Listen for update events
         const onUpdateAvailable = (info: any) => {
           clearTimeout(timeoutId);
@@ -309,7 +309,7 @@ async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<a
           autoUpdater.off('error', onError);
           resolve(info);
         };
-        
+
         const onUpdateNotAvailable = (_info: any) => {
           clearTimeout(timeoutId);
           autoUpdater.off('update-available', onUpdateAvailable);
@@ -317,7 +317,7 @@ async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<a
           autoUpdater.off('error', onError);
           resolve(null); // No updates available
         };
-        
+
         const onError = (error: any) => {
           clearTimeout(timeoutId);
           autoUpdater.off('update-available', onUpdateAvailable);
@@ -325,28 +325,28 @@ async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<a
           autoUpdater.off('error', onError);
           reject(error);
         };
-        
+
         // Set up event listeners
         autoUpdater.once('update-available', onUpdateAvailable);
         autoUpdater.once('update-not-available', onUpdateNotAvailable);
         autoUpdater.once('error', onError);
-        
+
         // Start the check
         autoUpdater.checkForUpdates().catch(reject);
       });
-      
+
       const result = await updateCheckPromise;
       return result;
     } catch (error) {
       console.error(`Update check attempt ${attempt} failed:`, error);
-      
+
       if (attempt === retries) {
         throw error; // Re-throw on final attempt
       }
-      
+
       // Wait before retrying (exponential backoff)
       const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay));
     }
   }
   return null; // Fallback return
@@ -357,7 +357,7 @@ if (!is.dev) {
   // Configure auto-updater settings
   autoUpdater.autoDownload = false; // Don't auto-download, let user control it
   autoUpdater.autoInstallOnAppQuit = false; // Don't auto-install on quit
-  
+
   // Only enable auto-updater in production
   autoUpdater.checkForUpdatesAndNotify();
 }
@@ -425,7 +425,9 @@ app.whenReady().then(async () => {
         return result;
       } catch (error) {
         console.error('Update check failed:', error);
-        throw new Error(`Failed to check for updates: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `Failed to check for updates: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
     return null;
@@ -437,7 +439,9 @@ app.whenReady().then(async () => {
         return await autoUpdater.downloadUpdate();
       } catch (error) {
         console.error('Update download failed:', error);
-        throw new Error(`Failed to download update: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `Failed to download update: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
     return null;
@@ -449,7 +453,9 @@ app.whenReady().then(async () => {
         autoUpdater.quitAndInstall();
       } catch (error) {
         console.error('Failed to quit and install:', error);
-        throw new Error(`Failed to install update: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        throw new Error(
+          `Failed to install update: ${error instanceof Error ? error.message : 'Unknown error'}`
+        );
       }
     }
   });

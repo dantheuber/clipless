@@ -17,8 +17,9 @@ The CI/CD workflow consists of three main components:
 **Triggers**: On every pull request to `main`
 
 **Actions**:
+
 - ✅ Typechecking (`npm run typecheck`)
-- ✅ Linting (`npm run lint`)  
+- ✅ Linting (`npm run lint`)
 - ✅ Version bump validation (ensures version in `package.json` doesn't already exist as a tag)
 
 **Requirements**: Developers must update the version in `package.json` as part of their PR.
@@ -28,6 +29,7 @@ The CI/CD workflow consists of three main components:
 **Triggers**: When PRs are merged to `main`
 
 **Actions**:
+
 - Reads version from `package.json`
 - Creates a git tag (e.g., `v1.0.1`)
 - Pushes the tag to trigger the build workflow
@@ -37,6 +39,7 @@ The CI/CD workflow consists of three main components:
 **Triggers**: When a version tag is pushed (e.g., `v1.0.1`)
 
 **Actions**:
+
 - Builds for Windows, macOS, and Linux
 - Creates a **draft release** with all platform binaries
 - Uploads artifacts to the draft release
@@ -46,6 +49,7 @@ The CI/CD workflow consists of three main components:
 **Triggers**: Manual workflow dispatch
 
 **Actions**:
+
 - Promotes a draft release to published
 - Allows editing release notes
 - Option to mark as pre-release
@@ -55,14 +59,16 @@ The CI/CD workflow consists of three main components:
 ### Making Changes with Version Bump
 
 1. **Create feature branch**:
+
    ```bash
    git checkout -b feature/my-feature
    ```
 
 2. **Make your changes** and update version in `package.json`:
+
    ```json
    {
-     "version": "1.0.2"  // Bump from 1.0.1
+     "version": "1.0.2" // Bump from 1.0.1
    }
    ```
 
@@ -86,7 +92,7 @@ The CI/CD workflow consists of three main components:
 ### Promoting a Draft Release
 
 1. **Navigate to Actions** in your GitHub repository
-2. **Select "Promote Release"** workflow  
+2. **Select "Promote Release"** workflow
 3. **Click "Run workflow"** and provide:
    - **Tag**: `v1.0.2` (the version to promote)
    - **Release Notes**: Markdown-formatted notes
@@ -101,12 +107,13 @@ The workflow includes a default template:
 ```markdown
 ## What's New
 
-- Feature updates and improvements  
+- Feature updates and improvements
 - Bug fixes
 
 ## Download
 
 Choose the appropriate download for your operating system:
+
 - **Windows**: `clipless-{version}-setup.exe`
 - **macOS**: `clipless-{version}.dmg`
 - **Linux**: `clipless-{version}.AppImage` or install via Snap Store
@@ -119,22 +126,24 @@ The `{version}` placeholder is automatically replaced with the actual version.
 ### ✅ **Supported Platforms**:
 
 - **Windows**: `.exe` installer (NSIS format)
-- **Linux**: AppImage, Snap package, and Debian package  
+- **Linux**: AppImage, Snap package, and Debian package
 - **macOS**: `.dmg` file (currently unsigned)
 
 ### 🔐 **Code Signing Status**:
 
 - **Windows**: ❌ Unsigned (builds work fine)
-- **macOS**: ❌ Unsigned (builds work but show security warnings)  
+- **macOS**: ❌ Unsigned (builds work but show security warnings)
 - **Linux**: ✅ No signing required
 
 ## Version Management
 
 ### Version Naming Convention
+
 - Use semantic versioning: `MAJOR.MINOR.PATCH`
 - Examples: `1.0.0`, `1.2.5`, `2.0.0`
 
 ### When to Bump Versions
+
 - **Patch** (1.0.0 → 1.0.1): Bug fixes, small improvements
 - **Minor** (1.0.0 → 1.1.0): New features, backwards compatible
 - **Major** (1.0.0 → 2.0.0): Breaking changes
@@ -144,21 +153,25 @@ The `{version}` placeholder is automatically replaced with the actual version.
 ### PR Validation Fails
 
 **"Tag already exists"**: The version in `package.json` is already released
+
 - Solution: Bump the version number in your PR
 
 **Typecheck/Lint errors**: Code quality issues
+
 - Solution: Fix the errors shown in the workflow logs
 
 ### Auto-tag Not Created
 
 **Check the auto-tag workflow**: Look at Actions → "Auto Tag on Merge"
+
 - May indicate version wasn't bumped in the merged PR
 
 ### Build Failures
 
 **Platform-specific issues**: Check the build logs for each OS
+
 - Linux: Missing system dependencies
-- Windows: Build environment issues  
+- Windows: Build environment issues
 - macOS: Code signing conflicts
 
 ### Release Promotion Fails
@@ -169,12 +182,14 @@ The `{version}` placeholder is automatically replaced with the actual version.
 ## Manual Operations
 
 ### Create Tag Manually (if needed)
+
 ```bash
 git tag v1.0.2
 git push origin v1.0.2
 ```
 
 ### Local Testing
+
 ```bash
 # Run the same checks as CI
 npm run typecheck
@@ -182,7 +197,7 @@ npm run lint
 
 # Test local builds
 npm run build:win    # Windows
-npm run build:mac    # macOS  
+npm run build:mac    # macOS
 npm run build:linux  # Linux
 ```
 
