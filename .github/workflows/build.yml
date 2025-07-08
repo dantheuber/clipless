@@ -9,12 +9,12 @@ jobs:
   # Validate PRs (typecheck, lint, version bump check)
   validate-pr:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for version checking
+          fetch-depth: 0 # Fetch all history for version checking
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -36,7 +36,7 @@ jobs:
           # Get current version from package.json
           CURRENT_VERSION=$(node -p "require('./package.json').version")
           echo "Current version in package.json: $CURRENT_VERSION"
-          
+
           # Check if tag already exists
           if git tag -l | grep -q "^v$CURRENT_VERSION$"; then
             echo "❌ Error: Tag v$CURRENT_VERSION already exists!"

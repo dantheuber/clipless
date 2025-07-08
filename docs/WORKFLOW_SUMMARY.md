@@ -30,18 +30,18 @@
 ✅ **Multi-platform builds** (Windows, macOS, Linux)  
 ✅ **Draft releases** for safe promotion  
 ✅ **Manual release control** with custom notes  
-✅ **Version collision prevention**  
+✅ **Version collision prevention**
 
 ## What Changed from Previous Setup
 
 ❌ **Removed**: Manual release scripts  
 ❌ **Removed**: Manual tag creation  
-❌ **Removed**: Building on every push  
+❌ **Removed**: Building on every push
 
 ✅ **Added**: PR validation workflow  
 ✅ **Added**: Automatic tag creation  
 ✅ **Added**: Draft release system  
 ✅ **Added**: Manual release promotion  
-✅ **Added**: Version bump validation  
+✅ **Added**: Version bump validation
 
 This ensures better code quality, safer releases, and more professional deployment process.

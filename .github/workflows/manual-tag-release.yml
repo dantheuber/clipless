@@ -44,14 +44,14 @@ jobs:
         uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          
+
           # Always create release for tags, but as draft
           release: true
-          
+
           build_script_name: build
           max_attempts: 3
         env:
           # Skip macOS code signing and notarization for now
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          CSC_LINK: ""
-          CSC_KEY_PASSWORD: ""
+          CSC_LINK: ''
+          CSC_KEY_PASSWORD: ''

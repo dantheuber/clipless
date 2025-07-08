@@ -563,7 +563,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
           // Generate URLs for each combination of values
           if (tokenReplacements.every((tr) => tr.values.length > 0)) {
             // Special case: if the tool URL is just a token that captures a URL, use it directly
-            if (tokenReplacements.length === 1 && tokenReplacements[0].isUrl && tool.url === tokenReplacements[0].token) {
+            if (
+              tokenReplacements.length === 1 &&
+              tokenReplacements[0].isUrl &&
+              tool.url === tokenReplacements[0].token
+            ) {
               tokenReplacements[0].values.forEach((url) => urlsToOpen.add(url));
             } else {
               // Get all combinations of values

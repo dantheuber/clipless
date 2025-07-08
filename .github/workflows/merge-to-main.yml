@@ -12,12 +12,12 @@ jobs:
     outputs:
       tag-created: ${{ steps.tag-check.outputs.tag-created }}
       tag-name: ${{ steps.tag-check.outputs.tag-name }}
-    
+
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history
+          fetch-depth: 0 # Fetch all history
 
       - name: Get version and create tag
         id: tag-check
@@ -25,10 +25,10 @@ jobs:
           # Get current version from package.json
           VERSION=$(node -p "require('./package.json').version")
           TAG_NAME="v$VERSION"
-          
+
           echo "Package.json version: $VERSION"
           echo "Tag to create: $TAG_NAME"
-          
+
           # Check if tag already exists
           if git tag -l | grep -q "^$TAG_NAME$"; then
             echo "❌ Tag $TAG_NAME already exists. Skipping tag creation."
@@ -37,15 +37,15 @@ jobs:
             echo "tag-name=" >> $GITHUB_OUTPUT
             exit 0
           fi
-          
+
           # Create and push tag
           echo "✅ Creating new tag: $TAG_NAME"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
+
           git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
           git push origin "$TAG_NAME"
-          
+
           echo "🚀 Tag $TAG_NAME created and pushed!"
           echo "tag-created=true" >> $GITHUB_OUTPUT
           echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
@@ -88,14 +88,14 @@ jobs:
         uses: samuelmeuli/action-electron-builder@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          
+
           # Always create release for tags, but as draft
           release: true
-          
+
           build_script_name: build
           max_attempts: 3
         env:
           # Skip macOS code signing and notarization for now
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          CSC_LINK: ""
-          CSC_KEY_PASSWORD: ""
+          CSC_LINK: ''
+          CSC_KEY_PASSWORD: ''
