@@ -1,131 +1,189 @@
-# GitHub Actions Setup for Clipless
+# CI/CD Workflow for Clipless
 
-This document explains how to use the GitHub Actions workflow for building and releasing Clipless across multiple platforms.
+This document explains the automated CI/CD workflow for building and releasing Clipless across multiple platforms.
 
 ## Overview
 
-The GitHub Actions workflow (`/.github/workflows/build.yml`) automatically:
+The CI/CD workflow consists of three main components:
 
-- **Builds** your Electron app on every push to main/master branches
-- **Tests** builds on pull requests
-- **Releases** your app when you push a version tag (e.g., `v1.0.1`)
+1. **PR Validation** - Automated checks on pull requests
+2. **Auto-tagging** - Automatic tag creation when PRs are merged
+3. **Release Promotion** - Manual promotion of draft releases to published releases
 
-## Supported Platforms
+## Workflow Components
 
-The workflow builds for all major platforms:
+### 1. PR Validation (`build.yml`)
 
-- **Windows**: Creates `.exe` installer (NSIS)
-- **macOS**: Creates `.dmg` file (currently unsigned - see code signing section below)
-- **Linux**: Creates AppImage, Snap, and Debian packages
+**Triggers**: On every pull request to `main`/`master`
 
-## How to Release
+**Actions**:
+- ✅ Typechecking (`npm run typecheck`)
+- ✅ Linting (`npm run lint`)  
+- ✅ Version bump validation (ensures version in `package.json` doesn't already exist as a tag)
 
-To create a new release:
+**Requirements**: Developers must update the version in `package.json` as part of their PR.
 
-1. **Update version** in `package.json`:
+### 2. Auto-tagging (`auto-tag.yml`)
+
+**Triggers**: When PRs are merged to `main`/`master`
+
+**Actions**:
+- Reads version from `package.json`
+- Creates a git tag (e.g., `v1.0.1`)
+- Pushes the tag to trigger the build workflow
+
+### 3. Build & Draft Release (`build.yml`)
+
+**Triggers**: When a version tag is pushed (e.g., `v1.0.1`)
+
+**Actions**:
+- Builds for Windows, macOS, and Linux
+- Creates a **draft release** with all platform binaries
+- Uploads artifacts to the draft release
+
+### 4. Release Promotion (`promote-release.yml`)
+
+**Triggers**: Manual workflow dispatch
+
+**Actions**:
+- Promotes a draft release to published
+- Allows editing release notes
+- Option to mark as pre-release
+
+## Developer Workflow
+
+### Making Changes with Version Bump
+
+1. **Create feature branch**:
+   ```bash
+   git checkout -b feature/my-feature
+   ```
+
+2. **Make your changes** and update version in `package.json`:
    ```json
    {
-     "version": "1.0.1"
+     "version": "1.0.2"  // Bump from 1.0.1
    }
    ```
 
-2. **Commit your changes**:
-   ```bash
-   git add .
-   git commit -m "Release v1.0.1"
-   ```
+3. **Create pull request**:
+   - PR validation will run automatically
+   - Ensures version 1.0.2 doesn't already exist as a tag
+   - Runs typecheck and linting
 
-3. **Create and push a tag**:
-   ```bash
-   git tag v1.0.1
-   git push origin main --tags
-   ```
+4. **Merge PR**:
+   - Auto-tagging workflow creates `v1.0.2` tag
+   - Build workflow automatically creates draft release
 
-4. **GitHub Actions will automatically**:
-   - Build for all platforms
-   - Create a GitHub release draft
-   - Upload all platform binaries as release assets
+5. **Promote release** (when ready):
+   - Go to Actions → "Promote Release"
+   - Enter tag `v1.0.2`
+   - Edit release notes
+   - Run workflow to publish
 
-## Configuration Files
+## Release Management
 
-- **`/.github/workflows/build.yml`**: GitHub Actions workflow
-- **`/electron-builder.yml`**: Electron Builder configuration
-- **`/package.json`**: Contains repository URL and release script
+### Promoting a Draft Release
 
-## Code Signing (macOS)
+1. **Navigate to Actions** in your GitHub repository
+2. **Select "Promote Release"** workflow  
+3. **Click "Run workflow"** and provide:
+   - **Tag**: `v1.0.2` (the version to promote)
+   - **Release Notes**: Markdown-formatted notes
+   - **Pre-release**: Check if this is a beta/alpha release
 
-Currently, macOS builds are **unsigned** because code signing requires:
+4. **Run the workflow** to publish the release
 
-- Apple Developer Account ($99/year)
-- Code signing certificate
-- App-specific password for notarization
+### Release Notes Template
 
-### To enable macOS code signing later:
+The workflow includes a default template:
 
-1. **Get Apple Developer certificates** and export as `.p12` file
-2. **Add GitHub Secrets**:
-   - `MAC_CERTS`: Base64-encoded certificate file
-   - `MAC_CERTS_PASSWORD`: Certificate password
-   - `API_KEY_ID`: App Store Connect API key ID
-   - `API_KEY_ISSUER_ID`: App Store Connect issuer ID
-   - `API_KEY`: App Store Connect API key content
+```markdown
+## What's New
 
-3. **Update workflow** to include code signing steps
+- Feature updates and improvements  
+- Bug fixes
 
-4. **Update electron-builder.yml**:
-   ```yaml
-   mac:
-     # Remove this line: identity: null
-     notarize: true
-   ```
+## Download
 
-## Windows Code Signing
+Choose the appropriate download for your operating system:
+- **Windows**: `clipless-{version}-setup.exe`
+- **macOS**: `clipless-{version}.dmg`
+- **Linux**: `clipless-{version}.AppImage` or install via Snap Store
+```
 
-Windows code signing is also optional but recommended for distribution. Similar to macOS, you would need:
+The `{version}` placeholder is automatically replaced with the actual version.
 
-- Code signing certificate
-- GitHub secrets: `WINDOWS_CERTS` and `WINDOWS_CERTS_PASSWORD`
+## Platform Support
+
+### ✅ **Supported Platforms**:
+
+- **Windows**: `.exe` installer (NSIS format)
+- **Linux**: AppImage, Snap package, and Debian package  
+- **macOS**: `.dmg` file (currently unsigned)
+
+### 🔐 **Code Signing Status**:
+
+- **Windows**: ❌ Unsigned (builds work fine)
+- **macOS**: ❌ Unsigned (builds work but show security warnings)  
+- **Linux**: ✅ No signing required
+
+## Version Management
+
+### Version Naming Convention
+- Use semantic versioning: `MAJOR.MINOR.PATCH`
+- Examples: `1.0.0`, `1.2.5`, `2.0.0`
+
+### When to Bump Versions
+- **Patch** (1.0.0 → 1.0.1): Bug fixes, small improvements
+- **Minor** (1.0.0 → 1.1.0): New features, backwards compatible
+- **Major** (1.0.0 → 2.0.0): Breaking changes
 
 ## Troubleshooting
 
+### PR Validation Fails
+
+**"Tag already exists"**: The version in `package.json` is already released
+- Solution: Bump the version number in your PR
+
+**Typecheck/Lint errors**: Code quality issues
+- Solution: Fix the errors shown in the workflow logs
+
+### Auto-tag Not Created
+
+**Check the auto-tag workflow**: Look at Actions → "Auto Tag on Merge"
+- May indicate version wasn't bumped in the merged PR
+
 ### Build Failures
 
-- Check the Actions tab in your GitHub repository
-- Common issues:
-  - Node version compatibility
-  - Missing dependencies
-  - Platform-specific build requirements
+**Platform-specific issues**: Check the build logs for each OS
+- Linux: Missing system dependencies
+- Windows: Build environment issues  
+- macOS: Code signing conflicts
 
-### Release Not Created
+### Release Promotion Fails
 
-Make sure:
-- Tag follows format `v*.*.*` (e.g., `v1.0.0`)
-- Repository has necessary permissions
-- `GITHUB_TOKEN` has write access (should be automatic)
+**Tag doesn't exist**: Verify the tag was created by the auto-tag workflow
+**Release not found**: Ensure the build workflow completed and created a draft
 
-## Manual Build
+## Manual Operations
 
-To test builds locally:
-
+### Create Tag Manually (if needed)
 ```bash
-# Build for current platform
-npm run build
+git tag v1.0.2
+git push origin v1.0.2
+```
 
-# Build for specific platforms
+### Local Testing
+```bash
+# Run the same checks as CI
+npm run typecheck
+npm run lint
+
+# Test local builds
 npm run build:win    # Windows
 npm run build:mac    # macOS  
 npm run build:linux  # Linux
-
-# Release (with publishing)
-npm run release
 ```
 
-## Environment Variables
-
-The workflow sets these environment variables:
-
-- `CSC_IDENTITY_AUTO_DISCOVERY=false`: Disables automatic code signing discovery
-- `CSC_LINK=""`: Empty certificate link
-- `CSC_KEY_PASSWORD=""`: Empty certificate password
-
-These prevent build failures when code signing certificates are not available.
+This workflow ensures code quality, automates repetitive tasks, and provides controlled release management while maintaining flexibility for manual oversight.

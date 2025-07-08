@@ -1,19 +1,57 @@
-name: Build/release
+# This workflow handles PR validation and building releases from tags
+name: CI/CD
 
 on:
-  push:
-    branches:
-      - main
-      - master
-    tags:
-      - 'v*'
   pull_request:
-    branches:
-      - main
-      - master
+    branches: [main, master]
+  push:
+    tags: ['v*']
 
 jobs:
-  release:
+  # Job 1: Validate PRs (typecheck, lint, version bump check)
+  validate-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for version checking
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Check version bump
+        run: |
+          # Get current version from package.json
+          CURRENT_VERSION=$(node -p "require('./package.json').version")
+          echo "Current version in package.json: $CURRENT_VERSION"
+          
+          # Check if tag already exists
+          if git tag -l | grep -q "^v$CURRENT_VERSION$"; then
+            echo "❌ Error: Tag v$CURRENT_VERSION already exists!"
+            echo "Please bump the version in package.json before merging."
+            exit 1
+          else
+            echo "✅ Version v$CURRENT_VERSION is new and valid."
+          fi
+
+  # Job 2: Build and create draft release when tag is pushed
+  build-and-release:
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -49,21 +87,15 @@ jobs:
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
         with:
-          # GitHub token, automatically provided to the action
           github_token: ${{ secrets.GITHUB_TOKEN }}
-
-          # If the commit is tagged with a version (e.g. "v1.0.0"),
-          # release the app after building
-          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
-
-          # Build script name (default: build)
-          build_script_name: build
           
-          # Maximum attempts for build
+          # Always create release for tags, but as draft
+          release: true
+          
+          build_script_name: build
           max_attempts: 3
         env:
           # Skip macOS code signing and notarization for now
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          # Disable macOS Gatekeeper checks during build
           CSC_LINK: ""
           CSC_KEY_PASSWORD: ""
