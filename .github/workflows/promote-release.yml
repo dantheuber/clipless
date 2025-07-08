@@ -90,9 +90,9 @@ jobs:
           
           # Prepare release notes
           RELEASE_NOTES="${{ github.event.inputs.release_notes }}"
-          # Replace {version} placeholder with actual version
+          # Replace {version} placeholder with actual version using sed
           VERSION="${TAG#v}"  # Remove 'v' prefix
-          RELEASE_NOTES="${RELEASE_NOTES//\{version\}/$VERSION}"
+          RELEASE_NOTES=$(echo "$RELEASE_NOTES" | sed "s/{version}/$VERSION/g")
           
           # Update and publish the release
           curl -X PATCH \
