@@ -61,7 +61,7 @@ const DEFAULT_DATA: AppData = {
   templates: [],
   searchTerms: [],
   quickTools: [],
-  version: '1.0.0',
+  version: __APP_VERSION__,
 };
 
 class SecureStorage {

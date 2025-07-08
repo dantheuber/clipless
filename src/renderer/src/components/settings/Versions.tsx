@@ -3,7 +3,7 @@ import { useTheme } from '../../providers/theme';
 import styles from './Versions.module.css';
 
 function Versions(): React.JSX.Element {
-  const appVersion = '1.0.0';
+  const appVersion = __APP_VERSION__;
   const { isLight } = useTheme();
 
   return (
