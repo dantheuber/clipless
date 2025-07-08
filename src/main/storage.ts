@@ -85,24 +85,33 @@ class SecureStorage {
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
+    // Start with default data immediately for fast startup
+    this.data = { ...DEFAULT_DATA };
+    this.isInitialized = true;
+
+    // Load actual data in the background
+    this.loadDataInBackground();
+  }
+
+  /**
+   * Load data in the background without blocking initialization
+   */
+  private async loadDataInBackground(): Promise<void> {
     try {
       // Ensure data directory exists
       await fs.mkdir(this.dataPath, { recursive: true });
 
       // Check if safeStorage is available
       if (!safeStorage.isEncryptionAvailable()) {
-        console.warn('Encryption not available, using plain text storage');
-        throw new Error('Encryption not available');
+        console.warn('Encryption not available, keeping default data');
+        return;
       }
 
       // Try to load existing data
       await this.loadData();
-      this.isInitialized = true;
     } catch (error) {
-      console.error('Failed to initialize secure storage:', error);
-      // Fall back to in-memory storage
-      this.data = { ...DEFAULT_DATA };
-      this.isInitialized = true;
+      console.error('Failed to load data in background:', error);
+      // Keep using default data
     }
   }
 
