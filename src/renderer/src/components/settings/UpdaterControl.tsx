@@ -25,12 +25,13 @@ function UpdaterControl(): React.JSX.Element {
     } catch (error) {
       console.error('Update check failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const normalizedErrorMessage = errorMessage.toLowerCase();
       
-      if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+      if (normalizedErrorMessage.includes('network') || normalizedErrorMessage.includes('fetch')) {
         setUpdateStatus('Error: Unable to connect to update server');
-      } else if (errorMessage.includes('timeout')) {
+      } else if (normalizedErrorMessage.includes('timeout')) {
         setUpdateStatus('Error: Update check timed out');
-      } else if (errorMessage.includes('GitHub')) {
+      } else if (normalizedErrorMessage.includes('github')) {
         setUpdateStatus('Error: GitHub API unavailable');
       } else {
         setUpdateStatus(`Error: ${errorMessage}`);
