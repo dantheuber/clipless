@@ -14,7 +14,7 @@ The CI/CD workflow consists of three main components:
 
 ### 1. PR Validation (`build.yml`)
 
-**Triggers**: On every pull request to `main`/`master`
+**Triggers**: On every pull request to `main`
 
 **Actions**:
 - ✅ Typechecking (`npm run typecheck`)
@@ -25,7 +25,7 @@ The CI/CD workflow consists of three main components:
 
 ### 2. Auto-tagging (`auto-tag.yml`)
 
-**Triggers**: When PRs are merged to `main`/`master`
+**Triggers**: When PRs are merged to `main`
 
 **Actions**:
 - Reads version from `package.json`
