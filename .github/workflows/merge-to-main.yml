@@ -1,0 +1,103 @@
+# This workflow handles auto-tagging and building releases when code is merged to main
+name: Merge to Main
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # Job 1: Create tag from package.json version
+  auto-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag-created: ${{ steps.tag-check.outputs.tag-created }}
+      tag-name: ${{ steps.tag-check.outputs.tag-name }}
+    
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history
+
+      - name: Get version and create tag
+        id: tag-check
+        run: |
+          # Get current version from package.json
+          VERSION=$(node -p "require('./package.json').version")
+          TAG_NAME="v$VERSION"
+          
+          echo "Package.json version: $VERSION"
+          echo "Tag to create: $TAG_NAME"
+          
+          # Check if tag already exists
+          if git tag -l | grep -q "^$TAG_NAME$"; then
+            echo "❌ Tag $TAG_NAME already exists. Skipping tag creation."
+            echo "This might happen if the version wasn't bumped in the merged PR."
+            echo "tag-created=false" >> $GITHUB_OUTPUT
+            echo "tag-name=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Create and push tag
+          echo "✅ Creating new tag: $TAG_NAME"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git tag -a "$TAG_NAME" -m "Release $TAG_NAME"
+          git push origin "$TAG_NAME"
+          
+          echo "🚀 Tag $TAG_NAME created and pushed!"
+          echo "tag-created=true" >> $GITHUB_OUTPUT
+          echo "tag-name=$TAG_NAME" >> $GITHUB_OUTPUT
+
+  # Job 2: Build and create draft release (only if tag was created)
+  build-and-release:
+    needs: auto-tag
+    if: needs.auto-tag.outputs.tag-created == 'true'
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            platform: linux
+          - os: windows-latest
+            platform: windows
+          - os: macos-latest
+            platform: mac
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Linux specific setup for AppImage and snap
+      - name: Install Linux dependencies
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 libasound2
+
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          
+          # Always create release for tags, but as draft
+          release: true
+          
+          build_script_name: build
+          max_attempts: 3
+        env:
+          # Skip macOS code signing and notarization for now
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          CSC_LINK: ""
+          CSC_KEY_PASSWORD: ""
