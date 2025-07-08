@@ -94,18 +94,28 @@ jobs:
           VERSION="${TAG#v}"  # Remove 'v' prefix
           RELEASE_NOTES=$(echo "$RELEASE_NOTES" | sed "s/{version}/$VERSION/g")
           
+          # Create JSON payload using jq to properly escape everything
+          JSON_PAYLOAD=$(jq -n \
+            --arg tag_name "$TAG" \
+            --arg name "Clipless $VERSION" \
+            --arg body "$RELEASE_NOTES" \
+            --argjson draft false \
+            --argjson prerelease "$PRERELEASE" \
+            '{
+              tag_name: $tag_name,
+              name: $name,
+              body: $body,
+              draft: $draft,
+              prerelease: $prerelease
+            }')
+          
           # Update and publish the release
           curl -X PATCH \
             -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
+            -H "Content-Type: application/json" \
             "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID" \
-            -d "{
-              \"tag_name\": \"$TAG\",
-              \"name\": \"Clipless $VERSION\",
-              \"body\": $(echo "$RELEASE_NOTES" | jq -R -s .),
-              \"draft\": false,
-              \"prerelease\": $PRERELEASE
-            }"
+            -d "$JSON_PAYLOAD"
           
           echo "🎉 Release $TAG has been published!"
           echo "📦 Release URL: https://github.com/${{ github.repository }}/releases/tag/$TAG"
