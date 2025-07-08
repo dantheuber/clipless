@@ -311,25 +311,25 @@ async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<U
         // Listen for update events
         const onUpdateAvailable = (info: UpdateCheckResult) => {
           clearTimeout(timeoutId);
-          autoUpdater.removeAllListeners('update-available');
-          autoUpdater.removeAllListeners('update-not-available');
-          autoUpdater.removeAllListeners('error');
+          autoUpdater.off('update-available', onUpdateAvailable);
+          autoUpdater.off('update-not-available', onUpdateNotAvailable);
+          autoUpdater.off('error', onError);
           resolve(info);
         };
         
         const onUpdateNotAvailable = (_info: any) => {
           clearTimeout(timeoutId);
-          autoUpdater.removeAllListeners('update-available');
-          autoUpdater.removeAllListeners('update-not-available');
-          autoUpdater.removeAllListeners('error');
+          autoUpdater.off('update-available', onUpdateAvailable);
+          autoUpdater.off('update-not-available', onUpdateNotAvailable);
+          autoUpdater.off('error', onError);
           resolve(null); // No updates available
         };
         
         const onError = (error: any) => {
           clearTimeout(timeoutId);
-          autoUpdater.removeAllListeners('update-available');
-          autoUpdater.removeAllListeners('update-not-available');
-          autoUpdater.removeAllListeners('error');
+          autoUpdater.off('update-available', onUpdateAvailable);
+          autoUpdater.off('update-not-available', onUpdateNotAvailable);
+          autoUpdater.off('error', onError);
           reject(error);
         };
         
