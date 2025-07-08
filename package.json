@@ -5,6 +5,10 @@
   "main": "./out/main/index.js",
   "author": "Daniel Essig",
   "homepage": "https://clipless.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dantheuber/clipless.git"
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",
@@ -18,7 +22,9 @@
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
-    "build:linux": "electron-vite build && electron-builder --linux"
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "release": "electron-builder",
+    "release:version": "node -e \"const fs=require('fs');const pkg=require('./package.json');const version=process.argv[1];if(!version||!/^\\d+\\.\\d+\\.\\d+$/.test(version)){console.error('Usage: npm run release:version <version>');process.exit(1);}pkg.version=version;fs.writeFileSync('./package.json',JSON.stringify(pkg,null,2));\""
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
