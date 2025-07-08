@@ -58,6 +58,34 @@ A powerful and intelligent clipboard manager built with Electron, React, and Typ
 - Lock clips to prevent automatic removal
 - Export/import functionality for backup
 
+## ⚠️ Installation Security Notice
+
+When installing Clipless from the releases page, your operating system may display security warnings about the application being from an "unidentified developer" or "untrusted source." This is normal and occurs because the application is not currently signed with a commercial code signing certificate.
+
+### Why This Happens
+
+- **Windows**: You may see "Windows protected your PC" or SmartScreen warnings
+- **macOS**: You may see "cannot be opened because it is from an unidentified developer"
+- **Linux**: Some distributions may flag the AppImage as untrusted
+
+### This is Safe to Override
+
+- The application is built from open source code available in this repository
+- You can verify the build integrity by checking the source code
+- No malicious code is present - this is purely a certificate signing issue
+
+### How to Install Despite Warnings
+
+- **Windows**: Click "More info" → "Run anyway" or temporarily disable SmartScreen
+- **macOS**: Right-click the app → "Open" → "Open" in the dialog, or use `sudo spctl --master-disable` to allow unsigned apps temporarily
+- **Linux**: Make the AppImage executable and run it, or adjust your security settings if needed
+
+### Future Plans
+
+If Clipless gains sufficient community support and adoption, I will consider investing in a commercial code signing certificate to eliminate these warnings. Code signing certificates cost several hundred dollars annually, so this decision depends on the project's growth and user base.
+
+For now, please know that the security warnings are purely administrative and the application itself is safe to use.
+
 ## 🚀 How to Use
 
 ### Basic Usage
