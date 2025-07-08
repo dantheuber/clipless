@@ -291,25 +291,18 @@ async function createWindow(): Promise<void> {
   applyWindowSettings(mainWindow);
 }
 
-// Define the type for update check results
-type UpdateCheckResult = {
-  version: string;
-  releaseNotes?: string;
-  releaseDate?: Date;
-};
-
 // Helper function to check for updates with timeout and retry
-async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<UpdateCheckResult | null> {
+async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<any> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       // Create a promise that resolves with auto-updater events
-      const updateCheckPromise = new Promise<UpdateCheckResult | null>((resolve, reject) => {
+      const updateCheckPromise = new Promise<any>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           reject(new Error('Update check timeout'));
         }, timeout);
         
         // Listen for update events
-        const onUpdateAvailable = (info: UpdateCheckResult) => {
+        const onUpdateAvailable = (info: any) => {
           clearTimeout(timeoutId);
           autoUpdater.off('update-available', onUpdateAvailable);
           autoUpdater.off('update-not-available', onUpdateNotAvailable);
@@ -356,6 +349,7 @@ async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<U
       await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
+  return null; // Fallback return
 }
 
 // Configure auto-updater
