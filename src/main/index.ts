@@ -45,6 +45,11 @@ async function saveWindowBounds(): Promise<void> {
 async function applyWindowSettings(window: BrowserWindow): Promise<void> {
   try {
     const settings = await storage.getSettings();
+    console.log('Applying window settings:', { 
+      alwaysOnTop: settings.alwaysOnTop,
+      transparencyEnabled: settings.transparencyEnabled,
+      windowTransparency: settings.windowTransparency 
+    });
 
     // Apply transparency
     if (
@@ -61,8 +66,10 @@ async function applyWindowSettings(window: BrowserWindow): Promise<void> {
 
     // Apply always on top
     if (settings.alwaysOnTop) {
+      console.log('Setting window always on top');
       window.setAlwaysOnTop(true);
     } else {
+      console.log('Removing window always on top');
       window.setAlwaysOnTop(false);
     }
   } catch (error) {
@@ -364,6 +371,14 @@ app.whenReady().then(async () => {
       }
     })
   ]);
+
+  // Set up callback to re-apply window settings after background storage loading completes
+  storage.setOnBackgroundLoadComplete(() => {
+    if (mainWindow) {
+      console.log('Background storage loading complete, re-applying window settings');
+      applyWindowSettings(mainWindow);
+    }
+  });
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

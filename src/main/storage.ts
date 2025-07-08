@@ -68,8 +68,10 @@ class SecureStorage {
   private dataPath: string;
   private encryptedDataPath: string;
   private isInitialized = false;
+  private isBackgroundLoadComplete = false;
   private data: AppData = DEFAULT_DATA;
   private savePromise: Promise<void> | null = null;
+  private onBackgroundLoadComplete?: () => void;
 
   constructor() {
     // Store data in the user data directory
@@ -104,14 +106,22 @@ class SecureStorage {
       // Check if safeStorage is available
       if (!safeStorage.isEncryptionAvailable()) {
         console.warn('Encryption not available, keeping default data');
+        this.isBackgroundLoadComplete = true;
+        this.onBackgroundLoadComplete?.();
         return;
       }
 
       // Try to load existing data
       await this.loadData();
+      
+      // Mark background loading as complete and notify
+      this.isBackgroundLoadComplete = true;
+      this.onBackgroundLoadComplete?.();
     } catch (error) {
       console.error('Failed to load data in background:', error);
       // Keep using default data
+      this.isBackgroundLoadComplete = true;
+      this.onBackgroundLoadComplete?.();
     }
   }
 
@@ -353,6 +363,18 @@ class SecureStorage {
     };
 
     await this.saveData();
+  }
+
+  /**
+   * Set callback to be called when background loading completes
+   */
+  setOnBackgroundLoadComplete(callback: () => void): void {
+    this.onBackgroundLoadComplete = callback;
+    
+    // If background loading is already complete, call the callback immediately
+    if (this.isBackgroundLoadComplete) {
+      callback();
+    }
   }
 
   /**
