@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: clipless
+appId: com.clipless.app
+productName: Clipless
 directories:
   buildResources: build
   output: dist
@@ -22,15 +22,38 @@ nsis:
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
 mac:
-  entitlementsInherit: build/entitlements.mac.plist
   icon: build/icon.icns
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
   extendInfo:
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-  notarize: false
-  # Skip code signing for now - can be enabled later with proper certificates
+    NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    NSHumanReadableCopyright: Copyright © 2025 Daniel Essig
+  # Skip code signing and entitlements for unsigned builds
   identity: null
+  entitlements: null
+  entitlementsInherit: null
+  gatekeeperAssess: false
+  notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
+  title: ${productName} ${version}
+  icon: build/icon.icns
+  background: null
+  window:
+    width: 540
+    height: 380
+  contents:
+    - x: 130
+      y: 220
+      type: file
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
 linux:
   target:
     - AppImage
