@@ -42,18 +42,22 @@ dmg:
   artifactName: ${name}-${version}.${ext}
   title: ${productName} ${version}
   icon: build/icon.icns
-  background: null
+  iconSize: 80
   window:
     width: 540
     height: 380
+    x: 400
+    y: 100
   contents:
     - x: 130
       y: 220
       type: file
+      name: ${productName}.app
     - x: 410
       y: 220
       type: link
       path: /Applications
+  format: UDZO
 linux:
   target:
     - AppImage
