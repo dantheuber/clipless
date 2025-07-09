@@ -113,7 +113,7 @@ class SecureStorage {
 
       // Try to load existing data
       await this.loadData();
-      
+
       // Mark background loading as complete and notify
       this.isBackgroundLoadComplete = true;
       this.onBackgroundLoadComplete?.();
@@ -370,7 +370,7 @@ class SecureStorage {
    */
   setOnBackgroundLoadComplete(callback: () => void): void {
     this.onBackgroundLoadComplete = callback;
-    
+
     // If background loading is already complete, call the callback immediately
     if (this.isBackgroundLoadComplete) {
       callback();

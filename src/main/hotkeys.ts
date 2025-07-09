@@ -34,7 +34,7 @@ class HotkeyManager {
 
       const settings = await storage.getSettings();
       console.log('Hotkey Manager: Loaded settings:', JSON.stringify(settings.hotkeys, null, 2));
-      
+
       if (!settings.hotkeys?.enabled) {
         console.log('Hotkey Manager: Hotkeys are disabled in settings');
         return;
@@ -45,7 +45,9 @@ class HotkeyManager {
 
       // Register focus window hotkey
       if (hotkeys.focusWindow.enabled) {
-        console.log(`Hotkey Manager: Attempting to register focus window hotkey: ${hotkeys.focusWindow.key}`);
+        console.log(
+          `Hotkey Manager: Attempting to register focus window hotkey: ${hotkeys.focusWindow.key}`
+        );
         this.registerHotkey(hotkeys.focusWindow.key, () => {
           this.focusWindow();
         });
@@ -64,7 +66,9 @@ class HotkeyManager {
 
       for (const { config, index } of quickClipHotkeys) {
         if (config.enabled) {
-          console.log(`Hotkey Manager: Attempting to register quick clip ${index} hotkey: ${config.key}`);
+          console.log(
+            `Hotkey Manager: Attempting to register quick clip ${index} hotkey: ${config.key}`
+          );
           this.registerHotkey(config.key, () => {
             this.copyQuickClip(index);
           });

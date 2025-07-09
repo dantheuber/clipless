@@ -5,26 +5,31 @@
 The application was experiencing intermittent slow startup and unresponsive behavior when accessing the system tray menu or settings window. After analysis, several performance bottlenecks were identified:
 
 ### 1. Auto-updater Network Call on Startup (Primary Issue)
+
 - **Problem**: `autoUpdater.checkForUpdatesAndNotify()` was called immediately during app startup
 - **Impact**: Network calls can cause 5-30 second delays depending on connection speed and server response time
 - **Frequency**: Every startup in production builds
 
 ### 2. Sequential Storage Initialization
+
 - **Problem**: Storage initialization was blocking the UI thread with synchronous file operations
 - **Impact**: Reading/decrypting large clipboard data files could cause delays
 - **Frequency**: Every startup
 
 ### 3. Heavy Component Initialization During Window Creation
+
 - **Problem**: Clipboard monitoring, hotkeys, and IPC handlers were initialized before the window was shown
 - **Impact**: Delayed window appearance and interaction capability
 - **Frequency**: Every startup
 
 ### 4. FontAwesome Library Loading
+
 - **Problem**: 25+ icons were loaded synchronously during renderer initialization
 - **Impact**: Brief UI rendering delay
 - **Frequency**: Every window creation
 
 ### 5. Duplicate IPC Handler Registration (Critical Bug)
+
 - **Problem**: IPC handlers were being registered multiple times causing UnhandledPromiseRejectionWarning
 - **Impact**: Console errors and potential memory leaks
 - **Frequency**: Every window reload/recreation
@@ -32,6 +37,7 @@ The application was experiencing intermittent slow startup and unresponsive beha
 ## Optimizations Implemented
 
 ### 1. Deferred Auto-updater Check
+
 ```typescript
 // OLD: Immediate network call
 autoUpdater.checkForUpdatesAndNotify();
@@ -41,9 +47,11 @@ setTimeout(() => {
   autoUpdater.checkForUpdatesAndNotify();
 }, 10000);
 ```
+
 **Benefit**: Eliminates network-related startup delays
 
 ### 2. Parallel Storage Initialization
+
 ```typescript
 // OLD: Sequential initialization
 await storage.initialize();
@@ -52,14 +60,13 @@ createWindow();
 
 // NEW: Create window first, load data in parallel
 createWindow();
-Promise.all([
-  storage.initialize(),
-  loadWindowBounds()
-]);
+Promise.all([storage.initialize(), loadWindowBounds()]);
 ```
+
 **Benefit**: Window appears immediately while data loads in background
 
 ### 3. Fast Storage Initialization
+
 ```typescript
 // NEW: Return immediately with defaults, load actual data in background
 async initialize(): Promise<void> {
@@ -68,9 +75,11 @@ async initialize(): Promise<void> {
   this.loadDataInBackground(); // Async
 }
 ```
+
 **Benefit**: Storage is immediately available with sensible defaults
 
 ### 4. Deferred Component Initialization
+
 ```typescript
 // OLD: Initialize before window loads
 initializeClipboardMonitoring(mainWindow);
@@ -82,9 +91,11 @@ mainWindow.webContents.once('did-finish-load', async () => {
   await hotkeyManager.initialize();
 });
 ```
+
 **Benefit**: Window becomes interactive faster
 
 ### 5. Fixed Duplicate IPC Handler Registration
+
 ```typescript
 // OLD: No protection against multiple registrations
 export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
@@ -101,9 +112,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   // ... register handlers
   ipcHandlersRegistered = true;
 ```
+
 **Benefit**: Eliminates console errors and prevents memory leaks
 
 ### 6. Asynchronous FontAwesome Loading
+
 ```typescript
 // OLD: Synchronous import
 import './fontawesome';
@@ -111,20 +124,24 @@ import './fontawesome';
 // NEW: Asynchronous import
 import('./fontawesome');
 ```
+
 **Benefit**: UI renders faster, icons load progressively
 
 ## Expected Performance Improvements
 
 ### Startup Time
+
 - **Before**: 3-30 seconds (depending on network and storage)
 - **After**: 1-3 seconds to window appearance, full functionality within 5 seconds
 
 ### Responsiveness
+
 - System tray menu should respond immediately
 - Settings window should open without delay
 - Main window becomes interactive as soon as it appears
 
 ### User Experience
+
 - Window appears much faster
 - Progressive enhancement as features load
 - No more "hanging" or unresponsive periods during startup

@@ -45,10 +45,10 @@ async function saveWindowBounds(): Promise<void> {
 async function applyWindowSettings(window: BrowserWindow): Promise<void> {
   try {
     const settings = await storage.getSettings();
-    console.log('Applying window settings:', { 
+    console.log('Applying window settings:', {
       alwaysOnTop: settings.alwaysOnTop,
       transparencyEnabled: settings.transparencyEnabled,
-      windowTransparency: settings.windowTransparency 
+      windowTransparency: settings.windowTransparency,
     });
 
     // Apply transparency
@@ -358,18 +358,21 @@ app.whenReady().then(async () => {
   // Initialize everything else in parallel to avoid blocking UI
   Promise.all([
     // Initialize secure storage in background
-    storage.initialize().then(() => {
-      console.log('Secure storage initialized successfully');
-    }).catch(error => {
-      console.error('Failed to initialize secure storage:', error);
-    }),
-    
+    storage
+      .initialize()
+      .then(() => {
+        console.log('Secure storage initialized successfully');
+      })
+      .catch((error) => {
+        console.error('Failed to initialize secure storage:', error);
+      }),
+
     // Load window bounds in background
     loadWindowBounds().then(() => {
       if (mainWindow && windowBounds) {
         mainWindow.setBounds(windowBounds);
       }
-    })
+    }),
   ]);
 
   // Set up callback to re-apply window settings after background storage loading completes
