@@ -1,4 +1,4 @@
-import { globalShortcut, BrowserWindow } from 'electron';
+import { globalShortcut, BrowserWindow, clipboard, nativeImage } from 'electron';
 import { storage } from './storage';
 
 class HotkeyManager {
@@ -11,11 +11,17 @@ class HotkeyManager {
   }
 
   async initialize() {
-    if (this.isInitialized) return;
+    console.log('Hotkey Manager: Initialize called');
+    if (this.isInitialized) {
+      console.log('Hotkey Manager: Already initialized, skipping');
+      return;
+    }
 
     try {
+      console.log('Hotkey Manager: Starting initialization...');
       await this.registerHotkeys();
       this.isInitialized = true;
+      console.log('Hotkey Manager: Initialization completed successfully');
     } catch (error) {
       console.error('Failed to initialize hotkey manager:', error);
     }
@@ -27,30 +33,42 @@ class HotkeyManager {
       this.unregisterAllHotkeys();
 
       const settings = await storage.getSettings();
+      console.log('Hotkey Manager: Loaded settings:', JSON.stringify(settings.hotkeys, null, 2));
+
       if (!settings.hotkeys?.enabled) {
+        console.log('Hotkey Manager: Hotkeys are disabled in settings');
         return;
       }
 
       const { hotkeys } = settings;
+      console.log('Hotkey Manager: Registering hotkeys...');
 
       // Register focus window hotkey
       if (hotkeys.focusWindow.enabled) {
+        console.log(
+          `Hotkey Manager: Attempting to register focus window hotkey: ${hotkeys.focusWindow.key}`
+        );
         this.registerHotkey(hotkeys.focusWindow.key, () => {
           this.focusWindow();
         });
       }
 
       // Register quick clip hotkeys
+      // Note: Quick clip hotkeys copy from previous clipboard history (offset by 1)
+      // since the first clip (index 0) is always the current clipboard content
       const quickClipHotkeys = [
-        { config: hotkeys.quickClip1, index: 0 },
-        { config: hotkeys.quickClip2, index: 1 },
-        { config: hotkeys.quickClip3, index: 2 },
-        { config: hotkeys.quickClip4, index: 3 },
-        { config: hotkeys.quickClip5, index: 4 },
+        { config: hotkeys.quickClip1, index: 1 }, // Copy 1st previous clip (position 2)
+        { config: hotkeys.quickClip2, index: 2 }, // Copy 2nd previous clip (position 3)
+        { config: hotkeys.quickClip3, index: 3 }, // Copy 3rd previous clip (position 4)
+        { config: hotkeys.quickClip4, index: 4 }, // Copy 4th previous clip (position 5)
+        { config: hotkeys.quickClip5, index: 5 }, // Copy 5th previous clip (position 6)
       ];
 
       for (const { config, index } of quickClipHotkeys) {
         if (config.enabled) {
+          console.log(
+            `Hotkey Manager: Attempting to register quick clip ${index} hotkey: ${config.key}`
+          );
           this.registerHotkey(config.key, () => {
             this.copyQuickClip(index);
           });
@@ -126,9 +144,12 @@ class HotkeyManager {
         return;
       }
 
-      // Import clipboard at runtime to avoid circular dependencies
-      const { clipboard } = require('electron');
+      // Notify renderer BEFORE copying to clipboard so it can set up duplicate detection
+      if (this.mainWindow && !this.mainWindow.isDestroyed()) {
+        this.mainWindow.webContents.send('hotkey-clip-copied', index);
+      }
 
+      // Copy the clip content with the appropriate format based on its type
       switch (clipToCopy.clip.type) {
         case 'text':
           clipboard.writeText(clipToCopy.clip.content);
@@ -147,33 +168,40 @@ class HotkeyManager {
           }
           break;
         case 'image':
-          // For images, we need to handle them differently
-          // For now, just copy the text representation
-          clipboard.writeText(clipToCopy.clip.content);
+          // For images, convert data URL back to image and copy to clipboard
+          try {
+            const image = nativeImage.createFromDataURL(clipToCopy.clip.content);
+            if (!image.isEmpty()) {
+              clipboard.writeImage(image);
+            } else {
+              // Fallback to copying data URL as text
+              clipboard.writeText(clipToCopy.clip.content);
+            }
+          } catch (error) {
+            console.error('Failed to copy image, falling back to text:', error);
+            clipboard.writeText(clipToCopy.clip.content);
+          }
           break;
         default:
           clipboard.writeText(clipToCopy.clip.content);
       }
 
-      console.log(`Copied clip ${index + 1} to clipboard`);
-
-      // Optional: Show a brief notification or update tray
-      this.showQuickClipNotification(index + 1);
+      console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
     } catch (error) {
       console.error(`Error copying quick clip ${index}:`, error);
     }
   }
 
-  private showQuickClipNotification(clipNumber: number) {
-    // You could show a native notification here if desired
-    // For now, we'll just log it
-    console.log(`Quick clip ${clipNumber} copied to clipboard`);
-  }
-
   async onSettingsChanged() {
-    if (!this.isInitialized) return;
+    console.log('Hotkey Manager: onSettingsChanged called, isInitialized:', this.isInitialized);
+    if (!this.isInitialized) {
+      console.log('Hotkey Manager: Not initialized yet, initializing now...');
+      await this.initialize();
+      return;
+    }
 
     try {
+      console.log('Hotkey Manager: Re-registering hotkeys after settings change...');
       await this.registerHotkeys();
     } catch (error) {
       console.error('Failed to update hotkeys after settings change:', error);

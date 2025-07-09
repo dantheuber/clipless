@@ -27,6 +27,9 @@ const api = {
   onClipboardChanged: (callback: (clipData: any) => void) =>
     electronAPI.ipcRenderer.on('clipboard-changed', (_event, clipData) => callback(clipData)),
   removeClipboardListeners: () => electronAPI.ipcRenderer.removeAllListeners('clipboard-changed'),
+  onHotkeyClipCopied: (callback: (clipIndex: number) => void) =>
+    electronAPI.ipcRenderer.on('hotkey-clip-copied', (_event, clipIndex) => callback(clipIndex)),
+  removeHotkeyListeners: () => electronAPI.ipcRenderer.removeAllListeners('hotkey-clip-copied'),
 
   // Settings APIs
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),

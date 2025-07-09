@@ -61,15 +61,17 @@ const DEFAULT_DATA: AppData = {
   templates: [],
   searchTerms: [],
   quickTools: [],
-  version: '1.0.0',
+  version: __APP_VERSION__,
 };
 
 class SecureStorage {
   private dataPath: string;
   private encryptedDataPath: string;
   private isInitialized = false;
+  private isBackgroundLoadComplete = false;
   private data: AppData = DEFAULT_DATA;
   private savePromise: Promise<void> | null = null;
+  private onBackgroundLoadComplete?: () => void;
 
   constructor() {
     // Store data in the user data directory
@@ -85,24 +87,41 @@ class SecureStorage {
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
 
+    // Start with default data immediately for fast startup
+    this.data = { ...DEFAULT_DATA };
+    this.isInitialized = true;
+
+    // Load actual data in the background
+    this.loadDataInBackground();
+  }
+
+  /**
+   * Load data in the background without blocking initialization
+   */
+  private async loadDataInBackground(): Promise<void> {
     try {
       // Ensure data directory exists
       await fs.mkdir(this.dataPath, { recursive: true });
 
       // Check if safeStorage is available
       if (!safeStorage.isEncryptionAvailable()) {
-        console.warn('Encryption not available, using plain text storage');
-        throw new Error('Encryption not available');
+        console.warn('Encryption not available, keeping default data');
+        this.isBackgroundLoadComplete = true;
+        this.onBackgroundLoadComplete?.();
+        return;
       }
 
       // Try to load existing data
       await this.loadData();
-      this.isInitialized = true;
+
+      // Mark background loading as complete and notify
+      this.isBackgroundLoadComplete = true;
+      this.onBackgroundLoadComplete?.();
     } catch (error) {
-      console.error('Failed to initialize secure storage:', error);
-      // Fall back to in-memory storage
-      this.data = { ...DEFAULT_DATA };
-      this.isInitialized = true;
+      console.error('Failed to load data in background:', error);
+      // Keep using default data
+      this.isBackgroundLoadComplete = true;
+      this.onBackgroundLoadComplete?.();
     }
   }
 
@@ -344,6 +363,18 @@ class SecureStorage {
     };
 
     await this.saveData();
+  }
+
+  /**
+   * Set callback to be called when background loading completes
+   */
+  setOnBackgroundLoadComplete(callback: () => void): void {
+    this.onBackgroundLoadComplete = callback;
+
+    // If background loading is already complete, call the callback immediately
+    if (this.isBackgroundLoadComplete) {
+      callback();
+    }
   }
 
   /**

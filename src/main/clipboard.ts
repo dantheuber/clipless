@@ -6,6 +6,7 @@ import type { ClipItem, PatternMatch } from '../shared/types';
 let lastClipboardContent = '';
 let lastClipboardType = '';
 let clipboardCheckInterval: NodeJS.Timeout | null = null;
+let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
 
 // Helper function to determine the current clipboard type and content
 export const getCurrentClipboardData = (): { type: string; content: string } | null => {
@@ -74,6 +75,12 @@ export const checkClipboard = (mainWindow: BrowserWindow | null) => {
 
 // Setup all clipboard-related IPC handlers
 export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
+  // Prevent multiple registrations of IPC handlers
+  if (ipcHandlersRegistered) {
+    console.log('Clipboard IPC handlers already registered, skipping...');
+    return;
+  }
+
   // Basic clipboard read operations
   ipcMain.handle('get-clipboard-text', () => clipboard.readText());
   ipcMain.handle('get-clipboard-html', () => clipboard.readHTML());
@@ -641,4 +648,8 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       throw error;
     }
   });
+
+  // Mark IPC handlers as registered
+  ipcHandlersRegistered = true;
+  console.log('Clipboard IPC handlers registered successfully');
 }

@@ -45,6 +45,11 @@ async function saveWindowBounds(): Promise<void> {
 async function applyWindowSettings(window: BrowserWindow): Promise<void> {
   try {
     const settings = await storage.getSettings();
+    console.log('Applying window settings:', {
+      alwaysOnTop: settings.alwaysOnTop,
+      transparencyEnabled: settings.transparencyEnabled,
+      windowTransparency: settings.windowTransparency,
+    });
 
     // Apply transparency
     if (
@@ -61,8 +66,10 @@ async function applyWindowSettings(window: BrowserWindow): Promise<void> {
 
     // Apply always on top
     if (settings.alwaysOnTop) {
+      console.log('Setting window always on top');
       window.setAlwaysOnTop(true);
     } else {
+      console.log('Removing window always on top');
       window.setAlwaysOnTop(false);
     }
   } catch (error) {
@@ -223,72 +230,18 @@ async function createWindow(): Promise<void> {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  // Initialize clipboard functionality
-  initializeClipboardMonitoring(mainWindow);
+  // Setup IPC handlers immediately (these should only be registered once)
   setupClipboardIPC(mainWindow);
 
-  // Initialize hotkey manager
-  hotkeyManager.setMainWindow(mainWindow);
-  await hotkeyManager.initialize();
+  // Initialize non-critical components after window loads to improve startup perception
+  mainWindow.webContents.once('did-finish-load', async () => {
+    // Initialize clipboard monitoring (this can be deferred)
+    initializeClipboardMonitoring(mainWindow);
 
-  // Settings window IPC handlers
-  ipcMain.handle('open-settings', (_event, tab?: string) => {
-    createSettingsWindow(tab);
+    // Initialize hotkey manager
+    hotkeyManager.setMainWindow(mainWindow);
+    await hotkeyManager.initialize();
   });
-
-  ipcMain.handle('close-settings', () => {
-    if (settingsWindow) {
-      settingsWindow.close();
-    }
-  });
-
-  // Settings communication between windows
-  ipcMain.handle('settings-changed', async (_event, settings) => {
-    try {
-      // Save settings to storage
-      await storage.saveSettings(settings);
-
-      // Apply window settings immediately
-      if (mainWindow) {
-        await applyWindowSettings(mainWindow);
-      }
-
-      // Update hotkeys if settings changed
-      await hotkeyManager.onSettingsChanged();
-
-      // Relay settings changes to all windows
-      if (mainWindow) {
-        mainWindow.webContents.send('settings-updated', settings);
-      }
-      if (settingsWindow) {
-        settingsWindow.webContents.send('settings-updated', settings);
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      return false;
-    }
-  });
-
-  ipcMain.handle('get-settings', async () => {
-    try {
-      return await storage.getSettings();
-    } catch (error) {
-      console.error('Failed to get settings:', error);
-      return {};
-    }
-  });
-
-  // Apply saved window bounds if available
-  loadWindowBounds().then(() => {
-    if (mainWindow && windowBounds) {
-      mainWindow.setBounds(windowBounds);
-    }
-  });
-
-  // Apply window settings (transparency, always on top)
-  applyWindowSettings(mainWindow);
 }
 
 // Helper function to check for updates with timeout and retry
@@ -358,8 +311,11 @@ if (!is.dev) {
   autoUpdater.autoDownload = false; // Don't auto-download, let user control it
   autoUpdater.autoInstallOnAppQuit = false; // Don't auto-install on quit
 
-  // Only enable auto-updater in production
-  autoUpdater.checkForUpdatesAndNotify();
+  // Delay auto-updater check to not block startup
+  // Check for updates 10 seconds after startup to avoid blocking UI
+  setTimeout(() => {
+    autoUpdater.checkForUpdatesAndNotify();
+  }, 10000);
 }
 
 // Auto-updater events
@@ -396,16 +352,36 @@ app.whenReady().then(async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron');
 
-  // Initialize secure storage
-  try {
-    await storage.initialize();
-    console.log('Secure storage initialized successfully');
-  } catch (error) {
-    console.error('Failed to initialize secure storage:', error);
-  }
+  // Create window first for better perceived performance
+  createWindow();
 
-  // Load window bounds before creating the window
-  await loadWindowBounds();
+  // Initialize everything else in parallel to avoid blocking UI
+  Promise.all([
+    // Initialize secure storage in background
+    storage
+      .initialize()
+      .then(() => {
+        console.log('Secure storage initialized successfully');
+      })
+      .catch((error) => {
+        console.error('Failed to initialize secure storage:', error);
+      }),
+
+    // Load window bounds in background
+    loadWindowBounds().then(() => {
+      if (mainWindow && windowBounds) {
+        mainWindow.setBounds(windowBounds);
+      }
+    }),
+  ]);
+
+  // Set up callback to re-apply window settings after background storage loading completes
+  storage.setOnBackgroundLoadComplete(() => {
+    if (mainWindow) {
+      console.log('Background storage loading complete, re-applying window settings');
+      applyWindowSettings(mainWindow);
+    }
+  });
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -416,6 +392,55 @@ app.whenReady().then(async () => {
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
+
+  // Settings window IPC handlers
+  ipcMain.handle('open-settings', (_event, tab?: string) => {
+    createSettingsWindow(tab);
+  });
+
+  ipcMain.handle('close-settings', () => {
+    if (settingsWindow) {
+      settingsWindow.close();
+    }
+  });
+
+  // Settings communication between windows
+  ipcMain.handle('settings-changed', async (_event, settings) => {
+    try {
+      // Save settings to storage
+      await storage.saveSettings(settings);
+
+      // Apply window settings immediately
+      if (mainWindow) {
+        await applyWindowSettings(mainWindow);
+      }
+
+      // Update hotkeys if settings changed
+      await hotkeyManager.onSettingsChanged();
+
+      // Relay settings changes to all windows
+      if (mainWindow) {
+        mainWindow.webContents.send('settings-updated', settings);
+      }
+      if (settingsWindow) {
+        settingsWindow.webContents.send('settings-updated', settings);
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      return false;
+    }
+  });
+
+  ipcMain.handle('get-settings', async () => {
+    try {
+      return await storage.getSettings();
+    } catch (error) {
+      console.error('Failed to get settings:', error);
+      return {};
+    }
+  });
 
   // Auto-updater IPC handlers
   ipcMain.handle('check-for-updates', async () => {
@@ -459,8 +484,6 @@ app.whenReady().then(async () => {
       }
     }
   });
-
-  createWindow();
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

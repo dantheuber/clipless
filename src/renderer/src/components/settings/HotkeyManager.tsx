@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { useTheme } from '../../providers/theme';
 import type { UserSettings, HotkeySettings } from '../../../../shared/types';
+import { InfoTooltip } from './quickclips/InfoTooltip';
 import styles from './HotkeyManager.module.css';
 
 interface HotkeyManagerProps {
@@ -39,11 +40,11 @@ const defaultHotkeySettings: HotkeySettings = {
 
 const hotkeyDescriptions = {
   focusWindow: 'Show/Focus Clipless Window',
-  quickClip1: 'Copy 1st Recent Clip',
-  quickClip2: 'Copy 2nd Recent Clip',
-  quickClip3: 'Copy 3rd Recent Clip',
-  quickClip4: 'Copy 4th Recent Clip',
-  quickClip5: 'Copy 5th Recent Clip',
+  quickClip1: 'Copy 1st Previous Clip',
+  quickClip2: 'Copy 2nd Previous Clip',
+  quickClip3: 'Copy 3rd Previous Clip',
+  quickClip4: 'Copy 4th Previous Clip',
+  quickClip5: 'Copy 5th Previous Clip',
 };
 
 export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
@@ -91,7 +92,8 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
         hotkeys: newHotkeySettings,
       };
 
-      const success = await window.api.storageSaveSettings(updatedSettings);
+      // Use the settings-changed IPC to properly notify main process
+      const success = await window.api.settingsChanged(updatedSettings);
 
       if (success) {
         setSettings(updatedSettings);
@@ -206,6 +208,27 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
   return (
     <div className={classNames(styles.container, { [styles.light]: isLight })}>
       <div className={styles.header}>
+        <div className={styles.titleRow}>
+          <h2>Global Hotkeys</h2>
+          <InfoTooltip
+            content={
+              <div>
+                <p>
+                  <strong>Important:</strong> The first clip is always your current clipboard
+                  content and cannot be copied via hotkeys.
+                </p>
+                <p>
+                  Quick Clip hotkeys copy from your <strong>previous</strong> clipboard history:
+                </p>
+                <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+                  <li>Quick Clip 1 → Copies the 1st previous clip (position 2)</li>
+                  <li>Quick Clip 2 → Copies the 2nd previous clip (position 3)</li>
+                  <li>And so on...</li>
+                </ul>
+              </div>
+            }
+          />
+        </div>
         <p className={styles.description}>
           Configure global hotkeys for quick access to Clipless features. Hotkeys work even when the
           application is minimized or in the background.
@@ -313,6 +336,11 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
             <li>Press Escape to cancel editing</li>
             <li>Use the toggle switches to enable/disable individual hotkeys</li>
           </ul>
+          <p className={styles.note}>
+            <strong>Quick Clip Behavior:</strong> The first clip position always shows your current
+            clipboard content. Quick Clip hotkeys copy from your <em>previous</em> clipboard
+            history, starting from position 2.
+          </p>
           <p className={styles.note}>
             <strong>Note:</strong> Hotkeys may conflict with other applications. Choose combinations
             that aren't commonly used by your system or other software.
