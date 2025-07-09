@@ -3,7 +3,7 @@ productName: Clipless
 directories:
   buildResources: build
   output: dist
-icon: build/icon.png
+icon: build/icon.icns
 files:
   - '!**/.vscode/*'
   - '!src/*'
@@ -38,6 +38,9 @@ mac:
   entitlementsInherit: null
   gatekeeperAssess: false
   notarize: false
+  # Force icon embedding
+  type: distribution
+  bundleVersion: ${version}
 dmg:
   artifactName: ${name}-${version}.${ext}
   title: ${productName} ${version}
@@ -52,12 +55,12 @@ dmg:
     - x: 130
       y: 220
       type: file
-      name: ${productName}.app
     - x: 410
       y: 220
       type: link
       path: /Applications
   format: UDZO
+  internetEnabled: false
 linux:
   target:
     - AppImage
