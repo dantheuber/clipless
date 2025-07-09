@@ -32,6 +32,8 @@ mac:
   extendInfo:
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     NSHumanReadableCopyright: Copyright © 2025 Daniel Essig
+    CFBundleIconFile: icon.icns
+    CFBundleIconName: icon
   # Skip code signing and entitlements for unsigned builds
   identity: null
   entitlements: null
@@ -59,7 +61,8 @@ dmg:
       y: 220
       type: link
       path: /Applications
-  format: UDZO
+  background: null
+  format: UDRO
   internetEnabled: false
 linux:
   target:
