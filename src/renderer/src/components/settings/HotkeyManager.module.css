@@ -18,6 +18,19 @@
   margin-bottom: 16px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.titleRow h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
 .description {
   margin: 0;
   color: var(--text-secondary);

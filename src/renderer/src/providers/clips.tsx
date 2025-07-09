@@ -1,4 +1,4 @@
-import { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
+import { createContext, useContext, useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { DEFAULT_MAX_CLIPS } from './constants';
 import { detectLanguage, isCode } from '../utils/languageDetection';
 import { useLanguageDetection } from './languageDetection';
@@ -128,6 +128,19 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
   // Track if we're still loading initial data to prevent saves during load
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
+
+  // state to track when hotkey operations are happening
+  const [isHotkeyOperation, setIsHotkeyOperation] = useState<boolean>(false);
+  const [lastCopiedContent, setLastCopiedContent] = useState<{content: string, type: string} | null>(null);
+
+  // Use refs to always have access to the current state in callbacks
+  const clipsRef = useRef(clips);
+  const isHotkeyOperationRef = useRef(isHotkeyOperation);
+  const lastCopiedContentRef = useRef(lastCopiedContent);
+  
+  clipsRef.current = clips;
+  isHotkeyOperationRef.current = isHotkeyOperation;
+  lastCopiedContentRef.current = lastCopiedContent;
 
   // Use language detection settings from the context
   const { isCodeDetectionEnabled } = useLanguageDetection();
@@ -382,24 +395,34 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
   const clipboardUpdated = useCallback(
     (newClip: ClipItem): void => {
-      if (
-        clipCopyIndex !== null &&
-        // If a clip is being copied, check if the new clip is the same as the copied one
-        clips[clipCopyIndex] &&
-        clips[clipCopyIndex].content === newClip.content &&
-        clips[clipCopyIndex].type === newClip.type
-      ) {
-        console.log('Clipboard update matches copied clip, not adding:', newClip);
-        return; // Skip adding if it's the same as the copied clip
-      } else {
-        console.log('New clipboard content detected:', newClip);
-        setClipCopyIndex(null); // Reset copy index since we're adding a new clip
+      const currentLastCopiedContent = lastCopiedContentRef.current;
+      const currentIsHotkeyOperation = isHotkeyOperationRef.current;
+      
+      console.log('clipboardUpdated called with:', newClip.content.substring(0, 50), 'type:', newClip.type);
+      console.log('Current lastCopiedContent:', currentLastCopiedContent);
+      console.log('Current isHotkeyOperation:', currentIsHotkeyOperation);
+      
+      // Enhanced duplicate detection for hotkey operations using lastCopiedContent
+      if (currentLastCopiedContent && 
+          currentLastCopiedContent.content === newClip.content && 
+          currentLastCopiedContent.type === newClip.type) {
+        console.log('❌ Clipboard update matches last copied content, not adding:', newClip.content.substring(0, 50));
+        // Clear the lastCopiedContent after matching to avoid blocking future legitimate clips
+        setLastCopiedContent(null);
+        return; // Skip adding if it's the same as the last copied content
       }
+
       // Check if this clip is a duplicate of the most recent clip
       if (isDuplicateOfMostRecent(newClip)) {
-        console.log('Duplicate clip detected, not adding to array:', newClip);
+        console.log('❌ Duplicate clip detected, not adding to array:', newClip.content.substring(0, 50));
         return; // Skip adding duplicate
       }
+
+      console.log('✅ New clipboard content detected, adding to array:', newClip.content.substring(0, 50));
+      
+      // Only reset copy index when actually adding a new clip (not a hotkey copy)
+      console.log('🔄 Resetting clipCopyIndex due to new clip being added');
+      setClipCopyIndex(null);
 
       // Create new clips array by shifting existing clips down
       const newClips = [...clips];
@@ -426,9 +449,9 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       maxClips,
       lockedClips,
       setClips,
-      clipCopyIndex,
-      setClipCopyIndex,
       isDuplicateOfMostRecent,
+      setLastCopiedContent,
+      setClipCopyIndex,
     ]
   );
 
@@ -494,11 +517,23 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     async (index: number): Promise<void> => {
       if (!window.api) return;
       setClipCopyIndex(index);
+      
+      // Set flag to prevent clipboard monitoring from adding this as a new clip
+      setIsHotkeyOperation(true);
+      
       const clip = getClip(index);
       if (!clip?.content) {
         console.warn('No clip content to copy at index:', index);
+        setIsHotkeyOperation(false);
         return;
       }
+
+      // Store the content that we're about to copy to prevent re-adding it
+      setLastCopiedContent({
+        content: clip.content,
+        type: clip.type
+      });
+      console.log('Set lastCopiedContent for manual copy operation:', clip.content.substring(0, 50));
 
       try {
         // Copy the clip content with the appropriate format based on its type
@@ -541,8 +576,21 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
             await window.api.setClipboardText(clip.content);
             console.log('Copied unknown type as text to clipboard');
         }
+        
+        // Clear the flag after a short delay
+        setTimeout(() => {
+          setIsHotkeyOperation(false);
+        }, 1000);
+        
+        // Clear lastCopiedContent after 3 seconds to avoid blocking future legitimate clips
+        setTimeout(() => {
+          setLastCopiedContent(null);
+          console.log('Cleared lastCopiedContent after timeout (manual copy)');
+        }, 3000);
+        
       } catch (error) {
         console.error('Failed to copy clip to clipboard:', error);
+        setIsHotkeyOperation(false);
 
         // Fallback: try to copy as plain text if the specific format failed
         try {
@@ -553,7 +601,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
         }
       }
     },
-    [getClip, setClipCopyIndex]
+    [getClip, setClipCopyIndex, setLastCopiedContent]
   );
 
   // Start clipboard monitoring when component mounts
@@ -561,6 +609,37 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     const startMonitoring = async () => {
       if (window.api) {
         try {
+          // Set up hotkey clip copied listener - this needs to happen before clipboard monitoring
+          window.api.onHotkeyClipCopied((clipIndex: number) => {
+            console.log('🔥 Hotkey copied clip at index:', clipIndex);
+            console.log('🔥 Setting clipCopyIndex to:', clipIndex);
+            setClipCopyIndex(clipIndex);
+            
+            // Use the ref to get the current clips state
+            const currentClips = clipsRef.current;
+            if (currentClips[clipIndex]) {
+              setLastCopiedContent({
+                content: currentClips[clipIndex].content,
+                type: currentClips[clipIndex].type
+              });
+              console.log('Set lastCopiedContent for hotkey operation:', currentClips[clipIndex].content.substring(0, 50));
+              
+              // Clear lastCopiedContent after 3 seconds to avoid blocking future legitimate clips
+              setTimeout(() => {
+                setLastCopiedContent(null);
+                console.log('Cleared lastCopiedContent after timeout');
+              }, 3000);
+            } else {
+              console.warn('No clip found at index', clipIndex, 'in current clips array');
+            }
+            
+            // Set flag to ignore clipboard changes briefly (backup mechanism)
+            setIsHotkeyOperation(true);
+            setTimeout(() => {
+              setIsHotkeyOperation(false);
+            }, 1000); // Ignore clipboard changes for 1 second after hotkey operation
+          });
+
           // Read current clipboard content first
           await readCurrentClipboard();
 
@@ -569,6 +648,19 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
           // Set up clipboard change listener
           window.api.onClipboardChanged((clipData: { type: string; content: string }) => {
+            const currentIsHotkeyOperation = isHotkeyOperationRef.current;
+            const currentLastCopiedContent = lastCopiedContentRef.current;
+            
+            console.log('📋 Clipboard change detected:', clipData.content.substring(0, 50), 'type:', clipData.type);
+            console.log('📋 Current isHotkeyOperation:', currentIsHotkeyOperation);
+            console.log('📋 Current lastCopiedContent:', currentLastCopiedContent);
+            
+            // Skip processing if this is likely from a hotkey operation
+            if (currentIsHotkeyOperation) {
+              console.log('⏭️ Skipping clipboard change during hotkey operation');
+              return;
+            }
+            
             let newClip: ClipItem;
             console.log('Clipboard change detected:', clipData);
             switch (clipData.type) {
@@ -617,6 +709,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       if (window.api) {
         window.api.stopClipboardMonitoring();
         window.api.removeClipboardListeners();
+        window.api.removeHotkeyListeners();
       }
     };
   }, [clipboardUpdated, readCurrentClipboard, isDuplicateOfMostRecent]); // Include all dependencies

@@ -22,10 +22,12 @@ declare global {
       stopClipboardMonitoring: () => Promise<boolean>;
       onClipboardChanged: (callback: (clipData: { type: string; content: string }) => void) => void;
       removeClipboardListeners: () => void;
+      onHotkeyClipCopied: (callback: (clipIndex: number) => void) => void;
+      removeHotkeyListeners: () => void;
       openSettings: (tab?: string) => Promise<void>;
       closeSettings: () => Promise<void>;
       getSettings: () => Promise<any>;
-      settingsChanged: (settings: any) => Promise<void>;
+      settingsChanged: (settings: any) => Promise<boolean>;
       onSettingsUpdated: (callback: (settings: any) => void) => void;
       removeSettingsListeners: () => void;
       // Storage APIs
