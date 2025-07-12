@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
 import { useTheme } from '../../providers/theme';
 import { useLanguageDetection } from '../../providers/languageDetection';
+import { useClips } from '../../providers/clips';
+import { ConfirmDialog } from '../ConfirmDialog';
 import type { UserSettings as UserSettingsType } from '../../../../shared/types';
 import styles from './StorageSettings.module.css';
 
@@ -13,9 +15,14 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
   const [settings, setSettings] = useState<UserSettingsType | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [pendingMaxClips, setPendingMaxClips] = useState<number | null>(null);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [tempMaxClips, setTempMaxClips] = useState<number | null>(null);
+  const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const { isLight } = useTheme();
   const { updateSettings: updateLanguageSettings } = useLanguageDetection();
+  const { clips } = useClips();
 
   // Load settings on mount
   useEffect(() => {
@@ -25,6 +32,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
       try {
         const loadedSettings = await window.api.storageGetSettings();
         setSettings(loadedSettings);
+        setTempMaxClips(loadedSettings.maxClips); // Initialize temp value
       } catch (error) {
         console.error('Failed to load settings:', error);
       } finally {
@@ -34,6 +42,15 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
 
     loadSettings();
   }, []);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimeout) {
+        clearTimeout(debounceTimeout);
+      }
+    };
+  }, [debounceTimeout]);
 
   const handleSettingChange = async (key: keyof UserSettingsType, value: any) => {
     if (!settings || !window.api) return;
@@ -45,6 +62,11 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
 
       if (success) {
         setSettings(updatedSettings);
+
+        // Update temp value if maxClips was changed
+        if (key === 'maxClips') {
+          setTempMaxClips(value);
+        }
 
         // Update language detection settings if code detection was changed
         if (key === 'codeDetectionEnabled') {
@@ -63,6 +85,72 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleMaxClipsChange = (value: number) => {
+    // Allow any value during typing for better UX
+    // Validation will happen after debounce period
+    setTempMaxClips(value);
+
+    // Clear any existing timeout
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout);
+    }
+
+    // Set a new timeout to process the change after user stops typing
+    const newTimeout = setTimeout(() => {
+      // Validate the final value
+      if (value > 100) {
+        // Reset to current setting if over maximum
+        if (settings) {
+          setTempMaxClips(settings.maxClips);
+        }
+        setDebounceTimeout(null);
+        return;
+      }
+
+      // Auto-correct to minimum if below 15
+      const correctedValue = value < 15 ? 15 : value;
+      
+      // Update temp value to show the correction
+      if (correctedValue !== value) {
+        setTempMaxClips(correctedValue);
+      }
+
+      // Count non-empty clips
+      const nonEmptyClips = clips.filter(clip => clip.content && clip.content.trim() !== '').length;
+      
+      // Check if reducing the limit would cause data loss
+      if (nonEmptyClips > correctedValue) {
+        setPendingMaxClips(correctedValue);
+        setShowConfirmDialog(true);
+      } else {
+        handleSettingChange('maxClips', correctedValue);
+      }
+      setDebounceTimeout(null);
+    }, 3000); // 3 second debounce
+
+    setDebounceTimeout(newTimeout);
+  };
+
+  const confirmMaxClipsChange = async () => {
+    if (pendingMaxClips !== null) {
+      // Save settings change directly - let the clips provider handle the array update
+      await handleSettingChange('maxClips', pendingMaxClips);
+      setTempMaxClips(pendingMaxClips); // Update temp value to match confirmed value
+    }
+
+    setPendingMaxClips(null);
+    setShowConfirmDialog(false);
+  };
+
+  const cancelMaxClipsChange = () => {
+    // Reset temp value to current setting
+    if (settings) {
+      setTempMaxClips(settings.maxClips);
+    }
+    setPendingMaxClips(null);
+    setShowConfirmDialog(false);
   };
 
   if (loading) {
@@ -135,16 +223,17 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
                 Maximum Clips
               </label>
               <p className={classNames(styles.settingDescription, { [styles.light]: isLight })}>
-                Maximum number of clipboard items to store (5-100)
+                Maximum number of clipboard items to store (15-100). Reducing this number will require confirmation if it would result in data loss.
+                {debounceTimeout && <span style={{ color: '#ffa500', fontWeight: 'bold' }}> (Change pending...)</span>}
               </p>
             </div>
             <input
               type="number"
               id="maxClips"
-              min="5"
+              min="15"
               max="100"
-              value={settings.maxClips}
-              onChange={(e) => handleSettingChange('maxClips', parseInt(e.target.value))}
+              value={tempMaxClips ?? settings.maxClips}
+              onChange={(e) => handleMaxClipsChange(parseInt(e.target.value))}
               disabled={saving}
               className={classNames(styles.input, { [styles.light]: isLight })}
             />
@@ -519,6 +608,18 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
           </button>
         </div>
       )}
+
+      {/* Confirm Dialog for Max Clips Change */}
+      <ConfirmDialog
+        isOpen={showConfirmDialog}
+        title="Confirm Max Clips Change"
+        message={`Changing the maximum clips from ${settings?.maxClips || 100} to ${pendingMaxClips} will result in the loss of ${Math.max(0, clips.filter(clip => clip.content && clip.content.trim() !== '').length - (pendingMaxClips || 0))} clips that cannot be recovered. The oldest clips will be removed. Are you sure you want to proceed?`}
+        onConfirm={confirmMaxClipsChange}
+        onCancel={cancelMaxClipsChange}
+        confirmText="Yes, change"
+        cancelText="Cancel"
+        type="warning"
+      />
     </div>
   );
 };

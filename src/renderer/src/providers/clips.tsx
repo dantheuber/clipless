@@ -87,20 +87,26 @@ export const createBookmarkClip = (title: string, url: string): ClipItem => ({
 /**
  * Updates the length of the clips array to ensure it has the set maximum number of clips.
  * If the clips array is shorter than the maximum, it fills the remaining slots with empty clips.
+ * If the clips array is longer than the maximum, it truncates from the end (oldest clips).
  * @param clips the current array of clips.
  * @param maxClips the maximum number of clips allowed.
  * @returns a new array of clips with the specified maximum length, filling empty slots with empty clips.
- * If the clips array is already at or above the maximum length, it returns the original array
  */
 const updateClipsLength = (clips: ClipItem[], maxClips: number): ClipItem[] => {
-  if (clips.length < maxClips) {
-    for (let index = 0; index < maxClips; index++) {
-      if (!clips[index]) {
-        clips[index] = createEmptyClip();
-      }
+  // Create a copy of the clips array
+  const result = [...clips];
+  
+  if (result.length > maxClips) {
+    // Truncate the array if it's too long (remove oldest clips from the end)
+    result.splice(maxClips);
+  } else if (result.length < maxClips) {
+    // Fill remaining slots with empty clips
+    for (let index = result.length; index < maxClips; index++) {
+      result[index] = createEmptyClip();
     }
   }
-  return [...clips];
+  
+  return result;
 };
 
 export const ClipsContext = createContext({});
@@ -240,6 +246,18 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
         // Update clips array to match new max clips limit
         setClips((prevClips) => updateClipsLength(prevClips, updatedSettings.maxClips));
+        
+        // Update locked clips to remove any locks beyond the new maxClips limit
+        setLockedClips((prevLocked) => {
+          const newLocked: Record<number, boolean> = {};
+          Object.keys(prevLocked).forEach(key => {
+            const index = parseInt(key);
+            if (index < updatedSettings.maxClips) {
+              newLocked[index] = prevLocked[index];
+            }
+          });
+          return newLocked;
+        });
       }
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };
