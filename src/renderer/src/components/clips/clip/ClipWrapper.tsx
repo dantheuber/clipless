@@ -9,7 +9,6 @@ import { HtmlClip } from './HtmlClip';
 import { ImageClip } from './ImageClip';
 import { RtfClip } from './RtfClip';
 import { BookmarkClip } from './BookmarkClip';
-import { DefaultClip } from './DefaultClip';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface ClipProps {
@@ -32,7 +31,6 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
 
   const renderClipContent = () => {
     switch (clip.type) {
-      
       case 'html':
         return <HtmlClip clip={clip} />;
       case 'image':
