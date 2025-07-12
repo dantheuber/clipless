@@ -55,7 +55,6 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
           { [styles.light]: isLight }
         )}
       >
-        {/* Row number */}
         <div
           className={classNames(
             styles.rowNumber,
