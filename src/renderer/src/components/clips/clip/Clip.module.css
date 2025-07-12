@@ -1,0 +1,502 @@
+/* Clip component styles */
+.clip {
+  position: relative;
+  width: 100%;
+}
+
+.clipRow {
+  display: flex;
+  align-items: center;
+  background-color: #404040;
+  width: 100%;
+  min-width: 0;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.clipRow.light {
+  background-color: #f8f8f8;
+}
+
+.clipRow:hover {
+  background-color: #505050;
+}
+
+.clipRow.light:hover {
+  background-color: #e8e8e8;
+}
+
+.clipRow.expanded {
+  align-items: flex-start;
+}
+
+.clipRow.expanded .contentArea {
+  max-height: none;
+  white-space: normal;
+}
+
+.rowNumber {
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2a2a2a;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.rowNumber.light {
+  background-color: #e0e0e0;
+  color: #1a1a1a;
+}
+
+.rowNumber:hover {
+  background-color: #404040;
+}
+
+.rowNumber.light:hover {
+  background-color: #d0d0d0;
+}
+
+.currentCopiedClip {
+  color: #22c55e !important;
+}
+
+.contentArea {
+  flex: 1;
+  padding: 0.625rem 0.5rem;
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 1.25rem;
+  max-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.contentArea.light {
+  color: #1a1a1a;
+}
+
+/* Pattern indicator */
+.patternIndicator {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  z-index: 1;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.patternIndicator:hover {
+  opacity: 1;
+}
+
+.patternIndicator.light {
+  background-color: #2563eb;
+}
+
+.settingsContainer {
+  position: relative;
+}
+
+.settingsButton {
+  flex-shrink: 0;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.settingsButton.light {
+  color: #1a1a1a;
+}
+
+.settingsButton:hover {
+  background-color: #505050;
+}
+
+.settingsButton.light:hover {
+  background-color: #e8e8e8;
+}
+
+.settingsIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.expandedMenu {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 3rem;
+  background-color: #1a1a1a;
+  border-left: 1px solid #505050;
+  display: flex;
+  align-items: center;
+  z-index: 10;
+}
+
+.expandedMenu.light {
+  background-color: #f0f0f0;
+  border-left-color: #d0d0d0;
+}
+
+.menuButton {
+  padding: 0 0.75rem;
+  height: 100%;
+  color: #ffffff;
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.menuButton.light {
+  color: #1a1a1a;
+}
+
+.menuButton:hover {
+  background-color: #2a2a2a;
+}
+
+.menuButton.light:hover {
+  background-color: #e0e0e0;
+}
+
+.menuButtonBorder {
+  padding: 0 0.75rem;
+  height: 100%;
+  color: #ffffff;
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  border-left: 1px solid #404040;
+  cursor: pointer;
+}
+
+.menuButtonBorder.light {
+  color: #1a1a1a;
+  border-left-color: #d0d0d0;
+}
+
+.menuButtonBorder:hover {
+  background-color: #2a2a2a;
+}
+
+.menuButtonBorder.light:hover {
+  background-color: #e0e0e0;
+}
+
+.deleteButton {
+  padding: 0 0.75rem;
+  height: 100%;
+  color: #ffffff;
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease-in-out;
+  background: none;
+  border: none;
+  border-left: 1px solid #404040;
+  cursor: pointer;
+}
+
+.deleteButton.light {
+  color: #1a1a1a;
+  border-left-color: #d0d0d0;
+}
+
+.deleteButton:hover {
+  background-color: #dc2626;
+}
+
+.typeLabel {
+  color: #a0a0a0;
+  font-weight: 500;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.typeLabel.light {
+  color: #666666;
+}
+
+.imagePreviewContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: 100%;
+  position: relative;
+}
+
+.imagePreview {
+  width: 1.75rem;
+  height: 1.75rem;
+  object-fit: cover;
+  border-radius: 0.25rem;
+  border: 1px solid #505050;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.imagePreview.light {
+  border-color: #d0d0d0;
+}
+
+.imagePreview:hover {
+  opacity: 0.8;
+}
+
+.imageInfo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  justify-content: center;
+}
+
+.imageFilename {
+  color: #ffffff;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.imageFilename.light {
+  color: #1a1a1a;
+}
+
+.imageSize {
+  color: #a0a0a0;
+  font-size: 0.75rem;
+  line-height: 1.2;
+}
+
+.imageSize.light {
+  color: #666666;
+}
+
+.imagePopover {
+  position: fixed;
+  background: #1a1a1a;
+  border: 1px solid #505050;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.3s ease,
+    visibility 0.3s ease;
+  pointer-events: none;
+  max-width: 20rem;
+  max-height: 20rem;
+}
+
+.imagePopover.light {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.imagePreviewContainer:hover .imagePopover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0.5s;
+}
+
+.imagePopover:hover {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition-delay: 0s;
+}
+
+.popoverImage {
+  width: 100%;
+  height: auto;
+  max-width: 18rem;
+  max-height: 18rem;
+  object-fit: contain;
+  border-radius: 0.25rem;
+  border: 1px solid #505050;
+}
+
+.popoverImage.light {
+  border-color: #d0d0d0;
+}
+
+.popoverInfo {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #404040;
+  text-align: center;
+}
+
+.popoverInfo.light {
+  border-top-color: #e0e0e0;
+}
+
+.popoverFilename {
+  color: #ffffff;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+
+.popoverFilename.light {
+  color: #1a1a1a;
+}
+
+.popoverSize {
+  color: #a0a0a0;
+  font-size: 0.75rem;
+}
+
+.popoverSize.light {
+  color: #666666;
+}
+
+/* Inline text editing styles */
+.editableText {
+  cursor: pointer;
+  transition: background-color 0.15s ease-in-out;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  margin: -0.125rem -0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.editableText:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.editableText.light:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.textEditor {
+  background: transparent;
+  border: 1px solid #404040;
+  border-radius: 0.25rem;
+  color: inherit;
+  font-family: inherit;
+  font-size: inherit;
+  padding: 0.125rem 0.25rem;
+  margin: -0.125rem -0.25rem;
+  width: calc(100% + 0.5rem);
+  outline: none;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.textEditor:focus {
+  border-color: #606060;
+  box-shadow: none;
+}
+
+.textEditor.light {
+  border-color: #d0d0d0;
+}
+
+.textEditor.light:focus {
+  border-color: #a0a0a0;
+}
+
+.emptyText {
+  color: #666666;
+  font-style: italic;
+  cursor: default !important;
+}
+
+.emptyText.light {
+  color: #999999;
+}
+
+.emptyText:hover {
+  background-color: transparent !important;
+}
+
+.textEditorWrapper {
+  width: 100%;
+  align-self: flex-start;
+}
+
+.textEditorWrapper .textEditor {
+  display: block;
+}
+
+/* Syntax highlighting container */
+.syntaxHighlightContainer {
+  position: relative;
+}
+
+.syntaxHighlightContainer pre {
+  background: inherit !important;
+  margin: 0 !important;
+  padding: 0.125rem 0.25rem !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+
+.syntaxHighlightContainer pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+
+.syntaxOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  z-index: 2;
+  padding: 0.125rem 0.25rem;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: inherit;
+  border-radius: 0.25rem;
+  box-sizing: border-box;
+}
