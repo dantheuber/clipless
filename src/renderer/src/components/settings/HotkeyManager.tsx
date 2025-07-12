@@ -40,11 +40,11 @@ const defaultHotkeySettings: HotkeySettings = {
 
 const hotkeyDescriptions = {
   focusWindow: 'Show/Focus Clipless Window',
-  quickClip1: 'Copy 1st Previous Clip',
-  quickClip2: 'Copy 2nd Previous Clip',
-  quickClip3: 'Copy 3rd Previous Clip',
-  quickClip4: 'Copy 4th Previous Clip',
-  quickClip5: 'Copy 5th Previous Clip',
+  quickClip1: 'Copy 1st Clip',
+  quickClip2: 'Copy 2nd Clip',
+  quickClip3: 'Copy 3rd Clip',
+  quickClip4: 'Copy 4th Clip',
+  quickClip5: 'Copy 5th Clip',
 };
 
 export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
@@ -214,15 +214,11 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
             content={
               <div>
                 <p>
-                  <strong>Important:</strong> The first clip is always your current clipboard
-                  content and cannot be copied via hotkeys.
-                </p>
-                <p>
-                  Quick Clip hotkeys copy from your <strong>previous</strong> clipboard history:
+                  Quick Clip hotkeys copy clips by their display number:
                 </p>
                 <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
-                  <li>Quick Clip 1 → Copies the 1st previous clip (position 2)</li>
-                  <li>Quick Clip 2 → Copies the 2nd previous clip (position 3)</li>
+                  <li>Quick Clip 1 → Copies clip #1 (position 1)</li>
+                  <li>Quick Clip 2 → Copies clip #2 (position 2)</li>
                   <li>And so on...</li>
                 </ul>
               </div>
@@ -337,9 +333,9 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
             <li>Use the toggle switches to enable/disable individual hotkeys</li>
           </ul>
           <p className={styles.note}>
-            <strong>Quick Clip Behavior:</strong> The first clip position always shows your current
-            clipboard content. Quick Clip hotkeys copy from your <em>previous</em> clipboard
-            history, starting from position 2.
+            <strong>Quick Clip Behavior:</strong> Quick Clip hotkeys copy clips by their display
+            number (1-5), so hotkey 1 copies the first clip, hotkey 2 copies the second clip, and
+            so on.
           </p>
           <p className={styles.note}>
             <strong>Note:</strong> Hotkeys may conflict with other applications. Choose combinations

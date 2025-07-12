@@ -54,14 +54,13 @@ class HotkeyManager {
       }
 
       // Register quick clip hotkeys
-      // Note: Quick clip hotkeys copy from previous clipboard history (offset by 1)
-      // since the first clip (index 0) is always the current clipboard content
+      // Note: Quick clip hotkeys copy clips by their display number (1-5)
       const quickClipHotkeys = [
-        { config: hotkeys.quickClip1, index: 1 }, // Copy 1st previous clip (position 2)
-        { config: hotkeys.quickClip2, index: 2 }, // Copy 2nd previous clip (position 3)
-        { config: hotkeys.quickClip3, index: 3 }, // Copy 3rd previous clip (position 4)
-        { config: hotkeys.quickClip4, index: 4 }, // Copy 4th previous clip (position 5)
-        { config: hotkeys.quickClip5, index: 5 }, // Copy 5th previous clip (position 6)
+        { config: hotkeys.quickClip1, index: 0 }, // Copy 1st clip (position 1)
+        { config: hotkeys.quickClip2, index: 1 }, // Copy 2nd clip (position 2)
+        { config: hotkeys.quickClip3, index: 2 }, // Copy 3rd clip (position 3)
+        { config: hotkeys.quickClip4, index: 3 }, // Copy 4th clip (position 4)
+        { config: hotkeys.quickClip5, index: 4 }, // Copy 5th clip (position 5)
       ];
 
       for (const { config, index } of quickClipHotkeys) {
