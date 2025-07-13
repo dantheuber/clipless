@@ -60,12 +60,6 @@ Discover the powerful capabilities that make Clipless the ultimate clipboard man
 - **IP Addresses** - IPv4, IPv6, with port detection
 - **Domains** - Domain names, subdomains, TLDs
 
-#### Financial & Identity
-- **Credit Card Numbers** - All major card types (automatically masked)
-- **Bank Account Numbers** - Various formats (securely handled)
-- **Social Security Numbers** - Multiple country formats (masked)
-- **Tax IDs** - Business and personal identification numbers
-
 #### Technical Data
 - **API Keys** - Common API key formats (securely masked)
 - **UUIDs** - Standard UUID formats

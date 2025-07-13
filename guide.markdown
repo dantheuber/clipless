@@ -21,7 +21,7 @@ Get the most out of Clipless with this comprehensive guide to features and workf
 
 1. **Copy Content** - Copy any text, image, or URL as you normally would
 2. **View History** - Open Clipless to see all your copied items
-3. **Reuse Items** - Click any row number to copy that item back to your clipboard
+3. **Reuse Items** - Click any row number or use the relevant hotkey to copy that item back to your clipboard
 4. **Lock Important Items** - Right-click clips to lock them and prevent automatic removal
 
 ## 🔍 Quick Clips - Advanced Pattern Detection
@@ -30,15 +30,20 @@ Get the most out of Clipless with this comprehensive guide to features and workf
 
 Quick Clips automatically detect patterns in your clipboard content and extract actionable data. When patterns are detected, you'll see a blue scanner icon appear.
 
-### Supported Patterns
+### Built in available Patterns
 
 - **Email Addresses** - `user@domain.com`
 - **URLs** - `https://example.com/path`
+- **Domain Names** - `example.com` or `subdomain.example.com`
 - **Phone Numbers** - Various formats including international
 - **IP Addresses** - IPv4 and IPv6
-- **Credit Card Numbers** - Masked for security
-- **Social Security Numbers** - Masked for security
-- **Custom Patterns** - Define your own regex patterns
+- **GUIDs** - GUID patterns
+
+## Custom Patterns
+
+Define your own regex patterns that extracts data relevant to your daily job role. Give capture groups appropriate names to be used in the tools you use them with.
+
+Example: You copy a block of text commonly that contains various information such as `Customer # 123456`, you could create a custom regex pattern to extract the customer number and use it for quick tools. `Customer # ($<customerNumber>\d+)` and then have associated tools to use the capture group: `http://some-tool.com/?search={customerNumber}`
 
 ### Using Quick Clips
 
