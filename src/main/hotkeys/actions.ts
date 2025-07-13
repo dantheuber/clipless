@@ -12,12 +12,19 @@ export class HotkeyActions {
   }
 
   /**
-   * Focus the main application window
+   * Toggle window visibility - focus if hidden/minimized, hide if currently focused
    */
   focusWindow(): void {
     if (!this.mainWindow) return;
 
     try {
+      // If window is visible and focused, hide it
+      if (this.mainWindow.isVisible() && this.mainWindow.isFocused()) {
+        this.mainWindow.hide();
+        return;
+      }
+
+      // Otherwise, show and focus the window
       if (this.mainWindow.isMinimized()) {
         this.mainWindow.restore();
       }
@@ -30,7 +37,7 @@ export class HotkeyActions {
         require('electron').app.focus();
       }
     } catch (error) {
-      console.error('Error focusing window:', error);
+      console.error('Error toggling window visibility:', error);
     }
   }
 
