@@ -3,7 +3,7 @@ import { join } from 'path';
 import { electronApp, optimizer, is } from '@electron-toolkit/utils';
 import { autoUpdater } from 'electron-updater';
 import { createTray as createTrayIcon, getTray, setIsQuitting, getIsQuitting } from './tray';
-import { initializeClipboardMonitoring, setupClipboardIPC } from './clipboard';
+import { initializeClipboardSystem } from './clipboard';
 import { hotkeyManager } from './hotkeys';
 import { storage } from './storage';
 import icon from '../../resources/icon.png?asset';
@@ -230,13 +230,11 @@ async function createWindow(): Promise<void> {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  // Setup IPC handlers immediately (these should only be registered once)
-  setupClipboardIPC(mainWindow);
+  // Setup clipboard system (IPC handlers and monitoring)
+  initializeClipboardSystem(mainWindow);
 
   // Initialize non-critical components after window loads to improve startup perception
   mainWindow.webContents.once('did-finish-load', async () => {
-    // Initialize clipboard monitoring (this can be deferred)
-    initializeClipboardMonitoring(mainWindow);
 
     // Initialize hotkey manager
     hotkeyManager.setMainWindow(mainWindow);
