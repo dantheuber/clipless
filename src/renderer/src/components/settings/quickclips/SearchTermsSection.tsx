@@ -41,6 +41,11 @@ const BUILTIN_PATTERNS = [
     pattern:
       '(?<ipv6Address>\\b(?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}\\b|\\b::1\\b|\\b::ffff:[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\b)',
   },
+  {
+    name: 'GUID',
+    pattern:
+      '(?<guid>\\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\b)',
+  },
 ];
 
 interface SearchTermsSectionProps {

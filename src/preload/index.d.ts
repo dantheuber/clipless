@@ -68,6 +68,12 @@ declare global {
       quickClipsOpenTools: (matches: any[], toolIds: string[]) => Promise<void>;
       quickClipsExportConfig: () => Promise<any>;
       quickClipsImportConfig: (config: any) => Promise<void>;
+      // Tools Launcher Window APIs
+      openToolsLauncher: (clipContent: string) => Promise<void>;
+      closeToolsLauncher: () => Promise<void>;
+      toolsLauncherReady: () => Promise<void>;
+      onToolsLauncherInitialize: (callback: (clipContent: string) => void) => void;
+      removeAllListeners?: (channel: string) => void;
     };
   }
 }

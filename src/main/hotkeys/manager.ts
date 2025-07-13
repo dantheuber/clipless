@@ -52,6 +52,9 @@ export class HotkeyManager {
 
       // Register quick clip hotkeys
       this.registerQuickClipHotkeys(hotkeys);
+
+      // Register tools launcher hotkey
+      this.registerToolsLauncherHotkey(hotkeys);
     } catch (error) {
       console.error('Failed to register hotkeys:', error);
     }
@@ -87,6 +90,23 @@ export class HotkeyManager {
           this.actions.copyQuickClip(index);
         });
       }
+    }
+  }
+
+  private registerToolsLauncherHotkey(hotkeys: any): void {
+    // Handle case where openToolsLauncher setting doesn't exist yet (new feature)
+    const toolsLauncherConfig = hotkeys.openToolsLauncher || {
+      enabled: true,
+      key: 'CommandOrControl+Shift+T',
+    };
+
+    if (toolsLauncherConfig.enabled) {
+      console.log(
+        `Hotkey Manager: Attempting to register tools launcher hotkey: ${toolsLauncherConfig.key}`
+      );
+      this.registry.registerHotkey(toolsLauncherConfig.key, () => {
+        this.actions.openToolsLauncher();
+      });
     }
   }
 

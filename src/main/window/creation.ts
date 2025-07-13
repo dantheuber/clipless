@@ -15,6 +15,7 @@ import icon from '../../../resources/icon.png?asset';
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
+let toolsLauncherWindow: BrowserWindow | null = null;
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
@@ -22,6 +23,10 @@ export function getMainWindow(): BrowserWindow | null {
 
 export function getSettingsWindow(): BrowserWindow | null {
   return settingsWindow;
+}
+
+export function getToolsLauncherWindow(): BrowserWindow | null {
+  return toolsLauncherWindow;
 }
 
 export function createSettingsWindow(tab?: string): void {
@@ -84,6 +89,63 @@ export function createSettingsWindow(tab?: string): void {
     settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'), {
       search: tab ? `tab=${tab}` : undefined,
     });
+  }
+}
+
+export function createToolsLauncherWindow(clipContent: string): void {
+  if (toolsLauncherWindow) {
+    // If window exists, send new content and focus
+    toolsLauncherWindow.webContents.send('tools-launcher-initialize', clipContent);
+    toolsLauncherWindow.focus();
+    return;
+  }
+
+  // Calculate positioning similar to settings window
+  const launcherWidth = 1000;
+  const launcherHeight = 700;
+  const position = calculateWindowPosition(mainWindow, launcherWidth, launcherHeight);
+
+  toolsLauncherWindow = new BrowserWindow({
+    width: launcherWidth,
+    height: launcherHeight,
+    x: position?.x,
+    y: position?.y,
+    show: false,
+    autoHideMenuBar: true,
+    resizable: false,
+    parent: mainWindow || undefined,
+    modal: false,
+    icon,
+    webPreferences: {
+      preload: join(__dirname, '../preload/index.js'),
+      sandbox: false,
+    },
+  });
+
+  toolsLauncherWindow.on('ready-to-show', () => {
+    if (toolsLauncherWindow) {
+      toolsLauncherWindow.show();
+      // Send initialization data after window is ready
+      toolsLauncherWindow.webContents.send('tools-launcher-initialize', clipContent);
+    }
+  });
+
+  toolsLauncherWindow.on('closed', () => {
+    toolsLauncherWindow = null;
+  });
+
+  // Load the tools-launcher HTML file
+  const baseUrl =
+    is.dev && process.env['ELECTRON_RENDERER_URL']
+      ? process.env['ELECTRON_RENDERER_URL']
+      : 'file://' + join(__dirname, '../renderer');
+
+  const url = baseUrl + '/tools-launcher.html';
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    toolsLauncherWindow.loadURL(url);
+  } else {
+    toolsLauncherWindow.loadFile(join(__dirname, '../renderer/tools-launcher.html'));
   }
 }
 

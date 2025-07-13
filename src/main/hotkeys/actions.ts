@@ -118,4 +118,33 @@ export class HotkeyActions {
       clipboard.writeText(content);
     }
   }
+
+  /**
+   * Open tools launcher for the first (most recent) clip
+   */
+  async openToolsLauncher(): Promise<void> {
+    try {
+      const clips = await storage.getClips();
+      if (!clips || clips.length === 0) {
+        console.warn('No clips available for tools launcher');
+        return;
+      }
+
+      const firstClip = clips[0];
+      if (!firstClip) {
+        console.warn('No first clip found');
+        return;
+      }
+
+      // Import the createToolsLauncherWindow function
+      const { createToolsLauncherWindow } = await import('../window/creation.js');
+      
+      // Open the tools launcher with the first clip's content
+      createToolsLauncherWindow(firstClip.clip.content);
+
+      console.log('Hotkey: Opened tools launcher for first clip');
+    } catch (error) {
+      console.error('Error opening tools launcher:', error);
+    }
+  }
 }
