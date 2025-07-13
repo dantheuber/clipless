@@ -79,7 +79,9 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('set-clipboard-text', (_event, text: string) => setClipboardText(text));
   ipcMain.handle('set-clipboard-html', (_event, html: string) => setClipboardHTML(html));
   ipcMain.handle('set-clipboard-rtf', (_event, rtf: string) => setClipboardRTF(rtf));
-  ipcMain.handle('set-clipboard-image', (_event, imageData: string) => setClipboardImage(imageData));
+  ipcMain.handle('set-clipboard-image', (_event, imageData: string) =>
+    setClipboardImage(imageData)
+  );
   ipcMain.handle(
     'set-clipboard-bookmark',
     (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) =>
@@ -150,9 +152,8 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   );
   ipcMain.handle('quick-tools-delete', async (_event, id: string) => deleteQuickTool(id));
   ipcMain.handle('quick-tools-reorder', async (_event, tools: any[]) => reorderQuickTools(tools));
-  ipcMain.handle(
-    'quick-tools-validate-url',
-    async (_event, url: string, captureGroups: string[]) => validateToolUrl(url, captureGroups)
+  ipcMain.handle('quick-tools-validate-url', async (_event, url: string, captureGroups: string[]) =>
+    validateToolUrl(url, captureGroups)
   );
 
   // Quick clips scanning IPC handlers

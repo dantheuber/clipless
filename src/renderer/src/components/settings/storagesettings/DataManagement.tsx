@@ -33,16 +33,8 @@ export const DataManagement: React.FC<DataManagementProps> = ({
       </h3>
 
       <div className={styles.buttonGrid}>
-        <button
-          onClick={onExportData}
-          className={classNames(styles.button, styles.buttonBlue)}
-        >
-          <svg
-            className={styles.buttonIcon}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+        <button onClick={onExportData} className={classNames(styles.button, styles.buttonBlue)}>
+          <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -54,12 +46,7 @@ export const DataManagement: React.FC<DataManagementProps> = ({
         </button>
 
         <label htmlFor="import-file" className={classNames(styles.button, styles.buttonGreen)}>
-          <svg
-            className={styles.buttonIcon}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+          <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -77,16 +64,8 @@ export const DataManagement: React.FC<DataManagementProps> = ({
           />
         </label>
 
-        <button
-          onClick={onClearAllData}
-          className={classNames(styles.button, styles.buttonRed)}
-        >
-          <svg
-            className={styles.buttonIcon}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
+        <button onClick={onClearAllData} className={classNames(styles.button, styles.buttonRed)}>
+          <svg className={styles.buttonIcon} fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"

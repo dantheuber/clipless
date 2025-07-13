@@ -40,7 +40,14 @@ export const ApplicationSettings: React.FC<ApplicationSettingsProps> = ({
           }`}
           htmlFor="maxClips"
         >
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              gap: '0.25rem',
+            }}
+          >
             <input
               type="number"
               id="maxClips"
@@ -86,11 +93,7 @@ export const ApplicationSettings: React.FC<ApplicationSettingsProps> = ({
         </SettingItem>
 
         {/* Theme Setting */}
-        <SettingItem
-          label="Theme"
-          description="Choose your preferred color scheme"
-          htmlFor="theme"
-        >
+        <SettingItem label="Theme" description="Choose your preferred color scheme" htmlFor="theme">
           <select
             id="theme"
             value={settings.theme || 'system'}

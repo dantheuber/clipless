@@ -7,10 +7,10 @@ import { initializeApp, setupAppEvents, initializeServices } from './app';
 app.whenReady().then(async () => {
   // Initialize the main application
   await initializeApp();
-  
+
   // Setup app event handlers
   setupAppEvents();
-  
+
   // Initialize services (IPC, updater, etc.)
   initializeServices();
 });

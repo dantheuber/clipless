@@ -11,13 +11,8 @@ interface StorageSettingsProps {
 }
 
 export const StorageSettings: React.FC<StorageSettingsProps> = ({ onClose }) => {
-  const {
-    stats,
-    loading,
-    handleExportData,
-    handleImportData,
-    handleClearAllData,
-  } = useStorageSettings();
+  const { stats, loading, handleExportData, handleImportData, handleClearAllData } =
+    useStorageSettings();
 
   if (loading) {
     return <LoadingState message="Loading storage data..." />;

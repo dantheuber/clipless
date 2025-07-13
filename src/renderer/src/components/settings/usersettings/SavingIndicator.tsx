@@ -5,10 +5,7 @@ interface SavingIndicatorProps {
   message?: string;
 }
 
-export const SavingIndicator: React.FC<SavingIndicatorProps> = ({ 
-  message = "Saving..." 
-}) => {
-
+export const SavingIndicator: React.FC<SavingIndicatorProps> = ({ message = 'Saving...' }) => {
   return (
     <div className={styles.savingIndicator}>
       <svg className={styles.spinner} viewBox="0 0 24 24">

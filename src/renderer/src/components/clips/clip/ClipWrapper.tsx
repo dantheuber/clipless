@@ -47,7 +47,9 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
         return <BookmarkClip clip={clip} />;
       case 'text':
       default:
-        return <TextClip clip={clip} onUpdate={handleUpdateClip} onEditingChange={handleEditingChange} />;
+        return (
+          <TextClip clip={clip} onUpdate={handleUpdateClip} onEditingChange={handleEditingChange} />
+        );
     }
   };
 

@@ -54,9 +54,7 @@ export const WindowSettings: React.FC<WindowSettingsProps> = ({
               max="100"
               step="5"
               value={settings.windowTransparency ?? 0}
-              onChange={(e) =>
-                onSettingChange('windowTransparency', parseInt(e.target.value))
-              }
+              onChange={(e) => onSettingChange('windowTransparency', parseInt(e.target.value))}
               disabled={saving || !(settings.transparencyEnabled ?? false)}
               className={classNames(styles.rangeSlider, { [styles.light]: isLight })}
             />

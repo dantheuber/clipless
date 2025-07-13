@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useMemo,
-  useState,
-  useRef,
-} from 'react';
+import { createContext, useContext, useMemo, useState, useRef } from 'react';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { useLanguageDetection } from '../languageDetection';
 import { ClipItem, ClipsContextType, ClipboardState } from './types';
@@ -67,14 +61,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     isClipLocked,
     isDuplicateOfMostRecent,
     clipboardUpdated,
-  } = useClipState(
-    clips,
-    setClips,
-    maxClips,
-    lockedClips,
-    setLockedClips,
-    setClipCopyIndex
-  );
+  } = useClipState(clips, setClips, maxClips, lockedClips, setLockedClips, setClipCopyIndex);
 
   // Use clipboard operations hook
   const { readCurrentClipboard, copyClipToClipboard } = useClipboardOperations(

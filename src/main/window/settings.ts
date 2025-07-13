@@ -110,7 +110,7 @@ export function calculateWindowPosition(
   if (proposedY + windowHeight > screenPosition.y + screenBounds.height) {
     proposedY = screenPosition.y + screenBounds.height - windowHeight - padding;
   }
-  
+
   if (proposedY < screenPosition.y) {
     proposedY = screenPosition.y + padding;
   }

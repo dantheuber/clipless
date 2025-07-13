@@ -10,7 +10,7 @@ export * from './creation';
 export async function initializeWindowSystem(): Promise<void> {
   // Load window bounds first
   await loadWindowBounds();
-  
+
   // Create the main window
   await createWindow();
 }

@@ -8,9 +8,9 @@ interface ErrorStateProps {
   message?: string;
 }
 
-export const ErrorState: React.FC<ErrorStateProps> = ({ 
-  title = "Failed to load settings",
-  message = "Please try refreshing the application"
+export const ErrorState: React.FC<ErrorStateProps> = ({
+  title = 'Failed to load settings',
+  message = 'Please try refreshing the application',
 }) => {
   const { isLight } = useTheme();
 
@@ -25,9 +25,7 @@ export const ErrorState: React.FC<ErrorStateProps> = ({
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.96-.833-2.73 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
           />
         </svg>
-        <p className={classNames(styles.errorTitle, { [styles.light]: isLight })}>
-          {title}
-        </p>
+        <p className={classNames(styles.errorTitle, { [styles.light]: isLight })}>{title}</p>
         <p className={classNames(styles.errorDescription, { [styles.light]: isLight })}>
           {message}
         </p>

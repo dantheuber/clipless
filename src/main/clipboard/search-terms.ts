@@ -47,7 +47,10 @@ export const reorderSearchTerms = async (searchTerms: any[]) => {
   }
 };
 
-export const testSearchTerm = async (pattern: string, testText: string): Promise<PatternMatch[]> => {
+export const testSearchTerm = async (
+  pattern: string,
+  testText: string
+): Promise<PatternMatch[]> => {
   try {
     // Test a single pattern against text
     const regex = new RegExp(pattern, 'g');

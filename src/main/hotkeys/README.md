@@ -20,25 +20,30 @@ src/main/hotkeys/
 ## Module Responsibilities
 
 ### `types.ts`
+
 - Contains TypeScript interfaces and type definitions
 - Defines callback maps, registry state, and registered hotkey structures
 
-### `registry.ts` 
+### `registry.ts`
+
 - `HotkeyRegistry` class handles low-level hotkey registration with Electron's `globalShortcut`
 - Manages the set of currently registered hotkeys
 - Provides registration, unregistration, and cleanup functionality
 
 ### `actions.ts`
+
 - `HotkeyActions` class implements all hotkey action handlers
 - Handles window focusing, clip copying, and clipboard format conversion
 - Separates action logic from registration logic
 
 ### `manager.ts`
+
 - `HotkeyManager` class coordinates between registry and actions
 - Manages initialization, settings changes, and high-level hotkey operations
 - Orchestrates the registration of different hotkey types
 
 ### `index.ts`
+
 - Exports all public classes and types
 - Creates and exports the singleton `hotkeyManager` instance
 - Provides the main module interface

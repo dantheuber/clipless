@@ -9,7 +9,7 @@ interface RtfClipProps {
 
 export const RtfClip = ({ clip }: RtfClipProps) => {
   const { isLight } = useTheme();
-  
+
   return (
     <div>
       <span className={classNames(styles.typeLabel, { [styles.light]: isLight })}>RTF:</span>

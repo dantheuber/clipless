@@ -42,6 +42,7 @@ The positioning logic is implemented in two main parts:
 ### Usage
 
 The positioning is automatically applied whenever the settings window is created via:
+
 - Status bar settings button
 - System tray settings menu item
 - Hotkey-triggered settings opening
@@ -51,7 +52,7 @@ The positioning is automatically applied whenever the settings window is created
 The positioning system handles various edge cases:
 
 1. **Right Edge**: Main window near right edge of screen
-2. **Left Edge**: Main window near left edge of screen  
+2. **Left Edge**: Main window near left edge of screen
 3. **Top Edge**: Main window near top of screen
 4. **Bottom Edge**: Main window near bottom of screen
 5. **Corner Cases**: Main window in screen corners

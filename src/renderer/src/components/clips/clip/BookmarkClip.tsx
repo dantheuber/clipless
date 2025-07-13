@@ -9,12 +9,10 @@ interface BookmarkClipProps {
 
 export const BookmarkClip = ({ clip }: BookmarkClipProps) => {
   const { isLight } = useTheme();
-  
+
   return (
     <div>
-      <span className={classNames(styles.typeLabel, { [styles.light]: isLight })}>
-        Bookmark:
-      </span>
+      <span className={classNames(styles.typeLabel, { [styles.light]: isLight })}>Bookmark:</span>
       <span>
         {clip.title || 'Untitled'} - {clip.url}
       </span>

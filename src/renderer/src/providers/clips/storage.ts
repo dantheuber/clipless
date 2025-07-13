@@ -90,11 +90,11 @@ export const useClipsStorage = (
 
         // Update clips array to match new max clips limit
         setClips((prevClips) => updateClipsLength(prevClips, updatedSettings.maxClips));
-        
+
         // Update locked clips to remove any locks beyond the new maxClips limit
         setLockedClips((prevLocked) => {
           const newLocked: Record<number, boolean> = {};
-          Object.keys(prevLocked).forEach(key => {
+          Object.keys(prevLocked).forEach((key) => {
             const index = parseInt(key);
             if (index < updatedSettings.maxClips) {
               newLocked[index] = prevLocked[index];

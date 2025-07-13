@@ -24,7 +24,10 @@ export function createQuickToolObject(
 /**
  * Update an existing quick tool with new data
  */
-export function updateQuickToolObject(quickTool: QuickTool, updates: Partial<QuickTool>): QuickTool {
+export function updateQuickToolObject(
+  quickTool: QuickTool,
+  updates: Partial<QuickTool>
+): QuickTool {
   return {
     ...quickTool,
     ...updates,

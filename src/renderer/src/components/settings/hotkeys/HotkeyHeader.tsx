@@ -3,7 +3,6 @@ import { InfoTooltip } from '../quickclips/InfoTooltip';
 import styles from '../HotkeyManager.module.css';
 
 export const HotkeyHeader: React.FC = () => {
-
   return (
     <div className={styles.header}>
       <div className={styles.titleRow}>
@@ -11,9 +10,7 @@ export const HotkeyHeader: React.FC = () => {
         <InfoTooltip
           content={
             <div>
-              <p>
-                Quick Clip hotkeys copy clips by their display number:
-              </p>
+              <p>Quick Clip hotkeys copy clips by their display number:</p>
               <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
                 <li>Quick Clip 1 → Copies clip #1 (position 1)</li>
                 <li>Quick Clip 2 → Copies clip #2 (position 2)</li>

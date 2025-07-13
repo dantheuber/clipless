@@ -376,7 +376,10 @@ class SecureStorage {
       throw new Error('Search term not found');
     }
 
-    const updatedSearchTerm = updateSearchTermObject(this.data.searchTerms[searchTermIndex], updates);
+    const updatedSearchTerm = updateSearchTermObject(
+      this.data.searchTerms[searchTermIndex],
+      updates
+    );
     this.data.searchTerms[searchTermIndex] = updatedSearchTerm;
     await this.saveData();
     return updatedSearchTerm;

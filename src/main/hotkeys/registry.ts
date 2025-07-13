@@ -7,7 +7,7 @@ import type { HotkeyRegistryState } from './types';
 export class HotkeyRegistry {
   private state: HotkeyRegistryState = {
     isInitialized: false,
-    currentHotkeys: new Set()
+    currentHotkeys: new Set(),
   };
 
   get isInitialized(): boolean {

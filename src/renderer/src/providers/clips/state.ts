@@ -168,14 +168,7 @@ export const useClipState = (
       const finalClips = updateClipsLength(newClips, maxClips);
       setClips(finalClips);
     },
-    [
-      clips,
-      maxClips,
-      lockedClips,
-      setClips,
-      isDuplicateOfMostRecent,
-      setClipCopyIndex,
-    ]
+    [clips, maxClips, lockedClips, setClips, isDuplicateOfMostRecent, setClipCopyIndex]
   );
 
   return {

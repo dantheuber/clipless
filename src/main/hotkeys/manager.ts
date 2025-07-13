@@ -91,7 +91,10 @@ export class HotkeyManager {
   }
 
   async onSettingsChanged(): Promise<void> {
-    console.log('Hotkey Manager: onSettingsChanged called, isInitialized:', this.registry.isInitialized);
+    console.log(
+      'Hotkey Manager: onSettingsChanged called, isInitialized:',
+      this.registry.isInitialized
+    );
     if (!this.registry.isInitialized) {
       console.log('Hotkey Manager: Not initialized yet, initializing now...');
       await this.initialize();

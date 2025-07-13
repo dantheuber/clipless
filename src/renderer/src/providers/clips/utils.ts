@@ -62,7 +62,7 @@ export const createBookmarkClip = (title: string, url: string): ClipItem => ({
 export const updateClipsLength = (clips: ClipItem[], maxClips: number): ClipItem[] => {
   // Create a copy of the clips array
   const result = [...clips];
-  
+
   if (result.length > maxClips) {
     // Truncate the array if it's too long (remove oldest clips from the end)
     result.splice(maxClips);
@@ -72,6 +72,6 @@ export const updateClipsLength = (clips: ClipItem[], maxClips: number): ClipItem
       result[index] = createEmptyClip();
     }
   }
-  
+
   return result;
 };

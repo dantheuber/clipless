@@ -25,9 +25,8 @@ export const HotkeyInstructions: React.FC<HotkeyInstructionsProps> = ({ hotkeySe
         <li>Use the toggle switches to enable/disable individual hotkeys</li>
       </ul>
       <p className={styles.note}>
-        <strong>Quick Clip Behavior:</strong> Quick Clip hotkeys copy clips by their display
-        number (1-5), so hotkey 1 copies the first clip, hotkey 2 copies the second clip, and
-        so on.
+        <strong>Quick Clip Behavior:</strong> Quick Clip hotkeys copy clips by their display number
+        (1-5), so hotkey 1 copies the first clip, hotkey 2 copies the second clip, and so on.
       </p>
       <p className={styles.note}>
         <strong>Note:</strong> Hotkeys may conflict with other applications. Choose combinations

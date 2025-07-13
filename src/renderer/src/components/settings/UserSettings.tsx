@@ -48,11 +48,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
         debounceTimeout={debounceTimeout}
       />
 
-      <WindowSettings
-        settings={settings}
-        onSettingChange={handleSettingChange}
-        saving={saving}
-      />
+      <WindowSettings settings={settings} onSettingChange={handleSettingChange} saving={saving} />
 
       {/* Saving Indicator */}
       {saving && <SavingIndicator />}
@@ -64,7 +60,7 @@ export const UserSettings: React.FC<UserSettingsProps> = ({ onClose }) => {
       <ConfirmDialog
         isOpen={showConfirmDialog}
         title="Confirm Max Clips Change"
-        message={`Changing the maximum clips from ${settings?.maxClips || 100} to ${pendingMaxClips} will result in the loss of ${Math.max(0, clips.filter(clip => clip.content && clip.content.trim() !== '').length - (pendingMaxClips || 0))} clips that cannot be recovered. The oldest clips will be removed. Are you sure you want to proceed?`}
+        message={`Changing the maximum clips from ${settings?.maxClips || 100} to ${pendingMaxClips} will result in the loss of ${Math.max(0, clips.filter((clip) => clip.content && clip.content.trim() !== '').length - (pendingMaxClips || 0))} clips that cannot be recovered. The oldest clips will be removed. Are you sure you want to proceed?`}
         onConfirm={confirmMaxClipsChange}
         onCancel={cancelMaxClipsChange}
         confirmText="Yes, change"

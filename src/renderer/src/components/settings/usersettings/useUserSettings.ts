@@ -102,15 +102,17 @@ export const useUserSettings = () => {
 
       // Auto-correct to minimum if below 15
       const correctedValue = value < 15 ? 15 : value;
-      
+
       // Update temp value to show the correction
       if (correctedValue !== value) {
         setTempMaxClips(correctedValue);
       }
 
       // Count non-empty clips
-      const nonEmptyClips = clips.filter(clip => clip.content && clip.content.trim() !== '').length;
-      
+      const nonEmptyClips = clips.filter(
+        (clip) => clip.content && clip.content.trim() !== ''
+      ).length;
+
       // Check if reducing the limit would cause data loss
       if (nonEmptyClips > correctedValue) {
         setPendingMaxClips(correctedValue);

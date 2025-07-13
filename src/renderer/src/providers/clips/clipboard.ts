@@ -1,11 +1,11 @@
 import { useCallback, useEffect } from 'react';
 import { ClipItem, ClipboardState } from './types';
-import { 
-  createTextClip, 
-  createHtmlClip, 
-  createImageClip, 
-  createRtfClip, 
-  createBookmarkClip 
+import {
+  createTextClip,
+  createHtmlClip,
+  createImageClip,
+  createRtfClip,
+  createBookmarkClip,
 } from './utils';
 
 /**
@@ -325,7 +325,7 @@ export const useClipboardOperations = (
     setIsHotkeyOperation,
     clipsRef,
     isHotkeyOperationRef,
-    lastCopiedContentRef
+    lastCopiedContentRef,
   ]);
 
   return {

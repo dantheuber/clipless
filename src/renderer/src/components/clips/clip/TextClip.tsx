@@ -31,7 +31,7 @@ export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => 
       textarea.style.height = 'auto';
       const newHeight = `${textarea.scrollHeight}px`;
       textarea.style.height = newHeight;
-      
+
       // Also update the syntax highlighter container if it exists
       const container = textarea.parentElement?.querySelector('.syntaxHighlightContainer');
       if (container) {
@@ -145,10 +145,7 @@ export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => 
               }}
               preTag="pre"
               PreTag={({ children, ...props }) => (
-                <pre
-                  {...props}
-                  style={{ ...props.style, margin: 0, padding: '0.125rem 0.25rem' }}
-                >
+                <pre {...props} style={{ ...props.style, margin: 0, padding: '0.125rem 0.25rem' }}>
                   {children}
                 </pre>
               )}

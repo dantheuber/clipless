@@ -4,7 +4,12 @@ import { is } from '@electron-toolkit/utils';
 import { createTray as createTrayIcon } from '../tray';
 import { initializeClipboardSystem } from '../clipboard';
 import { hotkeyManager } from '../hotkeys';
-import { applyWindowSettings, handleWindowFocus, handleWindowBlur, calculateWindowPosition } from './settings';
+import {
+  applyWindowSettings,
+  handleWindowFocus,
+  handleWindowBlur,
+  calculateWindowPosition,
+} from './settings';
 import { saveWindowBounds, getWindowBounds } from './bounds';
 import icon from '../../../resources/icon.png?asset';
 

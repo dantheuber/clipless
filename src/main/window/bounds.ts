@@ -36,6 +36,11 @@ export function getWindowBounds(): { x: number; y: number; width: number; height
   return windowBounds;
 }
 
-export function setWindowBounds(bounds: { x: number; y: number; width: number; height: number }): void {
+export function setWindowBounds(bounds: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}): void {
   windowBounds = bounds;
 }

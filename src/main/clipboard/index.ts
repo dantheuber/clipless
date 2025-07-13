@@ -16,7 +16,7 @@ export { setupClipboardIPC } from './ipc';
 export function initializeClipboardSystem(mainWindow: BrowserWindow | null): void {
   // Initialize clipboard monitoring
   initializeClipboardMonitoring(mainWindow);
-  
+
   // Setup IPC handlers
   setupClipboardIPC(mainWindow);
 }

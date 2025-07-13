@@ -80,7 +80,7 @@ export function setupAppEvents(): void {
 export function initializeServices(): void {
   // Setup IPC handlers
   setupMainIPC();
-  
+
   // Configure and setup auto-updater
   configureAutoUpdater();
   setupAutoUpdaterEvents();

@@ -7,9 +7,7 @@ interface LoadingStateProps {
   message?: string;
 }
 
-export const LoadingState: React.FC<LoadingStateProps> = ({ 
-  message = "Loading settings..." 
-}) => {
+export const LoadingState: React.FC<LoadingStateProps> = ({ message = 'Loading settings...' }) => {
   const { isLight } = useTheme();
 
   return (
