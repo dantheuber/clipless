@@ -28,6 +28,10 @@ export const defaultHotkeySettings: HotkeySettings = {
     enabled: true,
     key: 'CommandOrControl+Shift+5',
   },
+  openToolsLauncher: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+T',
+  },
 };
 
 export const hotkeyDescriptions = {
@@ -37,6 +41,7 @@ export const hotkeyDescriptions = {
   quickClip3: 'Copy 3rd Clip',
   quickClip4: 'Copy 4th Clip',
   quickClip5: 'Copy 5th Clip',
+  openToolsLauncher: 'Open Tools Launcher for Latest Clip',
 };
 
 export const useHotkeyManager = () => {
@@ -56,9 +61,13 @@ export const useHotkeyManager = () => {
         const loadedSettings = await window.api.storageGetSettings();
         setSettings(loadedSettings);
 
-        // Use existing hotkey settings or defaults
+        // Use existing hotkey settings or defaults, ensuring all properties exist
         if (loadedSettings.hotkeys) {
-          setHotkeySettings(loadedSettings.hotkeys);
+          const completeHotkeySettings = {
+            ...defaultHotkeySettings,
+            ...loadedSettings.hotkeys,
+          };
+          setHotkeySettings(completeHotkeySettings);
         } else {
           setHotkeySettings(defaultHotkeySettings);
         }

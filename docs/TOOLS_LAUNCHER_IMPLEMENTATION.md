@@ -31,13 +31,25 @@ The QuickClipsScanner functionality has been extracted from the main window into
 - **Standalone Mode**: Added `.standalone` style for full-window display
 - **Removed Overlay**: No overlay needed when used as dedicated window
 
+### 6. Hotkey Integration
+- **New Hotkey**: `CommandOrControl+Shift+T` to open tools launcher for the first (most recent) clip
+- **Global Access**: Works even when main window is hidden/minimized
+- **Settings Integration**: Configurable in Settings > Hotkeys section
+
 ## Usage
 
+### Via Scan Button
 When users click the scan button (🔍) on any clip:
 1. A new tools-launcher window opens with the clip content
 2. The window automatically scans for patterns and displays results
 3. Users can select patterns and tools, then launch them
 4. Window closes automatically after tools are launched or when cancelled
+
+### Via Hotkey
+Users can press `Ctrl+Shift+T` (or `Cmd+Shift+T` on Mac):
+1. Opens tools launcher with the most recent (first) clip content
+2. Works even when the main window is hidden or minimized
+3. Provides quick access to tools without navigating the UI
 
 ## Benefits
 
