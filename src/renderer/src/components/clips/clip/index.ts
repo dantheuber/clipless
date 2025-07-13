@@ -1,0 +1,1 @@
+export { ClipWrapper as Clip } from './ClipWrapper';

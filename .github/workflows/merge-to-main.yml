@@ -61,8 +61,8 @@ jobs:
         include:
           - os: windows-latest
             platform: windows
-          - os: macos-latest
-            platform: mac
+          # - os: macos-latest
+          #   platform: mac
 
     steps:
       - name: Check out Git repository

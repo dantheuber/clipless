@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useClips } from '../../providers/clips';
-import { useTheme } from '../../providers/theme';
-import { QuickClipsScanner } from './QuickClipsScanner';
+import { useClips } from '../../../providers/clips';
+import { useTheme } from '../../../providers/theme';
+import { QuickClipsScanner } from '../QuickClipsScanner';
 import styles from './ClipOptions.module.css';
 import classNames from 'classnames';
 
