@@ -11,9 +11,10 @@ import styles from './Clip.module.css';
 interface TextClipProps {
   clip: ClipItem;
   onUpdate: (newContent: string) => void;
+  onEditingChange?: (isEditing: boolean) => void;
 }
 
-export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
+export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => {
   const { isLight } = useTheme();
   const { isCodeDetectionEnabled } = useLanguageDetection();
 
@@ -28,7 +29,14 @@ export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
     if (isEditing && textareaRef.current) {
       const textarea = textareaRef.current;
       textarea.style.height = 'auto';
-      textarea.style.height = `${textarea.scrollHeight}px`;
+      const newHeight = `${textarea.scrollHeight}px`;
+      textarea.style.height = newHeight;
+      
+      // Also update the syntax highlighter container if it exists
+      const container = textarea.parentElement?.querySelector('.syntaxHighlightContainer');
+      if (container) {
+        (container as HTMLElement).style.height = newHeight;
+      }
     }
   }, [isEditing, editValue]);
 
@@ -61,6 +69,7 @@ export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
     if (clip.content.trim() !== '') {
       setIsEditing(true);
       setEditValue(clip.content);
+      onEditingChange?.(true);
     }
   };
 
@@ -72,6 +81,7 @@ export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
 
   const handleTextBlur = () => {
     setIsEditing(false);
+    onEditingChange?.(false);
     // Force immediate update on blur if there are pending changes
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
@@ -88,6 +98,7 @@ export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
     } else if (e.key === 'Escape') {
       setEditValue(clip.content); // Reset to original value
       setIsEditing(false);
+      onEditingChange?.(false);
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
@@ -159,7 +170,6 @@ export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
               style={{
                 resize: 'none',
                 minHeight: '1.2em',
-                overflow: 'hidden',
                 color: 'transparent',
                 caretColor: isLight ? '#000' : '#fff',
                 lineHeight: 'inherit',
@@ -185,7 +195,6 @@ export const TextClip = ({ clip, onUpdate }: TextClipProps) => {
             style={{
               resize: 'none',
               minHeight: '1.2em',
-              overflow: 'hidden',
             }}
           />
         </div>

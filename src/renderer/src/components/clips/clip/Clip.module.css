@@ -460,6 +460,7 @@
 /* Syntax highlighting container */
 .syntaxHighlightContainer {
   position: relative;
+  min-height: 1.2em;
 }
 
 .syntaxHighlightContainer pre {
@@ -470,7 +471,7 @@
   font-size: inherit !important;
   line-height: inherit !important;
   border-radius: 0.25rem;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .syntaxHighlightContainer pre code {

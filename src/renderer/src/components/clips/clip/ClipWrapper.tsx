@@ -1,4 +1,5 @@
 import classNames from 'classnames';
+import { useState } from 'react';
 import { ClipItem, useClips } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
 import { usePatternDetection } from '../../../hooks/usePatternDetection';
@@ -20,6 +21,7 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
   const { copyClipToClipboard, clipCopyIndex, updateClip } = useClips();
   const { isLight } = useTheme();
   const { hasPatterns } = usePatternDetection(clip.content);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleRowNumberClick = async () => {
     await copyClipToClipboard(index);
@@ -27,6 +29,10 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
 
   const handleUpdateClip = (newContent: string) => {
     updateClip(index, { ...clip, content: newContent });
+  };
+
+  const handleEditingChange = (isEditing: boolean) => {
+    setIsExpanded(isEditing);
   };
 
   const renderClipContent = () => {
@@ -41,7 +47,7 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
         return <BookmarkClip clip={clip} />;
       case 'text':
       default:
-        return <TextClip clip={clip} onUpdate={handleUpdateClip} />;
+        return <TextClip clip={clip} onUpdate={handleUpdateClip} onEditingChange={handleEditingChange} />;
     }
   };
 
@@ -52,7 +58,8 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
       <div
         className={classNames(
           styles.clipRow,
-          { [styles.light]: isLight }
+          { [styles.light]: isLight },
+          { [styles.expanded]: isExpanded }
         )}
       >
         <div
