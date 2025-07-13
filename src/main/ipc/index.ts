@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 import { storage } from '../storage';
 import { hotkeyManager } from '../hotkeys';
-import { getMainWindow, getSettingsWindow, createSettingsWindow } from '../window/creation';
+import { getMainWindow, getSettingsWindow, createSettingsWindow, createToolsLauncherWindow, getToolsLauncherWindow } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
 import { checkForUpdatesWithRetry } from '../updater';
 
@@ -61,6 +61,23 @@ export function setupMainIPC(): void {
       console.error('Failed to get settings:', error);
       return {};
     }
+  });
+
+  // Tools Launcher window IPC handlers
+  ipcMain.handle('open-tools-launcher', (_event, clipContent: string) => {
+    createToolsLauncherWindow(clipContent);
+  });
+
+  ipcMain.handle('close-tools-launcher', () => {
+    const toolsLauncherWindow = getToolsLauncherWindow();
+    if (toolsLauncherWindow) {
+      toolsLauncherWindow.close();
+    }
+  });
+
+  ipcMain.handle('tools-launcher-ready', () => {
+    // This is called when the tools launcher window is ready to receive data
+    // The actual data sending is handled in the window creation
   });
 
   // Auto-updater IPC handlers

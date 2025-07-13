@@ -100,6 +100,16 @@ const api = {
   quickClipsExportConfig: () => electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
   quickClipsImportConfig: (config: any) =>
     electronAPI.ipcRenderer.invoke('quick-clips-import-config', config),
+  // Tools Launcher Window APIs
+  openToolsLauncher: (clipContent: string) =>
+    electronAPI.ipcRenderer.invoke('open-tools-launcher', clipContent),
+  closeToolsLauncher: () => electronAPI.ipcRenderer.invoke('close-tools-launcher'),
+  toolsLauncherReady: () => electronAPI.ipcRenderer.invoke('tools-launcher-ready'),
+  onToolsLauncherInitialize: (callback: (clipContent: string) => void) =>
+    electronAPI.ipcRenderer.on('tools-launcher-initialize', (_event, clipContent) =>
+      callback(clipContent)
+    ),
+  removeAllListeners: (channel: string) => electronAPI.ipcRenderer.removeAllListeners(channel),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

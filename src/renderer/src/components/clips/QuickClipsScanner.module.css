@@ -28,6 +28,22 @@
   cursor: default;
 }
 
+/* Standalone mode - full window */
+.modal.standalone {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: none;
+  width: 100%;
+  max-height: none;
+  height: 100vh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
 /* Header */
 .header {
   display: flex;

@@ -3,13 +3,11 @@ import OutsideClickHandler from 'react-outside-click-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useClips } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
-import { QuickClipsScanner } from '../QuickClipsScanner';
 import styles from './ClipOptions.module.css';
 import classNames from 'classnames';
 
 export function ClipOptions({ index }): React.JSX.Element {
   const [visible, setVisible] = useState<boolean>(false);
-  const [scannerOpen, setScannerOpen] = useState<boolean>(false);
   const { isLight } = useTheme();
   const toggleVisibility = useCallback(() => {
     setVisible(!visible);
@@ -55,9 +53,13 @@ export function ClipOptions({ index }): React.JSX.Element {
     };
   }, [clip.content]);
 
-  const handleScanClick = () => {
-    setScannerOpen(true);
-    setVisible(false); // Close the options menu
+  const handleScanClick = async () => {
+    try {
+      await window.api.openToolsLauncher(clip.content);
+      setVisible(false); // Close the options menu
+    } catch (error) {
+      console.error('Failed to open tools launcher:', error);
+    }
   };
 
   return (
@@ -130,12 +132,6 @@ export function ClipOptions({ index }): React.JSX.Element {
           <FontAwesomeIcon icon={isClipLocked(index) ? 'lock' : 'gear'} />
         </button>
       </OutsideClickHandler>
-
-      <QuickClipsScanner
-        isOpen={scannerOpen}
-        onClose={() => setScannerOpen(false)}
-        clipContent={clip.content}
-      />
     </div>
   );
 }
