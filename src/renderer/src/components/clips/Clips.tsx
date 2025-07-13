@@ -1,6 +1,6 @@
 import { useClips } from '../../providers/clips';
 import { useTheme } from '../../providers/theme';
-import { Clip } from './Clip';
+import { Clip } from './clip';
 import classNames from 'classnames';
 import styles from './Clips.module.css';
 
