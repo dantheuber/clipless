@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, screen } from 'electron';
 import { storage } from '../storage';
 
 export async function applyWindowSettings(window: BrowserWindow): Promise<void> {
@@ -66,4 +66,54 @@ export async function handleWindowBlur(window: BrowserWindow): Promise<void> {
   } catch (error) {
     console.error('Failed to handle window blur:', error);
   }
+}
+
+/**
+ * Calculate optimal window position to ensure it stays within screen bounds
+ * Uses minimal padding and allows overlap with main window when needed
+ * @param mainWindow - The parent/main window to position relative to
+ * @param windowWidth - Width of the window to position
+ * @param windowHeight - Height of the window to position
+ * @returns Object with x and y coordinates, or undefined if no main window
+ */
+export function calculateWindowPosition(
+  mainWindow: BrowserWindow | null,
+  windowWidth: number,
+  windowHeight: number
+): { x: number; y: number } | undefined {
+  if (!mainWindow) return undefined;
+
+  const mainBounds = mainWindow.getBounds();
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const screenBounds = primaryDisplay.workAreaSize;
+  const screenPosition = primaryDisplay.workArea;
+  const padding = 10; // Minimal padding from screen edges
+
+  // Start with preferred position (to the right of main window)
+  let proposedX = mainBounds.x + mainBounds.width + 20; // 20px gap from main window
+  let proposedY = mainBounds.y;
+
+  // Only adjust X position if the window would actually go off the screen
+  if (proposedX + windowWidth > screenPosition.x + screenBounds.width) {
+    // Try positioning to the left of main window first
+    const leftPosition = mainBounds.x - windowWidth - 20;
+    if (leftPosition >= screenPosition.x + padding) {
+      // Left position works, use it
+      proposedX = leftPosition;
+    } else {
+      // Neither left nor right fits with gap, position with minimal padding from right edge
+      proposedX = screenPosition.x + screenBounds.width - windowWidth - padding;
+    }
+  }
+
+  // Only adjust Y position if the window would go off screen
+  if (proposedY + windowHeight > screenPosition.y + screenBounds.height) {
+    proposedY = screenPosition.y + screenBounds.height - windowHeight - padding;
+  }
+  
+  if (proposedY < screenPosition.y) {
+    proposedY = screenPosition.y + padding;
+  }
+
+  return { x: proposedX, y: proposedY };
 }

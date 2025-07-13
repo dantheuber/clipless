@@ -4,7 +4,7 @@ import { is } from '@electron-toolkit/utils';
 import { createTray as createTrayIcon } from '../tray';
 import { initializeClipboardSystem } from '../clipboard';
 import { hotkeyManager } from '../hotkeys';
-import { applyWindowSettings, handleWindowFocus, handleWindowBlur } from './settings';
+import { applyWindowSettings, handleWindowFocus, handleWindowBlur, calculateWindowPosition } from './settings';
 import { saveWindowBounds, getWindowBounds } from './bounds';
 import icon from '../../../resources/icon.png?asset';
 
@@ -31,9 +31,18 @@ export function createSettingsWindow(tab?: string): void {
     return;
   }
 
+  // Calculate positioning to keep settings window within screen bounds
+  // This uses minimal padding and allows overlap with main window when needed
+  // to keep the settings window close to the screen edges
+  const settingsWidth = 800;
+  const settingsHeight = 650;
+  const position = calculateWindowPosition(mainWindow, settingsWidth, settingsHeight);
+
   settingsWindow = new BrowserWindow({
-    width: 800,
-    height: 650,
+    width: settingsWidth,
+    height: settingsHeight,
+    x: position?.x,
+    y: position?.y,
     show: false,
     autoHideMenuBar: true,
     resizable: false,
