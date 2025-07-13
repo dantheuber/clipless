@@ -1,7 +1,7 @@
 import { BrowserWindow, shell } from 'electron';
 import { join } from 'path';
 import { is } from '@electron-toolkit/utils';
-import { createTray as createTrayIcon } from '../tray';
+import { createTray as createTrayIcon, getIsQuitting } from '../tray';
 import { initializeClipboardSystem } from '../clipboard';
 import { hotkeyManager } from '../hotkeys';
 import {
@@ -122,7 +122,6 @@ export async function createWindow(): Promise<void> {
 
   // Handle window close - minimize to tray instead of quitting
   mainWindow.on('close', (event) => {
-    const { getIsQuitting } = require('../tray');
     if (!getIsQuitting()) {
       event.preventDefault();
       if (mainWindow) {
