@@ -110,6 +110,18 @@ const api = {
       callback(clipContent)
     ),
   removeAllListeners: (channel: string) => electronAPI.ipcRenderer.removeAllListeners(channel),
+
+  // Native Context Menu APIs
+  showClipContextMenu: (options: {
+    index: number;
+    isFirstClip: boolean;
+    isLocked: boolean;
+    hasPatterns: boolean;
+  }) => electronAPI.ipcRenderer.invoke('show-clip-context-menu', options),
+  onContextMenuAction: (callback: (data: { action: string; index: number }) => void) =>
+    electronAPI.ipcRenderer.on('context-menu-action', (_event, data) => callback(data)),
+  removeContextMenuListeners: () =>
+    electronAPI.ipcRenderer.removeAllListeners('context-menu-action'),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

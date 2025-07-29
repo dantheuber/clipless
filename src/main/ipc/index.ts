@@ -1,9 +1,15 @@
-import { ipcMain } from 'electron';
+import { ipcMain, Menu, MenuItemConstructorOptions } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 import { storage } from '../storage';
 import { hotkeyManager } from '../hotkeys';
-import { getMainWindow, getSettingsWindow, createSettingsWindow, createToolsLauncherWindow, getToolsLauncherWindow } from '../window/creation';
+import {
+  getMainWindow,
+  getSettingsWindow,
+  createSettingsWindow,
+  createToolsLauncherWindow,
+  getToolsLauncherWindow,
+} from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
 import { checkForUpdatesWithRetry } from '../updater';
 
@@ -95,6 +101,59 @@ export function setupMainIPC(): void {
     }
     return null;
   });
+
+  // Context Menu IPC handler
+  ipcMain.handle(
+    'show-clip-context-menu',
+    async (
+      event,
+      options: {
+        index: number;
+        isFirstClip: boolean;
+        isLocked: boolean;
+        hasPatterns: boolean;
+      }
+    ) => {
+      const { index, isFirstClip, isLocked, hasPatterns } = options;
+
+      const template: MenuItemConstructorOptions[] = [
+        {
+          label: 'Copy to Clipboard',
+          click: () => {
+            event.sender.send('context-menu-action', { action: 'copy', index });
+          },
+        },
+        { type: 'separator' },
+        {
+          label: hasPatterns ? 'Scan with Quick Clips ⚡' : 'Scan with Quick Clips',
+          click: () => {
+            event.sender.send('context-menu-action', { action: 'scan', index });
+          },
+        },
+        { type: 'separator' },
+        {
+          label: isLocked ? 'Unlock Clip' : 'Lock Clip',
+          enabled: !isFirstClip,
+          click: () => {
+            event.sender.send('context-menu-action', { action: 'lock', index });
+          },
+        },
+        {
+          label: 'Delete Clip',
+          enabled: !isFirstClip,
+          click: () => {
+            event.sender.send('context-menu-action', { action: 'delete', index });
+          },
+        },
+      ];
+
+      const contextMenu = Menu.buildFromTemplate(template);
+      const window = getMainWindow();
+      if (window) {
+        contextMenu.popup({ window });
+      }
+    }
+  );
 
   ipcMain.handle('download-update', async () => {
     if (!is.dev) {

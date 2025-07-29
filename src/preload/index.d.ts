@@ -74,6 +74,15 @@ declare global {
       toolsLauncherReady: () => Promise<void>;
       onToolsLauncherInitialize: (callback: (clipContent: string) => void) => void;
       removeAllListeners?: (channel: string) => void;
+      // Native Context Menu APIs
+      showClipContextMenu: (options: {
+        index: number;
+        isFirstClip: boolean;
+        isLocked: boolean;
+        hasPatterns: boolean;
+      }) => Promise<void>;
+      onContextMenuAction: (callback: (data: { action: string; index: number }) => void) => void;
+      removeContextMenuListeners: () => void;
     };
   }
 }

@@ -3,8 +3,10 @@ import { useState } from 'react';
 import { ClipItem, useClips } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
 import { usePatternDetection } from '../../../hooks/usePatternDetection';
+import { useContextMenu } from '../../../hooks/useContextMenu';
 import styles from './Clip.module.css';
 import { ClipOptions } from './ClipOptions';
+import { ClipContextMenu } from './ClipContextMenu';
 import { TextClip } from './TextClip';
 import { HtmlClip } from './HtmlClip';
 import { ImageClip } from './ImageClip';
@@ -21,6 +23,7 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
   const { copyClipToClipboard, clipCopyIndex, updateClip } = useClips();
   const { isLight } = useTheme();
   const { hasPatterns } = usePatternDetection(clip.content);
+  const { contextMenu, openContextMenu, closeContextMenu } = useContextMenu();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const handleRowNumberClick = async () => {
@@ -33,6 +36,10 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
 
   const handleEditingChange = (isEditing: boolean) => {
     setIsExpanded(isEditing);
+  };
+
+  const handleContextMenu = (event: React.MouseEvent) => {
+    openContextMenu(event, index);
   };
 
   const renderClipContent = () => {
@@ -63,6 +70,7 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
           { [styles.light]: isLight },
           { [styles.expanded]: isExpanded }
         )}
+        onContextMenu={handleContextMenu}
       >
         <div
           className={classNames(
@@ -93,6 +101,16 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
 
         <ClipOptions index={index} />
       </div>
+
+      {/* Context Menu */}
+      {contextMenu.isOpen && contextMenu.targetIndex === index && (
+        <ClipContextMenu
+          index={index}
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={closeContextMenu}
+        />
+      )}
     </li>
   );
 }
