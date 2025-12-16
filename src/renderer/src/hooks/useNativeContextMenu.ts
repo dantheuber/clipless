@@ -30,7 +30,9 @@ export function useNativeContextMenu({ index }: NativeContextMenuProps) {
           }
           break;
         case 'scan':
-          window.api.openToolsLauncher(clip.content).catch(console.error);
+          if (!isFirstClip) {
+            window.api.openToolsLauncher(clip.content).catch(console.error);
+          }
           break;
       }
     };
@@ -38,7 +40,7 @@ export function useNativeContextMenu({ index }: NativeContextMenuProps) {
     window.api.onContextMenuAction(handleContextMenuAction);
 
     return () => {
-      // Clean up listener if needed
+      window.api.removeContextMenuListeners();
     };
   }, [index, isFirstClip, clip.content, copyClipToClipboard, toggleClipLock, emptyClip]);
 

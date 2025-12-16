@@ -67,7 +67,7 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
 
     document.addEventListener('mousedown', handleClickOutside);
     document.addEventListener('keydown', handleEscape);
-    
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
@@ -122,6 +122,11 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
   };
 
   const handleScanClick = async () => {
+    if (isFirstClip) {
+      onClose();
+      return;
+    }
+
     try {
       await window.api.openToolsLauncher(clip.content);
       onClose();
