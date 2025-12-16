@@ -93,7 +93,7 @@ For now, please know that the security warnings are purely administrative and th
 1. **Install and Run**: Start Clipless and it begins monitoring your clipboard automatically
 2. **Copy Content**: Any content you copy will appear in the Clipless window
 3. **Click to Reuse**: Click on any row number to copy that item back to your clipboard
-4. **Lock Important Items**: Right-click clips to lock them and prevent removal
+4. **Context Menu Actions**: Right-click clips to access Copy, Scan, Lock, and Delete options
 
 ### Quick Clips Workflow
 
