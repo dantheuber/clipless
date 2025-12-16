@@ -7,14 +7,14 @@
 
 .statusCard {
   padding: 1rem;
-  background-color: #374151;
+  background-color: #333333;
   border-radius: 0.5rem;
-  border: 1px solid #4b5563;
+  border: 1px solid #4a4a4a;
 }
 
 .statusCard.light {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+  background-color: #fafafa;
+  border-color: #e5e5e5;
 }
 
 .statusContent {
@@ -59,11 +59,11 @@
 .statusText {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #d1d5db;
+  color: #d4d4d4;
 }
 
 .statusText.light {
-  color: #374151;
+  color: #333333;
 }
 
 .statusValue {
@@ -71,7 +71,7 @@
 }
 
 .statusValue.light {
-  color: #111827;
+  color: #1a1a1a;
 }
 
 .buttonContainer {
@@ -98,25 +98,25 @@
 }
 
 .buttonPrimary {
-  background-color: #2563eb;
+  background-color: #6b7280;
   color: white;
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 .buttonPrimary:hover:not(:disabled) {
-  background-color: #1d4ed8;
+  background-color: #4a4a4a;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .buttonPrimary:disabled {
   background-color: #f3f4f6;
-  color: #9ca3af;
+  color: #a0a0a0;
   cursor: not-allowed;
 }
 
 .buttonPrimary:disabled.dark {
-  background-color: #374151;
-  color: #6b7280;
+  background-color: #333333;
+  color: #666666;
 }
 
 .buttonSuccess {
@@ -147,9 +147,9 @@
 
 .helperText {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #a0a0a0;
 }
 
 .helperText.light {
-  color: #6b7280;
+  color: #666666;
 }

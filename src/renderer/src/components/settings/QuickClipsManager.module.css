@@ -2,10 +2,7 @@
 .container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  min-height: 600px;
   padding: 0.75rem;
-  overflow: hidden;
   background-color: var(--bg-primary);
   border-radius: 0.5rem;
   gap: 0.75rem;
@@ -512,7 +509,7 @@
   display: inline-block;
   width: 1rem;
   height: 1rem;
-  border: 2px solid rgba(59, 130, 246, 0.3);
+  border: 2px solid rgba(107, 114, 128, 0.3);
   border-radius: 50%;
   border-top-color: var(--accent-primary);
   animation: spin 1s ease-in-out infinite;
@@ -538,7 +535,7 @@
 .progressBar {
   width: 100%;
   height: 4px;
-  background-color: rgba(59, 130, 246, 0.2);
+  background-color: rgba(107, 114, 128, 0.2);
   border-radius: 2px;
   overflow: hidden;
   margin: 1rem 0;
@@ -928,9 +925,9 @@
 .builtinSelect {
   background-color: var(--bg-quaternary);
   border: 1px solid var(--border-primary);
-  border-radius: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  border-radius: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
   cursor: pointer;
   min-width: 150px;
   color: var(--text-primary);
@@ -991,7 +988,7 @@
 }
 
 .cancelButton:hover {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
+  background: linear-gradient(135deg, #6b7280, #4a4a4a);
   color: var(--text-inverse);
   transform: translateY(-1px);
   box-shadow: 0 2px 4px rgba(107, 114, 128, 0.3);

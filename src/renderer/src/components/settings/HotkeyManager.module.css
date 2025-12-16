@@ -159,7 +159,11 @@
 }
 
 .toggle input:checked + .slider {
-  background-color: var(--accent-primary);
+  background-color: #10b981;
+}
+
+.toggle.light input:checked + .slider {
+  background-color: #10b981;
 }
 
 .toggle input:checked + .slider:before {
@@ -295,20 +299,30 @@
 .instructions {
   margin-top: 20px;
   padding: 16px;
-  background-color: var(--bg-accent);
+  background-color: rgba(59, 130, 246, 0.15);
   border-radius: 6px;
-  border: 1px solid var(--border-accent);
+  border-left: 4px solid #3b82f6;
+  border-top: 1px solid rgba(59, 130, 246, 0.3);
+  border-right: 1px solid rgba(59, 130, 246, 0.3);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .instructions.light {
-  background-color: var(--bg-accent);
-  border-color: var(--border-accent);
+  background-color: rgba(59, 130, 246, 0.08);
+  border-left-color: #3b82f6;
+  border-top-color: rgba(59, 130, 246, 0.2);
+  border-right-color: rgba(59, 130, 246, 0.2);
+  border-bottom-color: rgba(59, 130, 246, 0.2);
 }
 
 .instructions h3 {
   margin: 0 0 8px 0;
   font-size: 1.1rem;
-  color: var(--accent-primary);
+  color: #60a5fa;
+}
+
+.instructions.light h3 {
+  color: #2563eb;
 }
 
 .instructions ul {

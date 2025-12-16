@@ -292,58 +292,58 @@ export function TemplateManager(): React.JSX.Element {
                 </div>
               ) : (
                 <div className={styles.templateView}>
-                  <div className={styles.templateHeader}>
-                    <div className={styles.templateTitleSection}>
-                      <div className={styles.dragHandle}>
-                        <span className={styles.dragIcon}>⋮⋮</span>
-                      </div>
-                      <h3
-                        className={classNames(styles.templateName, { [styles.light]: isLight })}
-                        onClick={() => handleToggleExpand(template.id)}
-                      >
-                        {template.name}
-                      </h3>
-                      <button
-                        className={classNames(styles.expandButton, { [styles.light]: isLight })}
-                        onClick={() => handleToggleExpand(template.id)}
-                      >
-                        {expandedId === template.id ? '▼' : '▶'}
-                      </button>
+                  <div className={styles.templateTitleSection}>
+                    <div className={styles.dragHandle}>
+                      <span className={styles.dragIcon}>⋮⋮</span>
                     </div>
-                    <div className={styles.templateActions}>
-                      <button
-                        className={classNames(styles.editButton, { [styles.light]: isLight })}
-                        onClick={() => handleStartEdit(template)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className={classNames(styles.deleteButton, { [styles.light]: isLight })}
-                        onClick={() => handleDeleteTemplate(template.id)}
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    <h3
+                      className={classNames(styles.templateName, { [styles.light]: isLight })}
+                      onClick={() => handleToggleExpand(template.id)}
+                    >
+                      {template.name}
+                    </h3>
+                    <button
+                      className={classNames(styles.expandButton, { [styles.light]: isLight })}
+                      onClick={() => handleToggleExpand(template.id)}
+                    >
+                      {expandedId === template.id ? '▼' : '▶'}
+                    </button>
                   </div>
 
                   {expandedId === template.id && (
-                    <div className={styles.templateDetails}>
+                    <div className={classNames(styles.templateDetails, { [styles.light]: isLight })}>
                       <pre
                         className={classNames(styles.templateContent, { [styles.light]: isLight })}
                       >
                         {template.content}
                       </pre>
-                      <div className={styles.tokenPreview}>
-                        <span
-                          className={classNames(styles.tokenLabel, { [styles.light]: isLight })}
-                        >
-                          Tokens:
-                        </span>
-                        {extractTokens(template.content).map((token) => (
-                          <span key={token} className={styles.token}>
-                            {token}
+                      <div className={classNames(styles.templateFooter, { [styles.light]: isLight })}>
+                        <div className={styles.tokenPreview}>
+                          <span
+                            className={classNames(styles.tokenLabel, { [styles.light]: isLight })}
+                          >
+                            Tokens:
                           </span>
-                        ))}
+                          {extractTokens(template.content).map((token) => (
+                            <span key={token} className={styles.token}>
+                              {token}
+                            </span>
+                          ))}
+                        </div>
+                        <div className={styles.templateActions}>
+                          <button
+                            className={classNames(styles.editButton, { [styles.light]: isLight })}
+                            onClick={() => handleStartEdit(template)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className={classNames(styles.deleteButton, { [styles.light]: isLight })}
+                            onClick={() => handleDeleteTemplate(template.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}
