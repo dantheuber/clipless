@@ -12,10 +12,7 @@ export function useNativeContextMenu({ index }: NativeContextMenuProps) {
   const isFirstClip = index === 0;
 
   useEffect(() => {
-    const handleContextMenuAction = (
-      _event: Electron.IpcRendererEvent,
-      data: { action: string; index: number }
-    ) => {
+    const handleContextMenuAction = (data: { action: string; index: number }) => {
       if (data.index !== index) return;
 
       switch (data.action) {
