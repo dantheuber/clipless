@@ -27,7 +27,6 @@ mac:
   target:
     - target: dmg
       arch:
-        - x64
         - arm64
   extendInfo:
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
@@ -62,7 +61,7 @@ dmg:
       type: link
       path: /Applications
   background: null
-  format: UDRO
+  format: UDZO
   internetEnabled: false
 linux:
   target:

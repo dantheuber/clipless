@@ -6,3 +6,4 @@ out
 *.log*
 .env
 electron.vite.config.*.mjs
+.cursor/rules/user
