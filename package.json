@@ -21,8 +21,7 @@
     "postinstall": "electron-builder install-app-deps",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "cleanup:dmg": "osascript -e 'tell application \"Finder\" to close every window whose name contains \"Clipless\"' 2>/dev/null || true; sleep 1; for vol in \"/Volumes/Clipless\"*; do [ -d \"$vol\" ] && hdiutil detach -force \"$vol\" 2>/dev/null || true; done",
-    "build:mac": "npm run cleanup:dmg && electron-vite build && electron-builder --mac",
+    "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
     "release": "electron-builder"
   },
