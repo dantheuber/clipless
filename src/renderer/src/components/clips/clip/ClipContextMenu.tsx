@@ -158,7 +158,7 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
       <div className={styles.separator} />
 
       <div
-        className={classNames(styles.menuItem, { [styles.disabled]: isFirstClip })}
+        className={classNames(styles.menuItem, styles.warning, { [styles.disabled]: isFirstClip })}
         onClick={handleLockClick}
       >
         <FontAwesomeIcon
