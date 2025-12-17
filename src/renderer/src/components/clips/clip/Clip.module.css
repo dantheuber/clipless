@@ -22,7 +22,24 @@
 }
 
 .clipRow.light:hover {
-  background-color: #e8e8e8;
+  background-color: #e0e0e0;
+}
+
+/* Zebra striping for even rows */
+.clip:nth-child(even) .clipRow {
+  background-color: #383838;
+}
+
+.clip:nth-child(even) .clipRow.light {
+  background-color: #f0f0f0;
+}
+
+.clip:nth-child(even) .clipRow:hover {
+  background-color: #505050;
+}
+
+.clip:nth-child(even) .clipRow.light:hover {
+  background-color: #e0e0e0;
 }
 
 .clipRow.expanded {

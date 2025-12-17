@@ -5,22 +5,15 @@
 }
 
 .versionFooter {
-  padding: 0.75rem 0;
   text-align: center;
-  border-top: 1px solid #4b5563;
-  background-color: transparent;
-}
-
-.versionFooter.light {
-  border-top-color: #e5e7eb;
 }
 
 .versionText {
   font-size: 0.875rem;
   font-weight: 500;
-  color: #9ca3af;
+  color: #a0a0a0;
 }
 
 .versionText.light {
-  color: #6b7280;
+  color: #666666;
 }

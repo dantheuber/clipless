@@ -16,16 +16,16 @@
   margin: 0;
   font-size: 1.125rem;
   font-weight: 600;
-  color: #f9fafb;
+  color: #fafafa;
 }
 
 .title.light {
-  color: #111827;
+  color: #1a1a1a;
 }
 
 .createButton {
   padding: 0.5rem 1rem;
-  background-color: #3b82f6;
+  background-color: #6b7280;
   color: white;
   border: none;
   border-radius: 0.375rem;
@@ -36,15 +36,15 @@
 }
 
 .createButton:hover {
-  background-color: #2563eb;
+  background-color: #4a4a4a;
 }
 
 .createButton.light {
-  background-color: #3b82f6;
+  background-color: #6b7280;
 }
 
 .createButton.light:hover {
-  background-color: #2563eb;
+  background-color: #4a4a4a;
 }
 
 .description {
@@ -54,23 +54,23 @@
 .descriptionText {
   margin: 0;
   font-size: 0.875rem;
-  color: #9ca3af;
+  color: #a0a0a0;
   line-height: 1.5;
 }
 
 .descriptionText.light {
-  color: #6b7280;
+  color: #666666;
 }
 
 .emptyState {
   text-align: center;
   padding: 2rem;
-  color: #9ca3af;
+  color: #a0a0a0;
   font-style: italic;
 }
 
 .emptyState.light {
-  color: #6b7280;
+  color: #666666;
 }
 
 .templatesList {
@@ -80,10 +80,10 @@
 }
 
 .templateCard {
-  background-color: #374151;
+  background-color: #333333;
   border-radius: 0.5rem;
   padding: 1rem;
-  border: 1px solid #4b5563;
+  border: 1px solid #4a4a4a;
   transition: all 0.2s ease-in-out;
   cursor: grab;
 }
@@ -93,17 +93,17 @@
 }
 
 .templateCard.light {
-  background-color: #f9fafb;
-  border-color: #e5e7eb;
+  background-color: #fafafa;
+  border-color: #e5e5e5;
 }
 
 .templateCard.editing {
-  border-color: #3b82f6;
+  border-color: #9ca3af;
   cursor: default;
 }
 
 .templateCard.editing.light {
-  border-color: #3b82f6;
+  border-color: #9ca3af;
 }
 
 .templateCard.dragging {
@@ -132,8 +132,12 @@
   flex-direction: column;
   gap: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #4b5563;
+  border-top: 1px solid #4a4a4a;
   margin-top: 0.25rem;
+}
+
+.templateDetails.light {
+  border-top-color: #e5e5e5;
 }
 
 .templateTitleSection {
@@ -149,7 +153,7 @@
   align-items: center;
   cursor: grab;
   padding: 0.25rem;
-  color: #9ca3af;
+  color: #a0a0a0;
   user-select: none;
 }
 
@@ -170,7 +174,7 @@
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: #f9fafb;
+  color: #fafafa;
   cursor: pointer;
   flex: 1;
   min-width: 0;
@@ -180,21 +184,21 @@
 }
 
 .templateName:hover {
-  color: #3b82f6;
+  color: #a0a0a0;
 }
 
 .templateName.light {
-  color: #111827;
+  color: #1a1a1a;
 }
 
 .templateName.light:hover {
-  color: #3b82f6;
+  color: #666666;
 }
 
 .expandButton {
   background: none;
   border: none;
-  color: #9ca3af;
+  color: #a0a0a0;
   font-size: 0.875rem;
   cursor: pointer;
   padding: 0.25rem;
@@ -203,20 +207,21 @@
 }
 
 .expandButton:hover {
-  color: #d1d5db;
+  color: #d4d4d4;
 }
 
 .expandButton.light {
-  color: #6b7280;
+  color: #666666;
 }
 
 .expandButton.light:hover {
-  color: #374151;
+  color: #4a4a4a;
 }
 
 .templateActions {
   display: flex;
   gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .editButton,
@@ -235,22 +240,24 @@
 .editButton {
   background-color: transparent;
   border-color: #6b7280;
-  color: #d1d5db;
+  color: #d4d4d4;
 }
 
 .editButton:hover {
-  border-color: #9ca3af;
-  color: #f9fafb;
+  background-color: #6b7280;
+  border-color: #6b7280;
+  color: white;
 }
 
 .editButton.light {
   border-color: #9ca3af;
-  color: #374151;
+  color: #333333;
 }
 
 .editButton.light:hover {
+  background-color: #6b7280;
   border-color: #6b7280;
-  color: #111827;
+  color: white;
 }
 
 .deleteButton {
@@ -288,17 +295,17 @@
 .cancelButton {
   background-color: transparent;
   border-color: #6b7280;
-  color: #d1d5db;
+  color: #d4d4d4;
 }
 
 .cancelButton:hover {
   border-color: #9ca3af;
-  background-color: #374151;
+  background-color: #333333;
 }
 
 .cancelButton.light {
   border-color: #9ca3af;
-  color: #374151;
+  color: #333333;
 }
 
 .cancelButton.light:hover {
@@ -307,23 +314,23 @@
 }
 
 .templateContent {
-  background-color: #1f2937;
+  background-color: #262626;
   border-radius: 0.375rem;
   padding: 0.75rem;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
   font-size: 0.875rem;
   line-height: 1.5;
-  color: #d1d5db;
+  color: #d4d4d4;
   white-space: pre-wrap;
   word-wrap: break-word;
   margin: 0;
-  border: 1px solid #374151;
+  border: 1px solid #3a3a3a;
 }
 
 .templateContent.light {
-  background-color: #f8fafc;
-  color: #374151;
-  border-color: #e2e8f0;
+  background-color: #e8e8e8;
+  color: #333333;
+  border-color: #d4d4d4;
 }
 
 .editForm {
@@ -334,31 +341,31 @@
 
 .nameInput {
   padding: 0.5rem;
-  background-color: #1f2937;
-  border: 1px solid #374151;
+  background-color: #262626;
+  border: 1px solid #3a3a3a;
   border-radius: 0.375rem;
-  color: #f9fafb;
+  color: #fafafa;
   font-size: 0.875rem;
 }
 
 .nameInput.light {
   background-color: white;
-  border-color: #d1d5db;
-  color: #111827;
+  border-color: #d4d4d4;
+  color: #1a1a1a;
 }
 
 .nameInput:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 1px #9ca3af;
 }
 
 .contentTextarea {
   padding: 0.75rem;
-  background-color: #1f2937;
-  border: 1px solid #374151;
+  background-color: #262626;
+  border: 1px solid #3a3a3a;
   border-radius: 0.375rem;
-  color: #f9fafb;
+  color: #fafafa;
   font-size: 0.875rem;
   font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
   line-height: 1.5;
@@ -368,14 +375,27 @@
 
 .contentTextarea.light {
   background-color: white;
-  border-color: #d1d5db;
-  color: #111827;
+  border-color: #d4d4d4;
+  color: #1a1a1a;
 }
 
 .contentTextarea:focus {
   outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 1px #3b82f6;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 1px #9ca3af;
+}
+
+.templateFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #4a4a4a;
+}
+
+.templateFooter.light {
+  border-top-color: #e5e5e5;
 }
 
 .tokenPreview {
@@ -383,20 +403,22 @@
   align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .tokenLabel {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #a0a0a0;
   font-weight: 500;
 }
 
 .tokenLabel.light {
-  color: #6b7280;
+  color: #666666;
 }
 
 .token {
-  background-color: #3b82f6;
+  background-color: #6b7280;
   color: white;
   padding: 0.125rem 0.375rem;
   border-radius: 0.25rem;
