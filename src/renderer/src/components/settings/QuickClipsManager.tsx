@@ -120,7 +120,7 @@ export function QuickClipsManager(): React.JSX.Element {
   // Search Terms handlers
   const handleCreateSearchTerm = async () => {
     try {
-      const newTerm = await window.api.searchTermsCreate('New Search Term', '(?<value>.*)');
+      const newTerm = await window.api.searchTermsCreate('New Search Term', '(?<value>my_pattern)');
       setSearchTerms((prev) => [...prev, newTerm]);
       setEditingSearchTermId(newTerm.id);
       setEditingSearchTermName(newTerm.name);

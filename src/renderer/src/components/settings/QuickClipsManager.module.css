@@ -449,6 +449,31 @@
   box-shadow: var(--focus-ring);
 }
 
+.patternValidationError {
+  color: var(--error-color);
+  background-color: var(--bg-error);
+  border: 1px solid var(--border-error);
+  border-radius: 0.25rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.saveButton:disabled {
+  background: var(--text-tertiary);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  opacity: 0.6;
+}
+
+.saveButton:disabled:hover {
+  background: var(--text-tertiary);
+  transform: none;
+  box-shadow: none;
+}
+
 /* Enhanced Form Validation States */
 .nameInput.valid,
 .urlInput.valid,
