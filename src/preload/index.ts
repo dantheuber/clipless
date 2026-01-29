@@ -109,6 +109,9 @@ const api = {
     electronAPI.ipcRenderer.on('tools-launcher-initialize', (_event, clipContent) =>
       callback(clipContent)
     ),
+  onToggleSearch: (callback: () => void) =>
+    electronAPI.ipcRenderer.on('toggle-search', () => callback()),
+  removeToggleSearchListeners: () => electronAPI.ipcRenderer.removeAllListeners('toggle-search'),
   removeAllListeners: (channel: string) => electronAPI.ipcRenderer.removeAllListeners(channel),
 
   // Native Context Menu APIs

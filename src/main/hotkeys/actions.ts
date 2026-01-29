@@ -120,6 +120,30 @@ export class HotkeyActions {
   }
 
   /**
+   * Toggle search bar in the main window
+   */
+  toggleSearchBar(): void {
+    if (!this.mainWindow) return;
+
+    try {
+      if (!this.mainWindow.isVisible() || this.mainWindow.isMinimized()) {
+        if (this.mainWindow.isMinimized()) {
+          this.mainWindow.restore();
+        }
+        this.mainWindow.show();
+        this.mainWindow.focus();
+        if (process.platform === 'darwin') {
+          require('electron').app.focus();
+        }
+      }
+
+      this.mainWindow.webContents.send('toggle-search');
+    } catch (error) {
+      console.error('Error toggling search bar:', error);
+    }
+  }
+
+  /**
    * Open tools launcher for the first (most recent) clip
    */
   async openToolsLauncher(): Promise<void> {

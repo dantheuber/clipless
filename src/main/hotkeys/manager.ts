@@ -55,6 +55,9 @@ export class HotkeyManager {
 
       // Register tools launcher hotkey
       this.registerToolsLauncherHotkey(hotkeys);
+
+      // Register search clips hotkey
+      this.registerSearchHotkey(hotkeys);
     } catch (error) {
       console.error('Failed to register hotkeys:', error);
     }
@@ -106,6 +109,22 @@ export class HotkeyManager {
       );
       this.registry.registerHotkey(toolsLauncherConfig.key, () => {
         this.actions.openToolsLauncher();
+      });
+    }
+  }
+
+  private registerSearchHotkey(hotkeys: any): void {
+    const searchConfig = hotkeys.searchClips || {
+      enabled: true,
+      key: 'CommandOrControl+Shift+F',
+    };
+
+    if (searchConfig.enabled) {
+      console.log(
+        `Hotkey Manager: Attempting to register search clips hotkey: ${searchConfig.key}`
+      );
+      this.registry.registerHotkey(searchConfig.key, () => {
+        this.actions.toggleSearchBar();
       });
     }
   }
