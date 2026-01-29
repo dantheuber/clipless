@@ -49,6 +49,7 @@ export interface HotkeySettings {
   quickClip4: HotkeyConfig;
   quickClip5: HotkeyConfig;
   openToolsLauncher: HotkeyConfig;
+  searchClips: HotkeyConfig;
 }
 
 /**

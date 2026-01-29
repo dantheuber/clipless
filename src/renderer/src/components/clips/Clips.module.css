@@ -24,3 +24,16 @@
   padding: 0;
   list-style: none;
 }
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.emptyState.light {
+  color: #999;
+}

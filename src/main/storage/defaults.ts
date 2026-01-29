@@ -31,6 +31,10 @@ export const DEFAULT_HOTKEY_SETTINGS: HotkeySettings = {
     enabled: true,
     key: 'CommandOrControl+Shift+T',
   },
+  searchClips: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+F',
+  },
 };
 
 export const DEFAULT_SETTINGS: UserSettings = {

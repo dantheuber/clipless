@@ -3,6 +3,7 @@ import { ClipsProvider } from './providers/clips';
 import { ThemeProvider, useTheme } from './providers/theme';
 import { LanguageDetectionProvider } from './providers/languageDetection';
 import { StatusBar } from './components/StatusBar';
+import { SearchBar } from './components/SearchBar';
 import classNames from 'classnames';
 import styles from './App.module.css';
 
@@ -17,6 +18,7 @@ function AppContent(): React.JSX.Element {
           <div className={styles.mainContent}>
             <Clips />
           </div>
+          <SearchBar />
           <StatusBar />
         </ClipsProvider>
       </LanguageDetectionProvider>

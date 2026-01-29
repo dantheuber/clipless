@@ -73,6 +73,8 @@ declare global {
       closeToolsLauncher: () => Promise<void>;
       toolsLauncherReady: () => Promise<void>;
       onToolsLauncherInitialize: (callback: (clipContent: string) => void) => void;
+      onToggleSearch: (callback: () => void) => void;
+      removeToggleSearchListeners: () => void;
       removeAllListeners?: (channel: string) => void;
       // Native Context Menu APIs
       showClipContextMenu: (options: {

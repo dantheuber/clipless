@@ -34,6 +34,11 @@ export type ClipsContextType = {
   updateClip: (index: number, updatedClip: ClipItem) => void;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
+  searchTerm: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  isSearchVisible: boolean;
+  setIsSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  filteredClips: { clip: ClipItem; originalIndex: number }[];
 };
 
 /**

@@ -59,3 +59,35 @@
 .settingsButton.light:hover {
   background-color: #e0e0e0;
 }
+
+.searchToggleButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 0.25rem;
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.searchToggleButton:hover {
+  background-color: #404040;
+}
+
+.searchToggleButton.light:hover {
+  background-color: #e0e0e0;
+}
+
+.searchToggleButton.active {
+  background-color: #404040;
+  color: #6a9ef5;
+}
+
+.searchToggleButton.active.light {
+  background-color: #e0e0e0;
+  color: #4a8af5;
+}

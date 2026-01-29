@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, useRef } from 'react';
+import { createContext, useContext, useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { useLanguageDetection } from '../languageDetection';
 import { ClipItem, ClipsContextType, ClipboardState } from './types';
@@ -20,6 +20,10 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
   // track locked clips by their index with boolean values
   const [lockedClips, setLockedClips] = useState<Record<number, boolean>>({});
+
+  // Search state
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [isSearchVisible, setIsSearchVisible] = useState<boolean>(false);
 
   // Track if we're still loading initial data to prevent saves during load
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
@@ -77,6 +81,59 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     lastCopiedContentRef
   );
 
+  // Listen for toggle-search IPC from main process
+  const toggleSearch = useCallback(() => {
+    setIsSearchVisible((prev) => !prev);
+  }, []);
+
+  useEffect(() => {
+    if (window.api?.onToggleSearch) {
+      window.api.onToggleSearch(toggleSearch);
+    }
+    return () => {
+      if (window.api?.removeToggleSearchListeners) {
+        window.api.removeToggleSearchListeners();
+      }
+    };
+  }, [toggleSearch]);
+
+  // Reset search state when window is hidden
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        setIsSearchVisible(false);
+        setSearchTerm('');
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, []);
+
+  // Filter clips based on search term
+  const filteredClips = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) {
+      return clips.map((clip, index) => ({ clip, originalIndex: index }));
+    }
+    return clips.reduce<{ clip: ClipItem; originalIndex: number }[]>((acc, clip, index) => {
+      if (clip.type === 'image') return acc;
+      if (clip.type === 'bookmark') {
+        if (
+          clip.content.toLowerCase().includes(term) ||
+          (clip.title && clip.title.toLowerCase().includes(term)) ||
+          (clip.url && clip.url.toLowerCase().includes(term))
+        ) {
+          acc.push({ clip, originalIndex: index });
+        }
+        return acc;
+      }
+      if (clip.content.toLowerCase().includes(term)) {
+        acc.push({ clip, originalIndex: index });
+      }
+      return acc;
+    }, []);
+  }, [clips, searchTerm]);
+
   const providerValue = useMemo(
     () => ({
       // clips management
@@ -96,6 +153,12 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       // max clips management
       setMaxClips,
       maxClips,
+      // search
+      searchTerm,
+      setSearchTerm,
+      isSearchVisible,
+      setIsSearchVisible,
+      filteredClips,
     }),
     [
       clips,
@@ -111,6 +174,11 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       clipCopyIndex,
       setMaxClips,
       maxClips,
+      searchTerm,
+      setSearchTerm,
+      isSearchVisible,
+      setIsSearchVisible,
+      filteredClips,
     ]
   );
 

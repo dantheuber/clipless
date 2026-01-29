@@ -11,7 +11,7 @@ interface StatusBarProps {
 }
 
 export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
-  const { clips, maxClips, isClipLocked } = useClips();
+  const { clips, maxClips, isClipLocked, isSearchVisible, setIsSearchVisible } = useClips();
   const { isLight } = useTheme();
 
   // Count non-empty clips
@@ -51,6 +51,14 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
       </div>
 
       <div className={styles.rightSection}>
+        <button
+          onClick={() => setIsSearchVisible((prev) => !prev)}
+          className={classNames(styles.searchToggleButton, { [styles.light]: isLight, [styles.active]: isSearchVisible })}
+          title="Search/Filter Clips (Ctrl+Shift+F)"
+        >
+          <FontAwesomeIcon icon="search" className={styles.icon} />
+        </button>
+
         <TemplateSelector />
 
         <button

@@ -32,6 +32,10 @@ export const defaultHotkeySettings: HotkeySettings = {
     enabled: true,
     key: 'CommandOrControl+Shift+T',
   },
+  searchClips: {
+    enabled: true,
+    key: 'CommandOrControl+Shift+F',
+  },
 };
 
 export const hotkeyDescriptions = {
@@ -42,6 +46,7 @@ export const hotkeyDescriptions = {
   quickClip4: 'Copy 4th Clip',
   quickClip5: 'Copy 5th Clip',
   openToolsLauncher: 'Open Tools Launcher for Latest Clip',
+  searchClips: 'Search/Filter Clips',
 };
 
 export const useHotkeyManager = () => {
