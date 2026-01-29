@@ -161,10 +161,12 @@ export const exportQuickClipsConfig = async () => {
   try {
     const searchTerms = await storage.getSearchTerms();
     const tools = await storage.getQuickTools();
+    const templates = await storage.getTemplates();
 
     return {
       searchTerms,
       tools,
+      templates,
       version: '1.0.0',
     };
   } catch (error) {

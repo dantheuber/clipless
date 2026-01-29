@@ -277,6 +277,23 @@
   width: 100%;
 }
 
+.templateButton {
+  background: none;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+
+.templateButton:hover {
+  opacity: 0.8;
+}
+
+.templateButton:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 .toolDetails {
   flex: 1;
   display: flex;
@@ -301,6 +318,60 @@
   color: var(--text-tertiary);
   font-size: 0.675rem;
   font-style: italic;
+}
+
+/* Accordion */
+.accordionSection {
+  border: 1px solid var(--border-secondary);
+  border-radius: 0.375rem;
+  overflow: hidden;
+}
+
+.accordionSection + .accordionSection {
+  margin-top: 0.5rem;
+}
+
+.accordionHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  background-color: var(--bg-secondary);
+  border: none;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.15s ease;
+}
+
+.accordionHeader:hover {
+  background-color: var(--bg-accent);
+}
+
+.accordionChevron {
+  font-size: 0.625rem;
+  transition: transform 0.2s ease;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  width: 0.75rem;
+}
+
+.accordionChevronOpen {
+  transform: rotate(90deg);
+}
+
+.accordionIcon {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.accordionBody {
+  padding: 0.5rem;
+  border-top: 1px solid var(--border-secondary);
 }
 
 /* Footer */

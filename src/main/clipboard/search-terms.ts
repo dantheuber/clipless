@@ -1,6 +1,25 @@
 import { storage } from '../storage';
 import type { PatternMatch } from '../../shared/types';
 
+const RESERVED_GROUP_NAME = /^c\d+$/;
+
+/**
+ * Validate that named capture groups in a pattern don't use reserved names (c1, c2, etc.)
+ * These names conflict with positional template tokens.
+ */
+function validateCaptureGroupNames(pattern: string): void {
+  const groupNameRegex = /\(\?<(\w+)>/g;
+  let match;
+  while ((match = groupNameRegex.exec(pattern)) !== null) {
+    const name = match[1];
+    if (RESERVED_GROUP_NAME.test(name)) {
+      throw new Error(
+        `Capture group name "${name}" is reserved. Names matching "c" followed by digits (c1, c2, etc.) conflict with positional template tokens.`
+      );
+    }
+  }
+}
+
 // Search terms management functions
 export const getAllSearchTerms = async () => {
   try {
@@ -13,6 +32,7 @@ export const getAllSearchTerms = async () => {
 
 export const createSearchTerm = async (name: string, pattern: string) => {
   try {
+    validateCaptureGroupNames(pattern);
     return await storage.createSearchTerm(name, pattern);
   } catch (error) {
     console.error('Failed to create search term:', error);
@@ -22,6 +42,9 @@ export const createSearchTerm = async (name: string, pattern: string) => {
 
 export const updateSearchTerm = async (id: string, updates: any) => {
   try {
+    if (updates.pattern) {
+      validateCaptureGroupNames(updates.pattern);
+    }
     return await storage.updateSearchTerm(id, updates);
   } catch (error) {
     console.error('Failed to update search term:', error);

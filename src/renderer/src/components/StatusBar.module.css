@@ -39,28 +39,7 @@
   height: 1rem;
 }
 
-.settingsButton {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  background: transparent;
-  border: none;
-  color: inherit;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.settingsButton:hover {
-  background-color: #404040;
-}
-
-.settingsButton.light:hover {
-  background-color: #e0e0e0;
-}
-
-.searchToggleButton {
+.iconButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,20 +53,20 @@
   transition: background-color 0.2s ease;
 }
 
-.searchToggleButton:hover {
+.iconButton:hover {
   background-color: #404040;
 }
 
-.searchToggleButton.light:hover {
+.iconButton.light:hover {
   background-color: #e0e0e0;
 }
 
-.searchToggleButton.active {
+.iconButton.active {
   background-color: #404040;
   color: #6a9ef5;
 }
 
-.searchToggleButton.active.light {
+.iconButton.active.light {
   background-color: #e0e0e0;
   color: #4a8af5;
 }

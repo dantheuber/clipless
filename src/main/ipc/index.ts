@@ -125,7 +125,7 @@ export function setupMainIPC(): void {
         },
         { type: 'separator' },
         {
-          label: hasPatterns ? 'Scan with Quick Clips ⚡' : 'Scan with Quick Clips',
+          label: hasPatterns ? 'Open Tools Launcher ⚡' : 'Open Tools Launcher',
           click: () => {
             event.sender.send('context-menu-action', { action: 'scan', index });
           },

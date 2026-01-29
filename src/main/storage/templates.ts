@@ -50,14 +50,49 @@ export function reorderTemplatesArray(templates: Template[]): Template[] {
 }
 
 /**
- * Generate text from template using clipboard contents
+ * Extract template tokens into positional ({c1}) and named ({groupName}) categories.
  */
-export function generateTextFromTemplate(template: Template, clipContents: string[]): string {
+export function extractTemplateTokens(content: string): {
+  positional: string[];
+  named: string[];
+} {
+  const positional: string[] = [];
+  const named: string[] = [];
+  const tokenRegex = /\{(\w+)\}/g;
+  let match;
+
+  while ((match = tokenRegex.exec(content)) !== null) {
+    const token = match[1];
+    if (/^c\d+$/.test(token)) {
+      if (!positional.includes(token)) positional.push(token);
+    } else {
+      if (!named.includes(token)) named.push(token);
+    }
+  }
+
+  return { positional, named };
+}
+
+/**
+ * Generate text from template using clipboard contents and optional named captures.
+ */
+export function generateTextFromTemplate(
+  template: Template,
+  clipContents: string[],
+  captures?: Record<string, string>
+): string {
   let result = template.content;
 
-  // Replace all {c#} tokens with corresponding clip contents
-  const tokenRegex = /\{c(\d+)\}/g;
-  result = result.replace(tokenRegex, (match, clipIndex) => {
+  // First pass: replace named capture group tokens (skip positional {c\d+} tokens)
+  if (captures) {
+    result = result.replace(/\{(\w+)\}/g, (match, tokenName) => {
+      if (/^c\d+$/.test(tokenName)) return match; // skip positional
+      return tokenName in captures ? captures[tokenName] : match;
+    });
+  }
+
+  // Second pass: replace positional {c#} tokens with clip contents
+  result = result.replace(/\{c(\d+)\}/g, (match, clipIndex) => {
     const index = parseInt(clipIndex) - 1; // Convert to 0-based index
     return index >= 0 && index < clipContents.length ? clipContents[index] : match;
   });

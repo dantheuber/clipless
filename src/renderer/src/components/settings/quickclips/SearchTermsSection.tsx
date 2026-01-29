@@ -94,6 +94,15 @@ function validatePattern(pattern: string): string | null {
       return 'Pattern must contain at least one named capture group, e.g. (?<value>...).';
     }
 
+    // Check 4: reserved capture group names (c1, c2, etc.)
+    const groupNameRegex = /\(\?<(\w+)>/g;
+    let groupMatch;
+    while ((groupMatch = groupNameRegex.exec(pattern)) !== null) {
+      if (/^c\d+$/.test(groupMatch[1])) {
+        return `Capture group name "${groupMatch[1]}" is reserved. Names like c1, c2, etc. conflict with positional template tokens.`;
+      }
+    }
+
     return null;
   } catch {
     return 'Invalid regular expression.';

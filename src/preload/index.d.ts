@@ -45,7 +45,11 @@ declare global {
       templatesUpdate: (id: string, updates: any) => Promise<any>;
       templatesDelete: (id: string) => Promise<void>;
       templatesReorder: (templates: any[]) => Promise<void>;
-      templatesGenerateText: (templateId: string, clipContents: string[]) => Promise<string>;
+      templatesGenerateText: (
+        templateId: string,
+        clipContents: string[],
+        captures?: Record<string, string>
+      ) => Promise<string>;
       // Quick Clips - Search Terms APIs
       searchTermsGetAll: () => Promise<any[]>;
       searchTermsCreate: (name: string, pattern: string) => Promise<any>;

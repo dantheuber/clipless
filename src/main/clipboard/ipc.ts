@@ -120,8 +120,8 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   );
   ipcMain.handle(
     'templates-generate-text',
-    async (_event, templateId: string, clipContents: string[]) =>
-      generateTextFromTemplate(templateId, clipContents)
+    async (_event, templateId: string, clipContents: string[], captures?: Record<string, string>) =>
+      generateTextFromTemplate(templateId, clipContents, captures)
   );
 
   // Search terms IPC handlers

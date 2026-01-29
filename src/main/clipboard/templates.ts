@@ -46,9 +46,13 @@ export const reorderTemplates = async (templates: any[]) => {
   }
 };
 
-export const generateTextFromTemplate = async (templateId: string, clipContents: string[]) => {
+export const generateTextFromTemplate = async (
+  templateId: string,
+  clipContents: string[],
+  captures?: Record<string, string>
+) => {
   try {
-    return await storage.generateTextFromTemplate(templateId, clipContents);
+    return await storage.generateTextFromTemplate(templateId, clipContents, captures);
   } catch (error) {
     console.error('Failed to generate text from template:', error);
     throw error;

@@ -324,7 +324,11 @@ class SecureStorage {
   /**
    * Generate text from template using clipboard contents
    */
-  async generateTextFromTemplate(templateId: string, clipContents: string[]): Promise<string> {
+  async generateTextFromTemplate(
+    templateId: string,
+    clipContents: string[],
+    captures?: Record<string, string>
+  ): Promise<string> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -334,7 +338,7 @@ class SecureStorage {
       throw new Error('Template not found');
     }
 
-    return generateTextFromTemplate(template, clipContents);
+    return generateTextFromTemplate(template, clipContents, captures);
   }
 
   // ===== SEARCH TERMS MANAGEMENT =====
@@ -538,6 +542,23 @@ class SecureStorage {
             ? Math.max(...this.data.quickTools.map((t) => t.order)) + 1
             : 0;
         this.data.quickTools.push(quickTool);
+      });
+      hasChanges = true;
+    }
+
+    // Add templates (backwards-compatible: missing templates array is fine)
+    if (config.templates && Array.isArray(config.templates) && config.templates.length > 0) {
+      config.templates.forEach((template: any) => {
+        if (template.id && template.name && template.content) {
+          const newTemplate = {
+            ...template,
+            order:
+              this.data.templates.length > 0
+                ? Math.max(...this.data.templates.map((t) => t.order)) + 1
+                : 0,
+          };
+          this.data.templates.push(newTemplate);
+        }
       });
       hasChanges = true;
     }

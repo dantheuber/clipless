@@ -7,12 +7,11 @@ import { ThemeProvider, useTheme } from './providers/theme';
 import { LanguageDetectionProvider } from './providers/languageDetection';
 import { StorageSettings } from './components/settings/StorageSettings';
 import { UserSettings } from './components/settings/UserSettings';
-import { TemplateManager } from './components/settings/TemplateManager';
-import { QuickClipsManager } from './components/settings/QuickClipsManager';
+import { ToolsManager } from './components/settings/ToolsManager';
 import HotkeyManager from './components/settings/HotkeyManager';
 import styles from './Settings.module.css';
 
-type TabType = 'general' | 'templates' | 'quickClips' | 'hotkeys';
+type TabType = 'general' | 'tools' | 'hotkeys';
 
 interface Tab {
   id: TabType;
@@ -23,9 +22,17 @@ interface Tab {
 const tabs: Tab[] = [
   { id: 'general', label: 'General' },
   { id: 'hotkeys', label: 'Hotkeys' },
-  { id: 'templates', label: 'Templates' },
-  { id: 'quickClips', label: 'Quick Clips' },
+  { id: 'tools', label: 'Tools' },
 ];
+
+// Map legacy tab params to new tab
+const TAB_PARAM_MAP: Record<string, TabType> = {
+  general: 'general',
+  hotkeys: 'hotkeys',
+  tools: 'tools',
+  templates: 'tools',
+  quickClips: 'tools',
+};
 
 function SettingsContent(): React.JSX.Element {
   const { isLight } = useTheme();
@@ -34,9 +41,12 @@ function SettingsContent(): React.JSX.Element {
   // Check for URL parameters to set initial tab
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab') as TabType;
-    if (tabParam && tabs.some((tab) => tab.id === tabParam)) {
-      setActiveTab(tabParam);
+    const tabParam = urlParams.get('tab');
+    if (tabParam) {
+      const mappedTab = TAB_PARAM_MAP[tabParam];
+      if (mappedTab) {
+        setActiveTab(mappedTab);
+      }
     }
   }, []);
 
@@ -67,20 +77,11 @@ function SettingsContent(): React.JSX.Element {
           </div>
         );
 
-      case 'templates':
+      case 'tools':
         return (
           <div className={styles.grid}>
             <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <TemplateManager />
-            </section>
-          </div>
-        );
-
-      case 'quickClips':
-        return (
-          <div className={styles.grid}>
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <QuickClipsManager />
+              <ToolsManager />
             </section>
           </div>
         );

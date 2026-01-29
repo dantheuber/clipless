@@ -26,6 +26,10 @@ import {
   faChevronUp,
   faInfoCircle,
   faTimes,
+  faRocket,
+  faChevronRight,
+  faFileLines,
+  faGear,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -54,5 +58,9 @@ library.add(
   faSpinner,
   faChevronUp,
   faInfoCircle,
-  faTimes
+  faTimes,
+  faRocket,
+  faChevronRight,
+  faFileLines,
+  faGear
 );
