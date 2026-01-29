@@ -65,6 +65,41 @@ interface SearchTermsSectionProps {
   onExpandedSearchTermIdChange: (id: string | null) => void;
 }
 
+const SAMPLE_TEXT =
+  'The quick brown fox jumps over the lazy dog. Hello world! Test 123 abc xyz.';
+
+function validatePattern(pattern: string): string | null {
+  if (!pattern.trim()) {
+    return 'Pattern cannot be empty.';
+  }
+
+  try {
+    const regex = new RegExp(pattern, 'g');
+
+    // Check 1: matches empty string
+    if (regex.test('')) {
+      return 'This pattern matches empty strings and will match everything.';
+    }
+
+    // Check 2: excessive matches on sample text
+    regex.lastIndex = 0;
+    const matches = SAMPLE_TEXT.match(regex);
+    if (matches && matches.length > 20) {
+      return `This pattern produces too many matches (${matches.length} on a short sample). It will likely match all clipboard content.`;
+    }
+
+    // Check 3: no named capture groups
+    const hasNamedGroup = /\(\?<\w+>/.test(pattern);
+    if (!hasNamedGroup) {
+      return 'Pattern must contain at least one named capture group, e.g. (?<value>...).';
+    }
+
+    return null;
+  } catch {
+    return 'Invalid regular expression.';
+  }
+}
+
 export function SearchTermsSection({
   searchTerms,
   editingSearchTermId,
@@ -173,30 +208,41 @@ export function SearchTermsSection({
                     placeholder="Regular expression with named capture groups"
                     rows={3}
                   />
-                  <div className={styles.captureGroupsPreview}>
-                    <span className={classNames(styles.label, { [styles.light]: isLight })}>
-                      Capture Groups:
-                    </span>
-                    {extractCaptureGroups(editingSearchTermPattern).map((group) => (
-                      <span key={group} className={styles.captureGroup}>
-                        {group}
-                      </span>
-                    ))}
-                  </div>
-                  <div className={styles.editActions}>
-                    <button
-                      className={classNames(styles.saveButton, { [styles.light]: isLight })}
-                      onClick={onSaveSearchTerm}
-                    >
-                      Save
-                    </button>
-                    <button
-                      className={classNames(styles.cancelButton, { [styles.light]: isLight })}
-                      onClick={onCancelSearchTermEdit}
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  {(() => {
+                    const validationError = validatePattern(editingSearchTermPattern);
+                    return (
+                      <>
+                        {validationError && (
+                          <div className={styles.patternValidationError}>{validationError}</div>
+                        )}
+                        <div className={styles.captureGroupsPreview}>
+                          <span className={classNames(styles.label, { [styles.light]: isLight })}>
+                            Capture Groups:
+                          </span>
+                          {extractCaptureGroups(editingSearchTermPattern).map((group) => (
+                            <span key={group} className={styles.captureGroup}>
+                              {group}
+                            </span>
+                          ))}
+                        </div>
+                        <div className={styles.editActions}>
+                          <button
+                            className={classNames(styles.saveButton, { [styles.light]: isLight })}
+                            onClick={onSaveSearchTerm}
+                            disabled={!!validationError}
+                          >
+                            Save
+                          </button>
+                          <button
+                            className={classNames(styles.cancelButton, { [styles.light]: isLight })}
+                            onClick={onCancelSearchTermEdit}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </>
+                    );
+                  })()}
                 </div>
               ) : (
                 <div className={styles.itemView}>
