@@ -157,7 +157,7 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
         onClick={handleScanClick}
       >
         <FontAwesomeIcon icon="search" className={styles.menuIcon} />
-        <span>{hasPatterns ? 'Scan with Quick Clips ⚡' : 'Scan with Quick Clips'}</span>
+        <span>{hasPatterns ? 'Open Tools Launcher ⚡' : 'Open Tools Launcher'}</span>
       </div>
 
       <div className={styles.separator} />

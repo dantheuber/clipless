@@ -91,7 +91,7 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
           {hasPatterns && (
             <div
               className={classNames(styles.patternIndicator, { [styles.light]: isLight })}
-              title="Quick Clips patterns detected"
+              title="Patterns detected"
             >
               <FontAwesomeIcon icon="search" />
             </div>

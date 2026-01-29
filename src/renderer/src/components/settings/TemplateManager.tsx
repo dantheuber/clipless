@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { Template } from '../../../../shared/types';
 import { useTheme } from '../../providers/theme';
 import { ConfirmDialog } from '../ConfirmDialog';
+import { InfoTooltip } from './quickclips/InfoTooltip';
 import styles from './TemplateManager.module.css';
 
 const DEFAULT_TEMPLATE_CONTENT = `Customer Name: {c1}
@@ -193,7 +194,7 @@ export function TemplateManager(): React.JSX.Element {
   };
 
   const extractTokens = (content: string): string[] => {
-    const tokenRegex = /\{c(\d+)\}/g;
+    const tokenRegex = /\{(\w+)\}/g;
     const tokens: string[] = [];
     let match;
 
@@ -203,26 +204,39 @@ export function TemplateManager(): React.JSX.Element {
       }
     }
 
-    return tokens.sort();
+    // Sort positional tokens ({c1}, {c2}) first, then named tokens alphabetically
+    return tokens.sort((a, b) => {
+      const aIsPositional = /^\{c\d+\}$/.test(a);
+      const bIsPositional = /^\{c\d+\}$/.test(b);
+      if (aIsPositional && !bIsPositional) return -1;
+      if (!aIsPositional && bIsPositional) return 1;
+      return a.localeCompare(b);
+    });
   };
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={classNames(styles.title, { [styles.light]: isLight })}>Text Templates</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 className={classNames(styles.title, { [styles.light]: isLight })}>Text Templates</h2>
+          <InfoTooltip
+            content={
+              <>
+                Use <code>{'{c1}'}</code>, <code>{'{c2}'}</code>, etc. to insert content from your
+                clipboard entries. You can also use named capture groups from your search terms as
+                tokens — e.g. <code>{'{email}'}</code> or <code>{'{phoneNumber}'}</code> — and
+                matching templates will appear in the Tools Launcher when those patterns are
+                detected.
+              </>
+            }
+          />
+        </div>
         <button
           className={classNames(styles.createButton, { [styles.light]: isLight })}
           onClick={handleCreateTemplate}
         >
           Create Template
         </button>
-      </div>
-
-      <div className={styles.description}>
-        <p className={classNames(styles.descriptionText, { [styles.light]: isLight })}>
-          Create reusable text templates with placeholder variables. Use tokens like {'{c1}'},{' '}
-          {'{c2}'}, etc. to insert content from your clipboard entries.
-        </p>
       </div>
 
       {templates.length === 0 ? (
@@ -262,7 +276,7 @@ export function TemplateManager(): React.JSX.Element {
                     value={editingContent}
                     onChange={(e) => setEditingContent(e.target.value)}
                     className={classNames(styles.contentTextarea, { [styles.light]: isLight })}
-                    placeholder="Template content with {c1}, {c2}, etc."
+                    placeholder="Template content with {c1}, {c2}, or named groups like {email}"
                     rows={6}
                   />
                   <div className={styles.tokenPreview}>

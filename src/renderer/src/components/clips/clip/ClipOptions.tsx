@@ -111,7 +111,7 @@ export function ClipOptions({ index }): React.JSX.Element {
               )}
               onClick={handleScanClick}
               title={
-                hasPatterns ? 'Quick Clips patterns detected!' : 'Scan for Quick Clips patterns'
+                hasPatterns ? 'Patterns detected! Open Tools Launcher' : 'Scan with Tools Launcher'
               }
             >
               <FontAwesomeIcon icon="search" />

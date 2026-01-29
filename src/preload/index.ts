@@ -66,8 +66,11 @@ const api = {
   templatesDelete: (id: string) => electronAPI.ipcRenderer.invoke('templates-delete', id),
   templatesReorder: (templates: any[]) =>
     electronAPI.ipcRenderer.invoke('templates-reorder', templates),
-  templatesGenerateText: (templateId: string, clipContents: string[]) =>
-    electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents),
+  templatesGenerateText: (
+    templateId: string,
+    clipContents: string[],
+    captures?: Record<string, string>
+  ) => electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents, captures),
 
   // Quick Clips - Search Terms APIs
   searchTermsGetAll: () => electronAPI.ipcRenderer.invoke('search-terms-get-all'),

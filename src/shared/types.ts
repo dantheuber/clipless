@@ -130,7 +130,11 @@ export interface TemplateOperations {
   delete: (id: string) => Promise<void>;
   reorder: (templates: Template[]) => Promise<void>;
   getAll: () => Promise<Template[]>;
-  generateText: (templateId: string, clipContents: string[]) => Promise<string>;
+  generateText: (
+    templateId: string,
+    clipContents: string[],
+    captures?: Record<string, string>
+  ) => Promise<string>;
 }
 
 /**
@@ -174,6 +178,7 @@ export interface PatternMatch {
 export interface QuickClipsConfig {
   searchTerms: SearchTerm[];
   tools: QuickTool[];
+  templates?: Template[];
   version: string;
 }
 

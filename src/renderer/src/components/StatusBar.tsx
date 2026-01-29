@@ -3,7 +3,6 @@ import { useClips } from '../providers/clips';
 import { useTheme } from '../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
-import { TemplateSelector } from './TemplateSelector';
 import styles from './StatusBar.module.css';
 
 interface StatusBarProps {
@@ -32,6 +31,16 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
     }
   };
 
+  const handleOpenToolsLauncher = async () => {
+    try {
+      const firstClip = clips[0];
+      const content = firstClip?.content || '';
+      await window.api.openToolsLauncher(content);
+    } catch (error) {
+      console.error('Failed to open tools launcher:', error);
+    }
+  };
+
   return (
     <div className={classNames(styles.statusBar, { [styles.light]: isLight })}>
       <div className={styles.leftSection}>
@@ -53,21 +62,29 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
       <div className={styles.rightSection}>
         <button
           onClick={() => setIsSearchVisible((prev) => !prev)}
-          className={classNames(styles.searchToggleButton, { [styles.light]: isLight, [styles.active]: isSearchVisible })}
+          className={classNames(styles.iconButton, {
+            [styles.light]: isLight,
+            [styles.active]: isSearchVisible,
+          })}
           title="Search/Filter Clips (Ctrl+Shift+F)"
         >
           <FontAwesomeIcon icon="search" className={styles.icon} />
         </button>
 
-        <TemplateSelector />
+        <button
+          onClick={handleOpenToolsLauncher}
+          className={classNames(styles.iconButton, { [styles.light]: isLight })}
+          title="Open Tools Launcher"
+        >
+          <FontAwesomeIcon icon="rocket" className={styles.icon} />
+        </button>
 
         <button
           onClick={handleOpenSettings}
-          className={classNames(styles.settingsButton, { [styles.light]: isLight })}
+          className={classNames(styles.iconButton, { [styles.light]: isLight })}
           title="Open Settings"
         >
           <FontAwesomeIcon icon="screwdriver-wrench" className={styles.icon} />
-          <span>Settings</span>
         </button>
       </div>
     </div>

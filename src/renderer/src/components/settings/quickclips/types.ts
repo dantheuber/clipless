@@ -1,6 +1,6 @@
 import { SearchTerm, QuickTool } from '../../../../../shared/types';
 
-export type TabType = 'searchTerms' | 'tools' | 'test';
+export type TabType = 'searchTerms' | 'tools' | 'templates' | 'test';
 
 export interface DeleteConfirmState {
   show: boolean;

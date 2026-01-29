@@ -30,9 +30,7 @@ export function useNativeContextMenu({ index }: NativeContextMenuProps) {
           }
           break;
         case 'scan':
-          if (!isFirstClip) {
-            window.api.openToolsLauncher(clip.content).catch(console.error);
-          }
+          window.api.openToolsLauncher(clip.content).catch(console.error);
           break;
       }
     };

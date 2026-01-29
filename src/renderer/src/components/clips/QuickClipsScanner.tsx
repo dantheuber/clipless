@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import classNames from 'classnames';
-import { PatternMatch, QuickTool } from '../../../../shared/types';
+import { PatternMatch, QuickTool, Template } from '../../../../shared/types';
 import { useTheme } from '../../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './QuickClipsScanner.module.css';
@@ -14,9 +14,49 @@ interface CaptureItem {
 
 interface QuickClipsScannerProps {
   isOpen: boolean;
-  onClose?: () => void; // Make optional since we handle closing internally for standalone mode
+  onClose?: () => void;
   clipContent: string;
 }
+
+/**
+ * Extract named (non-positional) tokens from template content.
+ */
+function extractNamedTokens(content: string): string[] {
+  const tokens: string[] = [];
+  const tokenRegex = /\{(\w+)\}/g;
+  let match;
+  while ((match = tokenRegex.exec(content)) !== null) {
+    const token = match[1];
+    if (!/^c\d+$/.test(token) && !tokens.includes(token)) {
+      tokens.push(token);
+    }
+  }
+  return tokens;
+}
+
+/**
+ * Check if a template has any positional tokens ({c1}, {c2}, etc.)
+ */
+function hasPositionalTokens(content: string): boolean {
+  return /\{c\d+\}/.test(content);
+}
+
+/**
+ * Extract all token names from template content for display.
+ */
+function extractAllTokens(content: string): string[] {
+  const tokens: string[] = [];
+  const tokenRegex = /\{(\w+)\}/g;
+  let match;
+  while ((match = tokenRegex.exec(content)) !== null) {
+    if (!tokens.includes(match[1])) {
+      tokens.push(match[1]);
+    }
+  }
+  return tokens;
+}
+
+type AccordionSection = 'tools' | 'matchedTemplates' | 'clipTemplates';
 
 export function QuickClipsScanner({
   isOpen,
@@ -24,7 +64,7 @@ export function QuickClipsScanner({
   clipContent,
 }: QuickClipsScannerProps): React.JSX.Element {
   const { isLight } = useTheme();
-  const [matches, setMatches] = useState<PatternMatch[]>([]);
+  const [, setMatches] = useState<PatternMatch[]>([]);
   const [captureItems, setCaptureItems] = useState<CaptureItem[]>([]);
   const [tools, setTools] = useState<QuickTool[]>([]);
   const [selectedCaptureItems, setSelectedCaptureItems] = useState<Set<string>>(new Set());
@@ -32,8 +72,86 @@ export function QuickClipsScanner({
   const [selectedTools, setSelectedTools] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
+  // Template state
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [matchedTemplates, setMatchedTemplates] = useState<Template[]>([]);
+  const [generatingTemplateId, setGeneratingTemplateId] = useState<string | null>(null);
+
+  // Accordion state
+  const [expandedSections, setExpandedSections] = useState<Set<AccordionSection>>(new Set());
+  const [accordionInitialized, setAccordionInitialized] = useState(false);
+
+  // Clip-only templates (positional tokens only, no named tokens)
+  const clipTemplates = useMemo(() => {
+    return templates.filter((t) => {
+      const named = extractNamedTokens(t.content);
+      return named.length === 0 && hasPositionalTokens(t.content);
+    });
+  }, [templates]);
+
+  // Auto-expand the first non-empty section once data is ready
+  useEffect(() => {
+    if (accordionInitialized) return;
+    if (loading) return;
+
+    const hasTools = availableTools.length > 0;
+    const hasMatched = matchedTemplates.length > 0;
+    const hasClip = clipTemplates.length > 0;
+
+    // Wait until at least templates have loaded
+    if (templates.length === 0 && !loading) {
+      // Templates might genuinely be empty — only wait if we haven't tried loading yet
+      // We'll initialize once we have tools loaded too
+      if (tools.length === 0) return;
+    }
+
+    const initial = new Set<AccordionSection>();
+    if (hasTools) {
+      initial.add('tools');
+    } else if (hasMatched) {
+      initial.add('matchedTemplates');
+    } else if (hasClip) {
+      initial.add('clipTemplates');
+    }
+
+    setExpandedSections(initial);
+    setAccordionInitialized(true);
+  }, [
+    availableTools,
+    matchedTemplates,
+    clipTemplates,
+    templates,
+    tools,
+    loading,
+    accordionInitialized,
+  ]);
+
+  // When matched templates become available, auto-expand that section
+  useEffect(() => {
+    if (!accordionInitialized) return;
+    if (matchedTemplates.length > 0) {
+      setExpandedSections((prev) => {
+        const next = new Set(prev);
+        next.add('matchedTemplates');
+        next.delete('clipTemplates');
+        return next;
+      });
+    }
+  }, [matchedTemplates, accordionInitialized]);
+
+  const toggleSection = (section: AccordionSection) => {
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(section)) {
+        next.delete(section);
+      } else {
+        next.add(section);
+      }
+      return next;
+    });
+  };
+
   const handleClose = () => {
-    // If onClose is provided (modal mode), use it; otherwise close window (standalone mode)
     if (onClose) {
       onClose();
     } else {
@@ -54,7 +172,6 @@ export function QuickClipsScanner({
       return () => document.removeEventListener('keydown', handleEscape);
     }
 
-    // Return empty cleanup function for when not open
     return () => {};
   }, [isOpen]);
 
@@ -65,19 +182,28 @@ export function QuickClipsScanner({
     }
   }, [isOpen, clipContent]);
 
-  // Load available tools
+  // Load available tools and templates
   useEffect(() => {
     if (isOpen) {
       loadTools();
+      loadTemplates();
+      setAccordionInitialized(false);
     }
   }, [isOpen]);
 
-  // Update available tools when capture items or selected capture items change
+  // Update available tools when capture items change
   useEffect(() => {
     if (captureItems.length > 0 && tools.length > 0) {
       updateAvailableTools();
     }
   }, [captureItems, tools, selectedCaptureItems]);
+
+  // Update matched templates when capture items change
+  useEffect(() => {
+    if (captureItems.length > 0 && templates.length > 0) {
+      updateMatchedTemplates();
+    }
+  }, [captureItems, templates, selectedCaptureItems]);
 
   const scanContent = async () => {
     setLoading(true);
@@ -85,7 +211,6 @@ export function QuickClipsScanner({
       const scanResults = await window.api.quickClipsScanText(clipContent);
       setMatches(scanResults);
 
-      // Extract individual capture items and deduplicate
       const captureMap = new Map<string, CaptureItem>();
 
       scanResults.forEach((match) => {
@@ -104,8 +229,6 @@ export function QuickClipsScanner({
 
       const items = Array.from(captureMap.values());
       setCaptureItems(items);
-
-      // Auto-select all capture items initially
       setSelectedCaptureItems(new Set(items.map((item) => item.uniqueKey)));
     } catch (error) {
       console.error('Failed to scan content:', error);
@@ -126,8 +249,17 @@ export function QuickClipsScanner({
     }
   };
 
+  const loadTemplates = async () => {
+    try {
+      const loadedTemplates = await window.api.templatesGetAll();
+      setTemplates(loadedTemplates);
+    } catch (error) {
+      console.error('Failed to load templates:', error);
+      setTemplates([]);
+    }
+  };
+
   const updateAvailableTools = () => {
-    // Get all capture group names from selected capture items
     const selectedCaptureGroups = new Set<string>();
 
     captureItems.forEach((item) => {
@@ -136,16 +268,32 @@ export function QuickClipsScanner({
       }
     });
 
-    // Find tools that can work with the selected capture groups
     const compatibleTools = tools.filter((tool) =>
       tool.captureGroups.some((group) => selectedCaptureGroups.has(group))
     );
 
     setAvailableTools(compatibleTools);
 
-    // Auto-select tools that were previously selected and are still available
     const availableToolIds = new Set(compatibleTools.map((tool) => tool.id));
     setSelectedTools((prev) => new Set([...prev].filter((id) => availableToolIds.has(id))));
+  };
+
+  const updateMatchedTemplates = () => {
+    const selectedCaptureGroups = new Set<string>();
+
+    captureItems.forEach((item) => {
+      if (selectedCaptureItems.has(item.uniqueKey)) {
+        selectedCaptureGroups.add(item.groupName);
+      }
+    });
+
+    const compatible = templates.filter((template) => {
+      const namedTokens = extractNamedTokens(template.content);
+      if (namedTokens.length === 0) return false;
+      return namedTokens.every((token) => selectedCaptureGroups.has(token));
+    });
+
+    setMatchedTemplates(compatible);
   };
 
   const handleCaptureItemToggle = (uniqueKey: string) => {
@@ -168,11 +316,37 @@ export function QuickClipsScanner({
     setSelectedTools(newSelected);
   };
 
+  const handleTemplateSelect = async (template: Template) => {
+    setGeneratingTemplateId(template.id);
+    try {
+      const selectedCaptures: Record<string, string> = {};
+      captureItems
+        .filter((item) => selectedCaptureItems.has(item.uniqueKey))
+        .forEach((item) => {
+          selectedCaptures[item.groupName] = item.value;
+        });
+
+      const storedClips = await window.api.storageGetClips();
+      const clipContents = storedClips.map((c: any) => c.clip?.content || '');
+
+      const generatedText = await window.api.templatesGenerateText(
+        template.id,
+        clipContents,
+        selectedCaptures
+      );
+      await window.api.setClipboardText(generatedText);
+      handleClose();
+    } catch (error) {
+      console.error('Failed to generate text from template:', error);
+    } finally {
+      setGeneratingTemplateId(null);
+    }
+  };
+
   const handleOpenTools = async () => {
     if (selectedCaptureItems.size === 0 || selectedTools.size === 0) return;
 
     try {
-      // Create a single PatternMatch object containing all selected capture groups
       const selectedCaptures: Record<string, string> = {};
 
       captureItems
@@ -181,7 +355,6 @@ export function QuickClipsScanner({
           selectedCaptures[item.groupName] = item.value;
         });
 
-      // Create a single PatternMatch object with all selected captures
       const combinedMatch: PatternMatch = {
         searchTermId: 'combined',
         searchTermName: 'Combined Selection',
@@ -197,13 +370,17 @@ export function QuickClipsScanner({
 
   if (!isOpen) return <></>;
 
+  const hasAnyRightContent =
+    availableTools.length > 0 || matchedTemplates.length > 0 || clipTemplates.length > 0;
+  const showTwoColumns = captureItems.length > 0 && hasAnyRightContent;
+  // If no patterns but we have clip templates, show single-column with just templates
+  const showClipTemplatesOnly = captureItems.length === 0 && clipTemplates.length > 0;
+
   return (
     <div className={classNames(styles.modal, { [styles.light]: isLight }, styles.standalone)}>
       <div className={styles.header}>
         <div className={styles.headerContent}>
-          <h2 className={classNames(styles.title, { [styles.light]: isLight })}>
-            Quick Clips Scanner
-          </h2>
+          <h2 className={classNames(styles.title, { [styles.light]: isLight })}>Tools Launcher</h2>
           <p className={classNames(styles.subtitle, { [styles.light]: isLight })}>
             Press Esc or click close to exit
           </p>
@@ -219,9 +396,12 @@ export function QuickClipsScanner({
       <div
         className={classNames(styles.content, { [styles.light]: isLight })}
         style={{
-          flexDirection: loading || matches.length === 0 ? 'column' : 'row',
-          justifyContent: loading || matches.length === 0 ? 'center' : 'flex-start',
-          alignItems: loading || matches.length === 0 ? 'center' : 'stretch',
+          flexDirection:
+            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'column' : 'row',
+          justifyContent:
+            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'flex-start',
+          alignItems:
+            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'stretch',
         }}
       >
         {loading ? (
@@ -229,12 +409,40 @@ export function QuickClipsScanner({
             <FontAwesomeIcon icon="spinner" spin />
             <span>Scanning content...</span>
           </div>
+        ) : showClipTemplatesOnly ? (
+          /* No patterns found, but clip templates exist — show them */
+          <div style={{ width: '100%' }}>
+            <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
+              <FontAwesomeIcon icon="search" className={styles.emptyIcon} />
+              <p>No patterns found in this clip content.</p>
+            </div>
+            <div style={{ padding: '0 1rem' }}>
+              <button
+                className={classNames(styles.accordionHeader, { [styles.light]: isLight })}
+                onClick={() => toggleSection('clipTemplates')}
+              >
+                <FontAwesomeIcon
+                  icon="chevron-right"
+                  className={classNames(styles.accordionChevron, {
+                    [styles.accordionChevronOpen]: expandedSections.has('clipTemplates'),
+                  })}
+                />
+                <FontAwesomeIcon icon="file-lines" className={styles.accordionIcon} />
+                <span>Clip Templates ({clipTemplates.length})</span>
+              </button>
+              {expandedSections.has('clipTemplates') && (
+                <div className={styles.accordionBody}>
+                  {renderTemplateList(clipTemplates, false)}
+                </div>
+              )}
+            </div>
+          </div>
         ) : captureItems.length === 0 ? (
           <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
             <FontAwesomeIcon icon="search" className={styles.emptyIcon} />
             <p>No patterns found in this clip content.</p>
             <p className={styles.emptyHint}>
-              Create search terms in Settings &gt; Quick Clips to detect patterns.
+              Create search terms in Settings &gt; Tools to detect patterns.
             </p>
           </div>
         ) : (
@@ -291,73 +499,136 @@ export function QuickClipsScanner({
               </div>
             </div>
 
-            {/* Right Side - Tools Section */}
+            {/* Right Side - Accordion Sections */}
             <div className={classNames(styles.section, styles.rightSection)}>
-              {availableTools.length > 0 ? (
-                <>
-                  <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
-                    Available Tools ({availableTools.length})
-                  </h3>
-                  <div className={styles.toolsList}>
-                    {availableTools.map((tool) => {
-                      const isSelected = selectedTools.has(tool.id);
+              {/* Available Tools */}
+              {availableTools.length > 0 && (
+                <div className={styles.accordionSection}>
+                  <button
+                    className={classNames(styles.accordionHeader, { [styles.light]: isLight })}
+                    onClick={() => toggleSection('tools')}
+                  >
+                    <FontAwesomeIcon
+                      icon="chevron-right"
+                      className={classNames(styles.accordionChevron, {
+                        [styles.accordionChevronOpen]: expandedSections.has('tools'),
+                      })}
+                    />
+                    <FontAwesomeIcon icon="wrench" className={styles.accordionIcon} />
+                    <span>Available Tools ({availableTools.length})</span>
+                  </button>
+                  {expandedSections.has('tools') && (
+                    <div className={styles.accordionBody}>
+                      <div className={styles.toolsList}>
+                        {availableTools.map((tool) => {
+                          const isSelected = selectedTools.has(tool.id);
 
-                      return (
-                        <div
-                          key={tool.id}
-                          className={classNames(
-                            styles.toolItem,
-                            { [styles.light]: isLight },
-                            { [styles.selected]: isSelected }
-                          )}
-                        >
-                          <label className={styles.toolLabel}>
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              onChange={() => handleToolToggle(tool.id)}
-                              className={styles.checkbox}
-                            />
-                            <div className={styles.toolDetails}>
-                              <div
-                                className={classNames(styles.toolName, {
-                                  [styles.light]: isLight,
-                                })}
-                              >
-                                {tool.name}
-                              </div>
-                              <div
-                                className={classNames(styles.toolUrl, {
-                                  [styles.light]: isLight,
-                                })}
-                              >
-                                {tool.url}
-                              </div>
-                              <div
-                                className={classNames(styles.toolGroups, {
-                                  [styles.light]: isLight,
-                                })}
-                              >
-                                Supports: {tool.captureGroups.join(', ')}
-                              </div>
+                          return (
+                            <div
+                              key={tool.id}
+                              className={classNames(
+                                styles.toolItem,
+                                { [styles.light]: isLight },
+                                { [styles.selected]: isSelected }
+                              )}
+                            >
+                              <label className={styles.toolLabel}>
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleToolToggle(tool.id)}
+                                  className={styles.checkbox}
+                                />
+                                <div className={styles.toolDetails}>
+                                  <div
+                                    className={classNames(styles.toolName, {
+                                      [styles.light]: isLight,
+                                    })}
+                                  >
+                                    {tool.name}
+                                  </div>
+                                  <div
+                                    className={classNames(styles.toolUrl, {
+                                      [styles.light]: isLight,
+                                    })}
+                                  >
+                                    {tool.url}
+                                  </div>
+                                  <div
+                                    className={classNames(styles.toolGroups, {
+                                      [styles.light]: isLight,
+                                    })}
+                                  >
+                                    Supports: {tool.captureGroups.join(', ')}
+                                  </div>
+                                </div>
+                              </label>
                             </div>
-                          </label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </>
-              ) : (
-                <>
-                  <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
-                    Tools
-                  </h3>
-                  <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
-                    <FontAwesomeIcon icon="wrench" className={styles.emptyIcon} />
-                    <p>No compatible tools available.</p>
-                    <p className={styles.emptyHint}>Select patterns to see available tools.</p>
-                  </div>
-                </>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Matched Templates */}
+              {matchedTemplates.length > 0 && (
+                <div className={styles.accordionSection}>
+                  <button
+                    className={classNames(styles.accordionHeader, { [styles.light]: isLight })}
+                    onClick={() => toggleSection('matchedTemplates')}
+                  >
+                    <FontAwesomeIcon
+                      icon="chevron-right"
+                      className={classNames(styles.accordionChevron, {
+                        [styles.accordionChevronOpen]: expandedSections.has('matchedTemplates'),
+                      })}
+                    />
+                    <FontAwesomeIcon icon="file-lines" className={styles.accordionIcon} />
+                    <span>Matched Templates ({matchedTemplates.length})</span>
+                  </button>
+                  {expandedSections.has('matchedTemplates') && (
+                    <div className={styles.accordionBody}>
+                      {renderTemplateList(matchedTemplates, true)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Clip Templates (positional-only) */}
+              {clipTemplates.length > 0 && (
+                <div className={styles.accordionSection}>
+                  <button
+                    className={classNames(styles.accordionHeader, { [styles.light]: isLight })}
+                    onClick={() => toggleSection('clipTemplates')}
+                  >
+                    <FontAwesomeIcon
+                      icon="chevron-right"
+                      className={classNames(styles.accordionChevron, {
+                        [styles.accordionChevronOpen]: expandedSections.has('clipTemplates'),
+                      })}
+                    />
+                    <FontAwesomeIcon icon="clipboard" className={styles.accordionIcon} />
+                    <span>Clip Templates ({clipTemplates.length})</span>
+                  </button>
+                  {expandedSections.has('clipTemplates') && (
+                    <div className={styles.accordionBody}>
+                      {renderTemplateList(clipTemplates, false)}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Empty state when no right-side content */}
+              {!hasAnyRightContent && (
+                <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
+                  <FontAwesomeIcon icon="wrench" className={styles.emptyIcon} />
+                  <p>No tools or templates available.</p>
+                  <p className={styles.emptyHint}>
+                    Create tools or templates in Settings &gt; Tools.
+                  </p>
+                </div>
               )}
             </div>
           </>
@@ -391,4 +662,51 @@ export function QuickClipsScanner({
       )}
     </div>
   );
+
+  function renderTemplateList(templateList: Template[], showNamedTokens: boolean) {
+    return (
+      <div className={styles.toolsList}>
+        {templateList.map((template) => (
+          <div
+            key={template.id}
+            className={classNames(styles.toolItem, { [styles.light]: isLight })}
+          >
+            <button
+              className={classNames(styles.toolLabel, styles.templateButton)}
+              onClick={() => handleTemplateSelect(template)}
+              disabled={generatingTemplateId === template.id}
+            >
+              <div className={styles.toolDetails}>
+                <div
+                  className={classNames(styles.toolName, {
+                    [styles.light]: isLight,
+                  })}
+                >
+                  {generatingTemplateId === template.id ? (
+                    <FontAwesomeIcon icon="spinner" spin />
+                  ) : (
+                    <FontAwesomeIcon icon="file-lines" />
+                  )}{' '}
+                  {template.name}
+                </div>
+                <div
+                  className={classNames(styles.toolGroups, {
+                    [styles.light]: isLight,
+                  })}
+                >
+                  Tokens:{' '}
+                  {showNamedTokens
+                    ? extractAllTokens(template.content).join(', ')
+                    : extractAllTokens(template.content)
+                        .filter((t) => /^c\d+$/.test(t))
+                        .map((t) => `{${t}}`)
+                        .join(', ')}
+                </div>
+              </div>
+            </button>
+          </div>
+        ))}
+      </div>
+    );
+  }
 }
