@@ -25,9 +25,17 @@ Clipless polls the system clipboard every 250ms and stores new content automatic
 
 Duplicate content is detected and ignored. Click a clip's row number (or use a Quick Clip hotkey) to copy it back to the clipboard.
 
-### Locking Clips
+### Editing Clips
 
-Right-click a clip to lock it. Locked clips are not removed when the history limit is reached.
+Click on any clip to expand it and edit its contents inline. When editing a text clip, Clipless applies best-guess syntax highlighting based on the text content, making it easier to work with code snippets and structured data.
+
+### Clip Actions
+
+Each clip has a cog icon menu and a right-click context menu with actions including:
+
+- **Lock/Unlock** -- prevent a clip from being removed when the history limit is reached
+- **Delete** -- remove a clip from history
+- **Scan for Search Terms** -- scan a previous clip's content against your Quick Clips patterns and open the Tools Launcher with the results. This lets you use Quick Tools on any clip in your history, not just the most recent one.
 
 ### Storage
 
@@ -107,6 +115,7 @@ When Quick Clips detects patterns in a clip, you can:
 
 - Click the scanner icon on the clip to see matches and open tools
 - Use the Tools Launcher window (Ctrl+Shift+T) for quick access
+- Use the cog icon or right-click menu on any clip and select "Scan for Search Terms" to scan older clips and open the Tools Launcher with their extracted data
 
 ### Example: Call Center Workflow
 

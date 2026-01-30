@@ -14,7 +14,9 @@ Clipless monitors your clipboard, stores history with encryption, and provides p
 - Monitors the system clipboard with 250ms polling
 - Stores text, HTML, RTF, images, and bookmarks
 - Automatic deduplication prevents repeated entries
+- Click any clip to expand and edit inline with syntax highlighting
 - Lock clips to prevent automatic removal
+- Scan any clip's content for Quick Clips patterns via the cog icon or right-click menu
 - Encrypted storage using OS-native encryption (DPAPI, Keychain, Secret Service)
 
 ## Quick Clips
