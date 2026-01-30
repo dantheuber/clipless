@@ -21,10 +21,8 @@
 title: Clipless - Intelligent Clipboard Manager
 email: dan@clipless.app
 description: >- # this means to ignore newlines until "baseurl:"
-  A powerful and intelligent clipboard manager built for professionals. 
-  Automatic clipboard monitoring, pattern detection, multi-format support, 
-  and Quick Clips functionality to streamline your workflow. Perfect for 
-  call centers, data entry, customer support, and power users.
+  A clipboard manager with pattern-based data extraction, URL tools,
+  and template text generation. Built with Electron for Windows, macOS, and Linux.
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "https://clipless.app" # the base hostname & protocol for your site, e.g. http://example.com
 twitter_username: ""

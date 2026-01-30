@@ -1,76 +1,82 @@
 ---
 layout: home
-title: "Clipless - Intelligent Clipboard Manager"
+title: "Clipless"
 ---
 
-# 🚀 Welcome to Clipless
+# Clipless
 
-**A powerful and intelligent clipboard manager built for professionals**
+A clipboard manager for professionals who work with data across multiple systems.
 
-Clipless automatically monitors your clipboard, intelligently detects different content types, and provides advanced pattern-based data extraction with Quick Clips functionality. Perfect for call centers, data entry, customer support, and power users who need to streamline their workflow.
+Clipless monitors your clipboard, stores history with encryption, and provides pattern-based data extraction and template text generation.
 
-## ✨ Key Features
+## Clipboard Management
 
-### 🔄 **Automatic Clipboard Monitoring**
-- Real-time clipboard detection with 250ms polling
-- Support for multiple formats: text, HTML, RTF, images, and bookmarks
-- Intelligent format prioritization and duplicate prevention
-- Background monitoring that doesn't interfere with your workflow
+- Monitors the system clipboard with 250ms polling
+- Stores text, HTML, RTF, images, and bookmarks
+- Automatic deduplication prevents repeated entries
+- Lock clips to prevent automatic removal
+- Encrypted storage using OS-native encryption (DPAPI, Keychain, Secret Service)
 
-### 🔍 **Quick Clips - Intelligent Pattern Detection**
-- Automatically detect patterns in clipboard content (emails, URLs, phone numbers, etc.)
-- Custom regex patterns with named capture groups
-- Individual selection of extracted data values
-- Built-in pattern library for common data types
+## Quick Clips
 
-### 🛠️ **Quick Tools Integration**
-- Define web tools that open with extracted data
-- Multi-token URL support (e.g., `https://tool.com/{email}/{domain}`)
-- Bulk operations - open multiple tools simultaneously
-- Smart tool compatibility based on available data
+User-defined regex patterns that extract structured data from clipboard content. When a clip matches a pattern, the extracted values become available for use with Quick Tools and Templates.
 
-### 🔒 **Secure Storage**
-- Encrypted data storage using OS-native encryption
-- Windows: DPAPI, macOS: Keychain, Linux: Secret Service
-- Persistent clipboard history with lock functionality
-- Export/import functionality for backup
+Clipless ships with pattern templates you can add (email, URL, domain, phone, IP, MAC address, IPv6), but no patterns are active by default. You create the patterns relevant to your workflow.
 
-## 💼 Perfect for Professional Use
+[Learn more in the docs](/docs/#quick-clips)
 
-### Call Center & Customer Support
-Transform how support agents handle customer information:
-- Customer data lookup across multiple systems
-- Account verification tools
-- Issue tracking and diagnostic workflows
-- Multi-system navigation with one copy action
+## Quick Tools
 
-### Data Entry & Administrative Work
-Streamline data transfer between systems:
-- Form population with templates
-- Batch processing workflows
-- Quality assurance tools
-- Cross-platform system bridging
+URL templates that open web tools with data extracted by Quick Clips. Define a URL like `https://tool.com/search?q={email}` and Clipless substitutes the token with the matched value.
 
-## 🎯 Who Uses Clipless
+Supports multiple tokens per URL: `https://tool.com/check?email={email}&domain={domainName}`
 
-- **Call Center Agents** - Multi-system customer data lookups
-- **Data Entry Professionals** - Template-driven data formatting
-- **Customer Support Teams** - Instant access to customer information
-- **Administrative Staff** - Streamlined workflows between systems
-- **Developers** - Code snippet management and URL analysis
-- **Security Professionals** - URL/email analysis and validation
+[Learn more in the docs](/docs/#quick-tools)
+
+## Templates
+
+*Added in v1.6*
+
+Generate text from templates using two token types:
+
+- **Positional tokens** (`{c1}`, `{c2}`, ...) reference clips by recency (c1 = most recent)
+- **Named tokens** (`{email}`, `{domainName}`, ...) reference Quick Clips capture group values
+
+[Learn more in the docs](/docs/#templates)
+
+## Clip Quick Search
+
+*Added in v1.5*
+
+Press Ctrl+Shift+F (default) to toggle a search bar in the main window for filtering clips.
+
+## Tools Launcher
+
+Press Ctrl+Shift+T (default) to open a dedicated window that scans your most recent clip against Quick Clips patterns and shows matching Quick Tools.
+
+## Hotkeys
+
+8 configurable global hotkeys: toggle main window, quick-copy recent clips 1-5, search clips, and open Tools Launcher. All hotkeys can be rebound or disabled in settings.
+
+[Full hotkey reference](/docs/#global-hotkeys)
+
+## Themes and Code Detection
+
+- Light, dark, and system-following themes
+- Optional code language detection with syntax highlighting
+
+## Security and Privacy
+
+- All data stored locally in an encrypted file using OS-native encryption
+- No cloud sync, no telemetry, no analytics
+- Open source: [github.com/dantheuber/clipless](https://github.com/dantheuber/clipless)
 
 ---
 
-## 📥 Download Now
+## Download
 
-Get the latest version from our [GitHub Releases](https://github.com/dantheuber/clipless/releases) page.
-
-**Available for Windows, macOS, and Linux**
-
-### ⚠️ Installation Note
-You may see security warnings during installation because the app is not code-signed with a commercial certificate. This is safe to override - the application is built from open source code available in our repository.
+Available for Windows, macOS, and Linux. [Download the latest release](https://github.com/dantheuber/clipless/releases/latest).
 
 ---
 
-*Ready to transform your clipboard workflow? [Download Clipless today!](https://github.com/dantheuber/clipless/releases)*
+Built with Electron, React, and TypeScript by [Dan Essig](https://github.com/dantheuber). Source code and issue tracker on [GitHub](https://github.com/dantheuber/clipless).
