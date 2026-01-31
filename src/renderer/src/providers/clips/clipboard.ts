@@ -158,6 +158,9 @@ export const useClipboardOperations = (
             console.log('Copied unknown type as text to clipboard');
         }
 
+        // Notify with clip index
+        window.api.notifyClipCopied(index);
+
         // Clear the flag after a short delay
         setTimeout(() => {
           setIsHotkeyOperation(false);

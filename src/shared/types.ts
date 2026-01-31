@@ -68,6 +68,7 @@ export interface UserSettings {
   opaqueWhenFocused?: boolean;
   alwaysOnTop?: boolean;
   rememberWindowPosition?: boolean;
+  showNotifications?: boolean;
 }
 
 /**

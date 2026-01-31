@@ -53,7 +53,16 @@ import {
   exportQuickClipsConfig,
   importQuickClipsConfig,
 } from './quick-clips';
-import type { ClipItem } from '../../shared/types';
+import type {
+  ClipItem,
+  UserSettings,
+  Template,
+  SearchTerm,
+  QuickTool,
+  PatternMatch,
+  QuickClipsConfig,
+} from '../../shared/types';
+import { showNotification } from '../notifications';
 
 let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
 
@@ -88,6 +97,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       setClipboardBookmark(bookmarkData)
   );
 
+  // Notification for click-to-copy with clip index
+  ipcMain.handle('notify-clip-copied', (_event, index: number) => {
+    showNotification('Clip Copied', `Clip ${index + 1} copied to clipboard`);
+  });
+
   // Clipboard monitoring control
   ipcMain.handle('start-clipboard-monitoring', () => startClipboardMonitoring(mainWindow));
   ipcMain.handle('stop-clipboard-monitoring', () => stopClipboardMonitoring());
@@ -100,7 +114,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       saveClips(clips, lockedIndices)
   );
   ipcMain.handle('storage-get-settings', async () => getSettings());
-  ipcMain.handle('storage-save-settings', async (_event, settings: any) => saveSettings(settings));
+  ipcMain.handle('storage-save-settings', async (_event, settings: UserSettings) => saveSettings(settings));
   ipcMain.handle('storage-get-stats', async () => getStorageStats());
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
@@ -111,17 +125,23 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('templates-create', async (_event, name: string, content: string) =>
     createTemplate(name, content)
   );
-  ipcMain.handle('templates-update', async (_event, id: string, updates: any) =>
+  ipcMain.handle('templates-update', async (_event, id: string, updates: Partial<Template>) =>
     updateTemplate(id, updates)
   );
   ipcMain.handle('templates-delete', async (_event, id: string) => deleteTemplate(id));
-  ipcMain.handle('templates-reorder', async (_event, templates: any[]) =>
+  ipcMain.handle('templates-reorder', async (_event, templates: Template[]) =>
     reorderTemplates(templates)
   );
   ipcMain.handle(
     'templates-generate-text',
-    async (_event, templateId: string, clipContents: string[], captures?: Record<string, string>) =>
-      generateTextFromTemplate(templateId, clipContents, captures)
+    async (_event, templateId: string, clipContents: string[], captures?: Record<string, string>) => {
+      const templates = await getAllTemplates();
+      const template = templates.find((t) => t.id === templateId);
+      const templateName = template?.name || 'Unknown';
+      const result = await generateTextFromTemplate(templateId, clipContents, captures);
+      showNotification('Template Generated', `"${templateName}" text copied to clipboard`);
+      return result;
+    }
   );
 
   // Search terms IPC handlers
@@ -129,11 +149,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('search-terms-create', async (_event, name: string, pattern: string) =>
     createSearchTerm(name, pattern)
   );
-  ipcMain.handle('search-terms-update', async (_event, id: string, updates: any) =>
+  ipcMain.handle('search-terms-update', async (_event, id: string, updates: Partial<SearchTerm>) =>
     updateSearchTerm(id, updates)
   );
   ipcMain.handle('search-terms-delete', async (_event, id: string) => deleteSearchTerm(id));
-  ipcMain.handle('search-terms-reorder', async (_event, searchTerms: any[]) =>
+  ipcMain.handle('search-terms-reorder', async (_event, searchTerms: SearchTerm[]) =>
     reorderSearchTerms(searchTerms)
   );
   ipcMain.handle('search-terms-test', async (_event, pattern: string, testText: string) =>
@@ -147,11 +167,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     async (_event, name: string, url: string, captureGroups: string[]) =>
       createQuickTool(name, url, captureGroups)
   );
-  ipcMain.handle('quick-tools-update', async (_event, id: string, updates: any) =>
+  ipcMain.handle('quick-tools-update', async (_event, id: string, updates: Partial<QuickTool>) =>
     updateQuickTool(id, updates)
   );
   ipcMain.handle('quick-tools-delete', async (_event, id: string) => deleteQuickTool(id));
-  ipcMain.handle('quick-tools-reorder', async (_event, tools: any[]) => reorderQuickTools(tools));
+  ipcMain.handle('quick-tools-reorder', async (_event, tools: QuickTool[]) => reorderQuickTools(tools));
   ipcMain.handle('quick-tools-validate-url', async (_event, url: string, captureGroups: string[]) =>
     validateToolUrl(url, captureGroups)
   );
@@ -160,11 +180,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('quick-clips-scan-text', async (_event, text: string) =>
     scanTextForPatterns(text)
   );
-  ipcMain.handle('quick-clips-open-tools', async (_event, matches: any[], toolIds: string[]) =>
+  ipcMain.handle('quick-clips-open-tools', async (_event, matches: PatternMatch[], toolIds: string[]) =>
     openToolsForMatches(matches, toolIds)
   );
   ipcMain.handle('quick-clips-export-config', async () => exportQuickClipsConfig());
-  ipcMain.handle('quick-clips-import-config', async (_event, config: any) =>
+  ipcMain.handle('quick-clips-import-config', async (_event, config: QuickClipsConfig) =>
     importQuickClipsConfig(config)
   );
 

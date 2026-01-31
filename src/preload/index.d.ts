@@ -18,6 +18,7 @@ declare global {
       setClipboardRTF: (rtf: string) => Promise<void>;
       setClipboardImage: (imageData: string) => Promise<void>;
       setClipboardBookmark: (bookmarkData: any) => Promise<void>;
+      notifyClipCopied: (index: number) => Promise<void>;
       startClipboardMonitoring: () => Promise<boolean>;
       stopClipboardMonitoring: () => Promise<boolean>;
       onClipboardChanged: (callback: (clipData: { type: string; content: string }) => void) => void;
