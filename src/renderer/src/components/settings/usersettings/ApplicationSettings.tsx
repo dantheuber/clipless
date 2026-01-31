@@ -109,6 +109,19 @@ export const ApplicationSettings: React.FC<ApplicationSettingsProps> = ({
           </select>
         </SettingItem>
 
+        {/* Show Notifications Setting */}
+        <SettingItem
+          label="Show Notifications"
+          description="Show native OS notifications when clips are copied, templates are generated, or tools are launched"
+        >
+          <ToggleSwitch
+            checked={settings.showNotifications ?? false}
+            onChange={(checked) => onSettingChange('showNotifications', checked)}
+            disabled={saving}
+            label="Show Notifications"
+          />
+        </SettingItem>
+
         {/* Code Detection Setting */}
         <SettingItem
           label="Code Detection & Highlighting"

@@ -1,5 +1,6 @@
 import { BrowserWindow, clipboard, nativeImage } from 'electron';
 import { storage } from '../storage';
+import { showNotification } from '../notifications';
 
 /**
  * Handles all hotkey action implementations
@@ -67,6 +68,7 @@ export class HotkeyActions {
       this.copyClipToClipboard(clipToCopy);
 
       console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
+      showNotification('Clip Copied', `Clip ${index + 1} copied to clipboard`);
     } catch (error) {
       console.error(`Error copying quick clip ${index}:`, error);
     }

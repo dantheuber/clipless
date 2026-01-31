@@ -54,6 +54,7 @@ import {
   importQuickClipsConfig,
 } from './quick-clips';
 import type { ClipItem } from '../../shared/types';
+import { showNotification } from '../notifications';
 
 let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
 
@@ -88,6 +89,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       setClipboardBookmark(bookmarkData)
   );
 
+  // Notification for click-to-copy with clip index
+  ipcMain.handle('notify-clip-copied', (_event, index: number) => {
+    showNotification('Clip Copied', `Clip ${index + 1} copied to clipboard`);
+  });
+
   // Clipboard monitoring control
   ipcMain.handle('start-clipboard-monitoring', () => startClipboardMonitoring(mainWindow));
   ipcMain.handle('stop-clipboard-monitoring', () => stopClipboardMonitoring());
@@ -120,8 +126,14 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   );
   ipcMain.handle(
     'templates-generate-text',
-    async (_event, templateId: string, clipContents: string[], captures?: Record<string, string>) =>
-      generateTextFromTemplate(templateId, clipContents, captures)
+    async (_event, templateId: string, clipContents: string[], captures?: Record<string, string>) => {
+      const templates = await getAllTemplates();
+      const template = templates.find((t: any) => t.id === templateId);
+      const templateName = template?.name || 'Unknown';
+      const result = await generateTextFromTemplate(templateId, clipContents, captures);
+      showNotification('Template Generated', `"${templateName}" text copied to clipboard`);
+      return result;
+    }
   );
 
   // Search terms IPC handlers

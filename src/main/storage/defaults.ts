@@ -47,6 +47,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   opaqueWhenFocused: true,
   alwaysOnTop: false,
   rememberWindowPosition: true,
+  showNotifications: false,
   hotkeys: DEFAULT_HOTKEY_SETTINGS,
 };
 

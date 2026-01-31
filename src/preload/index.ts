@@ -22,6 +22,7 @@ const api = {
     electronAPI.ipcRenderer.invoke('set-clipboard-image', imageData),
   setClipboardBookmark: (bookmarkData: any) =>
     electronAPI.ipcRenderer.invoke('set-clipboard-bookmark', bookmarkData),
+  notifyClipCopied: (index: number) => electronAPI.ipcRenderer.invoke('notify-clip-copied', index),
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
   onClipboardChanged: (callback: (clipData: any) => void) =>
