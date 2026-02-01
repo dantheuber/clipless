@@ -190,7 +190,7 @@ describe('HotkeyActions', () => {
 
     it('copies unknown type as text', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'unknown', content: 'fallback' }, isLocked: false, timestamp: 1 },
+        { clip: { type: 'unknown' as any, content: 'fallback' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('fallback');

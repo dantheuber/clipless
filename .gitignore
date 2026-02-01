@@ -9,3 +9,4 @@ electron.vite.config.*.mjs
 .cursor/rules/user
 .claude/
 test-results/
+coverage/

@@ -186,7 +186,7 @@ describe('HotkeyManager', () => {
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
         // openToolsLauncher and searchClips deliberately missing
-      },
+      } as any,
     });
 
     await manager.initialize();
@@ -257,7 +257,6 @@ describe('HotkeyManager', () => {
     await manager.initialize();
 
     // Make registerHotkeys throw by overriding unregisterAllHotkeys to throw outside inner try
-    const registry = (manager as any).registry;
     const origMethod = (manager as any).registerHotkeys.bind(manager);
     (manager as any).registerHotkeys = vi.fn().mockRejectedValue(new Error('register fail'));
 

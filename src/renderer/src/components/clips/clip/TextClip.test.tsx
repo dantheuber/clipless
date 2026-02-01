@@ -33,7 +33,7 @@ vi.mock('../../../utils/languageDetection', () => ({
 }));
 
 vi.mock('react-syntax-highlighter', () => ({
-  Prism: ({ children, PreTag, ...props }: any) => {
+  Prism: ({ children, PreTag }: any) => {
     const Tag = PreTag || 'pre';
     return (
       <Tag data-testid="syntax-highlighter" {...(typeof Tag !== 'string' ? {} : {})}>
