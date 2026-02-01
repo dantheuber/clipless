@@ -85,7 +85,9 @@ describe('createQuickTool', () => {
   it('delegates to storage.createQuickTool', async () => {
     mockedStorage.createQuickTool.mockResolvedValue({ id: '1' } as any);
     const result = await createQuickTool('Test', 'https://example.com/{q}', ['q']);
-    expect(mockedStorage.createQuickTool).toHaveBeenCalledWith('Test', 'https://example.com/{q}', ['q']);
+    expect(mockedStorage.createQuickTool).toHaveBeenCalledWith('Test', 'https://example.com/{q}', [
+      'q',
+    ]);
     expect(result).toEqual({ id: '1' });
   });
 

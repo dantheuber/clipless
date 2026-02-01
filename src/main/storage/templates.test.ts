@@ -126,7 +126,9 @@ describe('generateTextFromTemplate', () => {
   });
 
   it('skips positional tokens during named capture replacement', () => {
-    const result = generateTextFromTemplate(makeTemplate('{c1} {name}'), ['clip1'], { name: 'Alice' });
+    const result = generateTextFromTemplate(makeTemplate('{c1} {name}'), ['clip1'], {
+      name: 'Alice',
+    });
     expect(result).toBe('clip1 Alice');
   });
 
@@ -145,7 +147,14 @@ describe('generateTemplateId', () => {
 
 describe('updateTemplateObject', () => {
   it('updates fields and refreshes updatedAt', () => {
-    const original = { id: '1', name: 'Old', content: 'test', createdAt: 1000, updatedAt: 1000, order: 0 };
+    const original = {
+      id: '1',
+      name: 'Old',
+      content: 'test',
+      createdAt: 1000,
+      updatedAt: 1000,
+      order: 0,
+    };
     const updated = updateTemplateObject(original, { name: 'New' });
     expect(updated.name).toBe('New');
     expect(updated.updatedAt).toBeGreaterThan(1000);

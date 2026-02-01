@@ -209,12 +209,12 @@ describe('openToolsForMatches', () => {
       },
     ]);
 
-    const matches = [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } }];
+    const matches = [
+      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
+    ];
     await openToolsForMatches(matches, ['t1']);
 
-    expect(mockOpenExternal).toHaveBeenCalledWith(
-      'https://google.com/search?q=test%40example.com'
-    );
+    expect(mockOpenExternal).toHaveBeenCalledWith('https://google.com/search?q=test%40example.com');
   });
 
   it('skips tool when no matching captures exist', async () => {
@@ -230,7 +230,9 @@ describe('openToolsForMatches', () => {
       },
     ]);
 
-    const matches = [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } }];
+    const matches = [
+      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
+    ];
     await openToolsForMatches(matches, ['t1']);
 
     expect(mockOpenExternal).not.toHaveBeenCalled();
@@ -239,7 +241,9 @@ describe('openToolsForMatches', () => {
   it('skips unknown tool ids', async () => {
     mockedStorage.getQuickTools.mockResolvedValue([]);
 
-    const matches = [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } }];
+    const matches = [
+      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
+    ];
     await openToolsForMatches(matches, ['unknown']);
 
     expect(mockOpenExternal).not.toHaveBeenCalled();
@@ -258,7 +262,9 @@ describe('openToolsForMatches', () => {
       },
     ]);
 
-    const matches = [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } }];
+    const matches = [
+      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
+    ];
     await openToolsForMatches(matches, ['t1']);
 
     expect(mockOpenExternal).toHaveBeenCalledWith('https://example.com/page');
@@ -277,7 +283,9 @@ describe('openToolsForMatches', () => {
       },
     ]);
 
-    const matches = [{ searchTermId: '1', searchTermName: 'URL', captures: { url: 'https://detected.com' } }];
+    const matches = [
+      { searchTermId: '1', searchTermName: 'URL', captures: { url: 'https://detected.com' } },
+    ];
     await openToolsForMatches(matches, ['t1']);
 
     expect(mockOpenExternal).toHaveBeenCalledWith('https://detected.com');
@@ -321,7 +329,9 @@ describe('openToolsForMatches', () => {
       },
     ]);
 
-    const matches = [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } }];
+    const matches = [
+      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
+    ];
     await openToolsForMatches(matches, ['t1']);
 
     expect(mockOpenExternal).not.toHaveBeenCalled();
@@ -448,17 +458,15 @@ describe('openToolsForMatches', () => {
     ];
     await openToolsForMatches(matches, ['t1']);
 
-    expect(mockOpenExternal).toHaveBeenCalledWith(
-      'https://proxy.com/https://example.com/test'
-    );
+    expect(mockOpenExternal).toHaveBeenCalledWith('https://proxy.com/https://example.com/test');
   });
 
   it('throws when storage fails', async () => {
     mockedStorage.getQuickTools.mockRejectedValue(new Error('storage error'));
 
-    await expect(
-      openToolsForMatches([{ captures: { email: 'a@b.com' } }], ['t1'])
-    ).rejects.toThrow('storage error');
+    await expect(openToolsForMatches([{ captures: { email: 'a@b.com' } }], ['t1'])).rejects.toThrow(
+      'storage error'
+    );
   });
 });
 

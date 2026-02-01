@@ -125,7 +125,12 @@ describe('HotkeyActions', () => {
     it('copies bookmark clip with title and url', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
         {
-          clip: { type: 'bookmark', content: 'Example', title: 'Example', url: 'https://example.com' },
+          clip: {
+            type: 'bookmark',
+            content: 'Example',
+            title: 'Example',
+            url: 'https://example.com',
+          },
           isLocked: false,
           timestamp: 1,
         },
@@ -147,7 +152,11 @@ describe('HotkeyActions', () => {
         isEmpty: () => false,
       } as any);
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'image', content: 'data:image/png;base64,abc' }, isLocked: false, timestamp: 1 },
+        {
+          clip: { type: 'image', content: 'data:image/png;base64,abc' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeImage).toHaveBeenCalled();
@@ -158,7 +167,11 @@ describe('HotkeyActions', () => {
         isEmpty: () => true,
       } as any);
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'image', content: 'data:image/png;base64,abc' }, isLocked: false, timestamp: 1 },
+        {
+          clip: { type: 'image', content: 'data:image/png;base64,abc' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('data:image/png;base64,abc');

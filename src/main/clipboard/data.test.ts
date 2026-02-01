@@ -77,7 +77,10 @@ describe('getCurrentClipboardData', () => {
   });
 
   it('returns bookmark type when only bookmark is available', () => {
-    vi.mocked(clipboard.readBookmark).mockReturnValue({ title: 'Example', url: 'https://example.com' });
+    vi.mocked(clipboard.readBookmark).mockReturnValue({
+      title: 'Example',
+      url: 'https://example.com',
+    });
     const result = getCurrentClipboardData();
     expect(result).toEqual({
       type: 'bookmark',
@@ -212,8 +215,6 @@ describe('setClipboardBookmark', () => {
     vi.mocked(clipboard.write).mockImplementation(() => {
       throw new Error('write failed');
     });
-    expect(() =>
-      setClipboardBookmark({ text: 'a', html: '<a>a</a>' })
-    ).toThrow('write failed');
+    expect(() => setClipboardBookmark({ text: 'a', html: '<a>a</a>' })).toThrow('write failed');
   });
 });

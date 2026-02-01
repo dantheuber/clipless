@@ -58,10 +58,9 @@ describe('usePatternDetection', () => {
     const mockScan = vi.fn().mockResolvedValue([]);
     (window.api as any).quickClipsScanText = mockScan;
 
-    const { rerender, result } = renderHook(
-      ({ content }) => usePatternDetection(content),
-      { initialProps: { content: 'first' } }
-    );
+    const { rerender, result } = renderHook(({ content }) => usePatternDetection(content), {
+      initialProps: { content: 'first' },
+    });
 
     // Change content before debounce fires
     rerender({ content: 'second' });
@@ -141,10 +140,9 @@ describe('usePatternDetection', () => {
     ];
     (window.api as any).quickClipsScanText = vi.fn().mockResolvedValue(mockMatches);
 
-    const { rerender, result } = renderHook(
-      ({ content }) => usePatternDetection(content),
-      { initialProps: { content: 'test@example.com' } }
-    );
+    const { rerender, result } = renderHook(({ content }) => usePatternDetection(content), {
+      initialProps: { content: 'test@example.com' },
+    });
 
     await waitFor(() => {
       expect(result.current.hasPatterns).toBe(true);
