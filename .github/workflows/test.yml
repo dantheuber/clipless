@@ -84,8 +84,26 @@ jobs:
 
       - name: Run E2E tests
         id: e2e
-        run: npx playwright test --reporter=json > e2e-results.json
+        shell: bash
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-results.json
+        run: npx playwright test --reporter=json,list
         continue-on-error: true
+
+      - name: Verify E2E tests actually ran
+        shell: bash
+        run: |
+          if [ ! -f e2e-results.json ]; then
+            echo "::error::E2E results file was not created — Playwright may not have run"
+            exit 1
+          fi
+          TOTAL=$(jq '[.suites[].specs[]] | length' e2e-results.json 2>/dev/null || echo "0")
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "::error::E2E results contain no test specs — tests did not actually execute"
+            cat e2e-results.json
+            exit 1
+          fi
+          echo "E2E results validated: $TOTAL test spec(s) found"
 
       - name: Upload Playwright traces on failure
         if: steps.e2e.outcome == 'failure'
