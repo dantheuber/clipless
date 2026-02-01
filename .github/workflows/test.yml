@@ -24,7 +24,43 @@ jobs:
         run: npm ci
 
       - name: Run unit tests
-        run: npm test
+        run: npx vitest run --coverage
+
+      - name: Post coverage comment
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SUMMARY=$(cat coverage/coverage-summary.json)
+          STMTS=$(echo "$SUMMARY" | jq -r '.total.statements.pct')
+          BRANCH=$(echo "$SUMMARY" | jq -r '.total.branches.pct')
+          FUNCS=$(echo "$SUMMARY" | jq -r '.total.functions.pct')
+          LINES=$(echo "$SUMMARY" | jq -r '.total.lines.pct')
+
+          CONTENT=$(cat <<EOF
+          ## 📊 Coverage Report
+
+          | Metric | Coverage |
+          |--------|----------|
+          | Statements | ${STMTS}% |
+          | Branches | ${BRANCH}% |
+          | Functions | ${FUNCS}% |
+          | Lines | ${LINES}% |
+          EOF
+          )
+
+          MARKER="<!-- coverage-report -->"
+          BODY="$MARKER
+          $CONTENT"
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null || echo "")
+          if [ -n "$COMMENT_ID" ]; then
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
+          else
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$BODY"
+          fi
 
   e2e-tests:
     needs: unit-tests
@@ -47,4 +83,68 @@ jobs:
         run: npm run build
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        id: e2e
+        run: npx playwright test --reporter=json > e2e-results.json
+        continue-on-error: true
+
+      - name: Upload Playwright traces on failure
+        if: steps.e2e.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+      - name: Post E2E comment
+        if: always() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if [ ! -f e2e-results.json ]; then
+            CONTENT="## 🧪 E2E Test Results\n\n❌ **Tests failed to produce results**"
+          else
+            PASSED=$(jq '[.suites[].specs[] | select(.ok == true)] | length' e2e-results.json)
+            FAILED=$(jq '[.suites[].specs[] | select(.ok == false)] | length' e2e-results.json)
+            SKIPPED=$(jq '[.suites[].specs[] | select(.tests[0].status == "skipped")] | length' e2e-results.json)
+
+            if [ "$FAILED" -eq 0 ]; then
+              STATUS="✅"
+            else
+              STATUS="❌"
+            fi
+
+            TABLE_ROWS=""
+            for SUITE in $(jq -r '.suites[].title' e2e-results.json); do
+              SUITE_OK=$(jq -r --arg s "$SUITE" '.suites[] | select(.title == $s) | if (.specs | all(.ok)) then "✅" else "❌" end' e2e-results.json)
+              TABLE_ROWS="${TABLE_ROWS}| ${SUITE} | ${SUITE_OK} |\n"
+            done
+
+            CONTENT=$(cat <<EOF
+          ## 🧪 E2E Test Results
+
+          ${STATUS} **${PASSED} passed**, ${FAILED} failed, ${SKIPPED} skipped
+
+          | Test Suite | Result |
+          |------------|--------|
+          $(echo -e "$TABLE_ROWS")
+          EOF
+            )
+          fi
+
+          MARKER="<!-- e2e-report -->"
+          BODY="$MARKER
+          $CONTENT"
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null || echo "")
+          if [ -n "$COMMENT_ID" ]; then
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
+          else
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$BODY"
+          fi
+
+      - name: Fail if E2E tests failed
+        if: steps.e2e.outcome == 'failure'
+        run: exit 1
