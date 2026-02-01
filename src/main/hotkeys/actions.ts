@@ -1,6 +1,7 @@
 import { BrowserWindow, clipboard, nativeImage, app } from 'electron';
 import { storage } from '../storage';
 import { showNotification } from '../notifications';
+import type { StoredClip } from '../../shared/types';
 
 /**
  * Handles all hotkey action implementations
@@ -77,7 +78,7 @@ export class HotkeyActions {
   /**
    * Copy a clip to the system clipboard based on its type
    */
-  private copyClipToClipboard(clipToCopy: any): void {
+  private copyClipToClipboard(clipToCopy: StoredClip): void {
     switch (clipToCopy.clip.type) {
       case 'text':
         clipboard.writeText(clipToCopy.clip.content);

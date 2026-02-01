@@ -19,6 +19,7 @@ function ThemeDisplay() {
 }
 
 describe('ThemeProvider', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let settingsCallback: ((settings: any) => void) | null = null;
   let mediaChangeCallback: (() => void) | null = null;
 
@@ -26,6 +27,7 @@ describe('ThemeProvider', () => {
     settingsCallback = null;
     mediaChangeCallback = null;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).api = {
       storageGetSettings: vi.fn().mockResolvedValue({ theme: 'system' }),
       storageSaveSettings: vi.fn().mockResolvedValue(undefined),
@@ -95,6 +97,7 @@ describe('ThemeProvider', () => {
   });
 
   it('loads theme from settings on mount', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window.api as any).storageGetSettings = vi.fn().mockResolvedValue({ theme: 'dark' });
 
     await act(async () => {
@@ -110,6 +113,7 @@ describe('ThemeProvider', () => {
   });
 
   it('handles theme loading error by defaulting to system', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window.api as any).storageGetSettings = vi.fn().mockRejectedValue(new Error('fail'));
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -126,6 +130,7 @@ describe('ThemeProvider', () => {
   });
 
   it('handles missing api gracefully during load', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).api = undefined;
 
     await act(async () => {
@@ -159,6 +164,7 @@ describe('ThemeProvider', () => {
   });
 
   it('handles save error gracefully', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window.api as any).storageSaveSettings = vi.fn().mockRejectedValue(new Error('save fail'));
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
@@ -185,6 +191,7 @@ describe('ThemeProvider', () => {
     );
 
     // Remove api after mount
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).api = undefined;
 
     await act(async () => {
@@ -234,6 +241,7 @@ describe('ThemeProvider', () => {
   });
 
   it('defaults to system when settings has no theme property', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window.api as any).storageGetSettings = vi.fn().mockResolvedValue({});
 
     await act(async () => {
@@ -296,6 +304,7 @@ describe('ThemeProvider', () => {
   });
 
   it('does not listen for settings updates when api.onSettingsUpdated is missing', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).api = {
       storageGetSettings: vi.fn().mockResolvedValue({ theme: 'system' }),
       storageSaveSettings: vi.fn(),

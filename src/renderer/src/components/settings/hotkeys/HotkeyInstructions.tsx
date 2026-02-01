@@ -19,7 +19,7 @@ export const HotkeyInstructions: React.FC<HotkeyInstructionsProps> = ({ hotkeySe
     <div className={classNames(styles.instructions, { [styles.light]: isLight })}>
       <h3>Instructions:</h3>
       <ul>
-        <li>Click "Edit" next to any hotkey to change it</li>
+        <li>Click &quot;Edit&quot; next to any hotkey to change it</li>
         <li>Press the desired key combination (must include Ctrl/Cmd, Shift, or Alt)</li>
         <li>Press Escape to cancel editing</li>
         <li>Use the toggle switches to enable/disable individual hotkeys</li>
@@ -30,7 +30,7 @@ export const HotkeyInstructions: React.FC<HotkeyInstructionsProps> = ({ hotkeySe
       </p>
       <p className={styles.note}>
         <strong>Note:</strong> Hotkeys may conflict with other applications. Choose combinations
-        that aren't commonly used by your system or other software.
+        that aren&apos;t commonly used by your system or other software.
       </p>
     </div>
   );

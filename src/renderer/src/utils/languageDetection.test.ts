@@ -62,7 +62,9 @@ describe('detectLanguage', () => {
   });
 
   it('returns null for null/undefined', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(detectLanguage(null as any)).toBeNull();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(detectLanguage(undefined as any)).toBeNull();
   });
 
@@ -113,7 +115,9 @@ describe('isCode', () => {
   });
 
   it('returns false for null/undefined', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(isCode(null as any)).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     expect(isCode(undefined as any)).toBe(false);
   });
 

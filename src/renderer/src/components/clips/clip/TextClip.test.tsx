@@ -33,6 +33,7 @@ vi.mock('../../../utils/languageDetection', () => ({
 }));
 
 vi.mock('react-syntax-highlighter', () => ({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   Prism: ({ children, PreTag }: any) => {
     const Tag = PreTag || 'pre';
     return (

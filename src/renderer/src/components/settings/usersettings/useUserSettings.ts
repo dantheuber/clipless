@@ -43,7 +43,10 @@ export const useUserSettings = () => {
     };
   }, [debounceTimeout]);
 
-  const handleSettingChange = async (key: keyof UserSettingsType, value: any) => {
+  const handleSettingChange = async (
+    key: keyof UserSettingsType,
+    value: boolean | number | string
+  ) => {
     if (!settings || !window.api) return;
 
     setSaving(true);
@@ -55,12 +58,12 @@ export const useUserSettings = () => {
         setSettings(updatedSettings);
 
         // Update temp value if maxClips was changed
-        if (key === 'maxClips') {
+        if (key === 'maxClips' && typeof value === 'number') {
           setTempMaxClips(value);
         }
 
         // Update language detection settings if code detection was changed
-        if (key === 'codeDetectionEnabled') {
+        if (key === 'codeDetectionEnabled' && typeof value === 'boolean') {
           updateLanguageSettings({ codeDetectionEnabled: value });
         }
 

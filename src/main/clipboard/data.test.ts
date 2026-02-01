@@ -45,6 +45,7 @@ describe('getCurrentClipboardData', () => {
     vi.mocked(clipboard.readImage).mockReturnValue({
       isEmpty: () => true,
       toDataURL: () => '',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     vi.mocked(clipboard.readBookmark).mockReturnValue({ title: '', url: '' });
   });
@@ -71,6 +72,7 @@ describe('getCurrentClipboardData', () => {
     vi.mocked(clipboard.readImage).mockReturnValue({
       isEmpty: () => false,
       toDataURL: () => 'data:image/png;base64,abc',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     const result = getCurrentClipboardData();
     expect(result).toEqual({ type: 'image', content: 'data:image/png;base64,abc' });
@@ -150,6 +152,7 @@ describe('getClipboardImage', () => {
     vi.mocked(clipboard.readImage).mockReturnValue({
       isEmpty: () => false,
       toDataURL: () => 'data:image/png;base64,abc',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     expect(getClipboardImage()).toBe('data:image/png;base64,abc');
   });
@@ -158,6 +161,7 @@ describe('getClipboardImage', () => {
     vi.mocked(clipboard.readImage).mockReturnValue({
       isEmpty: () => true,
       toDataURL: () => '',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
     expect(getClipboardImage()).toBeNull();
   });

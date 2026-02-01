@@ -15,8 +15,10 @@ import { useClipsStorage } from './storage';
 import { useClipboardOperations } from './clipboard';
 import { useClipState } from './state';
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const ClipsContext = createContext({});
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useClips = (): ClipsContextType => useContext(ClipsContext) as ClipsContextType;
 
 export function ClipsProvider({ children }: { children: React.ReactNode }) {
@@ -128,8 +130,8 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       if (clip.type === 'bookmark') {
         if (
           clip.content.toLowerCase().includes(term) ||
-          (clip.title && clip.title.toLowerCase().includes(term)) ||
-          (clip.url && clip.url.toLowerCase().includes(term))
+          clip.title?.toLowerCase().includes(term) ||
+          clip.url?.toLowerCase().includes(term)
         ) {
           acc.push({ clip, originalIndex: index });
         }
@@ -194,5 +196,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 }
 
 // Re-export all the types and utilities for consumers
+// eslint-disable-next-line react-refresh/only-export-components
 export * from './types';
+// eslint-disable-next-line react-refresh/only-export-components
 export * from './utils';

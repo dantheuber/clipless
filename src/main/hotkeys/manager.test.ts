@@ -62,6 +62,7 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
 
@@ -75,6 +76,7 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
 
@@ -89,6 +91,7 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
 
@@ -103,6 +106,7 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
 
@@ -126,6 +130,7 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
 
@@ -140,6 +145,7 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
     await manager.initialize();
@@ -186,6 +192,7 @@ describe('HotkeyManager', () => {
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
         // openToolsLauncher and searchClips deliberately missing
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     });
 
@@ -220,6 +227,7 @@ describe('HotkeyManager', () => {
   });
 
   it('setMainWindow sets window on actions', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const mockWindow = {} as any;
     expect(() => manager.setMainWindow(mockWindow)).not.toThrow();
   });
@@ -229,10 +237,12 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
 
     // Access the private registry to make setInitialized throw
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const registry = (manager as any).registry;
     const origSetInit = registry.setInitialized.bind(registry);
     registry.setInitialized = vi.fn().mockImplementation(() => {
@@ -252,12 +262,15 @@ describe('HotkeyManager', () => {
       maxClips: 100,
       startMinimized: false,
       autoStart: false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       hotkeys: { enabled: false } as any,
     });
     await manager.initialize();
 
     // Make registerHotkeys throw by overriding unregisterAllHotkeys to throw outside inner try
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const origMethod = (manager as any).registerHotkeys.bind(manager);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (manager as any).registerHotkeys = vi.fn().mockRejectedValue(new Error('register fail'));
 
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -265,15 +278,18 @@ describe('HotkeyManager', () => {
     spy.mockRestore();
 
     // Restore
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (manager as any).registerHotkeys = origMethod;
   });
 
   it('registered hotkey callbacks are callable', async () => {
-    const callbacks: Record<string, Function> = {};
-    vi.mocked(globalShortcut.register).mockImplementation((acc: string, cb: Function) => {
-      callbacks[acc] = cb;
-      return true;
-    });
+    const callbacks: Record<string, (...args: unknown[]) => unknown> = {};
+    vi.mocked(globalShortcut.register).mockImplementation(
+      (acc: string, cb: (...args: unknown[]) => unknown) => {
+        callbacks[acc] = cb;
+        return true;
+      }
+    );
 
     vi.mocked(storage.getSettings).mockResolvedValue({
       maxClips: 100,

@@ -464,9 +464,10 @@ describe('openToolsForMatches', () => {
   it('throws when storage fails', async () => {
     mockedStorage.getQuickTools.mockRejectedValue(new Error('storage error'));
 
-    await expect(openToolsForMatches([{ captures: { email: 'a@b.com' } }], ['t1'])).rejects.toThrow(
-      'storage error'
-    );
+    await expect(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      openToolsForMatches([{ captures: { email: 'a@b.com' } }] as any, ['t1'])
+    ).rejects.toThrow('storage error');
   });
 });
 
@@ -476,8 +477,11 @@ describe('exportQuickClipsConfig', () => {
   });
 
   it('returns config with searchTerms, tools, templates, and version', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.getSearchTerms.mockResolvedValue([{ id: '1' }] as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.getQuickTools.mockResolvedValue([{ id: '2' }] as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.getTemplates.mockResolvedValue([{ id: '3' }] as any);
 
     const result = await exportQuickClipsConfig();
@@ -502,13 +506,15 @@ describe('importQuickClipsConfig', () => {
   });
 
   it('delegates to storage.importQuickClipsConfig', async () => {
-    const config = { searchTerms: [], tools: [], templates: [] };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const config = { searchTerms: [], tools: [], templates: [] } as any;
     await importQuickClipsConfig(config);
     expect(mockedStorage.importQuickClipsConfig).toHaveBeenCalledWith(config);
   });
 
   it('throws when storage fails', async () => {
     mockedStorage.importQuickClipsConfig.mockRejectedValue(new Error('import fail'));
-    await expect(importQuickClipsConfig({})).rejects.toThrow('import fail');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await expect(importQuickClipsConfig({} as any)).rejects.toThrow('import fail');
   });
 });

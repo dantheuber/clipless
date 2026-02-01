@@ -68,7 +68,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     };
 
     loadTheme();
-  }, []);
+  }, [updateEffectiveTheme]);
 
   // Listen for settings changes from other windows
   useEffect(() => {
@@ -86,7 +86,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Return the cleanup function to remove only this specific listener
     return cleanup;
-  }, []); // Empty dependency array since we want this to run only once
+  }, [updateEffectiveTheme]); // Empty dependency array since we want this to run only once
 
   // Listen for system theme changes when using system theme
   useEffect(() => {
@@ -97,7 +97,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     mediaQuery.addEventListener('change', handleChange);
     return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
+  }, [theme, updateEffectiveTheme]);
 
   const setTheme = async (newTheme: Theme) => {
     setThemeState(newTheme);
@@ -128,6 +128,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTheme = (): ThemeContextType => {
   const context = useContext(ThemeContext);
   if (context === undefined) {

@@ -4,17 +4,17 @@ import { clipboard, nativeImage } from 'electron';
 export const getCurrentClipboardData = (): { type: string; content: string } | null => {
   // Priority: text > rtf > html > image > bookmark
   const text = clipboard.readText();
-  if (text && text.trim()) {
+  if (text?.trim()) {
     return { type: 'text', content: text };
   }
 
   const rtf = clipboard.readRTF();
-  if (rtf && rtf.trim()) {
+  if (rtf?.trim()) {
     return { type: 'rtf', content: rtf };
   }
 
   const html = clipboard.readHTML();
-  if (html && html.trim()) {
+  if (html?.trim()) {
     return { type: 'html', content: html };
   }
 
@@ -25,7 +25,7 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
 
   try {
     const bookmark = clipboard.readBookmark();
-    if (bookmark && bookmark.url) {
+    if (bookmark?.url) {
       return { type: 'bookmark', content: JSON.stringify(bookmark) };
     }
   } catch {

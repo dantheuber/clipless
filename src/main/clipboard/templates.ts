@@ -1,4 +1,5 @@
 import { storage } from '../storage';
+import type { Template } from '../../shared/types';
 
 // Template management functions
 export const getAllTemplates = async () => {
@@ -19,7 +20,7 @@ export const createTemplate = async (name: string, content: string) => {
   }
 };
 
-export const updateTemplate = async (id: string, updates: any) => {
+export const updateTemplate = async (id: string, updates: Partial<Template>) => {
   try {
     return await storage.updateTemplate(id, updates);
   } catch (error) {
@@ -37,7 +38,7 @@ export const deleteTemplate = async (id: string) => {
   }
 };
 
-export const reorderTemplates = async (templates: any[]) => {
+export const reorderTemplates = async (templates: Template[]) => {
   try {
     await storage.reorderTemplates(templates);
   } catch (error) {

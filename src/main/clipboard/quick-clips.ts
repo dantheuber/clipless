@@ -1,6 +1,6 @@
 import { shell } from 'electron';
 import { storage } from '../storage';
-import type { PatternMatch } from '../../shared/types';
+import type { PatternMatch, QuickClipsConfig } from '../../shared/types';
 
 // Quick clips scanning functions
 export const scanTextForPatterns = async (text: string): Promise<PatternMatch[]> => {
@@ -48,7 +48,7 @@ export const scanTextForPatterns = async (text: string): Promise<PatternMatch[]>
   }
 };
 
-export const openToolsForMatches = async (matches: any[], toolIds: string[]) => {
+export const openToolsForMatches = async (matches: PatternMatch[], toolIds: string[]) => {
   try {
     const tools = await storage.getQuickTools();
 
@@ -174,7 +174,7 @@ export const exportQuickClipsConfig = async () => {
   }
 };
 
-export const importQuickClipsConfig = async (config: any) => {
+export const importQuickClipsConfig = async (config: QuickClipsConfig) => {
   try {
     // Use the new batch import method to avoid race conditions
     await storage.importQuickClipsConfig(config);

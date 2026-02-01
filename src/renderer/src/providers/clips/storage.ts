@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { ClipItem } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { updateClipsLength } from './utils';
+import { UserSettings, StoredClip } from '../../../../shared/types';
 
 /**
  * Hook for managing storage operations for clips and settings
@@ -41,7 +42,7 @@ export const useClipsStorage = (
 
           // Process stored clips and rebuild the array properly
           let clipIndex = 0;
-          storedClips.forEach((storedClip: any) => {
+          storedClips.forEach((storedClip: StoredClip) => {
             if (storedClip.clip?.content && storedClip.clip.content.trim() !== '') {
               loadedClips.push(storedClip.clip); // Use push instead of index assignment
               // Only allow locking for clips at index 1 and higher
@@ -77,13 +78,13 @@ export const useClipsStorage = (
     };
 
     loadStoredData();
-  }, []); // Empty dependency array - only run once on mount
+  }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]); // Dependencies are stable setter functions
 
   // Listen for settings updates from other windows (like settings window)
   useEffect(() => {
     if (!window.api?.onSettingsUpdated) return;
 
-    const handleSettingsUpdate = (updatedSettings: any) => {
+    const handleSettingsUpdate = (updatedSettings: UserSettings) => {
       console.log('Received settings update from other window:', updatedSettings);
       if (updatedSettings && typeof updatedSettings.maxClips === 'number') {
         setMaxClips(updatedSettings.maxClips);
@@ -161,7 +162,7 @@ export const useClipsStorage = (
   // Settings listener
   useEffect(() => {
     if (window.api) {
-      window.api.onSettingsUpdated((settings: any) => {
+      window.api.onSettingsUpdated((settings: UserSettings) => {
         console.log('Settings updated in main window:', settings);
         // Handle settings changes here if needed
       });

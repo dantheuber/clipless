@@ -39,6 +39,7 @@ import { storage } from '../storage';
 
 describe('HotkeyActions', () => {
   let actions: HotkeyActions;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockWindow: any;
 
   beforeEach(() => {
@@ -150,6 +151,7 @@ describe('HotkeyActions', () => {
     it('copies image clip to clipboard', async () => {
       vi.mocked(nativeImage.createFromDataURL).mockReturnValue({
         isEmpty: () => false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       vi.mocked(storage.getClips).mockResolvedValue([
         {
@@ -165,6 +167,7 @@ describe('HotkeyActions', () => {
     it('falls back to text for empty image', async () => {
       vi.mocked(nativeImage.createFromDataURL).mockReturnValue({
         isEmpty: () => true,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any);
       vi.mocked(storage.getClips).mockResolvedValue([
         {
@@ -190,6 +193,7 @@ describe('HotkeyActions', () => {
 
     it('copies unknown type as text', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         { clip: { type: 'unknown' as any, content: 'fallback' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
@@ -211,6 +215,7 @@ describe('HotkeyActions', () => {
     });
 
     it('handles null clip at valid index', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const sparseClips = [null as any, { clip: { type: 'text', content: 'hello' } }];
       vi.mocked(storage.getClips).mockResolvedValue(sparseClips);
       await actions.copyQuickClip(0);
@@ -308,6 +313,7 @@ describe('HotkeyActions', () => {
     });
 
     it('does nothing when first clip is null', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(storage.getClips).mockResolvedValue([null as any]);
       await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
     });

@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron';
+import { BrowserWindow, shell, type BrowserWindowConstructorOptions } from 'electron';
 import { join } from 'path';
 import { is } from '@electron-toolkit/utils';
 import { createTray as createTrayIcon, getIsQuitting } from '../tray';
@@ -151,7 +151,7 @@ export function createToolsLauncherWindow(clipContent: string): void {
 
 export async function createWindow(): Promise<void> {
   // Create the browser window.
-  const windowOptions: any = {
+  const windowOptions: BrowserWindowConstructorOptions = {
     width: 900,
     height: 670,
     show: false,

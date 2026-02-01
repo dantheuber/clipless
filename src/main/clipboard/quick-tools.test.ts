@@ -59,6 +59,7 @@ describe('validateToolUrl', () => {
 
   it('throws when an unexpected error occurs', async () => {
     // Force an error by passing null as url
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await expect(validateToolUrl(null as any, [])).rejects.toThrow();
   });
 });
@@ -68,6 +69,7 @@ describe('getAllQuickTools', () => {
 
   it('returns tools from storage', async () => {
     const tools = [{ id: '1', name: 'Tool' }];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.getQuickTools.mockResolvedValue(tools as any);
     const result = await getAllQuickTools();
     expect(result).toEqual(tools);
@@ -83,6 +85,7 @@ describe('createQuickTool', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('delegates to storage.createQuickTool', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.createQuickTool.mockResolvedValue({ id: '1' } as any);
     const result = await createQuickTool('Test', 'https://example.com/{q}', ['q']);
     expect(mockedStorage.createQuickTool).toHaveBeenCalledWith('Test', 'https://example.com/{q}', [
@@ -101,6 +104,7 @@ describe('updateQuickTool', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('delegates to storage.updateQuickTool', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.updateQuickTool.mockResolvedValue({ id: '1' } as any);
     await updateQuickTool('1', { name: 'Updated' });
     expect(mockedStorage.updateQuickTool).toHaveBeenCalledWith('1', { name: 'Updated' });
@@ -131,7 +135,8 @@ describe('reorderQuickTools', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('delegates to storage.reorderQuickTools', async () => {
-    const tools = [{ id: '1' }, { id: '2' }];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const tools = [{ id: '1' }, { id: '2' }] as any;
     mockedStorage.reorderQuickTools.mockResolvedValue(undefined);
     await reorderQuickTools(tools);
     expect(mockedStorage.reorderQuickTools).toHaveBeenCalledWith(tools);

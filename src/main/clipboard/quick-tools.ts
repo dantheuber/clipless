@@ -1,4 +1,5 @@
 import { storage } from '../storage';
+import type { QuickTool } from '../../shared/types';
 
 // Quick tools management functions
 export const getAllQuickTools = async () => {
@@ -19,7 +20,7 @@ export const createQuickTool = async (name: string, url: string, captureGroups: 
   }
 };
 
-export const updateQuickTool = async (id: string, updates: any) => {
+export const updateQuickTool = async (id: string, updates: Partial<QuickTool>) => {
   try {
     return await storage.updateQuickTool(id, updates);
   } catch (error) {
@@ -37,7 +38,7 @@ export const deleteQuickTool = async (id: string) => {
   }
 };
 
-export const reorderQuickTools = async (tools: any[]) => {
+export const reorderQuickTools = async (tools: QuickTool[]) => {
   try {
     await storage.reorderQuickTools(tools);
   } catch (error) {

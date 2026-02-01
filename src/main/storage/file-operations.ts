@@ -4,7 +4,7 @@ import { promises as fs } from 'fs';
 /**
  * Save data to encrypted storage
  */
-export async function saveToFile(data: any, encryptedDataPath: string): Promise<void> {
+export async function saveToFile(data: unknown, encryptedDataPath: string): Promise<void> {
   const tempPath = encryptedDataPath + '.tmp';
 
   try {
@@ -42,7 +42,7 @@ export async function saveToFile(data: any, encryptedDataPath: string): Promise<
 /**
  * Load data from encrypted storage
  */
-export async function loadFromFile(encryptedDataPath: string): Promise<any> {
+export async function loadFromFile(encryptedDataPath: string): Promise<unknown> {
   try {
     // Check if encrypted file exists
     await fs.access(encryptedDataPath);
@@ -57,7 +57,7 @@ export async function loadFromFile(encryptedDataPath: string): Promise<any> {
     // Parse and return data
     return JSON.parse(jsonData);
   } catch (error) {
-    if ((error as any).code === 'ENOENT') {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
       // File doesn't exist
       throw new Error('FILE_NOT_FOUND');
     } else {

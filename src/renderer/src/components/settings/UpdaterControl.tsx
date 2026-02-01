@@ -114,7 +114,7 @@ function UpdaterControl(): React.JSX.Element {
 
       {/* Helper Text */}
       <p className={classNames(styles.helperText, { [styles.light]: isLight })}>
-        Updates are automatically downloaded. You'll be notified when a restart is required to
+        Updates are automatically downloaded. You&apos;ll be notified when a restart is required to
         complete the installation.
       </p>
     </div>

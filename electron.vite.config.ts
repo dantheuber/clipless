@@ -2,9 +2,7 @@ import { resolve } from 'path';
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
-
-// Load package.json to get the version
-const packageJson = require('./package.json');
+import packageJson from './package.json';
 
 export default defineConfig({
   main: {

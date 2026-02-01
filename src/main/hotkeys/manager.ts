@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron';
 import { storage } from '../storage';
 import { HotkeyRegistry } from './registry';
 import { HotkeyActions } from './actions';
+import type { UserSettings } from '../../shared/types';
 
 /**
  * Main hotkey manager that coordinates registration and actions
@@ -63,8 +64,8 @@ export class HotkeyManager {
     }
   }
 
-  private registerFocusWindowHotkey(hotkeys: any): void {
-    if (hotkeys.focusWindow.enabled) {
+  private registerFocusWindowHotkey(hotkeys: UserSettings['hotkeys']): void {
+    if (hotkeys?.focusWindow.enabled) {
       console.log(
         `Hotkey Manager: Attempting to register focus window hotkey: ${hotkeys.focusWindow.key}`
       );
@@ -74,8 +75,10 @@ export class HotkeyManager {
     }
   }
 
-  private registerQuickClipHotkeys(hotkeys: any): void {
+  private registerQuickClipHotkeys(hotkeys: UserSettings['hotkeys']): void {
     // Note: Quick clip hotkeys copy clips by their display number (1-5)
+    if (!hotkeys) return;
+
     const quickClipHotkeys = [
       { config: hotkeys.quickClip1, index: 0 }, // Copy 1st clip (position 1)
       { config: hotkeys.quickClip2, index: 1 }, // Copy 2nd clip (position 2)
@@ -96,9 +99,9 @@ export class HotkeyManager {
     }
   }
 
-  private registerToolsLauncherHotkey(hotkeys: any): void {
+  private registerToolsLauncherHotkey(hotkeys: UserSettings['hotkeys']): void {
     // Handle case where openToolsLauncher setting doesn't exist yet (new feature)
-    const toolsLauncherConfig = hotkeys.openToolsLauncher || {
+    const toolsLauncherConfig = hotkeys?.openToolsLauncher || {
       enabled: true,
       key: 'CommandOrControl+Shift+T',
     };
@@ -113,8 +116,8 @@ export class HotkeyManager {
     }
   }
 
-  private registerSearchHotkey(hotkeys: any): void {
-    const searchConfig = hotkeys.searchClips || {
+  private registerSearchHotkey(hotkeys: UserSettings['hotkeys']): void {
+    const searchConfig = hotkeys?.searchClips || {
       enabled: true,
       key: 'CommandOrControl+Shift+F',
     };

@@ -8,7 +8,7 @@ import styles from '../StorageSettings.module.css';
 
 interface WindowSettingsProps {
   settings: UserSettingsType;
-  onSettingChange: (key: keyof UserSettingsType, value: any) => void;
+  onSettingChange: (key: keyof UserSettingsType, value: boolean | number | string) => void;
   saving: boolean;
 }
 

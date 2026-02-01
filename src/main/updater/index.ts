@@ -1,18 +1,21 @@
-import { autoUpdater } from 'electron-updater';
+import { autoUpdater, type UpdateInfo } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 
 // Helper function to check for updates with timeout and retry
-export async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Promise<any> {
+export async function checkForUpdatesWithRetry(
+  retries = 2,
+  timeout = 10000
+): Promise<UpdateInfo | null> {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
       // Create a promise that resolves with auto-updater events
-      const updateCheckPromise = new Promise<any>((resolve, reject) => {
+      const updateCheckPromise = new Promise<UpdateInfo | null>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           reject(new Error('Update check timeout'));
         }, timeout);
 
         // Listen for update events
-        const onUpdateAvailable = (info: any) => {
+        const onUpdateAvailable = (info: UpdateInfo) => {
           clearTimeout(timeoutId);
           autoUpdater.off('update-available', onUpdateAvailable);
           autoUpdater.off('update-not-available', onUpdateNotAvailable);
@@ -20,7 +23,7 @@ export async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Pr
           resolve(info);
         };
 
-        const onUpdateNotAvailable = (_info: any) => {
+        const onUpdateNotAvailable = (_info: UpdateInfo) => {
           clearTimeout(timeoutId);
           autoUpdater.off('update-available', onUpdateAvailable);
           autoUpdater.off('update-not-available', onUpdateNotAvailable);
@@ -28,7 +31,7 @@ export async function checkForUpdatesWithRetry(retries = 2, timeout = 10000): Pr
           resolve(null); // No updates available
         };
 
-        const onError = (error: any) => {
+        const onError = (error: Error) => {
           clearTimeout(timeoutId);
           autoUpdater.off('update-available', onUpdateAvailable);
           autoUpdater.off('update-not-available', onUpdateNotAvailable);
