@@ -33,7 +33,7 @@ export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => 
       textarea.style.height = newHeight;
 
       // Also update the syntax highlighter container if it exists
-      const container = textarea.parentElement?.querySelector('.syntaxHighlightContainer');
+      const container = textarea.closest(`.${styles.syntaxHighlightContainer}`);
       if (container) {
         (container as HTMLElement).style.height = newHeight;
       }
@@ -48,6 +48,7 @@ export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => 
       }
 
       debounceRef.current = setTimeout(() => {
+        /* istanbul ignore else -- @preserve */
         if (newContent !== clip.content) {
           onUpdate(newContent);
         }

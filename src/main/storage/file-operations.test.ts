@@ -83,4 +83,26 @@ describe('isEncryptionAvailable', () => {
   it('returns the result from safeStorage', () => {
     expect(isEncryptionAvailable()).toBe(true);
   });
+
+  it('returns false when encryption is not available', () => {
+    vi.mocked(safeStorage.isEncryptionAvailable).mockReturnValueOnce(false);
+    expect(isEncryptionAvailable()).toBe(false);
+  });
+});
+
+describe('loadFromFile - non-ENOENT error', () => {
+  it('throws original error for non-ENOENT errors', async () => {
+    vi.mocked(fs.access).mockResolvedValue(undefined);
+    vi.mocked(fs.readFile).mockRejectedValueOnce(new Error('decrypt failed'));
+
+    await expect(loadFromFile('/path/data.enc')).rejects.toThrow('decrypt failed');
+  });
+});
+
+describe('saveToFile - temp file cleanup ignores missing', () => {
+  it('ignores temp file unlink error before write', async () => {
+    vi.mocked(fs.unlink).mockRejectedValueOnce(new Error('no temp file'));
+    await saveToFile({ test: true }, '/path/data.enc');
+    expect(fs.writeFile).toHaveBeenCalled();
+  });
 });

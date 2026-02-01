@@ -4,6 +4,9 @@ import {
   sortTemplatesByOrder,
   extractTemplateTokens,
   generateTextFromTemplate,
+  updateTemplateObject,
+  reorderTemplatesArray,
+  generateTemplateId,
 } from './templates';
 
 describe('createTemplateObject', () => {
@@ -63,6 +66,11 @@ describe('extractTemplateTokens', () => {
     expect(result.positional).toEqual(['c1']);
   });
 
+  it('deduplicates named tokens', () => {
+    const result = extractTemplateTokens('{name} and {name} again');
+    expect(result.named).toEqual(['name']);
+  });
+
   it('returns empty arrays for no tokens', () => {
     const result = extractTemplateTokens('plain text');
     expect(result.positional).toEqual([]);
@@ -110,5 +118,53 @@ describe('generateTextFromTemplate', () => {
   it('uses 1-based indexing for clips', () => {
     const result = generateTextFromTemplate(makeTemplate('{c1}'), ['first', 'second']);
     expect(result).toBe('first');
+  });
+
+  it('handles no captures provided', () => {
+    const result = generateTextFromTemplate(makeTemplate('{c1} {name}'), ['hello']);
+    expect(result).toBe('hello {name}');
+  });
+
+  it('skips positional tokens during named capture replacement', () => {
+    const result = generateTextFromTemplate(makeTemplate('{c1} {name}'), ['clip1'], { name: 'Alice' });
+    expect(result).toBe('clip1 Alice');
+  });
+
+  it('leaves named token when capture key is missing', () => {
+    const result = generateTextFromTemplate(makeTemplate('{missing}'), [], { other: 'val' });
+    expect(result).toBe('{missing}');
+  });
+});
+
+describe('generateTemplateId', () => {
+  it('returns a string starting with template-', () => {
+    const id = generateTemplateId();
+    expect(id).toMatch(/^template-/);
+  });
+});
+
+describe('updateTemplateObject', () => {
+  it('updates fields and refreshes updatedAt', () => {
+    const original = { id: '1', name: 'Old', content: 'test', createdAt: 1000, updatedAt: 1000, order: 0 };
+    const updated = updateTemplateObject(original, { name: 'New' });
+    expect(updated.name).toBe('New');
+    expect(updated.updatedAt).toBeGreaterThan(1000);
+    expect(updated.createdAt).toBe(1000);
+  });
+});
+
+describe('reorderTemplatesArray', () => {
+  it('assigns sequential order values', () => {
+    const templates = [
+      { id: '1', name: 'A', content: '', createdAt: 0, updatedAt: 0, order: 5 },
+      { id: '2', name: 'B', content: '', createdAt: 0, updatedAt: 0, order: 10 },
+    ];
+    const result = reorderTemplatesArray(templates);
+    expect(result[0].order).toBe(0);
+    expect(result[1].order).toBe(1);
+  });
+
+  it('handles empty array', () => {
+    expect(reorderTemplatesArray([])).toEqual([]);
   });
 });

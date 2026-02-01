@@ -1,4 +1,4 @@
-import { BrowserWindow, clipboard, nativeImage } from 'electron';
+import { BrowserWindow, clipboard, nativeImage, app } from 'electron';
 import { storage } from '../storage';
 import { showNotification } from '../notifications';
 
@@ -35,7 +35,7 @@ export class HotkeyActions {
 
       // On macOS, we need to bring the app to front
       if (process.platform === 'darwin') {
-        require('electron').app.focus();
+        app.focus();
       }
     } catch (error) {
       console.error('Error toggling window visibility:', error);
@@ -135,7 +135,7 @@ export class HotkeyActions {
         this.mainWindow.show();
         this.mainWindow.focus();
         if (process.platform === 'darwin') {
-          require('electron').app.focus();
+          app.focus();
         }
       }
 

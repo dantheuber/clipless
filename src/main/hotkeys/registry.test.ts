@@ -77,4 +77,26 @@ describe('HotkeyRegistry', () => {
       expect(registry.getCurrentHotkeys()).toEqual([]);
     });
   });
+
+  describe('error handling', () => {
+    it('returns false when globalShortcut.register throws', () => {
+      vi.mocked(globalShortcut.register).mockImplementationOnce(() => {
+        throw new Error('system error');
+      });
+      const result = registry.registerHotkey('Ctrl+Z', vi.fn());
+      expect(result).toBe(false);
+    });
+
+    it('continues unregistering when one hotkey throws', () => {
+      registry.registerHotkey('Ctrl+A', vi.fn());
+      registry.registerHotkey('Ctrl+B', vi.fn());
+
+      vi.mocked(globalShortcut.unregister).mockImplementationOnce(() => {
+        throw new Error('unregister error');
+      });
+
+      expect(() => registry.unregisterAllHotkeys()).not.toThrow();
+      expect(registry.getCurrentHotkeys()).toEqual([]);
+    });
+  });
 });
