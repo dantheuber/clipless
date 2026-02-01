@@ -29,6 +29,7 @@ const defaultSettings: LanguageDetectionSettings = {
   codeDetectionEnabled: true,
 };
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const LanguageDetectionContext = createContext<LanguageDetectionContextType>({
   settings: defaultSettings,
   updateSettings: () => {},
@@ -36,6 +37,7 @@ export const LanguageDetectionContext = createContext<LanguageDetectionContextTy
   isCodeDetectionEnabled: true,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useLanguageDetection = (): LanguageDetectionContextType =>
   useContext(LanguageDetectionContext);
 
@@ -99,11 +101,12 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
   useEffect(() => {
     if (!window.api?.onSettingsUpdated) return;
 
-    const handleSettingsUpdate = (updatedSettings: any) => {
+    const handleSettingsUpdate = (updatedSettings: Partial<LanguageDetectionSettings>) => {
       if (updatedSettings && typeof updatedSettings.codeDetectionEnabled === 'boolean') {
+        const enabled = updatedSettings.codeDetectionEnabled;
         setSettings((prevSettings) => ({
           ...prevSettings,
-          codeDetectionEnabled: updatedSettings.codeDetectionEnabled,
+          codeDetectionEnabled: enabled,
         }));
       }
     };

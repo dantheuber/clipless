@@ -241,7 +241,7 @@ export function TemplateManager(): React.JSX.Element {
 
       {templates.length === 0 ? (
         <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
-          <p>No templates created yet. Click "Create Template" to get started.</p>
+          <p>No templates created yet. Click &quot;Create Template&quot; to get started.</p>
         </div>
       ) : (
         <div className={styles.templatesList}>
@@ -325,13 +325,17 @@ export function TemplateManager(): React.JSX.Element {
                   </div>
 
                   {expandedId === template.id && (
-                    <div className={classNames(styles.templateDetails, { [styles.light]: isLight })}>
+                    <div
+                      className={classNames(styles.templateDetails, { [styles.light]: isLight })}
+                    >
                       <pre
                         className={classNames(styles.templateContent, { [styles.light]: isLight })}
                       >
                         {template.content}
                       </pre>
-                      <div className={classNames(styles.templateFooter, { [styles.light]: isLight })}>
+                      <div
+                        className={classNames(styles.templateFooter, { [styles.light]: isLight })}
+                      >
                         <div className={styles.tokenPreview}>
                           <span
                             className={classNames(styles.tokenLabel, { [styles.light]: isLight })}

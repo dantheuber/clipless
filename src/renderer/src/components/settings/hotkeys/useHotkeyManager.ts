@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import type { UserSettings, HotkeySettings } from '../../../../../shared/types';
 
 // Default hotkey configurations
@@ -86,32 +86,35 @@ export const useHotkeyManager = () => {
     loadSettings();
   }, []);
 
-  const saveSettings = async (newHotkeySettings: HotkeySettings) => {
-    if (!settings || !window.api) return false;
+  const saveSettings = useCallback(
+    async (newHotkeySettings: HotkeySettings) => {
+      if (!settings || !window.api) return false;
 
-    setSaving(true);
-    try {
-      const updatedSettings: UserSettings = {
-        ...settings,
-        hotkeys: newHotkeySettings,
-      };
+      setSaving(true);
+      try {
+        const updatedSettings: UserSettings = {
+          ...settings,
+          hotkeys: newHotkeySettings,
+        };
 
-      // Use the settings-changed IPC to properly notify main process
-      const success = await window.api.settingsChanged(updatedSettings);
+        // Use the settings-changed IPC to properly notify main process
+        const success = await window.api.settingsChanged(updatedSettings);
 
-      if (success) {
-        setSettings(updatedSettings);
-        setHotkeySettings(newHotkeySettings);
-        return true;
+        if (success) {
+          setSettings(updatedSettings);
+          setHotkeySettings(newHotkeySettings);
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Failed to save hotkey settings:', error);
+        return false;
+      } finally {
+        setSaving(false);
       }
-      return false;
-    } catch (error) {
-      console.error('Failed to save hotkey settings:', error);
-      return false;
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+    [settings]
+  );
 
   const handleGlobalToggle = async (enabled: boolean) => {
     const updatedSettings = { ...hotkeySettings, enabled };
@@ -129,28 +132,28 @@ export const useHotkeyManager = () => {
     await saveSettings(updatedSettings);
   };
 
-  const handleHotkeyChange = async (
-    hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>,
-    key: string
-  ) => {
-    const updatedSettings = {
-      ...hotkeySettings,
-      [hotkeyKey]: { ...hotkeySettings[hotkeyKey], key },
-    };
-    await saveSettings(updatedSettings);
-    setEditingHotkey(null);
-    setListeningForKey(false);
-  };
+  const handleHotkeyChange = useCallback(
+    async (hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>, key: string) => {
+      const updatedSettings = {
+        ...hotkeySettings,
+        [hotkeyKey]: { ...hotkeySettings[hotkeyKey], key },
+      };
+      await saveSettings(updatedSettings);
+      setEditingHotkey(null);
+      setListeningForKey(false);
+    },
+    [hotkeySettings, saveSettings]
+  );
 
   const startKeyCapture = (hotkeyKey: string) => {
     setEditingHotkey(hotkeyKey);
     setListeningForKey(true);
   };
 
-  const cancelKeyCapture = () => {
+  const cancelKeyCapture = useCallback(() => {
     setEditingHotkey(null);
     setListeningForKey(false);
-  };
+  }, []);
 
   // Handle key capture
   useEffect(() => {
@@ -199,7 +202,7 @@ export const useHotkeyManager = () => {
     return () => {
       document.removeEventListener('keydown', handleKeyDown, true);
     };
-  }, [listeningForKey, editingHotkey]);
+  }, [listeningForKey, editingHotkey, handleHotkeyChange, cancelKeyCapture]);
 
   return {
     settings,

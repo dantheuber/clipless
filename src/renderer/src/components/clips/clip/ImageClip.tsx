@@ -14,6 +14,7 @@ export const ImageClip = ({ clip }: ImageClipProps) => {
 
   const handleImageMouseEnter = (e: React.MouseEvent<HTMLImageElement>) => {
     const popover = popoverRef.current;
+    /* istanbul ignore else -- @preserve */
     if (popover) {
       const rect = e.currentTarget.getBoundingClientRect();
       const viewportHeight = window.innerHeight;

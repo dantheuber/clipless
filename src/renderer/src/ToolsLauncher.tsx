@@ -33,14 +33,16 @@ export default function ToolsLauncher(): React.JSX.Element {
   if (!isReady) {
     return (
       <ThemeProvider>
-        <div style={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          height: '100vh',
-          color: 'var(--text-color)',
-          backgroundColor: 'var(--background-color)'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100vh',
+            color: 'var(--text-color)',
+            backgroundColor: 'var(--background-color)',
+          }}
+        >
           Loading...
         </div>
       </ThemeProvider>
@@ -50,11 +52,7 @@ export default function ToolsLauncher(): React.JSX.Element {
   return (
     <ThemeProvider>
       <div style={{ height: '100vh', overflow: 'hidden' }}>
-        <QuickClipsScanner
-          isOpen={true}
-          onClose={handleClose}
-          clipContent={clipContent}
-        />
+        <QuickClipsScanner isOpen={true} onClose={handleClose} clipContent={clipContent} />
       </div>
     </ThemeProvider>
   );

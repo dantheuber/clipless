@@ -87,7 +87,7 @@ export function ToolsSection({
 
       {tools.length === 0 ? (
         <div className={classNames(styles.emptyState, { [styles.light]: isLight })}>
-          <p>No tools created yet. Click "Create Tool" to get started.</p>
+          <p>No tools created yet. Click &quot;Create Tool&quot; to get started.</p>
         </div>
       ) : (
         <div className={styles.itemsList}>

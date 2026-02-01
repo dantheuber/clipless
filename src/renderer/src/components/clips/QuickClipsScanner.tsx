@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
 import { PatternMatch, QuickTool, Template } from '../../../../shared/types';
 import { useTheme } from '../../providers/theme';
@@ -151,13 +151,13 @@ export function QuickClipsScanner({
     });
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     if (onClose) {
       onClose();
     } else {
       window.api.closeToolsLauncher();
     }
-  };
+  }, [onClose]);
 
   // Add escape key listener
   useEffect(() => {
@@ -173,39 +173,9 @@ export function QuickClipsScanner({
     }
 
     return () => {};
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
-  // Scan the clip content when modal opens
-  useEffect(() => {
-    if (isOpen && clipContent) {
-      scanContent();
-    }
-  }, [isOpen, clipContent]);
-
-  // Load available tools and templates
-  useEffect(() => {
-    if (isOpen) {
-      loadTools();
-      loadTemplates();
-      setAccordionInitialized(false);
-    }
-  }, [isOpen]);
-
-  // Update available tools when capture items change
-  useEffect(() => {
-    if (captureItems.length > 0 && tools.length > 0) {
-      updateAvailableTools();
-    }
-  }, [captureItems, tools, selectedCaptureItems]);
-
-  // Update matched templates when capture items change
-  useEffect(() => {
-    if (captureItems.length > 0 && templates.length > 0) {
-      updateMatchedTemplates();
-    }
-  }, [captureItems, templates, selectedCaptureItems]);
-
-  const scanContent = async () => {
+  const scanContent = useCallback(async () => {
     setLoading(true);
     try {
       const scanResults = await window.api.quickClipsScanText(clipContent);
@@ -237,9 +207,9 @@ export function QuickClipsScanner({
     } finally {
       setLoading(false);
     }
-  };
+  }, [clipContent]);
 
-  const loadTools = async () => {
+  const loadTools = useCallback(async () => {
     try {
       const loadedTools = await window.api.quickToolsGetAll();
       setTools(loadedTools);
@@ -247,9 +217,9 @@ export function QuickClipsScanner({
       console.error('Failed to load tools:', error);
       setTools([]);
     }
-  };
+  }, []);
 
-  const loadTemplates = async () => {
+  const loadTemplates = useCallback(async () => {
     try {
       const loadedTemplates = await window.api.templatesGetAll();
       setTemplates(loadedTemplates);
@@ -257,9 +227,9 @@ export function QuickClipsScanner({
       console.error('Failed to load templates:', error);
       setTemplates([]);
     }
-  };
+  }, []);
 
-  const updateAvailableTools = () => {
+  const updateAvailableTools = useCallback(() => {
     const selectedCaptureGroups = new Set<string>();
 
     captureItems.forEach((item) => {
@@ -276,9 +246,9 @@ export function QuickClipsScanner({
 
     const availableToolIds = new Set(compatibleTools.map((tool) => tool.id));
     setSelectedTools((prev) => new Set([...prev].filter((id) => availableToolIds.has(id))));
-  };
+  }, [captureItems, tools, selectedCaptureItems]);
 
-  const updateMatchedTemplates = () => {
+  const updateMatchedTemplates = useCallback(() => {
     const selectedCaptureGroups = new Set<string>();
 
     captureItems.forEach((item) => {
@@ -294,7 +264,37 @@ export function QuickClipsScanner({
     });
 
     setMatchedTemplates(compatible);
-  };
+  }, [captureItems, templates, selectedCaptureItems]);
+
+  // Scan the clip content when modal opens
+  useEffect(() => {
+    if (isOpen && clipContent) {
+      scanContent();
+    }
+  }, [isOpen, clipContent, scanContent]);
+
+  // Load available tools and templates
+  useEffect(() => {
+    if (isOpen) {
+      loadTools();
+      loadTemplates();
+      setAccordionInitialized(false);
+    }
+  }, [isOpen, loadTools, loadTemplates]);
+
+  // Update available tools when capture items change
+  useEffect(() => {
+    if (captureItems.length > 0 && tools.length > 0) {
+      updateAvailableTools();
+    }
+  }, [captureItems, tools, selectedCaptureItems, updateAvailableTools]);
+
+  // Update matched templates when capture items change
+  useEffect(() => {
+    if (captureItems.length > 0 && templates.length > 0) {
+      updateMatchedTemplates();
+    }
+  }, [captureItems, templates, selectedCaptureItems, updateMatchedTemplates]);
 
   const handleCaptureItemToggle = (uniqueKey: string) => {
     const newSelected = new Set(selectedCaptureItems);
@@ -327,7 +327,7 @@ export function QuickClipsScanner({
         });
 
       const storedClips = await window.api.storageGetClips();
-      const clipContents = storedClips.map((c: any) => c.clip?.content || '');
+      const clipContents = storedClips.map((c) => c.clip?.content || '');
 
       const generatedText = await window.api.templatesGenerateText(
         template.id,
@@ -396,12 +396,10 @@ export function QuickClipsScanner({
       <div
         className={classNames(styles.content, { [styles.light]: isLight })}
         style={{
-          flexDirection:
-            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'column' : 'row',
+          flexDirection: loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'column' : 'row',
           justifyContent:
             loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'flex-start',
-          alignItems:
-            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'stretch',
+          alignItems: loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'stretch',
         }}
       >
         {loading ? (

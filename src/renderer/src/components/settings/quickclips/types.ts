@@ -1,4 +1,4 @@
-import { SearchTerm, QuickTool } from '../../../../../shared/types';
+import { SearchTerm, QuickTool, PatternMatch } from '../../../../../shared/types';
 
 export type TabType = 'searchTerms' | 'tools' | 'templates' | 'test';
 
@@ -28,7 +28,7 @@ export interface QuickClipsState {
 
   // Test state
   testText: string;
-  testResults: any[];
+  testResults: PatternMatch[];
 
   // Common state
   deleteConfirm: DeleteConfirmState;
@@ -41,7 +41,7 @@ export interface QuickClipsActions {
 
   // Search Terms actions
   handleCreateSearchTerm: () => Promise<void>;
-  handleCreateFromBuiltin: (builtin: any) => Promise<void>;
+  handleCreateFromBuiltin: (builtin: SearchTerm) => Promise<void>;
   handleSaveSearchTerm: () => Promise<void>;
   handleCancelSearchTermEdit: () => void;
   handleStartSearchTermEdit: (term: SearchTerm) => void;

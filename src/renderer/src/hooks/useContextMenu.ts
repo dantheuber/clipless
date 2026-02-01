@@ -17,7 +17,7 @@ export function useContextMenu() {
   const openContextMenu = useCallback((event: React.MouseEvent, targetIndex?: number) => {
     event.preventDefault();
     event.stopPropagation();
-    
+
     setContextMenu({
       isOpen: true,
       x: event.clientX,

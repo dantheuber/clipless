@@ -1,8 +1,8 @@
 import { storage } from '../storage';
-import type { ClipItem } from '../../shared/types';
+import type { ClipItem, StoredClip, UserSettings } from '../../shared/types';
 
 // Storage integration functions
-export const getClips = async (): Promise<any[]> => {
+export const getClips = async (): Promise<StoredClip[]> => {
   try {
     return await storage.getClips();
   } catch (error) {
@@ -24,16 +24,16 @@ export const saveClips = async (
   }
 };
 
-export const getSettings = async (): Promise<any> => {
+export const getSettings = async (): Promise<UserSettings> => {
   try {
     return await storage.getSettings();
   } catch (error) {
     console.error('Failed to get settings from storage:', error);
-    return {};
+    return {} as UserSettings;
   }
 };
 
-export const saveSettings = async (settings: any): Promise<boolean> => {
+export const saveSettings = async (settings: UserSettings): Promise<boolean> => {
   try {
     await storage.saveSettings(settings);
     return true;

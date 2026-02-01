@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import type { PatternMatch } from '../../shared/types';
+import type { PatternMatch, SearchTerm } from '../../shared/types';
 
 const RESERVED_GROUP_NAME = /^c\d+$/;
 
@@ -40,7 +40,7 @@ export const createSearchTerm = async (name: string, pattern: string) => {
   }
 };
 
-export const updateSearchTerm = async (id: string, updates: any) => {
+export const updateSearchTerm = async (id: string, updates: Partial<SearchTerm>) => {
   try {
     if (updates.pattern) {
       validateCaptureGroupNames(updates.pattern);
@@ -61,7 +61,7 @@ export const deleteSearchTerm = async (id: string) => {
   }
 };
 
-export const reorderSearchTerms = async (searchTerms: any[]) => {
+export const reorderSearchTerms = async (searchTerms: SearchTerm[]) => {
   try {
     await storage.reorderSearchTerms(searchTerms);
   } catch (error) {

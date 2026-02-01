@@ -8,7 +8,7 @@ import styles from '../StorageSettings.module.css';
 
 interface ApplicationSettingsProps {
   settings: UserSettingsType;
-  onSettingChange: (key: keyof UserSettingsType, value: any) => void;
+  onSettingChange: (key: keyof UserSettingsType, value: boolean | number | string) => void;
   onMaxClipsChange: (value: number) => void;
   saving: boolean;
   tempMaxClips: number | null;

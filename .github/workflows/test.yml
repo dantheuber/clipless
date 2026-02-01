@@ -1,0 +1,153 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npx vitest run --coverage --coverage.reporter=json-summary
+
+      - name: Post coverage comment
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SUMMARY=$(cat coverage/coverage-summary.json)
+          STMTS=$(echo "$SUMMARY" | jq -r '.total.statements.pct')
+          BRANCH=$(echo "$SUMMARY" | jq -r '.total.branches.pct')
+          FUNCS=$(echo "$SUMMARY" | jq -r '.total.functions.pct')
+          LINES=$(echo "$SUMMARY" | jq -r '.total.lines.pct')
+
+          CONTENT=$(cat <<EOF
+          ## 📊 Coverage Report
+
+          | Metric | Coverage |
+          |--------|----------|
+          | Statements | ${STMTS}% |
+          | Branches | ${BRANCH}% |
+          | Functions | ${FUNCS}% |
+          | Lines | ${LINES}% |
+          EOF
+          )
+
+          MARKER="<!-- coverage-report -->"
+          BODY="$MARKER
+          $CONTENT"
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null | head -1 | tr -d '[:space:]')
+          if [ -n "$COMMENT_ID" ]; then
+            gh api "repos/$REPO/issues/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
+          else
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$BODY"
+          fi
+
+  e2e-tests:
+    needs: unit-tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run E2E tests
+        id: e2e
+        shell: bash
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: e2e-results.json
+        run: npx playwright test --reporter=json,list
+        continue-on-error: true
+
+      - name: Verify E2E tests actually ran
+        shell: bash
+        run: |
+          if [ ! -f e2e-results.json ]; then
+            echo "::error::E2E results file was not created — Playwright may not have run"
+            exit 1
+          fi
+          TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' e2e-results.json 2>/dev/null || echo "0")
+          if [ "$TOTAL" -eq 0 ]; then
+            echo "::error::E2E results contain no test specs — tests did not actually execute"
+            cat e2e-results.json
+            exit 1
+          fi
+          echo "E2E results validated: $TOTAL test(s) found"
+
+      - name: Upload Playwright traces on failure
+        if: steps.e2e.outcome == 'failure'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+      - name: Post E2E comment
+        if: always() && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if [ ! -f e2e-results.json ]; then
+            CONTENT="## 🧪 E2E Test Results\n\n❌ **Tests failed to produce results**"
+          else
+            CONTENT=$(jq -r '
+              .stats as $s |
+              (if $s.unexpected == 0 then "✅" else "❌" end) as $status |
+              [.suites[].suites[] | {title, ok: (.specs | all(.ok))}] as $suites |
+              "## 🧪 E2E Test Results\n\n" +
+              $status + " **" + ($s.expected | tostring) + " passed**, " +
+              ($s.unexpected | tostring) + " failed, " +
+              ($s.skipped | tostring) + " skipped\n\n" +
+              "| Test Suite | Result |\n|------------|--------|\n" +
+              ($suites | map("| " + .title + " | " + (if .ok then "✅" else "❌" end) + " |") | join("\n"))
+            ' e2e-results.json)
+          fi
+
+          MARKER="<!-- e2e-report -->"
+          BODY="$MARKER
+          $CONTENT"
+          REPO="${{ github.repository }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null | head -1 | tr -d '[:space:]')
+          if [ -n "$COMMENT_ID" ]; then
+            gh api "repos/$REPO/issues/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
+          else
+            gh api "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$BODY"
+          fi
+
+      - name: Fail if E2E tests failed
+        if: steps.e2e.outcome == 'failure'
+        run: exit 1

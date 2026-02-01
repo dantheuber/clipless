@@ -1,6 +1,7 @@
-import { BrowserWindow, clipboard, nativeImage } from 'electron';
+import { BrowserWindow, clipboard, nativeImage, app } from 'electron';
 import { storage } from '../storage';
 import { showNotification } from '../notifications';
+import type { StoredClip } from '../../shared/types';
 
 /**
  * Handles all hotkey action implementations
@@ -35,7 +36,7 @@ export class HotkeyActions {
 
       // On macOS, we need to bring the app to front
       if (process.platform === 'darwin') {
-        require('electron').app.focus();
+        app.focus();
       }
     } catch (error) {
       console.error('Error toggling window visibility:', error);
@@ -77,7 +78,7 @@ export class HotkeyActions {
   /**
    * Copy a clip to the system clipboard based on its type
    */
-  private copyClipToClipboard(clipToCopy: any): void {
+  private copyClipToClipboard(clipToCopy: StoredClip): void {
     switch (clipToCopy.clip.type) {
       case 'text':
         clipboard.writeText(clipToCopy.clip.content);
@@ -135,7 +136,7 @@ export class HotkeyActions {
         this.mainWindow.show();
         this.mainWindow.focus();
         if (process.platform === 'darwin') {
-          require('electron').app.focus();
+          app.focus();
         }
       }
 
@@ -164,7 +165,7 @@ export class HotkeyActions {
 
       // Import the createToolsLauncherWindow function
       const { createToolsLauncherWindow } = await import('../window/creation.js');
-      
+
       // Open the tools launcher with the first clip's content
       createToolsLauncherWindow(firstClip.clip.content);
 

@@ -55,7 +55,7 @@ export function reorderQuickToolsArray(quickTools: QuickTool[]): QuickTool[] {
 /**
  * Import configuration data for quick clips
  */
-export function processQuickClipsConfig(config: any): {
+export function processQuickClipsConfig(config: unknown): {
   searchTerms: SearchTerm[];
   quickTools: QuickTool[];
 } {
@@ -69,9 +69,11 @@ export function processQuickClipsConfig(config: any): {
     throw new Error('Invalid config format');
   }
 
+  const configObj = config as Record<string, unknown>;
+
   // Process search terms
-  if (config.searchTerms && Array.isArray(config.searchTerms)) {
-    for (const searchTermData of config.searchTerms) {
+  if (configObj.searchTerms && Array.isArray(configObj.searchTerms)) {
+    for (const searchTermData of configObj.searchTerms) {
       // Skip invalid entries
       if (!searchTermData || typeof searchTermData !== 'object') {
         continue;
@@ -93,8 +95,8 @@ export function processQuickClipsConfig(config: any): {
   }
 
   // Process quick tools
-  if (config.tools && Array.isArray(config.tools)) {
-    for (const toolData of config.tools) {
+  if (configObj.tools && Array.isArray(configObj.tools)) {
+    for (const toolData of configObj.tools) {
       // Skip invalid entries
       if (!toolData || typeof toolData !== 'object') {
         continue;

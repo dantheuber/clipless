@@ -10,6 +10,7 @@ import type {
   Template,
   SearchTerm,
   QuickTool,
+  QuickClipsConfig,
 } from '../../shared/types';
 
 // Import utility modules
@@ -513,7 +514,7 @@ class SecureStorage {
   /**
    * Import configuration data in batch (more efficient than individual imports)
    */
-  async importQuickClipsConfig(config: any): Promise<void> {
+  async importQuickClipsConfig(config: QuickClipsConfig): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -548,7 +549,7 @@ class SecureStorage {
 
     // Add templates (backwards-compatible: missing templates array is fine)
     if (config.templates && Array.isArray(config.templates) && config.templates.length > 0) {
-      config.templates.forEach((template: any) => {
+      config.templates.forEach((template) => {
         if (template.id && template.name && template.content) {
           const newTemplate = {
             ...template,
