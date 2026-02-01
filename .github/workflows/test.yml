@@ -97,13 +97,13 @@ jobs:
             echo "::error::E2E results file was not created — Playwright may not have run"
             exit 1
           fi
-          TOTAL=$(jq '[.suites[].specs[]] | length' e2e-results.json 2>/dev/null || echo "0")
+          TOTAL=$(jq '[.. | objects | select(has("tests")) | .tests[]] | length' e2e-results.json 2>/dev/null || echo "0")
           if [ "$TOTAL" -eq 0 ]; then
             echo "::error::E2E results contain no test specs — tests did not actually execute"
             cat e2e-results.json
             exit 1
           fi
-          echo "E2E results validated: $TOTAL test spec(s) found"
+          echo "E2E results validated: $TOTAL test(s) found"
 
       - name: Upload Playwright traces on failure
         if: steps.e2e.outcome == 'failure'
@@ -122,9 +122,10 @@ jobs:
           if [ ! -f e2e-results.json ]; then
             CONTENT="## 🧪 E2E Test Results\n\n❌ **Tests failed to produce results**"
           else
-            PASSED=$(jq '[.suites[].specs[] | select(.ok == true)] | length' e2e-results.json)
-            FAILED=$(jq '[.suites[].specs[] | select(.ok == false)] | length' e2e-results.json)
-            SKIPPED=$(jq '[.suites[].specs[] | select(.tests[0].status == "skipped")] | length' e2e-results.json)
+            PASSED=$(jq '.stats.expected' e2e-results.json)
+            FAILED=$(jq '.stats.unexpected' e2e-results.json)
+            SKIPPED=$(jq '.stats.skipped' e2e-results.json)
+            FLAKY=$(jq '.stats.flaky' e2e-results.json)
 
             if [ "$FAILED" -eq 0 ]; then
               STATUS="✅"
@@ -133,8 +134,8 @@ jobs:
             fi
 
             TABLE_ROWS=""
-            for SUITE in $(jq -r '.suites[].title' e2e-results.json); do
-              SUITE_OK=$(jq -r --arg s "$SUITE" '.suites[] | select(.title == $s) | if (.specs | all(.ok)) then "✅" else "❌" end' e2e-results.json)
+            for SUITE in $(jq -r '.suites[].suites[].title' e2e-results.json | sort -u); do
+              SUITE_OK=$(jq -r --arg s "$SUITE" '[.suites[].suites[] | select(.title == $s)] | if (.[0].specs | all(.ok)) then "✅" else "❌" end' e2e-results.json)
               TABLE_ROWS="${TABLE_ROWS}| ${SUITE} | ${SUITE_OK} |\n"
             done
 
