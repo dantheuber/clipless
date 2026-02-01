@@ -282,6 +282,13 @@ describe('HotkeyManager', () => {
     (manager as any).registerHotkeys = origMethod;
   });
 
+  it('registerQuickClipHotkeys handles undefined hotkeys', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (manager as any).registerQuickClipHotkeys(undefined);
+    // Should not throw and should not register any hotkeys
+    expect(globalShortcut.register).not.toHaveBeenCalled();
+  });
+
   it('registered hotkey callbacks are callable', async () => {
     const callbacks: Record<string, (...args: unknown[]) => unknown> = {};
     vi.mocked(globalShortcut.register).mockImplementation(

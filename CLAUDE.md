@@ -22,6 +22,16 @@ Clipless is an Electron clipboard manager built with React and TypeScript. It mo
 
 **Note:** E2E tests interact with the **system clipboard**. Running them will read from and write to your actual OS clipboard. Avoid copying sensitive data before running e2e tests, and expect your clipboard contents to be overwritten.
 
+## Verification
+
+After making any code changes, always run lint and typecheck before considering work complete:
+
+```bash
+npm run lint && npm run typecheck
+```
+
+Fix all errors and warnings before moving on. Do not leave broken lint or type errors for later.
+
 ## Architecture
 
 Electron three-process architecture using `electron-vite` as the build system and Tailwind CSS v4 for styling.
