@@ -55,9 +55,9 @@ jobs:
           REPO="${{ github.repository }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null || echo "")
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null | head -1 | tr -d '[:space:]')
           if [ -n "$COMMENT_ID" ]; then
-            gh api "repos/$REPO/issues/$PR_NUMBER/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
+            gh api "repos/$REPO/issues/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
           else
             gh api "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$BODY"
           fi
@@ -138,9 +138,9 @@ jobs:
           REPO="${{ github.repository }}"
           PR_NUMBER="${{ github.event.pull_request.number }}"
 
-          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null || echo "")
+          COMMENT_ID=$(gh api "repos/$REPO/issues/$PR_NUMBER/comments" --jq ".[] | select(.body | contains(\"$MARKER\")) | .id" 2>/dev/null | head -1 | tr -d '[:space:]')
           if [ -n "$COMMENT_ID" ]; then
-            gh api "repos/$REPO/issues/$PR_NUMBER/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
+            gh api "repos/$REPO/issues/comments/$COMMENT_ID" -X PATCH -f body="$BODY"
           else
             gh api "repos/$REPO/issues/$PR_NUMBER/comments" -f body="$BODY"
           fi
