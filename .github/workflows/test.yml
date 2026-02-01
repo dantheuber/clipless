@@ -24,7 +24,7 @@ jobs:
         run: npm ci
 
       - name: Run unit tests
-        run: npx vitest run --coverage
+        run: npx vitest run --coverage --coverage.reporter=json-summary
 
       - name: Post coverage comment
         if: github.event_name == 'pull_request'
