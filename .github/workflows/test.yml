@@ -122,33 +122,17 @@ jobs:
           if [ ! -f e2e-results.json ]; then
             CONTENT="## 🧪 E2E Test Results\n\n❌ **Tests failed to produce results**"
           else
-            PASSED=$(jq '.stats.expected' e2e-results.json)
-            FAILED=$(jq '.stats.unexpected' e2e-results.json)
-            SKIPPED=$(jq '.stats.skipped' e2e-results.json)
-            FLAKY=$(jq '.stats.flaky' e2e-results.json)
-
-            if [ "$FAILED" -eq 0 ]; then
-              STATUS="✅"
-            else
-              STATUS="❌"
-            fi
-
-            TABLE_ROWS=""
-            for SUITE in $(jq -r '.suites[].suites[].title' e2e-results.json | sort -u); do
-              SUITE_OK=$(jq -r --arg s "$SUITE" '[.suites[].suites[] | select(.title == $s)] | if (.[0].specs | all(.ok)) then "✅" else "❌" end' e2e-results.json)
-              TABLE_ROWS="${TABLE_ROWS}| ${SUITE} | ${SUITE_OK} |\n"
-            done
-
-            CONTENT=$(cat <<EOF
-          ## 🧪 E2E Test Results
-
-          ${STATUS} **${PASSED} passed**, ${FAILED} failed, ${SKIPPED} skipped
-
-          | Test Suite | Result |
-          |------------|--------|
-          $(echo -e "$TABLE_ROWS")
-          EOF
-            )
+            CONTENT=$(jq -r '
+              .stats as $s |
+              (if $s.unexpected == 0 then "✅" else "❌" end) as $status |
+              [.suites[].suites[] | {title, ok: (.specs | all(.ok))}] as $suites |
+              "## 🧪 E2E Test Results\n\n" +
+              $status + " **" + ($s.expected | tostring) + " passed**, " +
+              ($s.unexpected | tostring) + " failed, " +
+              ($s.skipped | tostring) + " skipped\n\n" +
+              "| Test Suite | Result |\n|------------|--------|\n" +
+              ($suites | map("| " + .title + " | " + (if .ok then "✅" else "❌" end) + " |") | join("\n"))
+            ' e2e-results.json)
           fi
 
           MARKER="<!-- e2e-report -->"
