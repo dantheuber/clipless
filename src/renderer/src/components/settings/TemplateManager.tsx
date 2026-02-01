@@ -325,13 +325,17 @@ export function TemplateManager(): React.JSX.Element {
                   </div>
 
                   {expandedId === template.id && (
-                    <div className={classNames(styles.templateDetails, { [styles.light]: isLight })}>
+                    <div
+                      className={classNames(styles.templateDetails, { [styles.light]: isLight })}
+                    >
                       <pre
                         className={classNames(styles.templateContent, { [styles.light]: isLight })}
                       >
                         {template.content}
                       </pre>
-                      <div className={classNames(styles.templateFooter, { [styles.light]: isLight })}>
+                      <div
+                        className={classNames(styles.templateFooter, { [styles.light]: isLight })}
+                      >
                         <div className={styles.tokenPreview}>
                           <span
                             className={classNames(styles.tokenLabel, { [styles.light]: isLight })}

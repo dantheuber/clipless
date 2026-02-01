@@ -24,9 +24,7 @@ describe('BookmarkClip', () => {
 
   it('renders Untitled for missing title', () => {
     const { container } = render(
-      <BookmarkClip
-        clip={{ type: 'bookmark', content: '', url: 'https://example.com' }}
-      />
+      <BookmarkClip clip={{ type: 'bookmark', content: '', url: 'https://example.com' }} />
     );
     expect(container.textContent).toContain('Untitled');
   });

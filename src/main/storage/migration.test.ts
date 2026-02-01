@@ -44,9 +44,7 @@ describe('migrateData', () => {
 
   it('preserves valid templates', () => {
     const data = {
-      templates: [
-        { id: '1', name: 'T', content: 'c', createdAt: 1, updatedAt: 1, order: 0 },
-      ],
+      templates: [{ id: '1', name: 'T', content: 'c', createdAt: 1, updatedAt: 1, order: 0 }],
     };
     const result = migrateData(data);
     expect(result.templates).toHaveLength(1);

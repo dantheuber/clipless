@@ -396,12 +396,10 @@ export function QuickClipsScanner({
       <div
         className={classNames(styles.content, { [styles.light]: isLight })}
         style={{
-          flexDirection:
-            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'column' : 'row',
+          flexDirection: loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'column' : 'row',
           justifyContent:
             loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'flex-start',
-          alignItems:
-            loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'stretch',
+          alignItems: loading || (!showTwoColumns && !showClipTemplatesOnly) ? 'center' : 'stretch',
         }}
       >
         {loading ? (

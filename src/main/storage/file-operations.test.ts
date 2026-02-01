@@ -19,7 +19,12 @@ vi.mock('fs', () => ({
   },
 }));
 
-import { saveToFile, loadFromFile, ensureDataDirectory, isEncryptionAvailable } from './file-operations';
+import {
+  saveToFile,
+  loadFromFile,
+  ensureDataDirectory,
+  isEncryptionAvailable,
+} from './file-operations';
 import { safeStorage } from 'electron';
 import { promises as fs } from 'fs';
 

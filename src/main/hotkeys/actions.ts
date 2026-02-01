@@ -164,7 +164,7 @@ export class HotkeyActions {
 
       // Import the createToolsLauncherWindow function
       const { createToolsLauncherWindow } = await import('../window/creation.js');
-      
+
       // Open the tools launcher with the first clip's content
       createToolsLauncherWindow(firstClip.clip.content);
 

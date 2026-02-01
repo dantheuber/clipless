@@ -114,7 +114,9 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       saveClips(clips, lockedIndices)
   );
   ipcMain.handle('storage-get-settings', async () => getSettings());
-  ipcMain.handle('storage-save-settings', async (_event, settings: UserSettings) => saveSettings(settings));
+  ipcMain.handle('storage-save-settings', async (_event, settings: UserSettings) =>
+    saveSettings(settings)
+  );
   ipcMain.handle('storage-get-stats', async () => getStorageStats());
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
@@ -134,7 +136,12 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   );
   ipcMain.handle(
     'templates-generate-text',
-    async (_event, templateId: string, clipContents: string[], captures?: Record<string, string>) => {
+    async (
+      _event,
+      templateId: string,
+      clipContents: string[],
+      captures?: Record<string, string>
+    ) => {
       const templates = await getAllTemplates();
       const template = templates.find((t) => t.id === templateId);
       const templateName = template?.name || 'Unknown';
@@ -171,7 +178,9 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     updateQuickTool(id, updates)
   );
   ipcMain.handle('quick-tools-delete', async (_event, id: string) => deleteQuickTool(id));
-  ipcMain.handle('quick-tools-reorder', async (_event, tools: QuickTool[]) => reorderQuickTools(tools));
+  ipcMain.handle('quick-tools-reorder', async (_event, tools: QuickTool[]) =>
+    reorderQuickTools(tools)
+  );
   ipcMain.handle('quick-tools-validate-url', async (_event, url: string, captureGroups: string[]) =>
     validateToolUrl(url, captureGroups)
   );
@@ -180,8 +189,10 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('quick-clips-scan-text', async (_event, text: string) =>
     scanTextForPatterns(text)
   );
-  ipcMain.handle('quick-clips-open-tools', async (_event, matches: PatternMatch[], toolIds: string[]) =>
-    openToolsForMatches(matches, toolIds)
+  ipcMain.handle(
+    'quick-clips-open-tools',
+    async (_event, matches: PatternMatch[], toolIds: string[]) =>
+      openToolsForMatches(matches, toolIds)
   );
   ipcMain.handle('quick-clips-export-config', async () => exportQuickClipsConfig());
   ipcMain.handle('quick-clips-import-config', async (_event, config: QuickClipsConfig) =>

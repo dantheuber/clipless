@@ -36,7 +36,10 @@ describe('getCurrentClipboardData', () => {
     vi.mocked(clipboard.readText).mockReturnValue('');
     vi.mocked(clipboard.readRTF).mockReturnValue('');
     vi.mocked(clipboard.readHTML).mockReturnValue('');
-    vi.mocked(clipboard.readImage).mockReturnValue({ isEmpty: () => true, toDataURL: () => '' } as any);
+    vi.mocked(clipboard.readImage).mockReturnValue({
+      isEmpty: () => true,
+      toDataURL: () => '',
+    } as any);
     vi.mocked(clipboard.readBookmark).mockReturnValue({ title: '', url: '' });
   });
 
@@ -104,7 +107,12 @@ describe('setClipboardImage', () => {
 
 describe('setClipboardBookmark', () => {
   it('writes bookmark data', () => {
-    setClipboardBookmark({ text: 'Example', html: '<a>Example</a>', title: 'Ex', url: 'https://example.com' });
+    setClipboardBookmark({
+      text: 'Example',
+      html: '<a>Example</a>',
+      title: 'Ex',
+      url: 'https://example.com',
+    });
     expect(clipboard.write).toHaveBeenCalledWith({ text: 'Example', html: '<a>Example</a>' });
   });
 });

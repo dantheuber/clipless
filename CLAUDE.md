@@ -16,6 +16,7 @@ Clipless is an Electron clipboard manager built with React and TypeScript. It mo
 - `npm run build:win` / `build:mac` / `build:linux` — Platform-specific packaging
 
 ### Testing
+
 - `npm test` / `npx vitest` — Unit tests (Vitest)
 - `npx playwright test` — E2E tests (Playwright with Electron)
 
@@ -26,7 +27,9 @@ Clipless is an Electron clipboard manager built with React and TypeScript. It mo
 Electron three-process architecture using `electron-vite` as the build system and Tailwind CSS v4 for styling.
 
 ### Main Process (`src/main/`)
+
 Node.js process handling system integration. Key modules:
+
 - **`clipboard/`** — 250ms polling-based clipboard monitoring, Quick Clips pattern scanning, Quick Tools URL generation, templates
 - **`storage/`** — `SecureStorage` singleton using Electron's `safeStorage` (OS-native encryption: DPAPI/Keychain/Secret Service). Data stored as `data.enc`
 - **`hotkeys/`** — Global hotkey registration via `globalShortcut` with modular registry/actions/manager pattern
@@ -35,12 +38,15 @@ Node.js process handling system integration. Key modules:
 - **`updater/`** — Auto-updates via electron-updater from GitHub releases
 
 ### Preload (`src/preload/`)
+
 Context bridge exposing typed IPC APIs to renderer. All renderer↔main communication goes through `api.*` methods defined here. IPC channels are organized by domain: clipboard, settings, storage, templates, search-terms, quick-tools.
 
 ### Renderer (`src/renderer/`)
+
 React 19 app with three entry points (`main.tsx`, `settings-main.tsx`, `tools-launcher-main.tsx`) and corresponding HTML files.
 
 State management uses React Context providers:
+
 - **`providers/clips/`** — Clipboard state with hooks: `useClipsStorage`, `useClipboardOperations`, `useClipState`. Handles clip lifecycle, deduplication, and locking
 - **`providers/theme.tsx`** — Light/dark theme with system detection
 - **`providers/languageDetection.tsx`** — Code language detection toggle
@@ -48,9 +54,11 @@ State management uses React Context providers:
 Clip types are rendered by type-specific components in `components/clips/clip/` (TextClip, HtmlClip, ImageClip, RtfClip, BookmarkClip).
 
 ### Shared (`src/shared/`)
+
 TypeScript interfaces and constants used by all processes.
 
 ### Data Flow
+
 User copies → main process detects via polling → reads clipboard → sends `clipboard-changed` IPC event → renderer updates state via ClipsProvider → saves back to encrypted storage via IPC.
 
 ## Linear Ticket Template
@@ -61,21 +69,27 @@ When creating Linear tickets for this project, use team **Clipless** and the fol
 **Priority:** 1=Urgent, 2=High, 3=Normal, 4=Low
 
 ### Title
+
 Short imperative description (e.g. "Add keyboard shortcut for clearing clips")
 
 ### Description format
+
 ```markdown
 ## Summary
+
 One or two sentences describing what needs to happen and why.
 
 ## Context
+
 - What currently happens (for bugs) or what's missing (for features)
 - Any relevant user workflow or affected area (clipboard, storage, hotkeys, settings, etc.)
 
 ## Acceptance Criteria
+
 - [ ] Specific, verifiable condition
 - [ ] Another condition
 
 ## Affected Areas
+
 Which modules are likely involved: clipboard/, storage/, hotkeys/, window/, renderer components, preload API, shared types.
 ```

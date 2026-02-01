@@ -71,7 +71,8 @@ const api = {
     templateId: string,
     clipContents: string[],
     captures?: Record<string, string>
-  ) => electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents, captures),
+  ) =>
+    electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents, captures),
 
   // Quick Clips - Search Terms APIs
   searchTermsGetAll: () => electronAPI.ipcRenderer.invoke('search-terms-get-all'),

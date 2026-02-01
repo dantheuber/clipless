@@ -65,8 +65,7 @@ interface SearchTermsSectionProps {
   onExpandedSearchTermIdChange: (id: string | null) => void;
 }
 
-const SAMPLE_TEXT =
-  'The quick brown fox jumps over the lazy dog. Hello world! Test 123 abc xyz.';
+const SAMPLE_TEXT = 'The quick brown fox jumps over the lazy dog. Hello world! Test 123 abc xyz.';
 
 function validatePattern(pattern: string): string | null {
   if (!pattern.trim()) {

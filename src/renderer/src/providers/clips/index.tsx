@@ -1,4 +1,12 @@
-import { createContext, useContext, useMemo, useState, useRef, useEffect, useCallback } from 'react';
+import {
+  createContext,
+  useContext,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+} from 'react';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { useLanguageDetection } from '../languageDetection';
 import { ClipItem, ClipsContextType, ClipboardState } from './types';

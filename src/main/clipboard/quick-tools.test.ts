@@ -31,10 +31,7 @@ describe('validateToolUrl', () => {
   });
 
   it('validates multiple tokens', async () => {
-    const result = await validateToolUrl('https://example.com/{name}/{email}', [
-      'name',
-      'email',
-    ]);
+    const result = await validateToolUrl('https://example.com/{name}/{email}', ['name', 'email']);
     expect(result.isValid).toBe(true);
   });
 

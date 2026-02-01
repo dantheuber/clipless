@@ -4,7 +4,7 @@
 
 ### Test Steps:
 
-1. **Enable Hotkeys**: 
+1. **Enable Hotkeys**:
    - Open Clipless Settings (gear icon or Ctrl+Shift+V)
    - Go to "Hotkeys" tab
    - Ensure "Enable Global Hotkeys" is checked
@@ -29,6 +29,7 @@
    - You should be able to select patterns and tools to launch
 
 ### Expected Behavior:
+
 - Hotkey works even when main window is hidden/minimized
 - Opens tools launcher with the first (most recent) clip content
 - Automatically scans for patterns and displays results
@@ -36,6 +37,7 @@
 - After launching tools, window closes automatically
 
 ### Configuration:
+
 - Default hotkey: `CommandOrControl+Shift+T`
 - Can be customized in Settings > Hotkeys
 - Can be enabled/disabled individually
