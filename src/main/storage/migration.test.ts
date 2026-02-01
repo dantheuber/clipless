@@ -104,4 +104,19 @@ describe('migrateData', () => {
     expect(result.clips).toEqual([]);
     expect(result.templates).toEqual([]);
   });
+
+  it('returns default structure for null or non-object data', () => {
+    const nullResult = migrateData(null);
+    expect(nullResult.clips).toEqual([]);
+    expect(nullResult.settings).toBeDefined();
+
+    const undefinedResult = migrateData(undefined);
+    expect(undefinedResult.clips).toEqual([]);
+
+    const stringResult = migrateData('not-an-object');
+    expect(stringResult.clips).toEqual([]);
+
+    const numberResult = migrateData(42);
+    expect(numberResult.clips).toEqual([]);
+  });
 });

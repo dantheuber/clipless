@@ -77,8 +77,6 @@ export class HotkeyManager {
 
   private registerQuickClipHotkeys(hotkeys: UserSettings['hotkeys']): void {
     // Note: Quick clip hotkeys copy clips by their display number (1-5)
-    if (!hotkeys) return;
-
     const quickClipHotkeys = [
       { config: hotkeys.quickClip1, index: 0 }, // Copy 1st clip (position 1)
       { config: hotkeys.quickClip2, index: 1 }, // Copy 2nd clip (position 2)
