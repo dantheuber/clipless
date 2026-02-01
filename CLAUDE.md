@@ -15,7 +15,11 @@ Clipless is an Electron clipboard manager built with React and TypeScript. It mo
 - `npm run typecheck` — Type check all TypeScript (runs both `typecheck:node` for main/preload and `typecheck:web` for renderer)
 - `npm run build:win` / `build:mac` / `build:linux` — Platform-specific packaging
 
-No test framework is configured.
+### Testing
+- `npm test` / `npx vitest` — Unit tests (Vitest)
+- `npx playwright test` — E2E tests (Playwright with Electron)
+
+**Note:** E2E tests interact with the **system clipboard**. Running them will read from and write to your actual OS clipboard. Avoid copying sensitive data before running e2e tests, and expect your clipboard contents to be overwritten.
 
 ## Architecture
 
