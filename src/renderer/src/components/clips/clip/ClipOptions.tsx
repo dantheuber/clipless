@@ -1,61 +1,32 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import OutsideClickHandler from 'react-outside-click-handler';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useClips } from '../../../providers/clips';
+import { useClipsActions } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
 import styles from './ClipOptions.module.css';
 import classNames from 'classnames';
 
-export function ClipOptions({ index }): React.JSX.Element {
+interface ClipOptionsProps {
+  index: number;
+  hasPatterns: boolean;
+  clipContent: string;
+}
+
+export function ClipOptions({ index, hasPatterns, clipContent }: ClipOptionsProps) {
   const [visible, setVisible] = useState<boolean>(false);
   const { isLight } = useTheme();
   const toggleVisibility = useCallback(() => {
-    setVisible(!visible);
-  }, [visible, setVisible]);
+    setVisible((v) => !v);
+  }, []);
 
-  const { isClipLocked, toggleClipLock, emptyClip, getClip } = useClips();
-
-  const clip = getClip(index);
+  const { isClipLocked, toggleClipLock, emptyClip } = useClipsActions();
 
   // Check if this is the first clip (cannot be locked or emptied)
   const isFirstClip = index === 0;
 
-  // Check if this clip has patterns (we'll do a simple check)
-  const [hasPatterns, setHasPatterns] = useState(false);
-
-  // Check for patterns when component mounts or clip content changes
-  useEffect(() => {
-    let isCancelled = false;
-
-    const checkPatterns = async () => {
-      if (!clip.content || clip.content.trim().length === 0) {
-        setHasPatterns(false);
-        return;
-      }
-
-      try {
-        const matches = await window.api.quickClipsScanText(clip.content);
-        if (!isCancelled) {
-          setHasPatterns(matches.length > 0);
-        }
-      } catch {
-        if (!isCancelled) {
-          setHasPatterns(false);
-        }
-      }
-    };
-
-    const timeoutId = setTimeout(checkPatterns, 200);
-
-    return () => {
-      isCancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [clip.content]);
-
   const handleScanClick = async () => {
     try {
-      await window.api.openToolsLauncher(clip.content);
+      await window.api.openToolsLauncher(clipContent);
       setVisible(false); // Close the options menu
     } catch (error) {
       console.error('Failed to open tools launcher:', error);

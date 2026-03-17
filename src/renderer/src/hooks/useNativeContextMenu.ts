@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
-import { useClips } from '../providers/clips';
+import { useClipsActions } from '../providers/clips';
 
 interface NativeContextMenuProps {
   index: number;
 }
 
 export function useNativeContextMenu({ index }: NativeContextMenuProps) {
-  const { isClipLocked, toggleClipLock, emptyClip, getClip, copyClipToClipboard } = useClips();
+  const { isClipLocked, toggleClipLock, emptyClip, getClip, copyClipToClipboard } =
+    useClipsActions();
 
   const clip = getClip(index);
   const isFirstClip = index === 0;

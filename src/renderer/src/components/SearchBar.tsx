@@ -1,12 +1,13 @@
 import React, { useRef, useEffect } from 'react';
-import { useClips } from '../providers/clips';
+import { useClipsData, useClipsMeta } from '../providers/clips';
 import { useTheme } from '../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import styles from './SearchBar.module.css';
 
 export const SearchBar: React.FC = () => {
-  const { searchTerm, setSearchTerm, isSearchVisible, setIsSearchVisible } = useClips();
+  const { searchTerm } = useClipsData();
+  const { setSearchTerm, isSearchVisible, setIsSearchVisible } = useClipsMeta();
   const { isLight } = useTheme();
   const inputRef = useRef<HTMLInputElement>(null);
 

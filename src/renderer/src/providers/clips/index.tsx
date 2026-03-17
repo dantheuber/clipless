@@ -9,17 +9,57 @@ import {
 } from 'react';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { useLanguageDetection } from '../languageDetection';
-import { ClipItem, ClipsContextType, ClipboardState } from './types';
+import {
+  ClipItem,
+  ClipsDataContextType,
+  ClipsActionsContextType,
+  ClipsMetaContextType,
+  ClipsContextType,
+  ClipboardState,
+} from './types';
 import { updateClipsLength } from './utils';
 import { useClipsStorage } from './storage';
 import { useClipboardOperations } from './clipboard';
 import { useClipState } from './state';
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const ClipsContext = createContext({});
+export const ClipsDataContext = createContext<ClipsDataContextType | null>(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const ClipsActionsContext = createContext<ClipsActionsContextType | null>(null);
+// eslint-disable-next-line react-refresh/only-export-components
+export const ClipsMetaContext = createContext<ClipsMetaContextType | null>(null);
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const useClips = (): ClipsContextType => useContext(ClipsContext) as ClipsContextType;
+export const useClipsData = (): ClipsDataContextType => {
+  const ctx = useContext(ClipsDataContext);
+  if (!ctx) throw new Error('useClipsData must be used within ClipsProvider');
+  return ctx;
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useClipsActions = (): ClipsActionsContextType => {
+  const ctx = useContext(ClipsActionsContext);
+  if (!ctx) throw new Error('useClipsActions must be used within ClipsProvider');
+  return ctx;
+};
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const useClipsMeta = (): ClipsMetaContextType => {
+  const ctx = useContext(ClipsMetaContext);
+  if (!ctx) throw new Error('useClipsMeta must be used within ClipsProvider');
+  return ctx;
+};
+
+/**
+ * Convenience hook that merges all three contexts (backwards compat)
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export const useClips = (): ClipsContextType => {
+  const data = useClipsData();
+  const actions = useClipsActions();
+  const meta = useClipsMeta();
+  return { ...data, ...actions, ...meta };
+};
 
 export function ClipsProvider({ children }: { children: React.ReactNode }) {
   // the array of clip values
@@ -144,34 +184,25 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     }, []);
   }, [clips, searchTerm]);
 
-  const providerValue = useMemo(
+  // Split context values for granular re-rendering
+  const dataValue = useMemo(
+    () => ({ clips, filteredClips, searchTerm }),
+    [clips, filteredClips, searchTerm]
+  );
+
+  const actionsValue = useMemo(
     () => ({
-      // clips management
-      clips,
       setClips,
       getClip,
       emptyClip,
       updateClip,
-      // clip locking
       toggleClipLock,
       isClipLocked,
-      // clipboard management
       clipboardUpdated,
       readCurrentClipboard,
       copyClipToClipboard,
-      clipCopyIndex,
-      // max clips management
-      setMaxClips,
-      maxClips,
-      // search
-      searchTerm,
-      setSearchTerm,
-      isSearchVisible,
-      setIsSearchVisible,
-      filteredClips,
     }),
     [
-      clips,
       setClips,
       getClip,
       emptyClip,
@@ -181,18 +212,28 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       clipboardUpdated,
       readCurrentClipboard,
       copyClipToClipboard,
-      clipCopyIndex,
-      setMaxClips,
-      maxClips,
-      searchTerm,
-      setSearchTerm,
-      isSearchVisible,
-      setIsSearchVisible,
-      filteredClips,
     ]
   );
 
-  return <ClipsContext.Provider value={providerValue}>{children}</ClipsContext.Provider>;
+  const metaValue = useMemo(
+    () => ({
+      clipCopyIndex,
+      maxClips,
+      setMaxClips,
+      setSearchTerm,
+      isSearchVisible,
+      setIsSearchVisible,
+    }),
+    [clipCopyIndex, maxClips, setMaxClips, setSearchTerm, isSearchVisible, setIsSearchVisible]
+  );
+
+  return (
+    <ClipsDataContext.Provider value={dataValue}>
+      <ClipsActionsContext.Provider value={actionsValue}>
+        <ClipsMetaContext.Provider value={metaValue}>{children}</ClipsMetaContext.Provider>
+      </ClipsActionsContext.Provider>
+    </ClipsDataContext.Provider>
+  );
 }
 
 // Re-export all the types and utilities for consumers

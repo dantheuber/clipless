@@ -1,6 +1,6 @@
 import classNames from 'classnames';
-import { useState } from 'react';
-import { ClipItem, useClips } from '../../../providers/clips';
+import { memo, useState } from 'react';
+import { ClipItem, useClipsActions } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
 import { usePatternDetection } from '../../../hooks/usePatternDetection';
 import { useContextMenu } from '../../../hooks/useContextMenu';
@@ -17,10 +17,17 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 interface ClipProps {
   clip: ClipItem;
   index: number;
+  isCurrentCopiedClip: boolean;
+  isEvenRow?: boolean;
 }
 
-export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
-  const { copyClipToClipboard, clipCopyIndex, updateClip } = useClips();
+export const ClipWrapper = memo(function ClipWrapper({
+  clip,
+  index,
+  isCurrentCopiedClip,
+  isEvenRow,
+}: ClipProps): React.JSX.Element {
+  const { copyClipToClipboard, updateClip } = useClipsActions();
   const { isLight } = useTheme();
   const { hasPatterns } = usePatternDetection(clip.content);
   const { contextMenu, openContextMenu, closeContextMenu } = useContextMenu();
@@ -60,10 +67,8 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
     }
   };
 
-  const isCurrentCopiedClip = clipCopyIndex === index;
-
   return (
-    <li className={styles.clip}>
+    <div className={classNames(styles.clip, { [styles.evenRow]: isEvenRow })}>
       <div
         className={classNames(
           styles.clipRow,
@@ -99,7 +104,7 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
           {renderClipContent()}
         </div>
 
-        <ClipOptions index={index} />
+        <ClipOptions index={index} hasPatterns={hasPatterns} clipContent={clip.content} />
       </div>
 
       {/* Context Menu */}
@@ -109,8 +114,9 @@ export function ClipWrapper({ clip, index }: ClipProps): React.JSX.Element {
           x={contextMenu.x}
           y={contextMenu.y}
           onClose={closeContextMenu}
+          hasPatterns={hasPatterns}
         />
       )}
-    </li>
+    </div>
   );
-}
+});

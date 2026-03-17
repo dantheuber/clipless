@@ -25,20 +25,20 @@
   background-color: #e0e0e0;
 }
 
-/* Zebra striping for even rows */
-.clip:nth-child(even) .clipRow {
+/* Zebra striping for even rows (class-based for virtualization compat) */
+.clip.evenRow .clipRow {
   background-color: #383838;
 }
 
-.clip:nth-child(even) .clipRow.light {
+.clip.evenRow .clipRow.light {
   background-color: #f0f0f0;
 }
 
-.clip:nth-child(even) .clipRow:hover {
+.clip.evenRow .clipRow:hover {
   background-color: #505050;
 }
 
-.clip:nth-child(even) .clipRow.light:hover {
+.clip.evenRow .clipRow.light:hover {
   background-color: #e0e0e0;
 }
 
@@ -330,9 +330,6 @@
   z-index: 9999;
   opacity: 0;
   visibility: hidden;
-  transition:
-    opacity 0.3s ease,
-    visibility 0.3s ease;
   pointer-events: none;
   max-width: 20rem;
   max-height: 20rem;
@@ -344,18 +341,10 @@
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
 }
 
-.imagePreviewContainer:hover .imagePopover {
+.imagePopoverVisible {
   opacity: 1;
   visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0.5s;
-}
-
-.imagePopover:hover {
-  opacity: 1;
-  visibility: visible;
-  pointer-events: auto;
-  transition-delay: 0s;
+  pointer-events: none;
 }
 
 .popoverImage {

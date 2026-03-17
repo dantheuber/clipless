@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguageDetection } from '../../../providers/languageDetection';
-import { useClips } from '../../../providers/clips';
+import { useClipsData } from '../../../providers/clips';
 import type { UserSettings as UserSettingsType } from '../../../../../shared/types';
 
 export const useUserSettings = () => {
@@ -13,7 +13,7 @@ export const useUserSettings = () => {
   const [debounceTimeout, setDebounceTimeout] = useState<NodeJS.Timeout | null>(null);
 
   const { updateSettings: updateLanguageSettings } = useLanguageDetection();
-  const { clips } = useClips();
+  const { clips } = useClipsData();
 
   // Load settings on mount
   useEffect(() => {

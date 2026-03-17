@@ -27,11 +27,13 @@ Clipless is an Electron clipboard manager built with React and TypeScript. It mo
 After making any code changes, always run the following before considering work complete:
 
 1. **Lint and typecheck** — must produce zero errors and zero warnings:
+
    ```bash
    npm run lint && npm run typecheck
    ```
 
 2. **Unit tests with coverage** — must maintain 100% code coverage across statements, branches, functions, and lines:
+
    ```bash
    npx vitest run --coverage
    ```

@@ -1,12 +1,12 @@
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useRef, useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import classNames from 'classnames';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { materialDark, materialLight } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { ClipItem } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
 import { useLanguageDetection } from '../../../providers/languageDetection';
 import { mapToSyntaxHighlighterLanguage } from '../../../utils/languageDetection';
 import styles from './Clip.module.css';
+
+const SyntaxHighlightedCode = lazy(() => import('./SyntaxHighlightedCode'));
 
 interface TextClipProps {
   clip: ClipItem;
@@ -112,69 +112,36 @@ export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => 
 
     if (shouldHighlight) {
       const syntaxLanguage = mapToSyntaxHighlighterLanguage(clip.language!);
-      const syntaxStyle = isLight ? materialLight : materialDark;
-      const borderColor = isLight ? '#d0d0d0' : '#404040';
-      const backgroundColor = isLight ? '#f8f8f8' : '#404040';
+
+      const fallback = (
+        <div className={styles.textEditorWrapper}>
+          <textarea
+            ref={textareaRef}
+            value={editValue}
+            onChange={handleTextChange}
+            onBlur={handleTextBlur}
+            onKeyDown={handleTextKeyDown}
+            className={classNames(styles.textEditor, { [styles.light]: isLight })}
+            autoFocus
+            rows={1}
+            spellCheck={false}
+            style={{ resize: 'none', minHeight: '1.2em' }}
+          />
+        </div>
+      );
 
       return (
-        <div className={styles.textEditorWrapper}>
-          <div className={styles.syntaxHighlightContainer}>
-            <SyntaxHighlighter
-              language={syntaxLanguage}
-              style={syntaxStyle}
-              customStyle={{
-                margin: 0,
-                padding: 0,
-                background: backgroundColor,
-                fontSize: 'inherit',
-                fontFamily: 'inherit',
-                lineHeight: 'inherit',
-                border: `1px solid ${borderColor}`,
-                borderRadius: '0.25rem',
-                overflow: 'hidden',
-                boxSizing: 'border-box',
-              }}
-              codeTagProps={{
-                style: {
-                  fontFamily: 'inherit',
-                  fontSize: 'inherit',
-                  lineHeight: 'inherit',
-                  background: 'transparent !important',
-                  padding: 0,
-                  margin: 0,
-                },
-              }}
-              preTag="pre"
-              PreTag={({ children, ...props }) => (
-                <pre {...props} style={{ ...props.style, margin: 0, padding: '0.125rem 0.25rem' }}>
-                  {children}
-                </pre>
-              )}
-            >
-              {editValue}
-            </SyntaxHighlighter>
-            <textarea
-              ref={textareaRef}
-              value={editValue}
-              onChange={handleTextChange}
-              onBlur={handleTextBlur}
-              onKeyDown={handleTextKeyDown}
-              className={classNames(styles.textEditor, styles.syntaxOverlay, {
-                [styles.light]: isLight,
-              })}
-              autoFocus
-              rows={1}
-              spellCheck={false}
-              style={{
-                resize: 'none',
-                minHeight: '1.2em',
-                color: 'transparent',
-                caretColor: isLight ? '#000' : '#fff',
-                lineHeight: 'inherit',
-              }}
-            />
-          </div>
-        </div>
+        <Suspense fallback={fallback}>
+          <SyntaxHighlightedCode
+            ref={textareaRef}
+            editValue={editValue}
+            syntaxLanguage={syntaxLanguage}
+            isLight={isLight}
+            onChange={handleTextChange}
+            onBlur={handleTextBlur}
+            onKeyDown={handleTextKeyDown}
+          />
+        </Suspense>
       );
     } else {
       // Regular textarea without syntax highlighting

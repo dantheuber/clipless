@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useClips } from '../../../providers/clips';
+import { useClipsActions } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
 import classNames from 'classnames';
 import styles from './ClipContextMenu.module.css';
@@ -10,46 +10,17 @@ interface ClipContextMenuProps {
   x: number;
   y: number;
   onClose: () => void;
+  hasPatterns: boolean;
 }
 
-export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) {
+export function ClipContextMenu({ index, x, y, onClose, hasPatterns }: ClipContextMenuProps) {
   const { isLight } = useTheme();
-  const { isClipLocked, toggleClipLock, emptyClip, getClip, copyClipToClipboard } = useClips();
+  const { isClipLocked, toggleClipLock, emptyClip, getClip, copyClipToClipboard } =
+    useClipsActions();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const clip = getClip(index);
   const isFirstClip = index === 0;
-
-  // Check for patterns
-  const [hasPatterns, setHasPatterns] = useState(false);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    const checkPatterns = async () => {
-      if (!clip.content || clip.content.trim().length === 0) {
-        setHasPatterns(false);
-        return;
-      }
-
-      try {
-        const matches = await window.api.quickClipsScanText(clip.content);
-        if (!isCancelled) {
-          setHasPatterns(matches.length > 0);
-        }
-      } catch {
-        if (!isCancelled) {
-          setHasPatterns(false);
-        }
-      }
-    };
-
-    checkPatterns();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [clip.content]);
 
   // Handle clicks outside menu
   useEffect(() => {

@@ -1,5 +1,17 @@
 import { clipboard, nativeImage } from 'electron';
 
+// Cached image fingerprint to avoid expensive toDataURL on every poll
+let lastImageFingerprint = '';
+let lastImageDataUrl = '';
+
+function getImageFingerprint(image: Electron.NativeImage): string {
+  const size = image.getSize();
+  const bitmap = image.toBitmap();
+  // Use dimensions + bitmap byte length + first 64 bytes as a fast fingerprint
+  const sample = bitmap.subarray(0, 64).toString('base64');
+  return `${size.width}x${size.height}:${bitmap.length}:${sample}`;
+}
+
 // Helper function to determine the current clipboard type and content
 export const getCurrentClipboardData = (): { type: string; content: string } | null => {
   // Priority: text > rtf > html > image > bookmark
@@ -20,7 +32,13 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
 
   const image = clipboard.readImage();
   if (!image.isEmpty()) {
-    return { type: 'image', content: image.toDataURL() };
+    const fingerprint = getImageFingerprint(image);
+    if (fingerprint !== lastImageFingerprint) {
+      // Image changed — do the expensive toDataURL conversion
+      lastImageFingerprint = fingerprint;
+      lastImageDataUrl = image.toDataURL();
+    }
+    return { type: 'image', content: lastImageDataUrl };
   }
 
   try {
@@ -34,6 +52,11 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
 
   return null;
 };
+
+export function clearImageCache(): void {
+  lastImageFingerprint = '';
+  lastImageDataUrl = '';
+}
 
 // Clipboard read operations
 export const getClipboardText = (): string => clipboard.readText();

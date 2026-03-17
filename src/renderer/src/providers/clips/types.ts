@@ -18,28 +18,47 @@ export interface ClipItem {
 }
 
 /**
- * Context type for the ClipsProvider
+ * Read-only clip data for rendering
  */
-export type ClipsContextType = {
+export type ClipsDataContextType = {
   clips: ClipItem[];
+  filteredClips: { clip: ClipItem; originalIndex: number }[];
+  searchTerm: string;
+};
+
+/**
+ * Stable action functions that rarely change identity
+ */
+export type ClipsActionsContextType = {
   setClips: React.Dispatch<React.SetStateAction<ClipItem[]>>;
   getClip: (index: number) => ClipItem;
+  emptyClip: (index: number) => void;
+  updateClip: (index: number, updatedClip: ClipItem) => void;
   toggleClipLock: (index: number) => void;
   isClipLocked: (index: number) => boolean;
   clipboardUpdated: (newClip: ClipItem) => void;
   readCurrentClipboard: () => Promise<void>;
   copyClipToClipboard: (index: number) => Promise<void>;
+};
+
+/**
+ * UI state and setters
+ */
+export type ClipsMetaContextType = {
   clipCopyIndex: number | null;
-  emptyClip: (index: number) => void;
-  updateClip: (index: number, updatedClip: ClipItem) => void;
-  setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   maxClips: number;
-  searchTerm: string;
+  setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   isSearchVisible: boolean;
   setIsSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  filteredClips: { clip: ClipItem; originalIndex: number }[];
 };
+
+/**
+ * Combined context type (backwards compat convenience)
+ */
+export type ClipsContextType = ClipsDataContextType &
+  ClipsActionsContextType &
+  ClipsMetaContextType;
 
 /**
  * Internal state interface for clipboard tracking

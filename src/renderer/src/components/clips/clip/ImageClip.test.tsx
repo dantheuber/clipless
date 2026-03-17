@@ -15,6 +15,7 @@ vi.mock('./Clip.module.css', () => ({
     imagePreviewContainer: 'imagePreviewContainer',
     imagePreview: 'imagePreview',
     imagePopover: 'imagePopover',
+    imagePopoverVisible: 'imagePopoverVisible',
     popoverImage: 'popoverImage',
     imageInfo: 'imageInfo',
     imageFilename: 'imageFilename',
@@ -26,11 +27,13 @@ vi.mock('./Clip.module.css', () => ({
 describe('ImageClip', () => {
   afterEach(() => {
     cleanup();
+    themeState.isLight = false;
   });
+
   it('renders image with correct src', () => {
     render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
-    const images = screen.getAllByRole('img');
-    expect(images[0]).toHaveAttribute('src', 'data:image/png;base64,abc123');
+    const img = screen.getAllByRole('img')[0];
+    expect(img).toHaveAttribute('src', 'data:image/png;base64,abc123');
   });
 
   it('displays image format', () => {
@@ -50,13 +53,10 @@ describe('ImageClip', () => {
     expect(screen.getByText(/Unknown format/)).toBeInTheDocument();
   });
 
-  it('handles mouse enter and positions popover', () => {
-    const { container } = render(
-      <ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />
-    );
+  it('shows popover on mouse enter and hides on mouse leave', () => {
+    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
     const img = screen.getAllByRole('img')[0];
 
-    // Mock getBoundingClientRect
     img.getBoundingClientRect = vi.fn().mockReturnValue({
       top: 100,
       left: 50,
@@ -66,21 +66,26 @@ describe('ImageClip', () => {
       height: 100,
     });
 
-    // Mock viewport
     Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
     Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
 
+    // Popover should not exist before hover
+    expect(document.body.querySelector('.imagePopoverVisible')).toBeNull();
+
     fireEvent.mouseEnter(img);
 
-    // Popover should have been positioned
-    const popover = container.querySelector('.imagePopover');
+    // Popover should be portaled to body
+    const popover = document.body.querySelector('.imagePopoverVisible');
     expect(popover).toBeTruthy();
+
+    fireEvent.mouseLeave(img);
+
+    // Popover should be removed
+    expect(document.body.querySelector('.imagePopoverVisible')).toBeNull();
   });
 
   it('positions popover to the left when right edge exceeded', () => {
-    const { container } = render(
-      <ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />
-    );
+    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -96,14 +101,12 @@ describe('ImageClip', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
 
     fireEvent.mouseEnter(img);
-    const popover = container.querySelector('.imagePopover') as HTMLElement;
+    const popover = document.body.querySelector('.imagePopoverVisible') as HTMLElement;
     expect(popover?.style.left).toBeTruthy();
   });
 
   it('clamps popover to top edge', () => {
-    const { container } = render(
-      <ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />
-    );
+    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -119,14 +122,12 @@ describe('ImageClip', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
 
     fireEvent.mouseEnter(img);
-    const popover = container.querySelector('.imagePopover') as HTMLElement;
+    const popover = document.body.querySelector('.imagePopoverVisible') as HTMLElement;
     expect(popover?.style.top).toBe('16px');
   });
 
   it('clamps popover to bottom edge', () => {
-    const { container } = render(
-      <ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />
-    );
+    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -142,18 +143,14 @@ describe('ImageClip', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
 
     fireEvent.mouseEnter(img);
-    const popover = container.querySelector('.imagePopover') as HTMLElement;
-    // Should be clamped to viewport - popoverHeight - 16
+    const popover = document.body.querySelector('.imagePopoverVisible') as HTMLElement;
     expect(popover?.style.top).toBe(`${800 - 320 - 16}px`);
   });
 
   it('clamps popover to left edge when positioned left goes negative', () => {
-    const { container } = render(
-      <ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />
-    );
+    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
     const img = screen.getAllByRole('img')[0];
 
-    // right edge exceeds viewport width, left edge is very close to 0
     img.getBoundingClientRect = vi.fn().mockReturnValue({
       top: 100,
       left: 5,
@@ -167,7 +164,7 @@ describe('ImageClip', () => {
     Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
 
     fireEvent.mouseEnter(img);
-    const popover = container.querySelector('.imagePopover') as HTMLElement;
+    const popover = document.body.querySelector('.imagePopoverVisible') as HTMLElement;
     expect(popover?.style.left).toBe('16px');
   });
 
@@ -176,7 +173,6 @@ describe('ImageClip', () => {
     render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
     const img = screen.getAllByRole('img')[0];
 
-    // Mock parentNode
     const parent = document.createElement('div');
     Object.defineProperty(img, 'parentNode', { value: parent, writable: true });
 
