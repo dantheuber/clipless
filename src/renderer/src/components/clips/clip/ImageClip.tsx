@@ -124,7 +124,7 @@ export const ImageClip = memo(function ImageClip({ clip }: ImageClipProps) {
             style={popoverStyle}
           >
             <img
-              src={popoverSrc || displaySrc}
+              src={popoverSrc}
               alt="Large image preview"
               className={classNames(styles.popoverImage, { [styles.light]: isLight })}
             />

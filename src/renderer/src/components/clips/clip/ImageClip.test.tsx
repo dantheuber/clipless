@@ -386,6 +386,47 @@ describe('ImageClip', () => {
     expect(popover).toBeTruthy();
   });
 
+  it('skips IPC call when getFullImage is not available', async () => {
+    const originalApi = window.api;
+    window.api = {} as unknown as typeof window.api;
+
+    render(
+      <ImageClip
+        clip={{
+          type: 'image',
+          content: 'data:image/png;base64,fallback',
+          thumbnailDataUrl: 'data:image/png;base64,thumb',
+          imageId: 'img-no-api',
+        }}
+      />
+    );
+    const img = screen.getAllByRole('img')[0];
+
+    img.getBoundingClientRect = vi.fn().mockReturnValue({
+      top: 100,
+      left: 50,
+      right: 150,
+      bottom: 200,
+      width: 100,
+      height: 100,
+    });
+
+    Object.defineProperty(window, 'innerHeight', { value: 800, writable: true });
+    Object.defineProperty(window, 'innerWidth', { value: 1200, writable: true });
+
+    await act(async () => {
+      fireEvent.mouseEnter(img);
+    });
+
+    // Popover should still show using the thumbnail fallback
+    const popover = document.body.querySelector('.imagePopoverVisible');
+    expect(popover).toBeTruthy();
+    const popoverImg = popover?.querySelector('img');
+    expect(popoverImg).toHaveAttribute('src', 'data:image/png;base64,thumb');
+
+    window.api = originalApi;
+  });
+
   it('uses content for format detection when no thumbnailDataUrl', () => {
     render(
       <ImageClip
