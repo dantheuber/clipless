@@ -33,6 +33,7 @@ const api = {
     electronAPI.ipcRenderer.invoke('set-clipboard-image', imageData),
   setClipboardBookmark: (bookmarkData: BookmarkData) =>
     electronAPI.ipcRenderer.invoke('set-clipboard-bookmark', bookmarkData),
+  getFullImage: (imageId: string) => electronAPI.ipcRenderer.invoke('get-full-image', imageId),
   notifyClipCopied: (index: number) => electronAPI.ipcRenderer.invoke('notify-clip-copied', index),
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
@@ -59,6 +60,9 @@ const api = {
   removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated'),
 
   // Storage APIs
+  onStorageReady: (callback: () => void) =>
+    electronAPI.ipcRenderer.on('storage-ready', () => callback()),
+  removeStorageReadyListeners: () => electronAPI.ipcRenderer.removeAllListeners('storage-ready'),
   storageGetClips: () => electronAPI.ipcRenderer.invoke('storage-get-clips'),
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
     electronAPI.ipcRenderer.invoke('storage-save-clips', clips, lockedIndices),

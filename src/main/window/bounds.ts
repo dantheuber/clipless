@@ -1,19 +1,22 @@
-import { BrowserWindow } from 'electron';
+import { app, BrowserWindow } from 'electron';
+import { promises as fs } from 'fs';
+import { join } from 'path';
 import { storage } from '../storage';
 
 let windowBounds: { x: number; y: number; width: number; height: number } | null = null;
 
+/**
+ * Load window bounds directly from window-bounds.json — no SecureStorage dependency.
+ * The rememberWindowPosition setting is checked later when storage is ready.
+ */
 export async function loadWindowBounds(): Promise<void> {
   try {
-    const settings = await storage.getSettings();
-    if (settings.rememberWindowPosition) {
-      const bounds = await storage.getWindowBounds();
-      if (bounds) {
-        windowBounds = bounds;
-      }
-    }
-  } catch (error) {
-    console.error('Failed to load window bounds:', error);
+    const dataPath = join(app.getPath('userData'), 'clipless-data');
+    const boundsPath = join(dataPath, 'window-bounds.json');
+    const data = await fs.readFile(boundsPath, 'utf-8');
+    windowBounds = JSON.parse(data);
+  } catch {
+    // File doesn't exist or is invalid, no saved bounds
   }
 }
 

@@ -11,14 +11,18 @@ import type {
   SearchTerm,
   QuickTool,
   QuickClipsConfig,
+  TemplatesData,
+  StorageMeta,
 } from '../../shared/types';
 
 // Import utility modules
-import { DEFAULT_DATA } from './defaults';
-import { migrateData } from './migration';
+import { DEFAULT_SETTINGS } from './defaults';
+import { migrateData, migrateLegacyStorage } from './migration';
 import {
-  saveToFile,
-  loadFromFile,
+  saveEncryptedJson,
+  loadEncryptedJson,
+  saveJsonFile,
+  loadJsonFile,
   ensureDataDirectory,
   isEncryptionAvailable,
 } from './file-operations';
@@ -32,6 +36,7 @@ import {
   generateTextFromTemplate,
 } from './templates';
 import {
+  generateId,
   createSearchTermObject,
   updateSearchTermObject,
   sortSearchTermsByOrder,
@@ -45,22 +50,45 @@ import {
   processQuickClipsConfig,
 } from './quick-tools';
 import { saveWindowBounds, getWindowBounds } from './window-bounds';
+import { saveImage, deleteImage, deleteAllImages } from './image-store';
+
+const CURRENT_STORAGE_VERSION = 1;
+
+const DEFAULT_TEMPLATES_DATA: TemplatesData = {
+  templates: [],
+  searchTerms: [],
+  quickTools: [],
+};
 
 class SecureStorage {
   private dataPath: string;
-  private encryptedDataPath: string;
+  private settingsPath: string;
+  private clipsPath: string;
+  private templatesPath: string;
+  private metaPath: string;
   private isInitialized = false;
   private isBackgroundLoadComplete = false;
-  private data: AppData = DEFAULT_DATA;
-  private savePromise: Promise<void> | null = null;
+
+  // Domain-specific data stores
+  private settings: UserSettings = DEFAULT_SETTINGS;
+  private clips: StoredClip[] = [];
+  private templatesData: TemplatesData = { ...DEFAULT_TEMPLATES_DATA };
+  private meta: StorageMeta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
+
+  // Per-domain save queuing
+  private savePromises: Map<string, Promise<void>> = new Map();
+
   private onBackgroundLoadComplete?: () => void;
 
   constructor() {
     // Store data in the user data directory
     const userDataPath = app.getPath('userData');
     this.dataPath = join(userDataPath, 'clipless-data');
-    this.encryptedDataPath = join(this.dataPath, 'data.enc');
-    console.log(`Secure storage initialized at: ${this.encryptedDataPath}`);
+    this.settingsPath = join(this.dataPath, 'settings.enc');
+    this.clipsPath = join(this.dataPath, 'clips.enc');
+    this.templatesPath = join(this.dataPath, 'templates.enc');
+    this.metaPath = join(this.dataPath, 'meta.json');
+    console.log(`Secure storage initialized at: ${this.dataPath}`);
   }
 
   /**
@@ -70,7 +98,10 @@ class SecureStorage {
     if (this.isInitialized) return;
 
     // Start with default data immediately for fast startup
-    this.data = { ...DEFAULT_DATA };
+    this.settings = { ...DEFAULT_SETTINGS };
+    this.clips = [];
+    this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
+    this.meta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
     this.isInitialized = true;
 
     // Load actual data in the background
@@ -93,8 +124,11 @@ class SecureStorage {
         return;
       }
 
-      // Try to load existing data
-      await this.loadData();
+      // Migrate legacy data.enc if needed
+      await migrateLegacyStorage(this.dataPath);
+
+      // Load each domain independently
+      await this.loadAllDomains();
 
       // Mark background loading as complete and notify
       this.isBackgroundLoadComplete = true;
@@ -108,58 +142,156 @@ class SecureStorage {
   }
 
   /**
-   * Load data from encrypted storage
+   * Load all domain-specific data files
    */
-  private async loadData(): Promise<void> {
+  private async loadAllDomains(): Promise<void> {
+    // Load settings
     try {
-      const parsedData = await loadFromFile(this.encryptedDataPath);
-
-      // Validate data structure and migrate if necessary
-      this.data = migrateData(parsedData);
-
-      console.log(`Loaded ${this.data.clips.length} clips from secure storage`);
-    } catch (error) {
-      if ((error as Error).message === 'FILE_NOT_FOUND') {
-        // File doesn't exist, start with default data
-        console.log('No existing data file found, starting with defaults');
-        this.data = { ...DEFAULT_DATA };
-      } else {
-        console.error('Failed to load data from storage:', error);
-        // Use default data if decryption fails
-        this.data = { ...DEFAULT_DATA };
+      const loadedSettings = await loadEncryptedJson<UserSettings>(this.settingsPath);
+      if (loadedSettings && typeof loadedSettings === 'object') {
+        this.settings = { ...DEFAULT_SETTINGS, ...loadedSettings };
       }
+    } catch (error) {
+      if ((error as Error).message !== 'FILE_NOT_FOUND') {
+        console.error('Failed to load settings:', error);
+      }
+    }
+
+    // Load clips
+    try {
+      const loadedClips = await loadEncryptedJson<StoredClip[]>(this.clipsPath);
+      if (Array.isArray(loadedClips)) {
+        // Validate clips through migrateData
+        const validated = migrateData({ clips: loadedClips });
+        this.clips = validated.clips;
+      }
+    } catch (error) {
+      if ((error as Error).message !== 'FILE_NOT_FOUND') {
+        console.error('Failed to load clips:', error);
+      }
+    }
+
+    // Load templates data
+    try {
+      const loadedTemplates = await loadEncryptedJson<TemplatesData>(this.templatesPath);
+      if (loadedTemplates && typeof loadedTemplates === 'object') {
+        // Validate through migrateData
+        const validated = migrateData(loadedTemplates);
+        this.templatesData = {
+          templates: validated.templates,
+          searchTerms: validated.searchTerms,
+          quickTools: validated.quickTools,
+        };
+      }
+    } catch (error) {
+      if ((error as Error).message !== 'FILE_NOT_FOUND') {
+        console.error('Failed to load templates data:', error);
+      }
+    }
+
+    // Load meta
+    try {
+      const loadedMeta = await loadJsonFile<StorageMeta>(this.metaPath);
+      if (loadedMeta && typeof loadedMeta === 'object') {
+        this.meta = {
+          version: loadedMeta.version || __APP_VERSION__,
+          storageVersion: loadedMeta.storageVersion || CURRENT_STORAGE_VERSION,
+        };
+      }
+    } catch (error) {
+      if ((error as Error).message !== 'FILE_NOT_FOUND') {
+        console.error('Failed to load meta:', error);
+      }
+    }
+
+    // Migrate inline base64 image clips to separate files
+    await this.migrateInlineImages();
+
+    console.log(`Loaded ${this.clips.length} clips from secure storage`);
+  }
+
+  /**
+   * Migrate existing inline base64 image clips to separate encrypted files.
+   * Clips with type 'image' and content starting with 'data:image/' are legacy inline images.
+   */
+  private async migrateInlineImages(): Promise<void> {
+    let hasMigrated = false;
+
+    for (const storedClip of this.clips) {
+      if (
+        storedClip.clip.type === 'image' &&
+        storedClip.clip.content.startsWith('data:image/') &&
+        !storedClip.clip.imageId
+      ) {
+        try {
+          const imageId = generateId();
+          const thumbnailDataUrl = await saveImage(imageId, storedClip.clip.content, this.dataPath);
+          storedClip.clip.imageId = imageId;
+          storedClip.clip.thumbnailDataUrl = thumbnailDataUrl;
+          storedClip.clip.content = imageId;
+          hasMigrated = true;
+        } catch (error) {
+          console.error('Failed to migrate inline image:', error);
+        }
+      }
+    }
+
+    if (hasMigrated) {
+      await this.saveClipsData();
+      console.log('Migrated inline base64 image clips to separate files');
     }
   }
 
   /**
-   * Save data to encrypted storage
+   * Save a specific domain file with queuing to prevent concurrent writes
    */
-  private async saveData(): Promise<void> {
+  private async saveDomain(key: string, data: unknown, filePath: string): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('Storage not initialized');
     }
 
-    // If a save operation is already in progress, wait for it to complete
-    if (this.savePromise) {
-      await this.savePromise;
+    const existing = this.savePromises.get(key);
+    if (existing) {
+      await existing;
       return;
     }
 
-    // Start a new save operation
-    this.savePromise = this.performSave();
+    const promise = saveEncryptedJson(data, filePath);
+    this.savePromises.set(key, promise);
 
     try {
-      await this.savePromise;
+      await promise;
     } finally {
-      this.savePromise = null;
+      this.savePromises.delete(key);
     }
   }
 
   /**
-   * Perform the actual save operation
+   * Save settings domain
    */
-  private async performSave(): Promise<void> {
-    await saveToFile(this.data, this.encryptedDataPath);
+  private async saveSettingsData(): Promise<void> {
+    await this.saveDomain('settings', this.settings, this.settingsPath);
+  }
+
+  /**
+   * Save clips domain
+   */
+  private async saveClipsData(): Promise<void> {
+    await this.saveDomain('clips', this.clips, this.clipsPath);
+  }
+
+  /**
+   * Save templates domain (templates + search terms + quick tools)
+   */
+  private async saveTemplatesData(): Promise<void> {
+    await this.saveDomain('templates', this.templatesData, this.templatesPath);
+  }
+
+  /**
+   * Save storage metadata
+   */
+  private async saveMeta(): Promise<void> {
+    await saveJsonFile(this.meta, this.metaPath);
   }
 
   /**
@@ -183,19 +315,40 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return [...this.data.clips];
+    return [...this.clips];
   }
 
   /**
-   * Save clips to storage
+   * Save clips to storage.
+   * Cleans up orphaned image files for deleted image clips.
    */
   async saveClips(clips: ClipItem[], lockedIndices: Record<number, boolean>): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
-    this.data.clips = convertToStoredClips(clips, lockedIndices);
-    await this.saveData();
+    // Collect image IDs from old clips for cleanup comparison
+    const oldImageIds = new Set(
+      this.clips.filter((c) => c.clip.imageId).map((c) => c.clip.imageId!)
+    );
+
+    this.clips = convertToStoredClips(clips, lockedIndices);
+
+    // Collect image IDs from new clips
+    const newImageIds = new Set(
+      this.clips.filter((c) => c.clip.imageId).map((c) => c.clip.imageId!)
+    );
+
+    // Delete orphaned images (in old but not in new)
+    for (const oldId of oldImageIds) {
+      if (!newImageIds.has(oldId)) {
+        deleteImage(oldId, this.dataPath).catch((err) =>
+          console.error('Failed to delete orphaned image:', err)
+        );
+      }
+    }
+
+    await this.saveClipsData();
   }
 
   // ===== SETTINGS MANAGEMENT =====
@@ -208,12 +361,12 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const settings = normalizeSettings(this.data.settings);
+    const settings = normalizeSettings(this.settings);
 
     // Save if hotkeys were missing and added
-    if (!this.data.settings.hotkeys) {
-      this.data.settings = settings;
-      await this.saveData();
+    if (!this.settings.hotkeys) {
+      this.settings = settings;
+      await this.saveSettingsData();
     }
 
     return settings;
@@ -227,8 +380,8 @@ class SecureStorage {
       await this.initialize();
     }
 
-    this.data.settings = mergeSettings(this.data.settings, settings);
-    await this.saveData();
+    this.settings = mergeSettings(this.settings, settings);
+    await this.saveSettingsData();
   }
 
   /**
@@ -247,7 +400,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return sortTemplatesByOrder(this.data.templates);
+    return sortTemplatesByOrder(this.templatesData.templates);
   }
 
   /**
@@ -258,9 +411,9 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const template = createTemplateObject(name, content, this.data.templates.length);
-    this.data.templates.push(template);
-    await this.saveData();
+    const template = createTemplateObject(name, content, this.templatesData.templates.length);
+    this.templatesData.templates.push(template);
+    await this.saveTemplatesData();
     return template;
   }
 
@@ -272,14 +425,17 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const templateIndex = this.data.templates.findIndex((t) => t.id === id);
+    const templateIndex = this.templatesData.templates.findIndex((t) => t.id === id);
     if (templateIndex === -1) {
       throw new Error('Template not found');
     }
 
-    const updatedTemplate = updateTemplateObject(this.data.templates[templateIndex], updates);
-    this.data.templates[templateIndex] = updatedTemplate;
-    await this.saveData();
+    const updatedTemplate = updateTemplateObject(
+      this.templatesData.templates[templateIndex],
+      updates
+    );
+    this.templatesData.templates[templateIndex] = updatedTemplate;
+    await this.saveTemplatesData();
     return updatedTemplate;
   }
 
@@ -291,14 +447,14 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const templateIndex = this.data.templates.findIndex((t) => t.id === id);
+    const templateIndex = this.templatesData.templates.findIndex((t) => t.id === id);
     if (templateIndex === -1) {
       throw new Error('Template not found');
     }
 
-    this.data.templates.splice(templateIndex, 1);
-    this.data.templates = reorderTemplatesArray(this.data.templates);
-    await this.saveData();
+    this.templatesData.templates.splice(templateIndex, 1);
+    this.templatesData.templates = reorderTemplatesArray(this.templatesData.templates);
+    await this.saveTemplatesData();
   }
 
   /**
@@ -311,15 +467,15 @@ class SecureStorage {
 
     // Update order for each template
     templates.forEach((template, index) => {
-      const existingTemplate = this.data.templates.find((t) => t.id === template.id);
+      const existingTemplate = this.templatesData.templates.find((t) => t.id === template.id);
       if (existingTemplate) {
         existingTemplate.order = index;
       }
     });
 
     // Sort templates by order
-    this.data.templates.sort((a, b) => a.order - b.order);
-    await this.saveData();
+    this.templatesData.templates.sort((a, b) => a.order - b.order);
+    await this.saveTemplatesData();
   }
 
   /**
@@ -334,7 +490,7 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const template = this.data.templates.find((t) => t.id === templateId);
+    const template = this.templatesData.templates.find((t) => t.id === templateId);
     if (!template) {
       throw new Error('Template not found');
     }
@@ -351,7 +507,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return sortSearchTermsByOrder(this.data.searchTerms);
+    return sortSearchTermsByOrder(this.templatesData.searchTerms);
   }
 
   /**
@@ -362,9 +518,9 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const searchTerm = createSearchTermObject(name, pattern, this.data.searchTerms.length);
-    this.data.searchTerms.push(searchTerm);
-    await this.saveData();
+    const searchTerm = createSearchTermObject(name, pattern, this.templatesData.searchTerms.length);
+    this.templatesData.searchTerms.push(searchTerm);
+    await this.saveTemplatesData();
     return searchTerm;
   }
 
@@ -376,17 +532,17 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const searchTermIndex = this.data.searchTerms.findIndex((t) => t.id === id);
+    const searchTermIndex = this.templatesData.searchTerms.findIndex((t) => t.id === id);
     if (searchTermIndex === -1) {
       throw new Error('Search term not found');
     }
 
     const updatedSearchTerm = updateSearchTermObject(
-      this.data.searchTerms[searchTermIndex],
+      this.templatesData.searchTerms[searchTermIndex],
       updates
     );
-    this.data.searchTerms[searchTermIndex] = updatedSearchTerm;
-    await this.saveData();
+    this.templatesData.searchTerms[searchTermIndex] = updatedSearchTerm;
+    await this.saveTemplatesData();
     return updatedSearchTerm;
   }
 
@@ -398,14 +554,14 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const searchTermIndex = this.data.searchTerms.findIndex((t) => t.id === id);
+    const searchTermIndex = this.templatesData.searchTerms.findIndex((t) => t.id === id);
     if (searchTermIndex === -1) {
       throw new Error('Search term not found');
     }
 
-    this.data.searchTerms.splice(searchTermIndex, 1);
-    this.data.searchTerms = reorderSearchTermsArray(this.data.searchTerms);
-    await this.saveData();
+    this.templatesData.searchTerms.splice(searchTermIndex, 1);
+    this.templatesData.searchTerms = reorderSearchTermsArray(this.templatesData.searchTerms);
+    await this.saveTemplatesData();
   }
 
   /**
@@ -417,15 +573,15 @@ class SecureStorage {
     }
 
     searchTerms.forEach((searchTerm, index) => {
-      const existingSearchTerm = this.data.searchTerms.find((t) => t.id === searchTerm.id);
+      const existingSearchTerm = this.templatesData.searchTerms.find((t) => t.id === searchTerm.id);
       if (existingSearchTerm) {
         existingSearchTerm.order = index;
       }
     });
 
     // Sort search terms by order
-    this.data.searchTerms.sort((a, b) => a.order - b.order);
-    await this.saveData();
+    this.templatesData.searchTerms.sort((a, b) => a.order - b.order);
+    await this.saveTemplatesData();
   }
 
   // ===== QUICK TOOLS MANAGEMENT =====
@@ -437,7 +593,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return sortQuickToolsByOrder(this.data.quickTools);
+    return sortQuickToolsByOrder(this.templatesData.quickTools);
   }
 
   /**
@@ -448,9 +604,14 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const quickTool = createQuickToolObject(name, url, captureGroups, this.data.quickTools.length);
-    this.data.quickTools.push(quickTool);
-    await this.saveData();
+    const quickTool = createQuickToolObject(
+      name,
+      url,
+      captureGroups,
+      this.templatesData.quickTools.length
+    );
+    this.templatesData.quickTools.push(quickTool);
+    await this.saveTemplatesData();
     return quickTool;
   }
 
@@ -462,14 +623,17 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const quickToolIndex = this.data.quickTools.findIndex((t) => t.id === id);
+    const quickToolIndex = this.templatesData.quickTools.findIndex((t) => t.id === id);
     if (quickToolIndex === -1) {
       throw new Error('Quick tool not found');
     }
 
-    const updatedQuickTool = updateQuickToolObject(this.data.quickTools[quickToolIndex], updates);
-    this.data.quickTools[quickToolIndex] = updatedQuickTool;
-    await this.saveData();
+    const updatedQuickTool = updateQuickToolObject(
+      this.templatesData.quickTools[quickToolIndex],
+      updates
+    );
+    this.templatesData.quickTools[quickToolIndex] = updatedQuickTool;
+    await this.saveTemplatesData();
     return updatedQuickTool;
   }
 
@@ -481,14 +645,14 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const quickToolIndex = this.data.quickTools.findIndex((t) => t.id === id);
+    const quickToolIndex = this.templatesData.quickTools.findIndex((t) => t.id === id);
     if (quickToolIndex === -1) {
       throw new Error('Quick tool not found');
     }
 
-    this.data.quickTools.splice(quickToolIndex, 1);
-    this.data.quickTools = reorderQuickToolsArray(this.data.quickTools);
-    await this.saveData();
+    this.templatesData.quickTools.splice(quickToolIndex, 1);
+    this.templatesData.quickTools = reorderQuickToolsArray(this.templatesData.quickTools);
+    await this.saveTemplatesData();
   }
 
   /**
@@ -500,15 +664,15 @@ class SecureStorage {
     }
 
     quickTools.forEach((quickTool, index) => {
-      const existingQuickTool = this.data.quickTools.find((t) => t.id === quickTool.id);
+      const existingQuickTool = this.templatesData.quickTools.find((t) => t.id === quickTool.id);
       if (existingQuickTool) {
         existingQuickTool.order = index;
       }
     });
 
     // Sort quick tools by order
-    this.data.quickTools.sort((a, b) => a.order - b.order);
-    await this.saveData();
+    this.templatesData.quickTools.sort((a, b) => a.order - b.order);
+    await this.saveTemplatesData();
   }
 
   /**
@@ -527,10 +691,10 @@ class SecureStorage {
     if (searchTerms.length > 0) {
       searchTerms.forEach((searchTerm) => {
         searchTerm.order =
-          this.data.searchTerms.length > 0
-            ? Math.max(...this.data.searchTerms.map((t) => t.order)) + 1
+          this.templatesData.searchTerms.length > 0
+            ? Math.max(...this.templatesData.searchTerms.map((t) => t.order)) + 1
             : 0;
-        this.data.searchTerms.push(searchTerm);
+        this.templatesData.searchTerms.push(searchTerm);
       });
       hasChanges = true;
     }
@@ -539,10 +703,10 @@ class SecureStorage {
     if (quickTools.length > 0) {
       quickTools.forEach((quickTool) => {
         quickTool.order =
-          this.data.quickTools.length > 0
-            ? Math.max(...this.data.quickTools.map((t) => t.order)) + 1
+          this.templatesData.quickTools.length > 0
+            ? Math.max(...this.templatesData.quickTools.map((t) => t.order)) + 1
             : 0;
-        this.data.quickTools.push(quickTool);
+        this.templatesData.quickTools.push(quickTool);
       });
       hasChanges = true;
     }
@@ -554,11 +718,11 @@ class SecureStorage {
           const newTemplate = {
             ...template,
             order:
-              this.data.templates.length > 0
-                ? Math.max(...this.data.templates.map((t) => t.order)) + 1
+              this.templatesData.templates.length > 0
+                ? Math.max(...this.templatesData.templates.map((t) => t.order)) + 1
                 : 0,
           };
-          this.data.templates.push(newTemplate);
+          this.templatesData.templates.push(newTemplate);
         }
       });
       hasChanges = true;
@@ -566,7 +730,7 @@ class SecureStorage {
 
     // Save only once at the end if there were changes
     if (hasChanges) {
-      await this.saveData();
+      await this.saveTemplatesData();
     }
   }
 
@@ -601,13 +765,24 @@ class SecureStorage {
       await this.initialize();
     }
 
-    this.data = { ...DEFAULT_DATA };
+    this.settings = { ...DEFAULT_SETTINGS };
+    this.clips = [];
+    this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
+    this.meta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
 
-    try {
-      await fs.unlink(this.encryptedDataPath);
-    } catch {
-      // File might not exist, that's okay
+    // Delete all domain files
+    const filesToDelete = [this.settingsPath, this.clipsPath, this.templatesPath, this.metaPath];
+
+    for (const filePath of filesToDelete) {
+      try {
+        await fs.unlink(filePath);
+      } catch {
+        // File might not exist, that's okay
+      }
     }
+
+    // Delete all image files
+    await deleteAllImages(this.dataPath);
   }
 
   /**
@@ -617,7 +792,17 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
-    return JSON.stringify(this.data, null, 2);
+
+    // Reconstruct AppData for export compatibility
+    const data: AppData = {
+      clips: this.clips,
+      settings: this.settings,
+      templates: this.templatesData.templates,
+      searchTerms: this.templatesData.searchTerms,
+      quickTools: this.templatesData.quickTools,
+      version: this.meta.version,
+    };
+    return JSON.stringify(data, null, 2);
   }
 
   /**
@@ -630,8 +815,28 @@ class SecureStorage {
 
     try {
       const importedData = JSON.parse(jsonData);
-      this.data = migrateData(importedData);
-      await this.saveData();
+      const migrated = migrateData(importedData);
+
+      // Split into domain stores
+      this.settings = migrated.settings;
+      this.clips = migrated.clips;
+      this.templatesData = {
+        templates: migrated.templates,
+        searchTerms: migrated.searchTerms,
+        quickTools: migrated.quickTools,
+      };
+      this.meta = {
+        version: migrated.version,
+        storageVersion: CURRENT_STORAGE_VERSION,
+      };
+
+      // Save all domains
+      await Promise.all([
+        this.saveSettingsData(),
+        this.saveClipsData(),
+        this.saveTemplatesData(),
+        this.saveMeta(),
+      ]);
     } catch (error) {
       console.error('Failed to import data:', error);
       throw new Error('Invalid data format');
@@ -646,14 +851,33 @@ class SecureStorage {
       await this.initialize();
     }
 
-    const { clipCount, lockedCount } = getClipStats(this.data.clips);
+    const { clipCount, lockedCount } = getClipStats(this.clips);
 
     let dataSize = 0;
+    const filesToStat = [this.settingsPath, this.clipsPath, this.templatesPath, this.metaPath];
+    for (const filePath of filesToStat) {
+      try {
+        const stats = await fs.stat(filePath);
+        dataSize += stats.size;
+      } catch {
+        // File might not exist yet
+      }
+    }
+
+    // Include images directory size
     try {
-      const stats = await fs.stat(this.encryptedDataPath);
-      dataSize = stats.size;
+      const imagesDir = join(this.dataPath, 'images');
+      const imageFiles = await fs.readdir(imagesDir);
+      for (const file of imageFiles) {
+        try {
+          const stats = await fs.stat(join(imagesDir, file));
+          dataSize += stats.size;
+        } catch {
+          // Skip files that can't be stat'd
+        }
+      }
     } catch {
-      // File might not exist yet
+      // Images directory might not exist
     }
 
     return { clipCount, lockedCount, dataSize };

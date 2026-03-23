@@ -28,12 +28,15 @@ export async function initializeApp(): Promise<void> {
       }),
   ]);
 
-  // Set up callback to re-apply window settings after background storage loading completes
+  // Set up callback to re-apply window settings and notify renderer after background storage loading completes
   storage.setOnBackgroundLoadComplete(() => {
     const mainWindow = getMainWindow();
     if (mainWindow) {
       console.log('Background storage loading complete, re-applying window settings');
       applyWindowSettings(mainWindow);
+
+      // Notify renderer that storage data is ready for re-fetching
+      mainWindow.webContents.send('storage-ready');
     }
   });
 

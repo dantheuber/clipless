@@ -1,5 +1,28 @@
-import { describe, it, expect } from 'vitest';
-import { migrateData } from './migration';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('electron', () => ({
+  safeStorage: {
+    isEncryptionAvailable: vi.fn().mockReturnValue(true),
+    encryptString: vi.fn((str: string) => Buffer.from(str)),
+    decryptString: vi.fn((buf: Buffer) => buf.toString()),
+  },
+}));
+
+vi.mock('fs', () => ({
+  promises: {
+    access: vi.fn(),
+    readFile: vi.fn(),
+    writeFile: vi.fn().mockResolvedValue(undefined),
+    rename: vi.fn().mockResolvedValue(undefined),
+    unlink: vi.fn().mockResolvedValue(undefined),
+    mkdir: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+import { migrateData, migrateLegacyStorage } from './migration';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import { safeStorage } from 'electron';
 
 describe('migrateData', () => {
   it('returns default structure for empty object', () => {
@@ -118,5 +141,136 @@ describe('migrateData', () => {
 
     const numberResult = migrateData(42);
     expect(numberResult.clips).toEqual([]);
+  });
+});
+
+describe('migrateLegacyStorage', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('returns false if legacy data.enc does not exist', async () => {
+    vi.mocked(fs.access).mockRejectedValueOnce(new Error('ENOENT'));
+
+    const result = await migrateLegacyStorage('/data');
+    expect(result).toBe(false);
+  });
+
+  it('returns false if clips.enc already exists (already migrated)', async () => {
+    // First access (data.enc) succeeds
+    vi.mocked(fs.access).mockResolvedValueOnce(undefined);
+    // Second access (clips.enc) succeeds
+    vi.mocked(fs.access).mockResolvedValueOnce(undefined);
+
+    const result = await migrateLegacyStorage('/data');
+    expect(result).toBe(false);
+  });
+
+  it('performs migration when data.enc exists but clips.enc does not', async () => {
+    // data.enc exists
+    vi.mocked(fs.access).mockResolvedValueOnce(undefined);
+    // clips.enc does not exist
+    vi.mocked(fs.access).mockRejectedValueOnce(new Error('ENOENT'));
+    // loadEncryptedJson reads data.enc
+    vi.mocked(fs.access).mockResolvedValueOnce(undefined);
+
+    const legacyData = {
+      clips: [{ clip: { type: 'text', content: 'test' }, isLocked: false, timestamp: 1 }],
+      settings: { maxClips: 100 },
+      templates: [],
+      searchTerms: [],
+      quickTools: [],
+      version: '1.0.0',
+    };
+    vi.mocked(fs.readFile).mockResolvedValueOnce(Buffer.from(JSON.stringify(legacyData)));
+    vi.mocked(safeStorage.decryptString).mockReturnValueOnce(JSON.stringify(legacyData));
+
+    const result = await migrateLegacyStorage('/data');
+
+    expect(result).toBe(true);
+    // Should have written settings.enc, clips.enc, templates.enc (3 encrypted saves with temp+rename each)
+    // Plus meta.json (1 plain write)
+    // Each encrypted save: unlink temp, writeFile temp, rename temp → final = 3 calls per file
+    // 3 encrypted files × 3 calls = 9, plus 1 for meta.json write, plus 1 for rename data.enc
+    expect(fs.rename).toHaveBeenCalledWith(
+      join('/data', 'data.enc'),
+      join('/data', 'data.enc') + '.migrated'
+    );
+  });
+
+  it('splits legacy data into correct domain files', async () => {
+    // data.enc exists
+    vi.mocked(fs.access).mockResolvedValueOnce(undefined);
+    // clips.enc does not exist
+    vi.mocked(fs.access).mockRejectedValueOnce(new Error('ENOENT'));
+    // loadEncryptedJson accesses data.enc
+    vi.mocked(fs.access).mockResolvedValueOnce(undefined);
+
+    const legacyData = {
+      clips: [{ clip: { type: 'text', content: 'hello' }, isLocked: true, timestamp: 1 }],
+      settings: { maxClips: 500, theme: 'dark' },
+      templates: [{ id: 't1', name: 'T1', content: 'c', createdAt: 1, updatedAt: 1, order: 0 }],
+      searchTerms: [
+        {
+          id: 's1',
+          name: 'S1',
+          pattern: '.*',
+          enabled: true,
+          createdAt: 1,
+          updatedAt: 1,
+          order: 0,
+        },
+      ],
+      quickTools: [
+        {
+          id: 'q1',
+          name: 'Q1',
+          url: 'https://example.com',
+          captureGroups: [],
+          createdAt: 1,
+          updatedAt: 1,
+          order: 0,
+        },
+      ],
+      version: '1.5.0',
+    };
+    vi.mocked(fs.readFile).mockResolvedValueOnce(Buffer.from(JSON.stringify(legacyData)));
+    vi.mocked(safeStorage.decryptString).mockReturnValueOnce(JSON.stringify(legacyData));
+
+    await migrateLegacyStorage('/data');
+
+    // Verify settings.enc was written (encryptString called with settings data)
+    const encryptCalls = vi.mocked(safeStorage.encryptString).mock.calls;
+    const settingsCall = encryptCalls.find((call) => {
+      const parsed = JSON.parse(call[0]);
+      return parsed.maxClips === 500;
+    });
+    expect(settingsCall).toBeDefined();
+
+    // Verify clips.enc was written
+    const clipsCall = encryptCalls.find((call) => {
+      const parsed = JSON.parse(call[0]);
+      return Array.isArray(parsed) && parsed.length === 1;
+    });
+    expect(clipsCall).toBeDefined();
+
+    // Verify templates.enc was written with templates, searchTerms, quickTools
+    const templatesCall = encryptCalls.find((call) => {
+      const parsed = JSON.parse(call[0]);
+      return parsed.templates && parsed.searchTerms && parsed.quickTools;
+    });
+    expect(templatesCall).toBeDefined();
+
+    // Verify meta.json was written
+    const writeFileCalls = vi.mocked(fs.writeFile).mock.calls;
+    const metaCall = writeFileCalls.find(
+      (call) => typeof call[0] === 'string' && call[0].includes('meta.json')
+    );
+    expect(metaCall).toBeDefined();
+    if (metaCall) {
+      const metaData = JSON.parse(metaCall[1] as string);
+      expect(metaData.version).toBe('1.5.0');
+      expect(metaData.storageVersion).toBe(1);
+    }
   });
 });
