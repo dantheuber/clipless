@@ -234,15 +234,13 @@ describe('TextClip', () => {
       />
     );
 
-    // Trigger edit mode and wait for lazy component to load
+    // Trigger edit mode
     await act(async () => {
       fireEvent.click(screen.getByText('const x = 1;'));
     });
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 10));
-    });
 
-    expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
+    // Wait for lazy component to resolve
+    expect(await screen.findByTestId('syntax-highlighter')).toBeInTheDocument();
     vi.useFakeTimers();
   });
 
@@ -257,15 +255,12 @@ describe('TextClip', () => {
     );
     fireEvent.click(screen.getByText('const x = 1;'));
 
-    // Wait for lazy component to load
-    await act(async () => {
-      await new Promise((r) => setTimeout(r, 0));
-    });
+    // Wait for lazy component to resolve
+    await screen.findByTestId('syntax-highlighter');
 
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: 'const x = 2;\nconst y = 3;' } });
 
-    // The useEffect should have run and attempted to set height on syntax container
     expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
     vi.useFakeTimers();
   });
@@ -389,10 +384,8 @@ describe('TextClip', () => {
       );
       fireEvent.click(screen.getByText('const x = 1;'));
 
-      // Wait for lazy component to load
-      await act(async () => {
-        await new Promise((r) => setTimeout(r, 0));
-      });
+      // Wait for lazy component to resolve
+      await screen.findByTestId('syntax-highlighter');
 
       const textarea = screen.getByRole('textbox');
       expect(textarea.className).toContain('light');
