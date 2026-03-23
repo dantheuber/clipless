@@ -12,7 +12,11 @@ import {
   setClipboardImage,
   setClipboardBookmark,
 } from './data';
-import { startClipboardMonitoring, stopClipboardMonitoring } from './monitoring';
+import {
+  startClipboardMonitoring,
+  stopClipboardMonitoring,
+  setSkipNextImageChange,
+} from './monitoring';
 import {
   getClips,
   saveClips,
@@ -63,6 +67,7 @@ import type {
   QuickClipsConfig,
 } from '../../shared/types';
 import { showNotification } from '../notifications';
+import { loadImage } from '../storage/image-store';
 
 let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
 
@@ -88,9 +93,10 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('set-clipboard-text', (_event, text: string) => setClipboardText(text));
   ipcMain.handle('set-clipboard-html', (_event, html: string) => setClipboardHTML(html));
   ipcMain.handle('set-clipboard-rtf', (_event, rtf: string) => setClipboardRTF(rtf));
-  ipcMain.handle('set-clipboard-image', (_event, imageData: string) =>
-    setClipboardImage(imageData)
-  );
+  ipcMain.handle('set-clipboard-image', (_event, imageData: string) => {
+    setSkipNextImageChange();
+    return setClipboardImage(imageData);
+  });
   ipcMain.handle(
     'set-clipboard-bookmark',
     (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) =>
@@ -121,6 +127,19 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
   ipcMain.handle('storage-clear-all', async () => clearAllData());
+
+  // Image storage handler - load full image on demand
+  ipcMain.handle('get-full-image', async (_event, imageId: string) => {
+    try {
+      const { app } = await import('electron');
+      const { join } = await import('path');
+      const dataPath = join(app.getPath('userData'), 'clipless-data');
+      return await loadImage(imageId, dataPath);
+    } catch (error) {
+      console.error('Failed to load full image:', error);
+      return null;
+    }
+  });
 
   // Template management handlers
   ipcMain.handle('templates-get-all', async () => getAllTemplates());

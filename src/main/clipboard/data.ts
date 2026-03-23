@@ -14,7 +14,9 @@ function getImageFingerprint(image: Electron.NativeImage): string {
 
 // Helper function to determine the current clipboard type and content
 export const getCurrentClipboardData = (): { type: string; content: string } | null => {
-  // Priority: text > rtf > html > image > bookmark
+  // Priority: text > rtf > image > html > bookmark
+  // Image is checked before HTML because some apps (e.g. Discord) put both
+  // an <img> HTML tag and the actual image binary on the clipboard.
   const text = clipboard.readText();
   if (text?.trim()) {
     return { type: 'text', content: text };
@@ -23,11 +25,6 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
   const rtf = clipboard.readRTF();
   if (rtf?.trim()) {
     return { type: 'rtf', content: rtf };
-  }
-
-  const html = clipboard.readHTML();
-  if (html?.trim()) {
-    return { type: 'html', content: html };
   }
 
   const image = clipboard.readImage();
@@ -39,6 +36,11 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
       lastImageDataUrl = image.toDataURL();
     }
     return { type: 'image', content: lastImageDataUrl };
+  }
+
+  const html = clipboard.readHTML();
+  if (html?.trim()) {
+    return { type: 'html', content: html };
   }
 
   try {

@@ -54,6 +54,9 @@ A powerful and intelligent clipboard manager built with Electron, React, and Typ
 
 - Encrypted data storage using OS-native encryption
 - Windows: DPAPI, macOS: Keychain, Linux: Secret Service
+- Domain-specific storage files (settings, clips, templates) for efficient per-domain saves
+- Images stored as separate encrypted files with generated thumbnails for fast rendering
+- Non-blocking startup: window displays immediately, data loads in background
 - Persistent clipboard history
 - Lock clips to prevent automatic removal
 - Export/import functionality for backup

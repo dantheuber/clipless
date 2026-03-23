@@ -34,9 +34,15 @@ export const createHtmlClip = (content: string): ClipItem => ({
   content,
 });
 
-export const createImageClip = (content: string): ClipItem => ({
+export const createImageClip = (
+  content: string,
+  imageId?: string,
+  thumbnailDataUrl?: string
+): ClipItem => ({
   type: 'image',
-  content, // This would be a data URL or file path for the image
+  content,
+  ...(imageId && { imageId }),
+  ...(thumbnailDataUrl && { thumbnailDataUrl }),
 });
 
 export const createRtfClip = (content: string): ClipItem => ({

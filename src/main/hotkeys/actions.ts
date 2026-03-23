@@ -1,6 +1,9 @@
 import { BrowserWindow, clipboard, nativeImage, app } from 'electron';
+import { join } from 'path';
 import { storage } from '../storage';
 import { showNotification } from '../notifications';
+import { loadImage } from '../storage/image-store';
+import { setSkipNextImageChange } from '../clipboard/monitoring';
 import type { StoredClip } from '../../shared/types';
 
 /**
@@ -66,7 +69,7 @@ export class HotkeyActions {
       }
 
       // Copy the clip content with the appropriate format based on its type
-      this.copyClipToClipboard(clipToCopy);
+      await this.copyClipToClipboard(clipToCopy);
 
       console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
       showNotification('Clip Copied', `Clip ${index + 1} copied to clipboard`);
@@ -78,7 +81,7 @@ export class HotkeyActions {
   /**
    * Copy a clip to the system clipboard based on its type
    */
-  private copyClipToClipboard(clipToCopy: StoredClip): void {
+  private async copyClipToClipboard(clipToCopy: StoredClip): Promise<void> {
     switch (clipToCopy.clip.type) {
       case 'text':
         clipboard.writeText(clipToCopy.clip.content);
@@ -97,7 +100,7 @@ export class HotkeyActions {
         }
         break;
       case 'image':
-        this.copyImageClip(clipToCopy.clip.content);
+        await this.copyImageClip(clipToCopy.clip.content, clipToCopy.clip.imageId);
         break;
       default:
         clipboard.writeText(clipToCopy.clip.content);
@@ -105,16 +108,26 @@ export class HotkeyActions {
   }
 
   /**
-   * Handle copying image clips with fallback
+   * Handle copying image clips with fallback.
+   * If imageId is present, loads full image from image store.
    */
-  private copyImageClip(content: string): void {
+  private async copyImageClip(content: string, imageId?: string): Promise<void> {
     try {
-      const image = nativeImage.createFromDataURL(content);
+      let dataUrl = content;
+
+      // Load full image from image store if imageId is present
+      if (imageId) {
+        const dataPath = join(app.getPath('userData'), 'clipless-data');
+        dataUrl = await loadImage(imageId, dataPath);
+      }
+
+      setSkipNextImageChange();
+      const image = nativeImage.createFromDataURL(dataUrl);
       if (!image.isEmpty()) {
         clipboard.writeImage(image);
       } else {
         // Fallback to copying data URL as text
-        clipboard.writeText(content);
+        clipboard.writeText(dataUrl);
       }
     } catch (error) {
       console.error('Failed to copy image, falling back to text:', error);
