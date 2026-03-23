@@ -32,21 +32,23 @@ vi.mock('../../../utils/languageDetection', () => ({
   mapToSyntaxHighlighterLanguage: vi.fn().mockReturnValue('javascript'),
 }));
 
-vi.mock('react-syntax-highlighter', () => ({
+vi.mock('./SyntaxHighlightedCode', () => ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Prism: ({ children, PreTag }: any) => {
-    const Tag = PreTag || 'pre';
-    return (
-      <Tag data-testid="syntax-highlighter" {...(typeof Tag !== 'string' ? {} : {})}>
-        {children}
-      </Tag>
-    );
-  },
-}));
-
-vi.mock('react-syntax-highlighter/dist/esm/styles/prism', () => ({
-  materialDark: {},
-  materialLight: {},
+  default: ({ editValue, onChange, onBlur, onKeyDown, isLight, ref }: any) => (
+    <div data-testid="syntax-highlighter" className="textEditorWrapper">
+      <div className="syntaxHighlightContainer">
+        <textarea
+          ref={ref}
+          value={editValue}
+          onChange={onChange}
+          onBlur={onBlur}
+          onKeyDown={onKeyDown}
+          className={isLight ? 'light' : ''}
+          style={{ caretColor: isLight ? '#000' : '#fff' }}
+        />
+      </div>
+    </div>
+  ),
 }));
 
 vi.mock('./Clip.module.css', () => ({
@@ -222,7 +224,8 @@ describe('TextClip', () => {
     expect(onEditingChange).toHaveBeenCalledWith(false);
   });
 
-  it('renders syntax highlighter when code detection enabled and clip has language', () => {
+  it('renders syntax highlighter when code detection enabled and clip has language', async () => {
+    vi.useRealTimers();
     mockIsCodeDetectionEnabled = true;
     render(
       <TextClip
@@ -230,12 +233,19 @@ describe('TextClip', () => {
         onUpdate={vi.fn()}
       />
     );
-    fireEvent.click(screen.getByText('const x = 1;'));
 
-    expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
+    // Trigger edit mode
+    await act(async () => {
+      fireEvent.click(screen.getByText('const x = 1;'));
+    });
+
+    // Wait for lazy component to resolve
+    expect(await screen.findByTestId('syntax-highlighter')).toBeInTheDocument();
+    vi.useFakeTimers();
   });
 
-  it('updates syntax container height on text change', () => {
+  it('updates syntax container height on text change', async () => {
+    vi.useRealTimers();
     mockIsCodeDetectionEnabled = true;
     render(
       <TextClip
@@ -244,12 +254,15 @@ describe('TextClip', () => {
       />
     );
     fireEvent.click(screen.getByText('const x = 1;'));
+
+    // Wait for lazy component to resolve
+    await screen.findByTestId('syntax-highlighter');
 
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: 'const x = 2;\nconst y = 3;' } });
 
-    // The useEffect should have run and attempted to set height on syntax container
     expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
+    vi.useFakeTimers();
   });
 
   it('renders plain textarea when code detection disabled', () => {
@@ -360,7 +373,8 @@ describe('TextClip', () => {
       expect(screen.getByRole('textbox').className).toContain('light');
     });
 
-    it('applies light styles in syntax-highlighted edit mode', () => {
+    it('applies light styles in syntax-highlighted edit mode', async () => {
+      vi.useRealTimers();
       mockIsCodeDetectionEnabled = true;
       render(
         <TextClip
@@ -370,9 +384,13 @@ describe('TextClip', () => {
       );
       fireEvent.click(screen.getByText('const x = 1;'));
 
+      // Wait for lazy component to resolve
+      await screen.findByTestId('syntax-highlighter');
+
       const textarea = screen.getByRole('textbox');
       expect(textarea.className).toContain('light');
       expect(textarea.style.caretColor).toBe('#000');
+      vi.useFakeTimers();
     });
 
     it('applies light class to empty content display', () => {

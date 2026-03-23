@@ -16,6 +16,7 @@ declare global {
       setClipboardText: (text: string) => Promise<void>;
       setClipboardHTML: (html: string) => Promise<void>;
       setClipboardRTF: (rtf: string) => Promise<void>;
+      getFullImage: (imageId: string) => Promise<string | null>;
       setClipboardImage: (imageData: string) => Promise<void>;
       setClipboardBookmark: (bookmarkData: any) => Promise<void>;
       notifyClipCopied: (index: number) => Promise<void>;
@@ -32,6 +33,8 @@ declare global {
       onSettingsUpdated: (callback: (settings: any) => void) => void;
       removeSettingsListeners: () => void;
       // Storage APIs
+      onStorageReady: (callback: () => void) => void;
+      removeStorageReadyListeners: () => void;
       storageGetClips: () => Promise<any[]>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<any>;

@@ -4,6 +4,7 @@ vi.mock('electron', () => ({
   BrowserWindow: vi.fn(),
   app: {
     focus: vi.fn(),
+    getPath: vi.fn().mockReturnValue('/mock/userData'),
   },
   clipboard: {
     writeText: vi.fn(),
@@ -33,9 +34,19 @@ vi.mock('../window/creation.js', () => ({
   createToolsLauncherWindow: vi.fn(),
 }));
 
+vi.mock('../storage/image-store', () => ({
+  loadImage: vi.fn().mockResolvedValue('data:image/png;base64,fullimage'),
+}));
+
+vi.mock('../clipboard/monitoring', () => ({
+  setSkipNextImageChange: vi.fn(),
+}));
+
 import { HotkeyActions } from './actions';
 import { clipboard, nativeImage, app } from 'electron';
 import { storage } from '../storage';
+import { loadImage } from '../storage/image-store';
+import { setSkipNextImageChange } from '../clipboard/monitoring';
 
 describe('HotkeyActions', () => {
   let actions: HotkeyActions;
@@ -189,6 +200,30 @@ describe('HotkeyActions', () => {
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('bad-data');
+    });
+
+    it('loads full image from image store when imageId is present', async () => {
+      vi.mocked(loadImage).mockResolvedValue('data:image/png;base64,fullimage');
+      vi.mocked(nativeImage.createFromDataURL).mockReturnValue({
+        isEmpty: () => false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any);
+      vi.mocked(storage.getClips).mockResolvedValue([
+        {
+          clip: {
+            type: 'image',
+            content: 'data:image/png;base64,thumbnail',
+            imageId: 'img-123',
+          },
+          isLocked: false,
+          timestamp: 1,
+        },
+      ]);
+      await actions.copyQuickClip(0);
+      expect(loadImage).toHaveBeenCalledWith('img-123', expect.stringContaining('clipless-data'));
+      expect(setSkipNextImageChange).toHaveBeenCalled();
+      expect(nativeImage.createFromDataURL).toHaveBeenCalledWith('data:image/png;base64,fullimage');
+      expect(clipboard.writeImage).toHaveBeenCalled();
     });
 
     it('copies unknown type as text', async () => {

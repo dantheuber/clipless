@@ -1,8 +1,20 @@
-import type { AppData, StoredClip, Template, SearchTerm, QuickTool } from '../../shared/types';
+import { promises as fs } from 'fs';
+import { join } from 'path';
+import type {
+  AppData,
+  StoredClip,
+  Template,
+  SearchTerm,
+  QuickTool,
+  StorageMeta,
+} from '../../shared/types';
 import { DEFAULT_DATA, DEFAULT_SETTINGS } from './defaults';
+import { saveEncryptedJson, loadEncryptedJson, saveJsonFile } from './file-operations';
+
+const CURRENT_STORAGE_VERSION = 1;
 
 /**
- * Migrate data from older versions
+ * Migrate data from older versions (validates and normalizes an AppData blob)
  */
 export function migrateData(data: unknown): AppData {
   // Start with default data
@@ -112,4 +124,65 @@ export function migrateData(data: unknown): AppData {
   }
 
   return migratedData;
+}
+
+/**
+ * Check if legacy data.enc exists and needs migration to domain-specific files.
+ * If data.enc exists but clips.enc does not, splits legacy data into:
+ *   - settings.enc, clips.enc, templates.enc, meta.json
+ * Then renames data.enc to data.enc.migrated.
+ *
+ * Returns true if migration was performed.
+ */
+export async function migrateLegacyStorage(dataPath: string): Promise<boolean> {
+  const legacyPath = join(dataPath, 'data.enc');
+  const clipsPath = join(dataPath, 'clips.enc');
+  const settingsPath = join(dataPath, 'settings.enc');
+  const templatesPath = join(dataPath, 'templates.enc');
+  const metaPath = join(dataPath, 'meta.json');
+
+  // Check if legacy file exists
+  try {
+    await fs.access(legacyPath);
+  } catch {
+    return false; // No legacy file
+  }
+
+  // Check if already migrated (clips.enc exists)
+  try {
+    await fs.access(clipsPath);
+    return false; // Already migrated
+  } catch {
+    // clips.enc doesn't exist, proceed with migration
+  }
+
+  console.log('Migrating legacy data.enc to domain-specific files...');
+
+  // Load and validate legacy data
+  const legacyRaw = await loadEncryptedJson<unknown>(legacyPath);
+  const data = migrateData(legacyRaw);
+
+  // Split into domain files
+  await saveEncryptedJson(data.settings, settingsPath);
+  await saveEncryptedJson(data.clips, clipsPath);
+  await saveEncryptedJson(
+    {
+      templates: data.templates,
+      searchTerms: data.searchTerms,
+      quickTools: data.quickTools,
+    },
+    templatesPath
+  );
+
+  const meta: StorageMeta = {
+    version: data.version,
+    storageVersion: CURRENT_STORAGE_VERSION,
+  };
+  await saveJsonFile(meta, metaPath);
+
+  // Rename legacy file
+  await fs.rename(legacyPath, legacyPath + '.migrated');
+
+  console.log('Legacy migration complete');
+  return true;
 }

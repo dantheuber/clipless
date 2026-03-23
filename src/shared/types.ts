@@ -18,6 +18,8 @@ export interface ClipItem {
   url?: string; // for bookmark type
   language?: string; // detected programming language
   isCode?: boolean; // whether the content appears to be code
+  imageId?: string; // UUID for image clips stored as separate files
+  thumbnailDataUrl?: string; // 200px-wide thumbnail data URL for image clips
 }
 
 /**
@@ -81,6 +83,23 @@ export interface AppData {
   searchTerms: SearchTerm[];
   quickTools: QuickTool[];
   version: string;
+}
+
+/**
+ * Domain-specific storage for templates, search terms, and quick tools
+ */
+export interface TemplatesData {
+  templates: Template[];
+  searchTerms: SearchTerm[];
+  quickTools: QuickTool[];
+}
+
+/**
+ * Storage metadata tracked in unencrypted meta.json
+ */
+export interface StorageMeta {
+  version: string;
+  storageVersion: number;
 }
 
 /**

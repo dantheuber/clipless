@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import classNames from 'classnames';
 import { ClipItem } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
@@ -7,7 +8,7 @@ interface BookmarkClipProps {
   clip: ClipItem;
 }
 
-export const BookmarkClip = ({ clip }: BookmarkClipProps) => {
+export const BookmarkClip = memo(function BookmarkClip({ clip }: BookmarkClipProps) {
   const { isLight } = useTheme();
 
   return (
@@ -18,4 +19,4 @@ export const BookmarkClip = ({ clip }: BookmarkClipProps) => {
       </span>
     </div>
   );
-};
+});

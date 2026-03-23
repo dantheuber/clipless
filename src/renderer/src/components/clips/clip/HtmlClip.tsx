@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import classNames from 'classnames';
 import { ClipItem } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
@@ -7,7 +8,7 @@ interface HtmlClipProps {
   clip: ClipItem;
 }
 
-export const HtmlClip = ({ clip }: HtmlClipProps) => {
+export const HtmlClip = memo(function HtmlClip({ clip }: HtmlClipProps) {
   const { isLight } = useTheme();
   return (
     <div>
@@ -15,4 +16,4 @@ export const HtmlClip = ({ clip }: HtmlClipProps) => {
       <span>{clip.content}</span>
     </div>
   );
-};
+});

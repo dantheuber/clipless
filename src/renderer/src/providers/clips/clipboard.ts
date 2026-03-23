@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ClipItem, ClipboardState } from './types';
 import {
   createTextClip,
@@ -62,7 +62,11 @@ export const useClipboardOperations = (
           newClip = createHtmlClip(clipData.content);
           break;
         case 'image':
-          newClip = createImageClip(clipData.content);
+          newClip = createImageClip(
+            clipData.content,
+            (clipData as ClipItem).imageId,
+            (clipData as ClipItem).thumbnailDataUrl
+          );
           break;
         case 'bookmark':
           try {
@@ -134,10 +138,19 @@ export const useClipboardOperations = (
             console.log('Copied RTF to clipboard');
             break;
 
-          case 'image':
-            await window.api.setClipboardImage(clip.content);
+          case 'image': {
+            // For image clips with imageId, load full image from storage first
+            let imageData = clip.content;
+            if (clip.imageId && window.api.getFullImage) {
+              const fullImage = await window.api.getFullImage(clip.imageId);
+              if (fullImage) {
+                imageData = fullImage;
+              }
+            }
+            await window.api.setClipboardImage(imageData);
             console.log('Copied image to clipboard');
             break;
+          }
 
           case 'bookmark': {
             // For bookmarks, we'll write both text (URL) and HTML (formatted link)
@@ -187,6 +200,9 @@ export const useClipboardOperations = (
     [getClip, setClipCopyIndex, setLastCopiedContent, setIsHotkeyOperation]
   );
 
+  // Guard to ensure readCurrentClipboard only runs on initial mount
+  const hasReadInitialClipboard = useRef(false);
+
   // Start clipboard monitoring when component mounts
   useEffect(() => {
     const startMonitoring = async () => {
@@ -226,8 +242,11 @@ export const useClipboardOperations = (
             }, 1000); // Ignore clipboard changes for 1 second after hotkey operation
           });
 
-          // Read current clipboard content first
-          await readCurrentClipboard();
+          // Read current clipboard content only on initial mount (not on effect re-runs)
+          if (!hasReadInitialClipboard.current) {
+            hasReadInitialClipboard.current = true;
+            await readCurrentClipboard();
+          }
 
           // Then start monitoring for changes
           await window.api.startClipboardMonitoring();
@@ -280,7 +299,11 @@ export const useClipboardOperations = (
                 newClip = createHtmlClip(clipData.content);
                 break;
               case 'image':
-                newClip = createImageClip(clipData.content);
+                newClip = createImageClip(
+                  clipData.content,
+                  (clipData as ClipItem).imageId,
+                  (clipData as ClipItem).thumbnailDataUrl
+                );
                 break;
               case 'bookmark':
                 try {

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ClipItem } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { updateClipsLength } from './utils';
@@ -17,68 +17,85 @@ export const useClipsStorage = (
   setMaxClips: React.Dispatch<React.SetStateAction<number>>,
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
+  // Shared function to load all stored data (clips + settings)
+  const loadStoredData = useCallback(async () => {
+    if (!window.api) {
+      setIsInitiallyLoading(false);
+      return;
+    }
+
+    try {
+      // Load settings first
+      const settings = await window.api.storageGetSettings();
+      if (settings && typeof settings.maxClips === 'number') {
+        setMaxClips(settings.maxClips);
+      }
+      // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
+
+      // Load clips from storage
+      const storedClips = await window.api.storageGetClips();
+
+      if (storedClips && storedClips.length > 0) {
+        const loadedClips: ClipItem[] = [];
+        const loadedLocks: Record<number, boolean> = {};
+
+        // Process stored clips and rebuild the array properly
+        let clipIndex = 0;
+        storedClips.forEach((storedClip: StoredClip) => {
+          if (storedClip.clip?.content && storedClip.clip.content.trim() !== '') {
+            loadedClips.push(storedClip.clip); // Use push instead of index assignment
+            // Only allow locking for clips at index 1 and higher
+            if (storedClip.isLocked && clipIndex > 0) {
+              loadedLocks[clipIndex] = true;
+            }
+            clipIndex++;
+          }
+        });
+
+        // Ensure the first clip (index 0) is never locked
+        if (loadedLocks[0]) {
+          delete loadedLocks[0];
+        }
+
+        // Always update clips state, even if empty, to ensure proper initialization
+        const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
+        const paddedClips = updateClipsLength(loadedClips, currentMaxClips);
+        setClips(paddedClips);
+        setLockedClips(loadedLocks);
+
+        if (loadedClips.length > 0) {
+          console.log(`Successfully loaded ${loadedClips.length} clips from storage`);
+        }
+      } else {
+        console.log('No stored clips found');
+      }
+    } catch (error) {
+      console.error('Failed to load data from storage:', error);
+    } finally {
+      setIsInitiallyLoading(false);
+    }
+  }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]);
+
   // Load data from storage on mount
   useEffect(() => {
-    const loadStoredData = async () => {
-      if (!window.api) {
-        setIsInitiallyLoading(false);
-        return;
-      }
+    loadStoredData();
+  }, [loadStoredData]);
 
-      try {
-        // Load settings first
-        const settings = await window.api.storageGetSettings();
-        if (settings && typeof settings.maxClips === 'number') {
-          setMaxClips(settings.maxClips);
-        }
-        // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
+  // Re-load data when background storage loading completes
+  useEffect(() => {
+    if (!window.api?.onStorageReady) return;
 
-        // Load clips from storage
-        const storedClips = await window.api.storageGetClips();
+    window.api.onStorageReady(() => {
+      console.log('Storage ready event received, re-loading data');
+      loadStoredData();
+    });
 
-        if (storedClips && storedClips.length > 0) {
-          const loadedClips: ClipItem[] = [];
-          const loadedLocks: Record<number, boolean> = {};
-
-          // Process stored clips and rebuild the array properly
-          let clipIndex = 0;
-          storedClips.forEach((storedClip: StoredClip) => {
-            if (storedClip.clip?.content && storedClip.clip.content.trim() !== '') {
-              loadedClips.push(storedClip.clip); // Use push instead of index assignment
-              // Only allow locking for clips at index 1 and higher
-              if (storedClip.isLocked && clipIndex > 0) {
-                loadedLocks[clipIndex] = true;
-              }
-              clipIndex++;
-            }
-          });
-
-          // Ensure the first clip (index 0) is never locked
-          if (loadedLocks[0]) {
-            delete loadedLocks[0];
-          }
-
-          // Always update clips state, even if empty, to ensure proper initialization
-          const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
-          const paddedClips = updateClipsLength(loadedClips, currentMaxClips);
-          setClips(paddedClips);
-          setLockedClips(loadedLocks);
-
-          if (loadedClips.length > 0) {
-            console.log(`Successfully loaded ${loadedClips.length} clips from storage`);
-          }
-        } else {
-          console.log('No stored clips found');
-        }
-      } catch (error) {
-        console.error('Failed to load data from storage:', error);
-      } finally {
-        setIsInitiallyLoading(false);
+    return () => {
+      if (window.api?.removeStorageReadyListeners) {
+        window.api.removeStorageReadyListeners();
       }
     };
-
-    loadStoredData();
-  }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]); // Dependencies are stable setter functions
+  }, [loadStoredData]);
 
   // Listen for settings updates from other windows (like settings window)
   useEffect(() => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { useClips } from '../providers/clips';
+import { useClipsData, useClipsActions, useClipsMeta } from '../providers/clips';
 import { useTheme } from '../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -10,7 +10,9 @@ interface StatusBarProps {
 }
 
 export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
-  const { clips, maxClips, isClipLocked, isSearchVisible, setIsSearchVisible } = useClips();
+  const { clips } = useClipsData();
+  const { isClipLocked } = useClipsActions();
+  const { maxClips, isSearchVisible, setIsSearchVisible } = useClipsMeta();
   const { isLight } = useTheme();
 
   // Count non-empty clips

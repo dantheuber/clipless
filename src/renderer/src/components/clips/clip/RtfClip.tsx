@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import classNames from 'classnames';
 import { ClipItem } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
@@ -7,7 +8,7 @@ interface RtfClipProps {
   clip: ClipItem;
 }
 
-export const RtfClip = ({ clip }: RtfClipProps) => {
+export const RtfClip = memo(function RtfClip({ clip }: RtfClipProps) {
   const { isLight } = useTheme();
 
   return (
@@ -16,4 +17,4 @@ export const RtfClip = ({ clip }: RtfClipProps) => {
       <span>{clip.content}</span>
     </div>
   );
-};
+});
