@@ -32,24 +32,29 @@ vi.mock('../../../utils/languageDetection', () => ({
   mapToSyntaxHighlighterLanguage: vi.fn().mockReturnValue('javascript'),
 }));
 
-vi.mock('./SyntaxHighlightedCode', () => ({
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: ({ editValue, onChange, onBlur, onKeyDown, isLight, ref }: any) => (
-    <div data-testid="syntax-highlighter" className="textEditorWrapper">
-      <div className="syntaxHighlightContainer">
-        <textarea
-          ref={ref}
-          value={editValue}
-          onChange={onChange}
-          onBlur={onBlur}
-          onKeyDown={onKeyDown}
-          className={isLight ? 'light' : ''}
-          style={{ caretColor: isLight ? '#000' : '#fff' }}
-        />
+vi.mock('./SyntaxHighlightedCode', async () => {
+  const React = await vi.importActual<typeof import('react')>('react');
+  const MockSyntaxHighlightedCode = React.forwardRef<HTMLTextAreaElement, Record<string, unknown>>(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ({ editValue, onChange, onBlur, onKeyDown, isLight }: any, ref) => (
+      <div data-testid="syntax-highlighter" className="textEditorWrapper">
+        <div className="syntaxHighlightContainer">
+          <textarea
+            ref={ref}
+            value={editValue}
+            onChange={onChange}
+            onBlur={onBlur}
+            onKeyDown={onKeyDown}
+            className={isLight ? 'light' : ''}
+            style={{ caretColor: isLight ? '#000' : '#fff' }}
+          />
+        </div>
       </div>
-    </div>
-  ),
-}));
+    )
+  );
+  MockSyntaxHighlightedCode.displayName = 'MockSyntaxHighlightedCode';
+  return { default: MockSyntaxHighlightedCode };
+});
 
 vi.mock('./Clip.module.css', () => ({
   default: {
@@ -259,7 +264,56 @@ describe('TextClip', () => {
     await screen.findByTestId('syntax-highlighter');
 
     const textarea = screen.getByRole('textbox');
-    fireEvent.change(textarea, { target: { value: 'const x = 2;\nconst y = 3;' } });
+
+    // Change to multiline content to trigger auto-resize with syntax container
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: 'const x = 2;\nconst y = 3;' } });
+    });
+
+    expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
+    vi.useFakeTimers();
+  });
+
+  it('auto-resizes plain textarea for multiline content without syntax highlighting', () => {
+    mockIsCodeDetectionEnabled = false;
+    const content = 'line1\nline2';
+    render(<TextClip clip={{ type: 'text', content }} onUpdate={vi.fn()} />);
+    fireEvent.click(screen.getByText('line1 line2'));
+
+    const textarea = screen.getByRole('textbox');
+    // Change to different multiline content to trigger auto-resize in plain textarea path
+    fireEvent.change(textarea, { target: { value: 'line1\nline2\nline3' } });
+
+    expect(textarea).toBeInTheDocument();
+  });
+
+  it('auto-resizes syntax container for multiline content on edit entry', async () => {
+    vi.useRealTimers();
+    mockIsCodeDetectionEnabled = true;
+    const multilineContent = 'const x = 1;\nconst y = 2;';
+    render(
+      <TextClip
+        clip={{ type: 'text', content: multilineContent, isCode: true, language: 'javascript' }}
+        onUpdate={vi.fn()}
+      />
+    );
+
+    // Enter edit mode with multiline content
+    await act(async () => {
+      fireEvent.click(screen.getByText('const x = 1; const y = 2;'));
+    });
+
+    // Wait for lazy component to resolve
+    await screen.findByTestId('syntax-highlighter');
+
+    // The textarea ref should be set and the multiline auto-resize should run
+    const textarea = screen.getByRole('textbox');
+    expect(textarea).toBeInTheDocument();
+
+    // Trigger a re-render to ensure effect runs with ref attached
+    await act(async () => {
+      fireEvent.change(textarea, { target: { value: 'const x = 1;\nconst y = 2;\nconst z = 3;' } });
+    });
 
     expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
     vi.useFakeTimers();

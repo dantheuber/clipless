@@ -42,7 +42,7 @@ export const ClipWrapper = memo(function ClipWrapper({
   };
 
   const handleEditingChange = (isEditing: boolean) => {
-    setIsExpanded(isEditing);
+    setIsExpanded(isEditing && clip.content.includes('\n'));
   };
 
   const handleContextMenu = (event: React.MouseEvent) => {

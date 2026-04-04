@@ -24,10 +24,21 @@ export const TextClip = ({ clip, onUpdate, onEditingChange }: TextClipProps) => 
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea
+  // Auto-resize textarea (only for multiline content)
   useEffect(() => {
     if (isEditing && textareaRef.current) {
       const textarea = textareaRef.current;
+
+      if (!editValue.includes('\n')) {
+        // Single line: reset to natural height to avoid extra spacing
+        textarea.style.height = '';
+        const container = textarea.closest(`.${styles.syntaxHighlightContainer}`);
+        if (container) {
+          (container as HTMLElement).style.height = '';
+        }
+        return;
+      }
+
       textarea.style.height = 'auto';
       const newHeight = `${textarea.scrollHeight}px`;
       textarea.style.height = newHeight;
