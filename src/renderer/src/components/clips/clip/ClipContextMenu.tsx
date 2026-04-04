@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useClipsActions } from '../../../providers/clips';
 import { useTheme } from '../../../providers/theme';
@@ -106,7 +107,7 @@ export function ClipContextMenu({ index, x, y, onClose, hasPatterns }: ClipConte
     }
   };
 
-  return (
+  return createPortal(
     <div
       ref={menuRef}
       className={classNames(styles.contextMenu, { [styles.light]: isLight })}
@@ -151,6 +152,7 @@ export function ClipContextMenu({ index, x, y, onClose, hasPatterns }: ClipConte
         <FontAwesomeIcon icon="trash" className={styles.menuIcon} />
         <span>Delete Clip</span>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
