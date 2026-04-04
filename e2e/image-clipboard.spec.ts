@@ -39,41 +39,49 @@ test.describe('Image Clipboard', () => {
     const window = await app.firstWindow();
     await window.waitForSelector('#root > *');
 
+    // Clear any persisted clips from previous test runs
+    await window.evaluate(async () => {
+      const api = (window as any).api;
+      await api.storageSaveClips([], {});
+    });
+    await window.waitForTimeout(500);
+
+    // Reload the window to pick up the cleared state
+    await window.reload();
+    await window.waitForSelector('#root > *');
+    await window.waitForTimeout(500);
+
     const testImagePath = resolve(__dirname, 'fixtures/test-image.png');
 
-    // Copy first image
+    // Copy first image (original dimensions)
     await app.evaluate(async ({ clipboard, nativeImage }, imgPath) => {
       const image = nativeImage.createFromPath(imgPath);
       clipboard.writeImage(image);
     }, testImagePath);
 
     await window.waitForTimeout(2000);
-    await expect(window.locator('img[alt="Clipboard image preview"]').first()).toBeVisible({
-      timeout: 5000,
-    });
+    const imgPreviews = window.locator('img[alt="Clipboard image preview"]');
+    await expect(imgPreviews.first()).toBeVisible({ timeout: 5000 });
 
-    // Clear clipboard with text to reset, then copy a different image
+    // Verify exactly 1 image clip so far
+    await expect(imgPreviews).toHaveCount(1, { timeout: 3000 });
+
+    // Clear clipboard with text to reset the detection state
     await app.evaluate(async ({ clipboard }) => {
       clipboard.writeText('separator');
     });
     await window.waitForTimeout(1000);
 
-    // Copy image again (will have different fingerprint due to fresh nativeImage instance)
+    // Copy a different image (resized to different dimensions → stable, distinct fingerprint)
     await app.evaluate(async ({ clipboard, nativeImage }, imgPath) => {
-      // Create a slightly different image by modifying pixels
       const image = nativeImage.createFromPath(imgPath);
-      const size = image.getSize();
-      const buf = image.toBitmap();
-      // Flip a pixel to ensure different fingerprint
-      buf[0] = buf[0] === 0 ? 1 : 0;
-      const modified = nativeImage.createFromBitmap(buf, { width: size.width, height: size.height });
-      clipboard.writeImage(modified);
+      const resized = image.resize({ width: 16, height: 16 });
+      clipboard.writeImage(resized);
     }, testImagePath);
 
     await window.waitForTimeout(2000);
 
     // Should now have two image clips
-    const imgPreviews = window.locator('img[alt="Clipboard image preview"]');
     await expect(imgPreviews).toHaveCount(2, { timeout: 5000 });
 
     await app.close();
