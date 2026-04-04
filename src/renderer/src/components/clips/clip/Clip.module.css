@@ -456,6 +456,9 @@
 
 .textEditorWrapper {
   width: 100%;
+}
+
+.clipRow.expanded .textEditorWrapper {
   align-self: flex-start;
 }
 
