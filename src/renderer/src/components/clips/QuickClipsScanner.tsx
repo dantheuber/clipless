@@ -4,13 +4,11 @@ import { PatternMatch, QuickTool, Template } from '../../../../shared/types';
 import { useTheme } from '../../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './QuickClipsScanner.module.css';
-
-interface CaptureItem {
-  groupName: string;
-  value: string;
-  searchTermId: string;
-  uniqueKey: string;
-}
+import {
+  computeInitialSelection,
+  computeAmbiguousGroups,
+  type CaptureItem,
+} from './quickClipsSelection';
 
 interface QuickClipsScannerProps {
   isOpen: boolean;
@@ -139,6 +137,19 @@ export function QuickClipsScanner({
     }
   }, [matchedTemplates, accordionInitialized]);
 
+  // When tools become available, auto-expand that section
+  useEffect(() => {
+    if (!accordionInitialized) return;
+    if (availableTools.length > 0) {
+      setExpandedSections((prev) => {
+        if (prev.has('tools')) return prev;
+        const next = new Set(prev);
+        next.add('tools');
+        return next;
+      });
+    }
+  }, [availableTools, accordionInitialized]);
+
   const toggleSection = (section: AccordionSection) => {
     setExpandedSections((prev) => {
       const next = new Set(prev);
@@ -199,7 +210,7 @@ export function QuickClipsScanner({
 
       const items = Array.from(captureMap.values());
       setCaptureItems(items);
-      setSelectedCaptureItems(new Set(items.map((item) => item.uniqueKey)));
+      setSelectedCaptureItems(computeInitialSelection(items));
     } catch (error) {
       console.error('Failed to scan content:', error);
       setMatches([]);
@@ -295,6 +306,22 @@ export function QuickClipsScanner({
       updateMatchedTemplates();
     }
   }, [captureItems, templates, selectedCaptureItems, updateMatchedTemplates]);
+
+  const allCapturesSelected =
+    captureItems.length > 0 && selectedCaptureItems.size === captureItems.length;
+
+  const ambiguousGroups = useMemo(
+    () => computeAmbiguousGroups(captureItems, selectedCaptureItems),
+    [captureItems, selectedCaptureItems]
+  );
+
+  const handleToggleAllCaptures = () => {
+    if (allCapturesSelected) {
+      setSelectedCaptureItems(new Set());
+    } else {
+      setSelectedCaptureItems(new Set(captureItems.map((item) => item.uniqueKey)));
+    }
+  };
 
   const handleCaptureItemToggle = (uniqueKey: string) => {
     const newSelected = new Set(selectedCaptureItems);
@@ -447,9 +474,27 @@ export function QuickClipsScanner({
           <>
             {/* Left Side - Capture Items Section */}
             <div className={classNames(styles.section, styles.leftSection)}>
-              <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
-                Found Patterns ({captureItems.length})
-              </h3>
+              <div className={classNames(styles.sectionTitleRow, { [styles.light]: isLight })}>
+                <label className={styles.selectAllLabel}>
+                  <input
+                    type="checkbox"
+                    checked={allCapturesSelected}
+                    ref={(el) => {
+                      if (el) {
+                        el.indeterminate = selectedCaptureItems.size > 0 && !allCapturesSelected;
+                      }
+                    }}
+                    onChange={handleToggleAllCaptures}
+                    className={styles.checkbox}
+                    aria-label={
+                      allCapturesSelected ? 'Deselect all patterns' : 'Select all patterns'
+                    }
+                  />
+                  <h3 className={classNames(styles.sectionTitle, { [styles.light]: isLight })}>
+                    Found Patterns ({captureItems.length})
+                  </h3>
+                </label>
+              </div>
               <div className={styles.matchesList}>
                 {captureItems.map((item) => {
                   const isSelected = selectedCaptureItems.has(item.uniqueKey);
@@ -664,46 +709,67 @@ export function QuickClipsScanner({
   function renderTemplateList(templateList: Template[], showNamedTokens: boolean) {
     return (
       <div className={styles.toolsList}>
-        {templateList.map((template) => (
-          <div
-            key={template.id}
-            className={classNames(styles.toolItem, { [styles.light]: isLight })}
-          >
-            <button
-              className={classNames(styles.toolLabel, styles.templateButton)}
-              onClick={() => handleTemplateSelect(template)}
-              disabled={generatingTemplateId === template.id}
+        {templateList.map((template) => {
+          const conflicts = showNamedTokens
+            ? extractNamedTokens(template.content).filter((t) => ambiguousGroups.has(t))
+            : [];
+          const isAmbiguous = conflicts.length > 0;
+          const disabled = generatingTemplateId === template.id || isAmbiguous;
+
+          return (
+            <div
+              key={template.id}
+              className={classNames(styles.toolItem, { [styles.light]: isLight })}
             >
-              <div className={styles.toolDetails}>
-                <div
-                  className={classNames(styles.toolName, {
-                    [styles.light]: isLight,
-                  })}
-                >
-                  {generatingTemplateId === template.id ? (
-                    <FontAwesomeIcon icon="spinner" spin />
-                  ) : (
-                    <FontAwesomeIcon icon="file-lines" />
-                  )}{' '}
-                  {template.name}
+              <button
+                className={classNames(styles.toolLabel, styles.templateButton)}
+                onClick={() => handleTemplateSelect(template)}
+                disabled={disabled}
+                title={
+                  isAmbiguous
+                    ? `Multiple values selected for ${conflicts.map((c) => `"${c}"`).join(', ')}. Pick a single value per group to use this template.`
+                    : undefined
+                }
+              >
+                <div className={styles.toolDetails}>
+                  <div
+                    className={classNames(styles.toolName, {
+                      [styles.light]: isLight,
+                    })}
+                  >
+                    {generatingTemplateId === template.id ? (
+                      <FontAwesomeIcon icon="spinner" spin />
+                    ) : (
+                      <FontAwesomeIcon icon="file-lines" />
+                    )}{' '}
+                    {template.name}
+                  </div>
+                  <div
+                    className={classNames(styles.toolGroups, {
+                      [styles.light]: isLight,
+                    })}
+                  >
+                    Tokens:{' '}
+                    {showNamedTokens
+                      ? extractAllTokens(template.content).join(', ')
+                      : extractAllTokens(template.content)
+                          .filter((t) => /^c\d+$/.test(t))
+                          .map((t) => `{${t}}`)
+                          .join(', ')}
+                  </div>
+                  {isAmbiguous && (
+                    <div
+                      className={classNames(styles.templateConflict, { [styles.light]: isLight })}
+                    >
+                      <FontAwesomeIcon icon="triangle-exclamation" /> Pick a single value for{' '}
+                      {conflicts.map((c) => `"${c}"`).join(', ')} to use this template.
+                    </div>
+                  )}
                 </div>
-                <div
-                  className={classNames(styles.toolGroups, {
-                    [styles.light]: isLight,
-                  })}
-                >
-                  Tokens:{' '}
-                  {showNamedTokens
-                    ? extractAllTokens(template.content).join(', ')
-                    : extractAllTokens(template.content)
-                        .filter((t) => /^c\d+$/.test(t))
-                        .map((t) => `{${t}}`)
-                        .join(', ')}
-                </div>
-              </div>
-            </button>
-          </div>
-        ))}
+              </button>
+            </div>
+          );
+        })}
       </div>
     );
   }

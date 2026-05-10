@@ -163,13 +163,26 @@
   min-width: 0;
 }
 
+.sectionTitleRow {
+  display: flex;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.selectAllLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  width: 100%;
+}
+
 .sectionTitle {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-secondary);
 }
 
 /* Matches List */
@@ -291,7 +304,7 @@
 
 .templateButton:disabled {
   opacity: 0.5;
-  cursor: wait;
+  cursor: not-allowed;
 }
 
 .toolDetails {
@@ -318,6 +331,19 @@
   color: var(--text-tertiary);
   font-size: 0.675rem;
   font-style: italic;
+}
+
+.templateConflict {
+  color: #d97706;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.125rem;
+}
+
+.templateConflict.light {
+  color: #b45309;
 }
 
 /* Accordion */
