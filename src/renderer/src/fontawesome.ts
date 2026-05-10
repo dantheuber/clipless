@@ -30,6 +30,7 @@ import {
   faChevronRight,
   faFileLines,
   faGear,
+  faTriangleExclamation,
 } from '@fortawesome/free-solid-svg-icons';
 
 library.add(
@@ -62,5 +63,6 @@ library.add(
   faRocket,
   faChevronRight,
   faFileLines,
-  faGear
+  faGear,
+  faTriangleExclamation
 );
