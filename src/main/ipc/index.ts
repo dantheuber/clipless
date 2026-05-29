@@ -12,6 +12,7 @@ import {
 } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
 import { checkForUpdatesWithRetry } from '../updater';
+import { applyAutoStart } from '../autoStart';
 
 export function setupMainIPC(): void {
   // IPC test
@@ -34,6 +35,9 @@ export function setupMainIPC(): void {
     try {
       // Save settings to storage
       await storage.saveSettings(settings);
+
+      // Apply auto-start setting to OS login items
+      applyAutoStart(settings.autoStart);
 
       // Apply window settings immediately
       const mainWindow = getMainWindow();

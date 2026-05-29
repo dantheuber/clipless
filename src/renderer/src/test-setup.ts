@@ -18,6 +18,7 @@ Object.defineProperty(window, 'matchMedia', {
 
 // Mock window.api for renderer tests
 const createMockApi = () => ({
+  platform: 'win32' as NodeJS.Platform,
   storageGetSettings: vi.fn().mockResolvedValue({
     maxClips: 100,
     startMinimized: false,

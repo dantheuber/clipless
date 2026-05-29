@@ -27,6 +27,7 @@ import {
   importData,
   clearAllData,
 } from './storage-integration';
+import { applyAutoStart } from '../autoStart';
 import {
   getAllTemplates,
   createTemplate,
@@ -120,9 +121,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       saveClips(clips, lockedIndices)
   );
   ipcMain.handle('storage-get-settings', async () => getSettings());
-  ipcMain.handle('storage-save-settings', async (_event, settings: UserSettings) =>
-    saveSettings(settings)
-  );
+  ipcMain.handle('storage-save-settings', async (_event, settings: UserSettings) => {
+    const result = await saveSettings(settings);
+    applyAutoStart(settings.autoStart);
+    return result;
+  });
   ipcMain.handle('storage-get-stats', async () => getStorageStats());
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
