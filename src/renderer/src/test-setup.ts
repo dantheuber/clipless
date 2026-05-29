@@ -38,6 +38,8 @@ const createMockApi = () => ({
   quickClipsScanText: vi.fn().mockResolvedValue([]),
   onToggleSearch: vi.fn(),
   removeToggleSearchListeners: vi.fn(),
+  onUpdateDownloaded: vi.fn().mockReturnValue(() => {}),
+  quitAndInstall: vi.fn().mockResolvedValue(undefined),
 });
 
 Object.defineProperty(window, 'api', {

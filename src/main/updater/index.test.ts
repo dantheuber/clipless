@@ -8,7 +8,7 @@ interface FakeAutoUpdater extends EventEmitter {
   quitAndInstall: ReturnType<typeof vi.fn>;
 }
 
-const { isMock, fakeAutoUpdater, showMessageBox, getSettings } = vi.hoisted(() => {
+const { isMock, fakeAutoUpdater, getSettings } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { EventEmitter: NodeEventEmitter } = require('events');
   const updater = new NodeEventEmitter();
@@ -20,7 +20,6 @@ const { isMock, fakeAutoUpdater, showMessageBox, getSettings } = vi.hoisted(() =
   return {
     isMock: { dev: false },
     fakeAutoUpdater: updater as FakeAutoUpdater,
-    showMessageBox: vi.fn(),
     getSettings: vi.fn(),
   };
 });
@@ -31,12 +30,6 @@ vi.mock('@electron-toolkit/utils', () => ({
 
 vi.mock('electron-updater', () => ({
   autoUpdater: fakeAutoUpdater,
-}));
-
-vi.mock('electron', () => ({
-  dialog: {
-    showMessageBox: (...args: unknown[]) => showMessageBox(...args),
-  },
 }));
 
 vi.mock('../storage', () => ({
@@ -54,6 +47,16 @@ import {
 
 const flush = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
 
+const makeWindow = (
+  overrides: Partial<{ destroyed: boolean; send: ReturnType<typeof vi.fn> }> = {}
+): Parameters<typeof runAutomaticUpdateCheck>[0] => {
+  const send = overrides.send ?? vi.fn();
+  return {
+    isDestroyed: () => overrides.destroyed ?? false,
+    webContents: { send },
+  } as unknown as Parameters<typeof runAutomaticUpdateCheck>[0];
+};
+
 beforeEach(() => {
   isMock.dev = false;
   fakeAutoUpdater.removeAllListeners();
@@ -61,7 +64,6 @@ beforeEach(() => {
   fakeAutoUpdater.autoInstallOnAppQuit = false;
   fakeAutoUpdater.checkForUpdates.mockReset().mockResolvedValue(undefined);
   fakeAutoUpdater.quitAndInstall.mockReset();
-  showMessageBox.mockReset();
   getSettings.mockReset();
 });
 
@@ -113,119 +115,91 @@ describe('setupAutoUpdaterEvents', () => {
 });
 
 describe('runAutomaticUpdateCheck', () => {
-  const parentWindow = {} as Parameters<typeof runAutomaticUpdateCheck>[0];
-
   it('is a no-op in dev mode', async () => {
     isMock.dev = true;
-    await runAutomaticUpdateCheck(parentWindow);
+    await runAutomaticUpdateCheck(makeWindow());
     expect(getSettings).not.toHaveBeenCalled();
     expect(fakeAutoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 
   it('returns silently when settings load throws', async () => {
     getSettings.mockRejectedValue(new Error('disk on fire'));
-    await runAutomaticUpdateCheck(parentWindow);
+    await runAutomaticUpdateCheck(makeWindow());
     expect(fakeAutoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 
   it('skips the check when automaticUpdates is false', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: false });
-    await runAutomaticUpdateCheck(parentWindow);
+    await runAutomaticUpdateCheck(makeWindow());
     expect(fakeAutoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 
   it('runs the check when automaticUpdates is true and flips autoDownload', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    await runAutomaticUpdateCheck(parentWindow);
+    await runAutomaticUpdateCheck(makeWindow());
     expect(fakeAutoUpdater.autoDownload).toBe(true);
     expect(fakeAutoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
   });
 
   it('treats undefined automaticUpdates as enabled', async () => {
     getSettings.mockResolvedValue({});
-    await runAutomaticUpdateCheck(parentWindow);
+    await runAutomaticUpdateCheck(makeWindow());
     expect(fakeAutoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
   });
 
   it('silently swallows a checkForUpdates rejection and clears listeners', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
     fakeAutoUpdater.checkForUpdates.mockRejectedValueOnce(new Error('network'));
-    await expect(runAutomaticUpdateCheck(parentWindow)).resolves.toBeUndefined();
+    await expect(runAutomaticUpdateCheck(makeWindow())).resolves.toBeUndefined();
     expect(fakeAutoUpdater.listenerCount('update-downloaded')).toBe(0);
     expect(fakeAutoUpdater.listenerCount('error')).toBe(0);
   });
 
   it('clears the update-downloaded listener if an error event fires mid-download', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    await runAutomaticUpdateCheck(parentWindow);
+    const send = vi.fn();
+    await runAutomaticUpdateCheck(makeWindow({ send }));
     expect(fakeAutoUpdater.listenerCount('update-downloaded')).toBe(1);
 
     fakeAutoUpdater.emit('error', new Error('mid-download boom'));
 
     expect(fakeAutoUpdater.listenerCount('update-downloaded')).toBe(0);
     expect(fakeAutoUpdater.listenerCount('error')).toBe(0);
-    expect(showMessageBox).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
   });
 
-  it('shows dialog with parent window and calls quitAndInstall when user picks Restart Now', async () => {
+  it('sends update-downloaded IPC with version to the renderer when download completes', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    showMessageBox.mockResolvedValue({ response: 0 });
+    const send = vi.fn();
+    const win = makeWindow({ send });
 
-    await runAutomaticUpdateCheck(parentWindow);
-    fakeAutoUpdater.emit('update-downloaded', { version: '1.0.0' });
-    await flush();
-    await flush();
-
-    expect(showMessageBox).toHaveBeenCalledWith(
-      parentWindow,
-      expect.objectContaining({
-        type: 'info',
-        buttons: ['Restart Now', 'Later'],
-        defaultId: 0,
-        cancelId: 1,
-      })
-    );
-    expect(fakeAutoUpdater.quitAndInstall).toHaveBeenCalledTimes(1);
-  });
-
-  it('does NOT call quitAndInstall when user picks Later', async () => {
-    getSettings.mockResolvedValue({ automaticUpdates: true });
-    showMessageBox.mockResolvedValue({ response: 1 });
-
-    await runAutomaticUpdateCheck(parentWindow);
-    fakeAutoUpdater.emit('update-downloaded', { version: '1.0.0' });
-    await flush();
+    await runAutomaticUpdateCheck(win);
+    fakeAutoUpdater.emit('update-downloaded', { version: '2.3.4' });
     await flush();
 
-    expect(showMessageBox).toHaveBeenCalled();
+    expect(send).toHaveBeenCalledWith('update-downloaded', { version: '2.3.4' });
     expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
   });
 
-  it('falls back to parentless dialog when no window is provided', async () => {
+  it('does not send IPC when window is null', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    showMessageBox.mockResolvedValue({ response: 0 });
-
     await runAutomaticUpdateCheck(null);
-    fakeAutoUpdater.emit('update-downloaded', { version: '1.0.0' });
+    fakeAutoUpdater.emit('update-downloaded', { version: '2.3.4' });
     await flush();
-    await flush();
-
-    expect(showMessageBox).toHaveBeenCalledWith(
-      expect.objectContaining({ buttons: ['Restart Now', 'Later'] })
-    );
-    expect(fakeAutoUpdater.quitAndInstall).toHaveBeenCalledTimes(1);
+    // No assertion needed beyond not throwing — the null path is exercised.
+    expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
   });
 
-  it('silently swallows a dialog failure without calling quitAndInstall', async () => {
+  it('does not send IPC when window has been destroyed', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    showMessageBox.mockRejectedValueOnce(new Error('dialog broken'));
+    const send = vi.fn();
+    const win = makeWindow({ send, destroyed: true });
 
-    await runAutomaticUpdateCheck(parentWindow);
-    fakeAutoUpdater.emit('update-downloaded', { version: '1.0.0' });
-    await flush();
+    await runAutomaticUpdateCheck(win);
+    fakeAutoUpdater.emit('update-downloaded', { version: '2.3.4' });
     await flush();
 
-    expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
+    expect(send).not.toHaveBeenCalled();
   });
 });
 
