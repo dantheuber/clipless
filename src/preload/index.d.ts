@@ -4,6 +4,7 @@ declare global {
   interface Window {
     electron: ElectronAPI;
     api: {
+      platform: NodeJS.Platform;
       checkForUpdates: () => Promise<any>;
       downloadUpdate: () => Promise<any>;
       quitAndInstall: () => Promise<void>;

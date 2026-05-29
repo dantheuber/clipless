@@ -14,6 +14,9 @@ import type {
 
 // Custom APIs for renderer
 const api = {
+  // Platform info
+  platform: process.platform,
+
   // Auto-updater APIs
   checkForUpdates: () => electronAPI.ipcRenderer.invoke('check-for-updates'),
   downloadUpdate: () => electronAPI.ipcRenderer.invoke('download-update'),

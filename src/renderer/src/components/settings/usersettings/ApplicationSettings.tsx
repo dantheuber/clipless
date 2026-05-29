@@ -24,6 +24,7 @@ export const ApplicationSettings: React.FC<ApplicationSettingsProps> = ({
   debounceTimeout,
 }) => {
   const { isLight } = useTheme();
+  const isLinux = window.api.platform === 'linux';
 
   return (
     <div className={styles.section}>
@@ -82,12 +83,16 @@ export const ApplicationSettings: React.FC<ApplicationSettingsProps> = ({
         {/* Auto Start Setting */}
         <SettingItem
           label="Auto Start with System"
-          description="Start Clipless automatically when your computer boots up"
+          description={
+            isLinux
+              ? 'Not available on Linux'
+              : 'Start Clipless automatically when your computer boots up'
+          }
         >
           <ToggleSwitch
-            checked={settings.autoStart}
+            checked={!isLinux && settings.autoStart}
             onChange={(checked) => onSettingChange('autoStart', checked)}
-            disabled={saving}
+            disabled={saving || isLinux}
             label="Auto Start with System"
           />
         </SettingItem>

@@ -7,6 +7,7 @@ import { configureAutoUpdater, setupAutoUpdaterEvents } from '../updater';
 import { setupMainIPC } from '../ipc';
 import { initializeWindowSystem, getMainWindow, getWindowBounds } from '../window';
 import { applyWindowSettings } from '../window/settings';
+import { applyAutoStart } from '../autoStart';
 
 export async function initializeApp(): Promise<void> {
   // Set app user model id for windows
@@ -29,7 +30,7 @@ export async function initializeApp(): Promise<void> {
   ]);
 
   // Set up callback to re-apply window settings and notify renderer after background storage loading completes
-  storage.setOnBackgroundLoadComplete(() => {
+  storage.setOnBackgroundLoadComplete(async () => {
     const mainWindow = getMainWindow();
     if (mainWindow) {
       console.log('Background storage loading complete, re-applying window settings');
@@ -37,6 +38,14 @@ export async function initializeApp(): Promise<void> {
 
       // Notify renderer that storage data is ready for re-fetching
       mainWindow.webContents.send('storage-ready');
+    }
+
+    // Reconcile OS login-item state with persisted setting
+    try {
+      const settings = await storage.getSettings();
+      applyAutoStart(settings.autoStart);
+    } catch (error) {
+      console.error('Failed to apply auto-start setting on startup:', error);
     }
   });
 
