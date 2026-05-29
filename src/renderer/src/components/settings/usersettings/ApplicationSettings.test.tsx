@@ -152,6 +152,7 @@ describe('ApplicationSettings - other settings', () => {
     expect(screen.getByRole('combobox')).toBeDisabled();
     expect(screen.getByRole('checkbox', { name: 'Show Notifications' })).toBeDisabled();
     expect(screen.getByRole('checkbox', { name: 'Code Detection & Highlighting' })).toBeDisabled();
+    expect(screen.getByRole('checkbox', { name: 'Automatic Updates' })).toBeDisabled();
   });
 
   it('forwards Start Minimized toggle changes', () => {
@@ -192,5 +193,18 @@ describe('ApplicationSettings - other settings', () => {
     });
     expect(screen.getByRole('checkbox', { name: 'Show Notifications' })).not.toBeChecked();
     expect(screen.getByRole('checkbox', { name: 'Code Detection & Highlighting' })).toBeChecked();
+  });
+
+  it('renders Automatic Updates toggle defaulted on when undefined', () => {
+    renderComponent({
+      overrides: { automaticUpdates: undefined as unknown as boolean },
+    });
+    expect(screen.getByRole('checkbox', { name: 'Automatic Updates' })).toBeChecked();
+  });
+
+  it('forwards Automatic Updates toggle changes', () => {
+    const { onSettingChange } = renderComponent({ overrides: { automaticUpdates: true } });
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Automatic Updates' }));
+    expect(onSettingChange).toHaveBeenCalledWith('automaticUpdates', false);
   });
 });

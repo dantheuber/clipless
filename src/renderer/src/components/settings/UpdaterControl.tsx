@@ -114,8 +114,8 @@ function UpdaterControl(): React.JSX.Element {
 
       {/* Helper Text */}
       <p className={classNames(styles.helperText, { [styles.light]: isLight })}>
-        Updates are automatically downloaded. You&apos;ll be notified when a restart is required to
-        complete the installation.
+        Updates are checked automatically when Clipless starts (configurable in Application
+        Settings). Use this button to check manually.
       </p>
     </div>
   );
