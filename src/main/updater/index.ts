@@ -1,6 +1,6 @@
 import { autoUpdater, type UpdateInfo } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
-import { dialog, type BrowserWindow } from 'electron';
+import type { BrowserWindow } from 'electron';
 import { storage } from '../storage';
 
 // Helper function to check for updates with timeout and retry
@@ -108,10 +108,11 @@ export function setupAutoUpdaterEvents(): void {
 }
 
 // Runs at app startup: silently checks for an update and, if one is available,
-// downloads it and shows a native dialog asking the user to restart now or
-// later. All failures are swallowed silently so unsupported platforms (e.g.
-// unsigned macOS builds) never surface errors to the user.
-export async function runAutomaticUpdateCheck(parentWindow: BrowserWindow | null): Promise<void> {
+// downloads it and notifies the renderer (via the `update-downloaded` IPC
+// channel) so the in-app UpdateBanner can prompt the user to restart. All
+// failures are swallowed silently so unsupported platforms (e.g. unsigned
+// macOS builds) never surface errors to the user.
+export async function runAutomaticUpdateCheck(targetWindow: BrowserWindow | null): Promise<void> {
   if (is.dev) return;
 
   let enabled = true;
@@ -128,28 +129,11 @@ export async function runAutomaticUpdateCheck(parentWindow: BrowserWindow | null
     autoUpdater.off('error', onError);
   };
 
-  const onDownloaded = async (): Promise<void> => {
+  const onDownloaded = (info: UpdateInfo): void => {
     autoUpdater.off('update-downloaded', onDownloaded);
     autoUpdater.off('error', onError);
-    const options: Electron.MessageBoxOptions = {
-      type: 'info',
-      buttons: ['Restart Now', 'Later'],
-      defaultId: 0,
-      cancelId: 1,
-      title: 'Update Ready',
-      message: 'Clipless has been updated.',
-      detail: 'Restart now to use the new version, or wait until the next time you quit.',
-    };
-    try {
-      const promise = parentWindow
-        ? dialog.showMessageBox(parentWindow, options)
-        : dialog.showMessageBox(options);
-      const { response } = await promise;
-      if (response === 0) {
-        autoUpdater.quitAndInstall();
-      }
-    } catch {
-      // Silent: never bother the user with auto-update errors.
+    if (targetWindow && !targetWindow.isDestroyed()) {
+      targetWindow.webContents.send('update-downloaded', { version: info.version });
     }
   };
 

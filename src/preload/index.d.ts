@@ -8,6 +8,7 @@ declare global {
       checkForUpdates: () => Promise<any>;
       downloadUpdate: () => Promise<any>;
       quitAndInstall: () => Promise<void>;
+      onUpdateDownloaded: (callback: (info: { version: string }) => void) => () => void;
       getClipboardText: () => Promise<string>;
       getClipboardHTML: () => Promise<string>;
       getClipboardRTF: () => Promise<string>;
