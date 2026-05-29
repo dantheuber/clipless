@@ -71,6 +71,7 @@ export interface UserSettings {
   alwaysOnTop?: boolean;
   rememberWindowPosition?: boolean;
   showNotifications?: boolean;
+  automaticUpdates?: boolean;
 }
 
 /**

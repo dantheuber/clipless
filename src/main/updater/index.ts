@@ -1,5 +1,7 @@
 import { autoUpdater, type UpdateInfo } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
+import { dialog, type BrowserWindow } from 'electron';
+import { storage } from '../storage';
 
 // Helper function to check for updates with timeout and retry
 export async function checkForUpdatesWithRetry(
@@ -67,20 +69,19 @@ export async function checkForUpdatesWithRetry(
 
 export function configureAutoUpdater(): void {
   if (!is.dev) {
-    // Configure auto-updater settings
-    autoUpdater.autoDownload = false; // Don't auto-download, let user control it
-    autoUpdater.autoInstallOnAppQuit = false; // Don't auto-install on quit
-
-    // Delay auto-updater check to not block startup
-    // Check for updates 10 seconds after startup to avoid blocking UI
-    setTimeout(() => {
-      autoUpdater.checkForUpdatesAndNotify();
-    }, 10000);
+    // Manual flow (UpdaterControl) controls its own download; automatic flow
+    // sets autoDownload = true just before invoking the check.
+    autoUpdater.autoDownload = false;
+    // If an update is downloaded and the user defers the restart, install it
+    // automatically the next time they quit.
+    autoUpdater.autoInstallOnAppQuit = true;
   }
 }
 
 export function setupAutoUpdaterEvents(): void {
-  // Auto-updater events
+  // Auto-updater events — logging only. Lifecycle decisions (download,
+  // install/restart) are owned by the manual UpdaterControl flow and by
+  // runAutomaticUpdateCheck so the user is never restarted without consent.
   autoUpdater.on('checking-for-update', () => {
     console.log('Checking for update...');
   });
@@ -103,7 +104,63 @@ export function setupAutoUpdaterEvents(): void {
 
   autoUpdater.on('update-downloaded', (info) => {
     console.log('Update downloaded:', info);
-    // Auto-install and restart
-    autoUpdater.quitAndInstall();
   });
+}
+
+// Runs at app startup: silently checks for an update and, if one is available,
+// downloads it and shows a native dialog asking the user to restart now or
+// later. All failures are swallowed silently so unsupported platforms (e.g.
+// unsigned macOS builds) never surface errors to the user.
+export async function runAutomaticUpdateCheck(parentWindow: BrowserWindow | null): Promise<void> {
+  if (is.dev) return;
+
+  let enabled = true;
+  try {
+    const settings = await storage.getSettings();
+    enabled = settings.automaticUpdates ?? true;
+  } catch {
+    return;
+  }
+  if (!enabled) return;
+
+  const onError = (): void => {
+    autoUpdater.off('update-downloaded', onDownloaded);
+    autoUpdater.off('error', onError);
+  };
+
+  const onDownloaded = async (): Promise<void> => {
+    autoUpdater.off('update-downloaded', onDownloaded);
+    autoUpdater.off('error', onError);
+    const options: Electron.MessageBoxOptions = {
+      type: 'info',
+      buttons: ['Restart Now', 'Later'],
+      defaultId: 0,
+      cancelId: 1,
+      title: 'Update Ready',
+      message: 'Clipless has been updated.',
+      detail: 'Restart now to use the new version, or wait until the next time you quit.',
+    };
+    try {
+      const promise = parentWindow
+        ? dialog.showMessageBox(parentWindow, options)
+        : dialog.showMessageBox(options);
+      const { response } = await promise;
+      if (response === 0) {
+        autoUpdater.quitAndInstall();
+      }
+    } catch {
+      // Silent: never bother the user with auto-update errors.
+    }
+  };
+
+  autoUpdater.once('update-downloaded', onDownloaded);
+  autoUpdater.once('error', onError);
+
+  try {
+    autoUpdater.autoDownload = true;
+    await autoUpdater.checkForUpdates();
+  } catch {
+    autoUpdater.off('update-downloaded', onDownloaded);
+    autoUpdater.off('error', onError);
+  }
 }

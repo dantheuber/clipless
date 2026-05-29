@@ -97,6 +97,19 @@ export const ApplicationSettings: React.FC<ApplicationSettingsProps> = ({
           />
         </SettingItem>
 
+        {/* Automatic Updates Setting */}
+        <SettingItem
+          label="Automatic Updates"
+          description="Check for updates in the background when Clipless starts. You'll be prompted to restart when a new version is downloaded."
+        >
+          <ToggleSwitch
+            checked={settings.automaticUpdates ?? true}
+            onChange={(checked) => onSettingChange('automaticUpdates', checked)}
+            disabled={saving}
+            label="Automatic Updates"
+          />
+        </SettingItem>
+
         {/* Theme Setting */}
         <SettingItem label="Theme" description="Choose your preferred color scheme" htmlFor="theme">
           <select

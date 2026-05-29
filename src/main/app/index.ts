@@ -3,7 +3,7 @@ import { electronApp, optimizer } from '@electron-toolkit/utils';
 import { storage } from '../storage';
 import { hotkeyManager } from '../hotkeys';
 import { getTray, setIsQuitting } from '../tray';
-import { configureAutoUpdater, setupAutoUpdaterEvents } from '../updater';
+import { configureAutoUpdater, setupAutoUpdaterEvents, runAutomaticUpdateCheck } from '../updater';
 import { setupMainIPC } from '../ipc';
 import { initializeWindowSystem, getMainWindow, getWindowBounds } from '../window';
 import { applyWindowSettings } from '../window/settings';
@@ -47,6 +47,11 @@ export async function initializeApp(): Promise<void> {
     } catch (error) {
       console.error('Failed to apply auto-start setting on startup:', error);
     }
+
+    // Silently check for updates in the background. Errors are swallowed
+    // inside the function so unsupported platforms (e.g. unsigned macOS
+    // builds) never surface failures to the user.
+    runAutomaticUpdateCheck(getMainWindow());
   });
 
   // Apply window bounds if available after initialization
