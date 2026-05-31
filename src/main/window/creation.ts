@@ -11,6 +11,7 @@ import {
   calculateWindowPosition,
 } from './settings';
 import { saveWindowBounds, getWindowBounds } from './bounds';
+import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
 
 let mainWindow: BrowserWindow | null = null;
@@ -174,12 +175,28 @@ export async function createWindow(): Promise<void> {
 
   mainWindow = new BrowserWindow(windowOptions);
 
-  mainWindow.on('ready-to-show', () => {
-    if (mainWindow) {
-      mainWindow.show();
-      // Apply window settings after the window is ready
-      applyWindowSettings(mainWindow);
+  mainWindow.on('ready-to-show', async () => {
+    if (!mainWindow) {
+      return;
     }
+
+    // Honor "Start Minimized": keep the window hidden (tray only) on launch
+    // when enabled. Settings load from storage in the background; if they
+    // aren't ready yet this safely defaults to showing the window.
+    let startMinimized = false;
+    try {
+      const settings = await storage.getSettings();
+      startMinimized = settings.startMinimized;
+    } catch (error) {
+      console.error('Failed to read startMinimized setting:', error);
+    }
+
+    if (!startMinimized) {
+      mainWindow.show();
+    }
+
+    // Apply window settings after the window is ready
+    applyWindowSettings(mainWindow);
   });
 
   // Handle window close - minimize to tray instead of quitting

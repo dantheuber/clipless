@@ -113,6 +113,8 @@ For now, please know that the security warnings are purely administrative and th
 - **Add Tools**: Settings → Quick Clips → Tools
 - **Set Hotkeys**: Settings → Hotkeys
 - **Adjust Preferences**: Settings → General
+- **Auto Start with System**: Settings → General — launch Clipless automatically when you log in (Windows & macOS)
+- **Start Minimized**: Settings → General — start hidden in the system tray instead of opening a window
 
 ### Example Quick Clips Use Cases
 

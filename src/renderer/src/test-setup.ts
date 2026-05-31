@@ -33,6 +33,7 @@ const createMockApi = () => ({
     codeDetectionEnabled: true,
   }),
   storageSaveSettings: vi.fn().mockResolvedValue(undefined),
+  getAutoStartState: vi.fn().mockResolvedValue(null),
   onSettingsUpdated: vi.fn().mockReturnValue(() => {}),
   removeSettingsListeners: vi.fn(),
   quickClipsScanText: vi.fn().mockResolvedValue([]),

@@ -57,6 +57,8 @@ const api = {
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),
   closeSettings: () => electronAPI.ipcRenderer.invoke('close-settings'),
   getSettings: () => electronAPI.ipcRenderer.invoke('get-settings'),
+  getAutoStartState: (): Promise<boolean | null> =>
+    electronAPI.ipcRenderer.invoke('auto-start-get-state'),
   settingsChanged: (settings: UserSettings) =>
     electronAPI.ipcRenderer.invoke('settings-changed', settings),
   onSettingsUpdated: (callback: (settings: UserSettings) => void) => {
