@@ -10,8 +10,11 @@ import { applyWindowSettings } from '../window/settings';
 import { applyAutoStart } from '../autoStart';
 
 export async function initializeApp(): Promise<void> {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron');
+  // Set app user model id for windows. This must be unique to Clipless: on
+  // Windows it is also used as the registry value name for the autostart login
+  // item, so a shared default (e.g. 'com.electron') would collide with other
+  // Electron apps and let dev builds clobber the installed app's entry.
+  electronApp.setAppUserModelId('com.clipless.app');
 
   // Create window first for better perceived performance
   await initializeWindowSystem();
@@ -63,6 +66,22 @@ export async function initializeApp(): Promise<void> {
 }
 
 export function setupAppEvents(): void {
+  // When a second launch is attempted, the new process quits itself via the
+  // single-instance lock (see index.ts) and fires this event on the primary
+  // instance — surface the existing window instead of starting over.
+  app.on('second-instance', () => {
+    const mainWindow = getMainWindow();
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      if (!mainWindow.isVisible()) {
+        mainWindow.show();
+      }
+      mainWindow.focus();
+    }
+  });
+
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.

@@ -22,6 +22,23 @@ export const useUserSettings = () => {
 
       try {
         const loadedSettings = await window.api.storageGetSettings();
+
+        // Reflect the real OS login-item state so the toggle can't silently
+        // drift from what will actually happen at boot (e.g. if a write failed
+        // or an external change occurred). Falls back to the persisted value
+        // when autostart isn't OS-managed — getAutoStartState returns null on
+        // Linux and in unpackaged dev builds.
+        if (window.api.getAutoStartState) {
+          try {
+            const osAutoStart = await window.api.getAutoStartState();
+            if (typeof osAutoStart === 'boolean') {
+              loadedSettings.autoStart = osAutoStart;
+            }
+          } catch (error) {
+            console.error('Failed to read auto-start state:', error);
+          }
+        }
+
         setSettings(loadedSettings);
         setTempMaxClips(loadedSettings.maxClips); // Initialize temp value
       } catch (error) {

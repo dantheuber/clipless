@@ -31,6 +31,7 @@ declare global {
       openSettings: (tab?: string) => Promise<void>;
       closeSettings: () => Promise<void>;
       getSettings: () => Promise<any>;
+      getAutoStartState: () => Promise<boolean | null>;
       settingsChanged: (settings: any) => Promise<boolean>;
       onSettingsUpdated: (callback: (settings: any) => void) => void;
       removeSettingsListeners: () => void;

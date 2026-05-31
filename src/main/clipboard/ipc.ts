@@ -27,7 +27,7 @@ import {
   importData,
   clearAllData,
 } from './storage-integration';
-import { applyAutoStart } from '../autoStart';
+import { applyAutoStart, getAutoStartState } from '../autoStart';
 import {
   getAllTemplates,
   createTemplate,
@@ -126,6 +126,9 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     applyAutoStart(settings.autoStart);
     return result;
   });
+  // Actual OS login-item state, so the renderer can reflect reality rather than
+  // only the persisted preference. Returns null when not OS-managed (Linux/dev).
+  ipcMain.handle('auto-start-get-state', async () => getAutoStartState());
   ipcMain.handle('storage-get-stats', async () => getStorageStats());
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
