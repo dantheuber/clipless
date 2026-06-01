@@ -28,7 +28,9 @@
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "screenshots": "npm run build && playwright test -c screenshots/playwright.config.ts",
+    "screenshots:only": "playwright test -c screenshots/playwright.config.ts"
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",

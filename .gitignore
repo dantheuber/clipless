@@ -10,3 +10,4 @@ electron.vite.config.*.mjs
 .claude/
 test-results/
 coverage/
+screenshots/output/
