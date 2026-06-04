@@ -1,203 +1,336 @@
+<div align="center">
+
+<img src="build/icon.png" width="116" alt="Clipless icon" />
+
 # Clipless
 
-A powerful and intelligent clipboard manager built with Electron, React, and TypeScript. Clipless automatically monitors your clipboard, intelligently detects different content types, and provides advanced pattern-based data extraction with Quick Clips functionality.
+### The clipboard that reads between the lines.
 
-## ✨ Features
+Clipless quietly remembers everything you copy, then **reads it** — spotting emails, IPs,
+tickets and URLs in what you copy and turning them into one-click actions.
 
-### 🔄 **Automatic Clipboard Monitoring**
+<br />
 
-- Real-time clipboard detection with 250ms polling
-- Support for multiple formats: text, HTML, RTF, images, and bookmarks
-- Intelligent format prioritization and duplicate prevention
-- Background monitoring that doesn't interfere with your workflow
+[![Website](https://img.shields.io/badge/clipless.app-3b82f6?style=flat-square&label=website)](https://clipless.app)
+[![Latest release](https://img.shields.io/github/v/release/dantheuber/clipless?style=flat-square&color=3b82f6&label=release)](https://github.com/dantheuber/clipless/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/dantheuber/clipless/total?style=flat-square&color=3b82f6&label=downloads)](https://github.com/dantheuber/clipless/releases)
+[![Platforms](https://img.shields.io/badge/Windows%20·%20macOS%20·%20Linux-3b82f6?style=flat-square)](https://clipless.app/download/)
+[![Built with Electron](https://img.shields.io/badge/Electron%20·%20React%20·%20TypeScript-3b82f6?style=flat-square&logo=electron&logoColor=white)](#-development)
 
-### 📋 **Multi-Format Clipboard Management**
+<br />
 
-- **Text**: Plain text content with programming language detection
-- **HTML**: Rich HTML content with visual indicators
-- **RTF**: Rich Text Format support
-- **Images**: Image clipboard data with preview support
-- **Bookmarks**: URLs with titles (macOS/Windows compatible)
+[![Download Clipless](https://img.shields.io/badge/⬇%20%20Download%20Clipless-3b82f6?style=for-the-badge)](https://clipless.app/download/)
+[![Documentation](https://img.shields.io/badge/Documentation-1d1d22?style=for-the-badge)](https://clipless.app/docs/)
+[![View on GitHub](https://img.shields.io/badge/View%20Source-1d1d22?style=for-the-badge&logo=github&logoColor=white)](https://github.com/dantheuber/clipless)
 
-### 🔍 **Quick Clips - Intelligent Pattern Detection**
+<br />
 
-- Automatically detect patterns in clipboard content (emails, URLs, phone numbers, etc.)
-- Custom regex patterns with named capture groups
-- Individual selection of extracted data values
-- Built-in pattern library for common data types
-- Visual indicators when patterns are detected
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/main-dark.png" />
+  <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/main-light.png" />
+  <img src="site/assets/screens/main-dark.png" width="820" alt="Clipless main window listing copied clips, each flagged with a scanner icon" />
+</picture>
 
-### 🛠️ **Quick Tools Integration**
+<br /><br />
 
-- Define web tools that open with extracted data
-- Multi-token URL support (e.g., `https://tool.com/{email}/{domain}`)
-- Bulk operations - open multiple tools simultaneously
-- Smart tool compatibility based on available data
-- Export/import configurations for sharing
+**✓ Windows, macOS &amp; Linux  ·  ✓ Encrypted local storage  ·  ✓ No account needed**
 
-### ⚡ **Hotkey Support**
+<br />
 
-- Global hotkeys for quick access to clipboard items
-- Configurable key combinations
-- Quick clip hotkeys (1-5) for instant access to recent items
-- Focus window hotkey for quick app access
+[Quick Clips](#-quick-clips) · [Tools Launcher](#-tools-launcher) · [Capture](#-capture-everything) · [Theming](#-looks-right-day-or-night) · [Who it's for](#-who-its-for) · [Install](#-installation) · [Develop](#-development)
 
-### 🎨 **Modern UI & Theming**
+</div>
 
-- Light and dark theme support
-- Responsive design with beautiful gradients
-- System tray integration
-- Settings panel for complete customization
-- Visual feedback and smooth animations
+---
 
-### 🔒 **Secure Storage**
+## 🔍 Quick Clips
 
-- Encrypted data storage using OS-native encryption
-- Windows: DPAPI, macOS: Keychain, Linux: Secret Service
-- Domain-specific storage files (settings, clips, templates) for efficient per-domain saves
-- Images stored as separate encrypted files with generated thumbnails for fast rendering
-- Non-blocking startup: window displays immediately, data loads in background
-- Persistent clipboard history
-- Lock clips to prevent automatic removal
-- Export/import functionality for backup
+### It reads what you copy.
 
-## ⚠️ Installation Security Notice
+The moment something useful lands in your clipboard, Clipless flags it. A scanner icon
+appears on the clip — open it to see every pattern it pulled out, ready to act on.
 
-When installing Clipless from the releases page, your operating system may display security warnings about the application being from an "unidentified developer" or "untrusted source." This is normal and occurs because the application is not currently signed with a commercial code signing certificate.
+- **Automatic detection** — emails, IPs, URLs, phone numbers, ticket IDs and your own custom regex
+- **Pick exactly what you need** — each extracted value is individually selectable
+- **Named capture groups** — build a pattern once and reuse it across every clip
+- **Built-in library** — common data types work out of the box, with a clear visual indicator when patterns are found
 
-### Why This Happens
+<div align="center">
 
-- **Windows**: You may see "Windows protected your PC" or SmartScreen warnings
-- **macOS**: You may see "cannot be opened because it is from an unidentified developer"
-- **Linux**: Some distributions may flag the AppImage as untrusted
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/main-dark.png" />
+  <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/main-light.png" />
+  <img src="site/assets/screens/main-dark.png" width="760" alt="Clipless scanning clips and surfacing detected email, IP and ticket values" />
+</picture>
 
-### This is Safe to Override
+</div>
+
+---
+
+## ⚡ Tools Launcher
+
+### One copy. Every tool, open.
+
+Send the data Clipless found straight into the web tools you already use. Select a few
+patterns, pick your tools, and launch them all at once — no retyping, no tab juggling.
+
+- **Multi-token URLs** — drop values into any link, e.g. `https://tool.com/{ip}/{email}`
+- **Open in bulk** — fire off several lookups simultaneously with one click
+- **Smart compatibility** — only the tools that match your available data are offered
+- **Templates &amp; sharing** — match templates automatically and export / import configs for your team
+
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/patterns-dark.png" />
+  <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/patterns-light.png" />
+  <img src="site/assets/screens/patterns-dark.png" width="760" alt="Clipless Tools Launcher with found patterns on the left and matching web tools on the right" />
+</picture>
+
+</div>
+
+---
+
+## 📋 Capture everything
+
+### Every format, deduplicated and in order.
+
+Real-time clipboard monitoring with 250ms polling, intelligent format prioritization, and
+duplicate prevention — all running quietly in the background so it never interrupts your flow.
+
+| Format | What you get |
+| --- | --- |
+| **Text** | Plain text with automatic programming-language detection |
+| **HTML** | Rich HTML content with visual indicators |
+| **RTF** | Full Rich Text Format support |
+| **Images** | Image clipboard data with preview and generated thumbnails |
+| **Bookmarks** | URLs with titles (macOS / Windows compatible) |
+
+- **Lock clips** to keep important items from rotating out of history
+- **Clip Quick Search** to filter your entire history instantly
+
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/search-dark.png" />
+  <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/search-light.png" />
+  <img src="site/assets/screens/search-dark.png" width="760" alt="Clipless filtering clipboard history with the quick search bar" />
+</picture>
+
+</div>
+
+---
+
+## 🌗 Looks right, day or night
+
+### Theming that follows you.
+
+Clipless follows your system theme out of the box and flips instantly when you switch — with
+smooth, considered transitions instead of a jarring flash. Prefer to set it yourself? One
+dropdown, done.
+
+- **Matches your system** — respects your OS light / dark preference automatically
+- **Carefully tuned palettes** — readable contrast and soft surfaces in both modes
+
+<div align="center">
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/settings-general-dark.png" />
+  <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/settings-general-light.png" />
+  <img src="site/assets/screens/settings-general-dark.png" width="760" alt="Clipless settings window showing theme and general options" />
+</picture>
+
+<sub>This README does it too — the screenshots above follow your GitHub light / dark setting.</sub>
+
+</div>
+
+---
+
+## ✨ The quiet details
+
+The things you don't notice until you'd miss them.
+
+- **⌨️ Global hotkeys** — reach recent clips and the launcher from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you.
+- **🔒 Encrypted storage** — history is encrypted with your OS keystore (DPAPI, Keychain or Secret Service) and never leaves your machine. Data is split into domain-specific files for efficient saves, with images stored as separate encrypted files and fast-loading thumbnails.
+- **🚀 Non-blocking startup** — the window appears immediately while your history loads in the background.
+- **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background.
+- **💾 Backup-friendly** — export and import your clips, patterns, tools and templates.
+
+---
+
+## 👥 Who it's for
+
+Clipless shines anywhere people copy the same kinds of data all day — but nothing about it
+is locked to one job. Define your own patterns and tools, and it bends to whatever workflow
+you throw at it.
+
+| ☎️ Call center &amp; support | 🗂️ Data entry &amp; admin | 🛡️ Security &amp; research |
+| --- | --- | --- |
+| Copy a customer email or account number and open it across your CRM, billing and knowledge-base tools in a single move. | Bridge legacy and modern systems — extract reference numbers, populate templates and process records in batches without retyping. | Pull IPs, domains and hashes from any text and fan them out to VirusTotal, AbuseIPDB and the rest of your toolkit instantly. |
+
+> **…and whatever you do next.** Custom regex patterns, custom tools, custom templates —
+> Clipless is a blank canvas with smart defaults. If you can describe the data and where it
+> should go, you can wire it up. No use case is too niche.
+
+<details>
+<summary><strong>Real-world office scenarios &amp; more roles</strong></summary>
+
+<br />
+
+**Call center &amp; customer support**
+
+- **Customer data lookup** — copy customer emails / phone numbers and instantly open them in CRM, billing or support tools
+- **Account verification** — extract account numbers and open multiple verification tools simultaneously
+- **Issue tracking** — copy error codes or ticket numbers and launch diagnostic tools, knowledge bases and escalation systems
+- **Multi-system navigation** — one copy action can open customer records across 3–4 different systems instantly
+
+**Data entry &amp; administrative work**
+
+- **Form population** — use templates to generate standardized text from clipboard data (addresses, contact info, etc.)
+- **Batch processing** — copy reference numbers and open them across multiple validation or processing tools
+- **Quality assurance** — extract identifiers and quickly access audit trails, compliance tools and verification systems
+- **Cross-platform workflows** — bridge gaps between legacy systems by automating tool launches
+
+**Real-world scenarios**
+
+- **Insurance claims** — copy claim numbers → open in claims system, fraud detection and payment processing
+- **Banking support** — copy account numbers → access account details, transaction history and compliance tools
+- **Healthcare administration** — copy patient IDs → open in medical records, billing and scheduling systems
+- **E-commerce support** — copy order numbers → launch order management, shipping and customer communication tools
+
+**Template-powered productivity**
+
+- **Standardized responses** — create templates for common communications, populated with copied data
+- **Report generation** — templates that format clipboard data into structured reports
+- **Data transformation** — convert between formats required by different systems
+- **Compliance documentation** — generate required documentation with proper formatting from raw copied data
+
+**Also a great fit for**
+
+- **Developers** — code snippet management and URL analysis
+- **Researchers** — data extraction and multi-tool workflows
+- **Security professionals** — URL / email analysis and validation
+- **Content creators** — managing copied content across projects
+- **Power users** — anyone who copies lots of data and wants smart organization
+
+</details>
+
+---
+
+## 🚀 How to use
+
+### Basic usage
+
+1. **Install and run** — start Clipless and it begins monitoring your clipboard automatically
+2. **Copy content** — anything you copy appears in the Clipless window
+3. **Click to reuse** — click a row number to copy that item back to your clipboard
+4. **Context menu actions** — right-click a clip for Copy, Scan, Lock and Delete
+
+### Quick Clips workflow
+
+1. **Copy content** containing patterns (emails, URLs, etc.)
+2. **Look for the scanner icon** — a blue search icon appears when patterns are detected
+3. **Click the scanner** to open the launcher and see the extracted data
+4. **Select data** — choose which extracted values you want to use
+5. **Open tools** — pick compatible tools to launch with your selected data
+
+**Example uses:** extract emails and open them in validation tools · pull domains and run them
+through security scanners · gather multiple data points to research across tools · grab code
+snippets and open them in your documentation.
+
+### Settings &amp; customization
+
+- **Access settings** — right-click the system tray icon → Settings
+- **Configure patterns** — Settings → Quick Clips → Search Terms
+- **Add tools** — Settings → Quick Clips → Tools
+- **Set hotkeys** — Settings → Hotkeys
+- **Adjust preferences** — Settings → General
+- **Auto start with system** — Settings → General (Windows &amp; macOS)
+- **Start minimized** — Settings → General (start hidden in the tray)
+
+📖 Full reference at **[clipless.app/docs](https://clipless.app/docs/)**.
+
+---
+
+## 📥 Installation
+
+Download the latest build for your platform from the **[download page](https://clipless.app/download/)**
+or the **[GitHub releases](https://github.com/dantheuber/clipless/releases)**.
+
+<details>
+<summary><strong>⚠️ A note on security warnings during install</strong></summary>
+
+<br />
+
+Clipless isn't code-signed with a commercial certificate yet, so your OS may warn that the
+app is from an "unidentified developer" or "untrusted source." This is expected and safe to
+override — the build comes straight from this open-source repository.
+
+**Why this happens**
+
+- **Windows** — "Windows protected your PC" or SmartScreen warnings
+- **macOS** — "cannot be opened because it is from an unidentified developer"
+- **Linux** — some distributions may flag the AppImage as untrusted
+
+**Why it's safe**
 
 - The application is built from open source code available in this repository
-- You can verify the build integrity by checking the source code
-- No malicious code is present - this is purely a certificate signing issue
+- You can verify build integrity by reviewing the source
+- There's no malicious code — this is purely a certificate-signing issue
 
-### How to Install Despite Warnings
+**How to install past the warning**
 
-- **Windows**: Click "More info" → "Run anyway" or temporarily disable SmartScreen
-- **macOS**: Right-click the app → "Open" → "Open" in the dialog, or use `sudo spctl --master-disable` to allow unsigned apps temporarily
-- **Linux**: Make the AppImage executable and run it, or adjust your security settings if needed
+- **Windows** — click "More info" → "Run anyway", or temporarily disable SmartScreen
+- **macOS** — right-click the app → "Open" → "Open" in the dialog, or run `sudo spctl --master-disable` to temporarily allow unsigned apps
+- **Linux** — make the AppImage executable and run it, or adjust your security settings if needed
 
-### Future Plans
+**Looking ahead** — if Clipless gains enough community adoption, a commercial code-signing
+certificate (several hundred dollars a year) will eliminate these warnings. For now, the
+warnings are purely administrative and the app is safe to use.
 
-If Clipless gains sufficient community support and adoption, I will consider investing in a commercial code signing certificate to eliminate these warnings. Code signing certificates cost several hundred dollars annually, so this decision depends on the project's growth and user base.
+</details>
 
-For now, please know that the security warnings are purely administrative and the application itself is safe to use.
+---
 
-## 🚀 How to Use
+## 🧰 Development
 
-### Basic Usage
+Clipless is an Electron app built with `electron-vite`, React 19, TypeScript and Tailwind CSS v4.
 
-1. **Install and Run**: Start Clipless and it begins monitoring your clipboard automatically
-2. **Copy Content**: Any content you copy will appear in the Clipless window
-3. **Click to Reuse**: Click on any row number to copy that item back to your clipboard
-4. **Context Menu Actions**: Right-click clips to access Copy, Scan, Lock, and Delete options
-
-### Quick Clips Workflow
-
-1. **Copy Content**: Copy text containing patterns (emails, URLs, etc.)
-2. **Look for the Scanner Icon**: A blue search icon appears when patterns are detected
-3. **Click Scanner**: Opens the Quick Clips scanner showing extracted data
-4. **Select Data**: Choose which extracted values you want to use
-5. **Open Tools**: Select compatible tools to open with your selected data
-
-### Settings & Customization
-
-- **Access Settings**: Right-click system tray icon → Settings
-- **Configure Patterns**: Settings → Quick Clips → Search Terms
-- **Add Tools**: Settings → Quick Clips → Tools
-- **Set Hotkeys**: Settings → Hotkeys
-- **Adjust Preferences**: Settings → General
-- **Auto Start with System**: Settings → General — launch Clipless automatically when you log in (Windows & macOS)
-- **Start Minimized**: Settings → General — start hidden in the system tray instead of opening a window
-
-### Example Quick Clips Use Cases
-
-- **Email Processing**: Extract emails and open with validation tools
-- **URL Analysis**: Extract domains and open with security scanners
-- **Data Research**: Extract multiple data points and research across tools
-- **Development**: Extract code snippets and open in documentation tools
-
-## 💼 Ideal for Office & Call Center Work
-
-### **Call Center & Customer Support**
-
-Clipless transforms how support agents handle customer information:
-
-- **Customer Data Lookup**: Copy customer emails/phone numbers and instantly open them in CRM, billing, or support tools
-- **Account Verification**: Extract account numbers and open multiple verification tools simultaneously
-- **Issue Tracking**: Copy error codes or ticket numbers and launch diagnostic tools, knowledge bases, and escalation systems
-- **Multi-System Navigation**: One copy action can open customer records across 3-4 different systems instantly
-
-### **Data Entry & Administrative Work**
-
-Perfect for roles requiring constant data transfer between systems:
-
-- **Form Population**: Use templates to generate standardized text from clipboard data (addresses, contact info, etc.)
-- **Batch Processing**: Copy reference numbers and open them across multiple validation or processing tools
-- **Quality Assurance**: Extract identifiers and quickly access audit trails, compliance tools, and verification systems
-- **Cross-Platform Workflows**: Bridge gaps between legacy systems by automating tool launches
-
-### **Real-World Office Scenarios**
-
-- **Insurance Claims**: Copy claim numbers → automatically open in claims system, fraud detection, and payment processing
-- **Banking Support**: Copy account numbers → instantly access account details, transaction history, and compliance tools
-- **Healthcare Administration**: Copy patient IDs → open in medical records, billing, and scheduling systems
-- **E-commerce Support**: Copy order numbers → launch into order management, shipping, and customer communication tools
-
-### **Template-Powered Productivity**
-
-- **Standardized Responses**: Create templates for common customer communications, populated with copied data
-- **Report Generation**: Templates that format clipboard data into structured reports
-- **Data Transformation**: Convert between different data formats required by various systems
-- **Compliance Documentation**: Generate required documentation with proper formatting from raw copied data
-
-## 🎯 Perfect For
-
-- **Call Center Agents**: Multi-system customer data lookups and rapid tool navigation
-- **Data Entry Professionals**: Template-driven standardized data formatting and batch processing
-- **Customer Support Teams**: Instant access to customer information across multiple platforms
-- **Administrative Staff**: Streamlined workflows between legacy and modern systems
-- **Insurance/Banking Workers**: Quick access to claims, accounts, and compliance tools
-- **Healthcare Administration**: Patient data management across medical, billing, and scheduling systems
-- **Developers**: Code snippet management and URL analysis
-- **Researchers**: Data extraction and multi-tool workflows
-- **Security Professionals**: URL/email analysis and validation
-- **Content Creators**: Managing copied content across projects
-- **Power Users**: Anyone who copies lots of data and wants smart organization
-
-## Recommended IDE Setup
-
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
-
-## Project Setup
-
-### Install
+### Setup
 
 ```bash
-$ npm install
+npm install
+npm run dev      # start with hot reload
 ```
 
-### Development
+### Scripts
 
-```bash
-$ npm run dev
-```
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start development with hot reload |
+| `npm run build` | Type-check and build all processes |
+| `npm run lint` | ESLint with caching |
+| `npm run format` | Prettier formatting |
+| `npm run typecheck` | Type-check all TypeScript |
+| `npm test` / `npx vitest` | Unit tests (Vitest) |
+| `npx playwright test` | E2E tests (Playwright + Electron) |
+| `npm run build:win` · `build:mac` · `build:linux` | Platform-specific packaging |
 
-### Build
+> **Heads up:** E2E tests interact with your **system clipboard** — they read from and write
+> to it. Avoid copying sensitive data before running them, and expect your clipboard contents
+> to be overwritten.
 
-```bash
-# For windows
-$ npm run build:win
+### Recommended IDE setup
 
-# For macOS
-$ npm run build:mac
+[VS Code](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
-# For Linux
-$ npm run build:linux
-```
+---
+
+<div align="center">
+
+Built with Electron, React &amp; TypeScript. Your data is encrypted with your OS-native
+keystore and never leaves your machine.
+
+[**clipless.app**](https://clipless.app) · [Documentation](https://clipless.app/docs/) · [Download](https://clipless.app/download/) · [GitHub](https://github.com/dantheuber/clipless)
+
+</div>
