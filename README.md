@@ -1,60 +1,50 @@
-# Clipless Website
+# clipless.app
 
-This is the official website for [Clipless](https://github.com/dantheuber/clipless) - an intelligent clipboard manager built for professionals.
+The marketing and documentation site for [Clipless](https://github.com/dantheuber/clipless),
+served at **https://clipless.app** from the `gh-pages` branch.
 
-## 🌐 Website Structure
+This is a plain static site — no build step, no framework. GitHub Pages serves the
+files as-is (`.nojekyll` disables Jekyll processing).
 
-- **Homepage** (`index.markdown`) - Main landing page with overview
-- **About** (`about.markdown`) - Detailed information about Clipless
-- **Features** (`features.markdown`) - Comprehensive feature documentation
-- **User Guide** (`guide.markdown`) - Complete tutorial and usage instructions
-- **Download** (`download.markdown`) - Installation instructions and links
-- **Blog Posts** (`_posts/`) - News, announcements, and updates
+## Structure
 
-## 🛠️ Technology
-
-This site is built with:
-- **Jekyll** - Static site generator
-- **GitHub Pages** - Hosting platform
-- **Minima theme** - Clean, responsive design
-
-## 🚀 Local Development
-
-To run the site locally:
-
-```bash
-# Install dependencies
-bundle install
-
-# Serve the site locally
-bundle exec jekyll serve
+```
+/
+├── index.html          Landing page
+├── docs/index.html     Feature documentation
+├── download/index.html Download + install instructions
+├── 404.html            Not-found page
+├── styles.css          Design system + page styles (theme tokens, accent)
+├── app.js              Theme toggle, nav, scroll reveal, docs TOC scroll-spy
+├── assets/
+│   ├── clipless-mark.png   Logo mark (CSS-masked to the text colour)
+│   ├── icon.png            Favicon
+│   └── screens/            Product screenshots (light + dark per view)
+├── CNAME               Custom domain (clipless.app)
+└── .nojekyll           Tell GitHub Pages to skip Jekyll
 ```
 
-The site will be available at `http://localhost:4000`
+## Theming
 
-## 📝 Content Guidelines
+The site follows the visitor's OS light/dark preference and remembers a manual
+override in `localStorage` (`clipless-theme`). The accent colour is baked into
+`:root` in `styles.css`.
 
-When adding content:
-- Use consistent emoji styling (🎯 for targeting, 🔒 for security, etc.)
-- Include clear navigation links between pages
-- Keep professional tone while being approachable
-- Focus on real-world use cases and benefits
+## Local preview
 
-## 🤝 Contributing
+Because pages use root-relative paths (`/styles.css`, `/docs/`), preview with a
+static server rather than opening the files directly:
 
-Contributions to improve the website are welcome:
-- Fix typos or improve clarity
-- Add new use cases or examples
-- Improve navigation or user experience
-- Suggest new content or pages
+```bash
+npx serve .
+# or
+python -m http.server 8000
+```
 
-## 📞 Support
+## Editing content
 
-For questions about the website or Clipless:
-- **Main Repository:** [github.com/dantheuber/clipless](https://github.com/dantheuber/clipless)
-- **Issues:** [Report problems or suggestions](https://github.com/dantheuber/clipless/issues)
-- **Website:** [clipless.app](https://clipless.app)
+Each page is hand-written HTML sharing `styles.css` and `app.js`. The nav and footer
+are duplicated per page (no templating) — keep them in sync when changing links.
 
----
-
-*This website serves as the central hub for all things Clipless - from downloads to documentation to community resources.*
+The design source these pages were built from lives in the main branch under
+`.claude/design/`.

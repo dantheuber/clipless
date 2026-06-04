@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Documentation — Clipless</title>
+  <meta name="description" content="Clipless documentation: clipboard history, Quick Clips pattern extraction, Quick Tools URL launching, templates, hotkeys and settings reference." />
+  <link rel="canonical" href="https://clipless.app/docs/" />
+  <link rel="icon" type="image/png" href="/assets/icon.png" />
+
+  <meta property="og:type" content="article" />
+  <meta property="og:url" content="https://clipless.app/docs/" />
+  <meta property="og:title" content="Clipless Documentation" />
+  <meta property="og:description" content="Everything Clipless can do: clipboard history, Quick Clips, Quick Tools, templates, hotkeys and settings." />
+  <meta property="og:image" content="https://clipless.app/assets/screens/main-dark.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+
+  <script>
+    (function () {
+      try {
+        var saved = localStorage.getItem('clipless-theme');
+        var sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+        document.documentElement.dataset.theme = (saved === 'light' || saved === 'dark') ? saved : sys;
+      } catch (e) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div class="bg-field"></div>
+
+  <!-- ===================== Nav ===================== -->
+  <header class="nav">
+    <div class="wrap nav-inner">
+      <a class="brand" href="/" aria-label="Clipless home">
+        <span class="mark"><span class="mark-img" aria-hidden="true" style="width:30px;height:30px"></span></span>
+        <span class="name">Clipless</span>
+      </a>
+      <nav class="nav-links">
+        <a href="/#quick-clips">Quick Clips</a>
+        <a href="/#tools">Tools</a>
+        <a href="/#theming">Theming</a>
+        <a href="/docs/" class="active">Docs</a>
+      </nav>
+      <div class="nav-right">
+        <button class="theme-toggle" data-theme-toggle aria-label="Toggle light / dark theme">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8" /></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" /></svg>
+        </button>
+        <a class="btn btn-primary btn-sm" href="/download/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg>
+          Download
+        </a>
+        <button class="nav-toggle" data-nav-toggle aria-label="Open menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+        </button>
+      </div>
+    </div>
+    <div class="nav-mobile">
+      <div class="wrap">
+        <a href="/#quick-clips">Quick Clips</a>
+        <a href="/#tools">Tools</a>
+        <a href="/#theming">Theming</a>
+        <a href="/docs/">Docs</a>
+        <a href="/download/">Download</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="page-head reveal in">
+      <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H14l6 6v10.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 19.5Z" /><path d="M14 3v6h6" /></svg> Documentation</span>
+      <h1>Everything Clipless <span class="grad">can do.</span></h1>
+      <p class="lead">
+        A complete reference for clipboard history, Quick Clips pattern extraction,
+        the Tools Launcher, templates, hotkeys and every setting.
+      </p>
+    </div>
+
+    <div class="docs-layout">
+      <!-- Sidebar TOC -->
+      <aside class="docs-nav">
+        <div class="docs-nav-title">On this page</div>
+        <ul>
+          <li><a href="#getting-started">Getting Started</a></li>
+          <li><a href="#clipboard-history">Clipboard History</a></li>
+          <li><a href="#quick-clips">Quick Clips</a></li>
+          <li><a href="#quick-tools">Quick Tools</a></li>
+          <li><a href="#templates">Templates</a></li>
+          <li><a href="#clip-quick-search">Clip Quick Search</a></li>
+          <li><a href="#tools-launcher">Tools Launcher</a></li>
+          <li><a href="#global-hotkeys">Global Hotkeys</a></li>
+          <li><a href="#settings">Settings Reference</a></li>
+          <li><a href="#code-detection">Code Detection</a></li>
+          <li><a href="#security">Security &amp; Privacy</a></li>
+          <li><a href="#workflow-examples">Workflow Examples</a></li>
+          <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ul>
+      </aside>
+
+      <!-- Content -->
+      <article class="prose">
+        <section id="getting-started">
+          <h2>Getting Started</h2>
+          <ol>
+            <li><a href="/download/">Download</a> and install Clipless for your platform</li>
+            <li>Launch the application — it starts monitoring your clipboard immediately</li>
+            <li>Look for the Clipless icon in your system tray</li>
+            <li>Copy content as you normally would; Clipless captures it automatically</li>
+          </ol>
+        </section>
+
+        <section id="clipboard-history">
+          <h2>Clipboard History</h2>
+          <p>
+            Clipless polls the system clipboard every 250ms and stores new content
+            automatically. Supported formats:
+          </p>
+          <ul>
+            <li><strong>Plain text</strong> with optional code language detection</li>
+            <li><strong>HTML</strong> with rendered preview</li>
+            <li><strong>RTF</strong> (rich text)</li>
+            <li><strong>Images</strong> (screenshots, copied graphics)</li>
+            <li><strong>Bookmarks</strong> (URLs with titles)</li>
+          </ul>
+          <p>
+            Duplicate content is detected and ignored. Click a clip's row number (or
+            use a Quick Clip hotkey) to copy it back to the clipboard.
+          </p>
+
+          <h3>Editing Clips</h3>
+          <p>
+            Click on any clip to expand it and edit its contents inline. When editing a
+            text clip, Clipless applies best-guess syntax highlighting based on the text
+            content, making it easier to work with code snippets and structured data.
+          </p>
+
+          <h3>Clip Actions</h3>
+          <p>Each clip has a cog icon menu and a right-click context menu with actions including:</p>
+          <ul>
+            <li><strong>Lock / Unlock</strong> — prevent a clip from being removed when the history limit is reached</li>
+            <li><strong>Delete</strong> — remove a clip from history</li>
+            <li><strong>Scan for Search Terms</strong> — scan a previous clip's content against your Quick Clips patterns and open the Tools Launcher with the results. This lets you use Quick Tools on any clip in your history, not just the most recent one.</li>
+          </ul>
+
+          <h3>Storage</h3>
+          <p>Clipboard history is stored locally in an encrypted file (<code>data.enc</code>) using OS-native encryption:</p>
+          <ul>
+            <li><strong>Windows:</strong> DPAPI (Data Protection API)</li>
+            <li><strong>macOS:</strong> Keychain Services</li>
+            <li><strong>Linux:</strong> Secret Service API (GNOME Keyring / KDE Wallet)</li>
+          </ul>
+          <p>No data is sent to any server.</p>
+        </section>
+
+        <section id="quick-clips">
+          <h2>Quick Clips</h2>
+          <p>
+            Quick Clips are user-defined regex patterns that extract data from clipboard
+            content. When copied text matches a pattern, the extracted values can be used
+            with Quick Tools and Templates.
+          </p>
+
+          <h3>How Patterns Work</h3>
+          <p>
+            Each pattern is a regular expression with named capture groups. The capture
+            group names become tokens you can reference in Quick Tools URLs and Templates.
+          </p>
+          <p>Example pattern for extracting a customer number:</p>
+          <pre><code>Customer #\s*(?&lt;customerNumber&gt;\d+)</code></pre>
+          <p>When you copy text containing "Customer # 123456", Quick Clips extracts <code>customerNumber = 123456</code>.</p>
+
+          <h3>Pattern Templates</h3>
+          <p>Clipless includes pattern templates you can add with one click in the Tools Manager:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Pattern</th><th>Capture Group</th></tr></thead>
+              <tbody>
+                <tr><td>Email Address</td><td><code>email</code></td></tr>
+                <tr><td>URL</td><td><code>url</code></td></tr>
+                <tr><td>Domain Name</td><td><code>domainName</code></td></tr>
+                <tr><td>Phone Number</td><td><code>phoneNumber</code></td></tr>
+                <tr><td>IP Address (v4)</td><td><code>ipAddress</code></td></tr>
+                <tr><td>MAC Address</td><td><code>macAddress</code></td></tr>
+                <tr><td>IPv6 Address</td><td><code>ipv6Address</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>These are suggestions, not active by default. Add the ones relevant to your work.</p>
+
+          <h3>Managing Patterns</h3>
+          <ol>
+            <li>Right-click the system tray icon and open Settings</li>
+            <li>Go to the Tools tab</li>
+            <li>Add patterns from templates or create custom ones with your own regex</li>
+          </ol>
+        </section>
+
+        <section id="quick-tools">
+          <h2>Quick Tools</h2>
+          <p>Quick Tools are URL templates that open web pages with data extracted by Quick Clips.</p>
+
+          <h3>Setup</h3>
+          <ol>
+            <li>Open Settings &gt; Tools tab</li>
+            <li>Add a new Quick Tool with a name and URL template</li>
+            <li>Use capture group names as tokens in the URL</li>
+          </ol>
+
+          <h3>URL Templates</h3>
+          <p>Tokens are capture group names wrapped in curly braces:</p>
+          <pre><code>https://example.com/lookup?email={email}
+https://tool.com/check?email={email}&amp;domain={domainName}</code></pre>
+          <p>A tool is available when its required tokens are present in the current Quick Clips matches.</p>
+
+          <h3>Usage</h3>
+          <p>When Quick Clips detects patterns in a clip, you can:</p>
+          <ul>
+            <li>Click the scanner icon on the clip to see matches and open tools</li>
+            <li>Use the Tools Launcher window (Ctrl+Shift+T) for quick access</li>
+            <li>Use the cog icon or right-click menu on any clip and select "Scan for Search Terms" to scan older clips and open the Tools Launcher with their extracted data</li>
+          </ul>
+
+          <h3>Example: Call Center Workflow</h3>
+          <p>Define patterns for email and customer number, then create tools:</p>
+          <pre><code>CRM Lookup:    https://crm.company.com/search?email={email}
+Account Info:  https://billing.company.com/customer/{customerNumber}
+Ticket Search: https://helpdesk.company.com/history/{email}</code></pre>
+          <p>Copy a customer email, and all three tools become available in one click.</p>
+
+          <h3>Example: Data Entry</h3>
+          <p>Define a pattern to extract an order number from pasted text, then create a tool:</p>
+          <pre><code>Order Lookup: https://orders.company.com/view/{orderNumber}</code></pre>
+        </section>
+
+        <section id="templates">
+          <h2>Templates <span class="added-in">Added in v1.6</span></h2>
+          <p>Templates generate formatted text by substituting tokens with clipboard data.</p>
+
+          <h3>Token Types</h3>
+          <p><strong>Positional tokens</strong> reference clips by recency:</p>
+          <ul>
+            <li><code>{c1}</code> — most recent clip</li>
+            <li><code>{c2}</code> — second most recent</li>
+            <li><code>{c3}</code> — third most recent, and so on</li>
+          </ul>
+          <p><strong>Named tokens</strong> reference Quick Clips capture group values:</p>
+          <ul>
+            <li><code>{email}</code>, <code>{domainName}</code>, <code>{phoneNumber}</code>, etc.</li>
+          </ul>
+
+          <h3>Example</h3>
+          <p>Template:</p>
+          <pre><code>Hello {c1},
+
+Your account ({email}) has been updated. Reference number: {customerNumber}.
+
+Regards</code></pre>
+          <p>
+            This pulls the most recent clip for the greeting name, and uses Quick Clips
+            matches for the email and customer number.
+          </p>
+
+          <h3>Managing Templates</h3>
+          <p>Templates are managed in Settings &gt; Tools tab, alongside Quick Clips patterns and Quick Tools.</p>
+        </section>
+
+        <section id="clip-quick-search">
+          <h2>Clip Quick Search <span class="added-in">Added in v1.5</span></h2>
+          <p>
+            Press Ctrl+Shift+F (default hotkey) to toggle a search bar in the main window.
+            Type to filter clips by content.
+          </p>
+        </section>
+
+        <section id="tools-launcher">
+          <h2>Tools Launcher Window</h2>
+          <p>The Tools Launcher is a dedicated window for quickly acting on clipboard content.</p>
+          <ul>
+            <li>Open with Ctrl+Shift+T (default hotkey)</li>
+            <li>Automatically scans the most recent clip against your Quick Clips patterns</li>
+            <li>Shows matched values and available Quick Tools</li>
+            <li>If already open, sending a new clip refreshes the content</li>
+          </ul>
+        </section>
+
+        <section id="global-hotkeys">
+          <h2>Global Hotkeys</h2>
+          <p>All hotkeys are configurable in Settings &gt; Hotkeys. Any hotkey can be rebound or disabled.</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Default Shortcut</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td><code>Ctrl+Shift+V</code></td><td>Toggle main window</td></tr>
+                <tr><td><code>Ctrl+Shift+1</code></td><td>Copy most recent clip to clipboard</td></tr>
+                <tr><td><code>Ctrl+Shift+2</code></td><td>Copy 2nd most recent clip</td></tr>
+                <tr><td><code>Ctrl+Shift+3</code></td><td>Copy 3rd most recent clip</td></tr>
+                <tr><td><code>Ctrl+Shift+4</code></td><td>Copy 4th most recent clip</td></tr>
+                <tr><td><code>Ctrl+Shift+5</code></td><td>Copy 5th most recent clip</td></tr>
+                <tr><td><code>Ctrl+Shift+F</code></td><td>Toggle clip search bar</td></tr>
+                <tr><td><code>Ctrl+Shift+T</code></td><td>Open Tools Launcher</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>On macOS, Ctrl is replaced with Cmd.</p>
+        </section>
+
+        <section id="settings">
+          <h2>Settings Reference</h2>
+
+          <h3>Application</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Setting</th><th>Description</th><th>Default</th></tr></thead>
+              <tbody>
+                <tr><td>Maximum Clips</td><td>Number of clips to retain (15–100)</td><td>—</td></tr>
+                <tr><td>Start Minimized</td><td>Start in system tray</td><td>—</td></tr>
+                <tr><td>Auto Start</td><td>Launch with OS</td><td>—</td></tr>
+                <tr><td>Theme</td><td>Light, Dark, or System</td><td>System</td></tr>
+                <tr><td>Code Detection</td><td>Detect and highlight code languages</td><td>On</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Window</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Setting</th><th>Description</th><th>Default</th></tr></thead>
+              <tbody>
+                <tr><td>Window Transparency</td><td>Enable transparent window</td><td>Off</td></tr>
+                <tr><td>Transparency Level</td><td>Opacity percentage (0–100%)</td><td>—</td></tr>
+                <tr><td>Opaque When Focused</td><td>Full opacity when window is focused</td><td>On</td></tr>
+                <tr><td>Always On Top</td><td>Keep window above others</td><td>Off</td></tr>
+                <tr><td>Remember Position</td><td>Restore window position on launch</td><td>On</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Hotkeys</h3>
+          <p>Configure key combinations for all 8 global hotkeys. Hotkeys can be individually enabled or disabled.</p>
+
+          <h3>Tools</h3>
+          <p>Manage Quick Clips patterns, Quick Tools, and Templates.</p>
+        </section>
+
+        <section id="code-detection">
+          <h2>Code Detection</h2>
+          <p>
+            When enabled (Settings &gt; Application &gt; Code Detection), Clipless detects
+            programming languages in text clips and applies syntax highlighting in the UI.
+          </p>
+        </section>
+
+        <section id="security">
+          <h2>Security and Privacy</h2>
+          <ul>
+            <li>All clipboard data is encrypted at rest using OS-native encryption</li>
+            <li>Data is stored locally only — no cloud sync, no remote servers</li>
+            <li>No telemetry, analytics, or tracking of any kind</li>
+            <li>The application is open source: <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener">github.com/dantheuber/clipless</a></li>
+          </ul>
+        </section>
+
+        <section id="workflow-examples">
+          <h2>Workflow Examples</h2>
+
+          <h3>Call Center Agent</h3>
+          <ol>
+            <li>Add Quick Clips patterns for email, phone number, and customer ID</li>
+            <li>Create Quick Tools pointing to your CRM, billing system, and helpdesk</li>
+            <li>When a customer provides their info, copy it once</li>
+            <li>Open the Tools Launcher (Ctrl+Shift+T) to see extracted data and launch lookups</li>
+          </ol>
+
+          <h3>Data Entry</h3>
+          <ol>
+            <li>Create Templates with positional tokens for standardized form text</li>
+            <li>Use Quick Clips patterns to extract structured data from source documents</li>
+            <li>Use the clipboard history (Ctrl+Shift+1 through 5) to quickly re-paste recent items</li>
+          </ol>
+        </section>
+
+        <section id="troubleshooting">
+          <h2>Troubleshooting</h2>
+
+          <div class="callout">
+            <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 8h.01M11 12h1v4h1" /></svg></span>
+            <p>Still stuck? Check <a href="https://github.com/dantheuber/clipless/issues" target="_blank" rel="noopener">GitHub Issues</a> for known problems, or <a href="https://github.com/dantheuber/clipless/issues/new" target="_blank" rel="noopener">create an issue</a> with your platform and steps to reproduce.</p>
+          </div>
+
+          <h3>Clipboard not detecting content</h3>
+          <ul>
+            <li>Verify Clipless is running (check system tray)</li>
+            <li>On macOS/Linux, check accessibility/permissions</li>
+            <li>Restart the application</li>
+          </ul>
+
+          <h3>Patterns not matching</h3>
+          <ul>
+            <li>Verify regex syntax in your custom patterns</li>
+            <li>Test the regex against your expected input</li>
+            <li>Ensure capture groups are named: <code>(?&lt;name&gt;...)</code></li>
+          </ul>
+
+          <h3>Quick Tools not opening</h3>
+          <ul>
+            <li>Check URL template syntax (tokens use <code>{name}</code> format)</li>
+            <li>Verify the web tool URL is accessible</li>
+            <li>Ensure the required capture groups are present in matched data</li>
+          </ul>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <!-- ===================== Footer ===================== -->
+  <footer class="footer">
+    <div class="wrap">
+      <div class="footer-inner">
+        <a class="brand" href="/">
+          <span class="mark"><span class="mark-img" aria-hidden="true" style="width:26px;height:26px"></span></span>
+          <span class="name">Clipless</span>
+        </a>
+        <nav class="footer-links">
+          <a href="/#quick-clips">Quick Clips</a>
+          <a href="/#tools">Tools</a>
+          <a href="/#theming">Theming</a>
+          <a href="/docs/">Docs</a>
+          <a href="/download/">Download</a>
+          <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </div>
+      <p class="footer-fine">
+        Clipless is an open-source clipboard manager built with Electron, React &amp; TypeScript.
+        Data is encrypted with your OS-native keystore and never leaves your machine.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
