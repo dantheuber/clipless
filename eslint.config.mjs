@@ -14,6 +14,7 @@ export default tseslint.config(
       'e2e/**',
       'screenshots/**',
       'coverage/**',
+      'site/**',
     ],
   },
   tseslint.configs.recommended,
