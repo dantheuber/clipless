@@ -153,7 +153,7 @@ The things you don't notice until you'd miss them.
 - **⌨️ Global hotkeys** — reach recent clips and the launcher from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you.
 - **🔒 Encrypted storage** — history is encrypted with your OS keystore (DPAPI, Keychain or Secret Service) and never leaves your machine. Data is split into domain-specific files for efficient saves, with images stored as separate encrypted files and fast-loading thumbnails.
 - **🚀 Non-blocking startup** — the window appears immediately while your history loads in the background.
-- **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background.
+- **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background (auto-update is Windows-only for now — see [Installing on macOS](#-installing-on-macos)).
 - **💾 Backup-friendly** — export and import your clips, patterns, tools and templates.
 
 ---
@@ -254,8 +254,50 @@ snippets and open them in your documentation.
 
 ## 📥 Installation
 
-Download the latest build for your platform from the **[download page](https://clipless.app/download/)**
+Download the latest build for **Windows** or **Linux** from the **[download page](https://clipless.app/download/)**
 or the **[GitHub releases](https://github.com/dantheuber/clipless/releases)**.
+
+### 🍎 Installing on macOS
+
+macOS builds aren't code-signed yet. This causes `.dmg` files downloaded from releases to not immediately work.
+The sticking point is **Gatekeeper**: anything downloaded through a browser gets a
+`com.apple.quarantine` flag, and macOS refuses to open a quarantined, unsigned app — usually
+with *"Clipless is damaged and can't be opened."* The DMG isn't actually damaged; clearing that
+flag (or building locally, where it's never applied) fixes it. Two ways to install:
+
+**Option 1 — Download a `.dmg` and clear the quarantine flag** *(recommended)*
+
+1. Get the Clipless `.dmg` for your Mac from a [release](https://github.com/dantheuber/clipless/releases) — `arm64` for Apple Silicon, `x64` for Intel (or a build artifact)
+2. Open it and drag **Clipless** into your **Applications** folder
+3. Remove the quarantine flag in Terminal:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/Clipless.app
+   ```
+4. Launch Clipless normally — Gatekeeper will let it through
+
+**Option 2 — Build it yourself** *(no Terminal step on a downloaded file)*
+
+A DMG you compile locally never receives the quarantine flag, so it installs straight away.
+You'll need the **Xcode Command Line Tools** (`xcode-select --install`) and **Node.js 20+**.
+
+```bash
+git clone https://github.com/dantheuber/clipless.git
+cd clipless
+npm ci
+npm run build:mac
+```
+
+This produces two disk images in `dist/` — `clipless-<version>-arm64.dmg` (Apple Silicon) and
+`clipless-<version>-x64.dmg` (Intel). Open the one matching your Mac and drag **Clipless** into
+**Applications**.
+
+> **Architecture:** macOS releases ship separate `.dmg` files for **Apple Silicon (arm64)** and
+> **Intel (x86_64)**. Download the one matching your Mac.
+
+> **Auto-update:** in-app automatic updates don't work on macOS yet, because they require a
+> code-signed app and the macOS builds are currently unsigned. On macOS, update by downloading
+> the latest `.dmg` from [releases](https://github.com/dantheuber/clipless/releases) and
+> reinstalling. (Windows auto-updates normally.)
 
 <details>
 <summary><strong>⚠️ A note on security warnings during install</strong></summary>
@@ -281,7 +323,7 @@ override — the build comes straight from this open-source repository.
 **How to install past the warning**
 
 - **Windows** — click "More info" → "Run anyway", or temporarily disable SmartScreen
-- **macOS** — right-click the app → "Open" → "Open" in the dialog, or run `sudo spctl --master-disable` to temporarily allow unsigned apps
+- **macOS** — see [Installing on macOS](#-installing-on-macos) above (clear the quarantine flag, or build locally)
 - **Linux** — make the AppImage executable and run it, or adjust your security settings if needed
 
 **Looking ahead** — if Clipless gains enough community adoption, a commercial code-signing

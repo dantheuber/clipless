@@ -115,7 +115,7 @@ The workflow includes a default template:
 Choose the appropriate download for your operating system:
 
 - **Windows**: `clipless-{version}-setup.exe`
-- **macOS**: `clipless-{version}.dmg`
+- **macOS**: `clipless-{version}-arm64.dmg` (Apple Silicon) / `clipless-{version}-x64.dmg` (Intel)
 - **Linux**: `clipless-{version}.AppImage` or install via Snap Store
 ```
 
