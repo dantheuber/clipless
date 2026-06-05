@@ -28,6 +28,7 @@ mac:
     - target: dmg
       arch:
         - arm64
+        - x64
   extendInfo:
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     NSHumanReadableCopyright: Copyright © 2025 Daniel Essig
@@ -43,7 +44,7 @@ mac:
   type: distribution
   bundleVersion: ${version}
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: ${name}-${version}-${arch}.${ext}
   title: ${productName} ${version}
   icon: build/icon.icns
   iconSize: 80

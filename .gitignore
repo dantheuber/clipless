@@ -8,5 +8,7 @@ out
 electron.vite.config.*.mjs
 .cursor/rules/user
 .claude/
+updatesite.sh
 test-results/
 coverage/
+screenshots/output/
