@@ -366,6 +366,12 @@ npm run dev      # start with hot reload
 
 [VS Code](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
+## 📄 License
+
+Clipless is released under the [MIT License](LICENSE) — you're free to use, modify, and
+distribute it, including in forks and derivative works. The only condition is that the
+original copyright and license notice be retained, so the original project is always credited.
+
 ---
 
 <div align="center">
