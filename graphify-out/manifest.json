@@ -1,0 +1,1162 @@
+{
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.vscode\\extensions.json": {
+    "mtime": 1769886440.2673852,
+    "ast_hash": "74a56d7bbbf177ae6339c026934ee00b",
+    "semantic_hash": "74a56d7bbbf177ae6339c026934ee00b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.vscode\\launch.json": {
+    "mtime": 1769886440.267889,
+    "ast_hash": "c7826d06165bf4890ba638f23b066a6d",
+    "semantic_hash": "c7826d06165bf4890ba638f23b066a6d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.vscode\\settings.json": {
+    "mtime": 1769886440.2683558,
+    "ast_hash": "39dc44bd672f9ef8bd33a4140e7cd61c",
+    "semantic_hash": "39dc44bd672f9ef8bd33a4140e7cd61c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.vscode\\tasks.json": {
+    "mtime": 1769886440.2683558,
+    "ast_hash": "9b6e131839f1013cf64eb8bb203a94d1",
+    "semantic_hash": "9b6e131839f1013cf64eb8bb203a94d1"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\app-launch.spec.ts": {
+    "mtime": 1773705874.6289852,
+    "ast_hash": "24e87450ee0bdd996a8245f4725f65be",
+    "semantic_hash": "24e87450ee0bdd996a8245f4725f65be"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\clipboard.spec.ts": {
+    "mtime": 1773705874.6299882,
+    "ast_hash": "29d075f8c23e1b7ec7f20db6f0787189",
+    "semantic_hash": "29d075f8c23e1b7ec7f20db6f0787189"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\context-menu.spec.ts": {
+    "mtime": 1780895453.3649378,
+    "ast_hash": "3b12270a94c29d7c9a3efccbd3e1bbd5",
+    "semantic_hash": "3b12270a94c29d7c9a3efccbd3e1bbd5"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\image-clipboard.spec.ts": {
+    "mtime": 1775279007.4879632,
+    "ast_hash": "e2929f523bd460f474c9ea049331cf03",
+    "semantic_hash": "e2929f523bd460f474c9ea049331cf03"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\quick-clips.spec.ts": {
+    "mtime": 1773705874.6299882,
+    "ast_hash": "e9e8c4995663c9aaebaf940233404840",
+    "semantic_hash": "e9e8c4995663c9aaebaf940233404840"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\settings.spec.ts": {
+    "mtime": 1773705874.6309862,
+    "ast_hash": "2211eda6042b7fd891bb55721861874d",
+    "semantic_hash": "2211eda6042b7fd891bb55721861874d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\theme.spec.ts": {
+    "mtime": 1773705874.6309862,
+    "ast_hash": "c794eaaff83bd05d6e8b79a8a7dcd337",
+    "semantic_hash": "c794eaaff83bd05d6e8b79a8a7dcd337"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\tools.spec.ts": {
+    "mtime": 1773705874.6309862,
+    "ast_hash": "0c20d1fc1d5d9e43e836cec3ef4cea50",
+    "semantic_hash": "0c20d1fc1d5d9e43e836cec3ef4cea50"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\tsconfig.json": {
+    "mtime": 1773705874.6324904,
+    "ast_hash": "dbf4e9d4395d662300218337d7617f7f",
+    "semantic_hash": "dbf4e9d4395d662300218337d7617f7f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\electron.vite.config.ts": {
+    "mtime": 1773705874.6334949,
+    "ast_hash": "5f71e0395edd521b621e2baa24c66631",
+    "semantic_hash": "5f71e0395edd521b621e2baa24c66631"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\eslint.config.mjs": {
+    "mtime": 1780679611.3114643,
+    "ast_hash": "fc69b0578613b620e3588c382c595808",
+    "semantic_hash": "fc69b0578613b620e3588c382c595808"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\package.json": {
+    "mtime": 1780895453.3669362,
+    "ast_hash": "4609e60dcc55451d1eb88c2d9b4ae37e",
+    "semantic_hash": "4609e60dcc55451d1eb88c2d9b4ae37e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\playwright.config.ts": {
+    "mtime": 1773705874.6370032,
+    "ast_hash": "54afbabd972669c20ab9d203f72e09b7",
+    "semantic_hash": "54afbabd972669c20ab9d203f72e09b7"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\screenshots\\capture.spec.ts": {
+    "mtime": 1780895453.3679383,
+    "ast_hash": "92acfb6a1bb3d6aaa84a93c6386bfcce",
+    "semantic_hash": "92acfb6a1bb3d6aaa84a93c6386bfcce"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\screenshots\\fixtures\\demo-data.ts": {
+    "mtime": 1780895453.3694427,
+    "ast_hash": "0fc77a6208822d92e0d5baafbf94851e",
+    "semantic_hash": "0fc77a6208822d92e0d5baafbf94851e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\screenshots\\helpers.ts": {
+    "mtime": 1780895453.3694427,
+    "ast_hash": "2741b447be68ab683f0bc3b2c94ec6a0",
+    "semantic_hash": "2741b447be68ab683f0bc3b2c94ec6a0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\screenshots\\playwright.config.ts": {
+    "mtime": 1780620074.9806736,
+    "ast_hash": "ee936f4dcbb711643b73f4984239ce90",
+    "semantic_hash": "ee936f4dcbb711643b73f4984239ce90"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\screenshots\\tsconfig.json": {
+    "mtime": 1780620074.982178,
+    "ast_hash": "e6ca2b1121933d178c099a617103dd61",
+    "semantic_hash": "e6ca2b1121933d178c099a617103dd61"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\app.js": {
+    "mtime": 1780895453.3704505,
+    "ast_hash": "151d94d87bbfe5dabea5bf5fb134e89f",
+    "semantic_hash": "151d94d87bbfe5dabea5bf5fb134e89f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\__mocks__\\electron.ts": {
+    "mtime": 1773705874.6380029,
+    "ast_hash": "7e0a3fc8dcf04568e939fb1848b179fb",
+    "semantic_hash": "7e0a3fc8dcf04568e939fb1848b179fb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\app\\index.ts": {
+    "mtime": 1780330398.969671,
+    "ast_hash": "8e73cfa67dd88d109ce2a9ee0f2b7ada",
+    "semantic_hash": "8e73cfa67dd88d109ce2a9ee0f2b7ada"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\autoStart\\index.test.ts": {
+    "mtime": 1780330398.9706755,
+    "ast_hash": "b3cada0b792b73b4ff2aa2e8eba544ab",
+    "semantic_hash": "b3cada0b792b73b4ff2aa2e8eba544ab"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\autoStart\\index.ts": {
+    "mtime": 1780330398.971675,
+    "ast_hash": "d603dcdf7dda4d455a1e88537dea1cad",
+    "semantic_hash": "d603dcdf7dda4d455a1e88537dea1cad"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\data.test.ts": {
+    "mtime": 1775279007.49103,
+    "ast_hash": "13acfb5937fc99203553d94ab146f02a",
+    "semantic_hash": "13acfb5937fc99203553d94ab146f02a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\data.ts": {
+    "mtime": 1775279007.49103,
+    "ast_hash": "cd482660827c2c6f1b4bd244b6d37108",
+    "semantic_hash": "cd482660827c2c6f1b4bd244b6d37108"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\index.ts": {
+    "mtime": 1769886440.2905095,
+    "ast_hash": "5246059168a543b682044b86a24ef05b",
+    "semantic_hash": "5246059168a543b682044b86a24ef05b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\ipc.ts": {
+    "mtime": 1780330398.9726753,
+    "ast_hash": "df6b3b777ad9f9099478298951e19001",
+    "semantic_hash": "df6b3b777ad9f9099478298951e19001"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\monitoring.test.ts": {
+    "mtime": 1775279007.4925323,
+    "ast_hash": "e3e4b81ad423fb8dd405f2d4d7641d8c",
+    "semantic_hash": "e3e4b81ad423fb8dd405f2d4d7641d8c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\monitoring.ts": {
+    "mtime": 1775279007.4935365,
+    "ast_hash": "8b52574e1f8b50f737672e1d309992cf",
+    "semantic_hash": "8b52574e1f8b50f737672e1d309992cf"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\quick-clips.test.ts": {
+    "mtime": 1773705874.6412492,
+    "ast_hash": "a7a4e1a437f50dbab7702e216f62696a",
+    "semantic_hash": "a7a4e1a437f50dbab7702e216f62696a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\quick-clips.ts": {
+    "mtime": 1773705874.6427531,
+    "ast_hash": "0667bcf3fe1b1ffe9fb68ea48e6add85",
+    "semantic_hash": "0667bcf3fe1b1ffe9fb68ea48e6add85"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\quick-tools.test.ts": {
+    "mtime": 1773705874.6427531,
+    "ast_hash": "597273adeafe1b4ce1a3c07d50f875cb",
+    "semantic_hash": "597273adeafe1b4ce1a3c07d50f875cb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\quick-tools.ts": {
+    "mtime": 1773705874.6437578,
+    "ast_hash": "f95178985ec914fae081505c8de62497",
+    "semantic_hash": "f95178985ec914fae081505c8de62497"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\search-terms.ts": {
+    "mtime": 1773705874.6452618,
+    "ast_hash": "aa417b6326be045306199d39749ecab0",
+    "semantic_hash": "aa417b6326be045306199d39749ecab0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\storage-integration.ts": {
+    "mtime": 1773705874.646314,
+    "ast_hash": "9ce7f200df4eff20f6d8c167f57bba0f",
+    "semantic_hash": "9ce7f200df4eff20f6d8c167f57bba0f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\clipboard\\templates.ts": {
+    "mtime": 1773705874.6473148,
+    "ast_hash": "98d4f13ae0ba4c1c140f5c6b772f84a0",
+    "semantic_hash": "98d4f13ae0ba4c1c140f5c6b772f84a0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\global.d.ts": {
+    "mtime": 1769886440.2943864,
+    "ast_hash": "cc6472b768b6184bf0a14585afd55d0c",
+    "semantic_hash": "cc6472b768b6184bf0a14585afd55d0c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\actions.test.ts": {
+    "mtime": 1775279007.4935365,
+    "ast_hash": "dbe695a5666c019fde0a185e17e90de0",
+    "semantic_hash": "dbe695a5666c019fde0a185e17e90de0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\actions.ts": {
+    "mtime": 1775279007.4945362,
+    "ast_hash": "1717934790b6aeb06f6a9de0a6851e86",
+    "semantic_hash": "1717934790b6aeb06f6a9de0a6851e86"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\index.ts": {
+    "mtime": 1769886440.2953866,
+    "ast_hash": "7e0b62e30595b1b64f82a4e02bc95e94",
+    "semantic_hash": "7e0b62e30595b1b64f82a4e02bc95e94"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\manager.test.ts": {
+    "mtime": 1773705874.6483147,
+    "ast_hash": "be214b873a6ed72521f67acc68b5c04d",
+    "semantic_hash": "be214b873a6ed72521f67acc68b5c04d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\manager.ts": {
+    "mtime": 1773705874.6498203,
+    "ast_hash": "5b7f806f3fa06f2835f606a08c88d8f7",
+    "semantic_hash": "5b7f806f3fa06f2835f606a08c88d8f7"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\registry.test.ts": {
+    "mtime": 1773705874.6498203,
+    "ast_hash": "752ddc34cc0ceb8e14d354119789492f",
+    "semantic_hash": "752ddc34cc0ceb8e14d354119789492f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\registry.ts": {
+    "mtime": 1769886440.2953866,
+    "ast_hash": "16b7e7460ae5f03afa11c7488a40ff6d",
+    "semantic_hash": "16b7e7460ae5f03afa11c7488a40ff6d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\types.ts": {
+    "mtime": 1769886440.2963865,
+    "ast_hash": "8dad089ac3b3ce0a313c37f0874a1bb8",
+    "semantic_hash": "8dad089ac3b3ce0a313c37f0874a1bb8"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\index.ts": {
+    "mtime": 1780330398.9726753,
+    "ast_hash": "910ba34e8760e0d828374ab60f514ca0",
+    "semantic_hash": "910ba34e8760e0d828374ab60f514ca0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\ipc\\index.ts": {
+    "mtime": 1780069991.0791588,
+    "ast_hash": "3579096fef7875c4fd5dd5a4d1e44f35",
+    "semantic_hash": "3579096fef7875c4fd5dd5a4d1e44f35"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\notifications\\index.ts": {
+    "mtime": 1769893108.787186,
+    "ast_hash": "e86cb121a257210dbbf971cbe41f1765",
+    "semantic_hash": "e86cb121a257210dbbf971cbe41f1765"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\clips.ts": {
+    "mtime": 1769886440.2984803,
+    "ast_hash": "e75d5e46c8ccef830534fef84e0ce4d4",
+    "semantic_hash": "e75d5e46c8ccef830534fef84e0ce4d4"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\defaults.ts": {
+    "mtime": 1780084423.0324857,
+    "ast_hash": "26c754a306520e31bc3b7025e82ad4cb",
+    "semantic_hash": "26c754a306520e31bc3b7025e82ad4cb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\file-operations.test.ts": {
+    "mtime": 1775279007.4945362,
+    "ast_hash": "b19c72fa4e95edea87e459fbef82be7a",
+    "semantic_hash": "b19c72fa4e95edea87e459fbef82be7a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\file-operations.ts": {
+    "mtime": 1775279007.49554,
+    "ast_hash": "56ec96faa1ab67e61545701ce0a2ea34",
+    "semantic_hash": "56ec96faa1ab67e61545701ce0a2ea34"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\image-store.test.ts": {
+    "mtime": 1775279007.4965408,
+    "ast_hash": "aff5c4220e61b8f9a01ae1217f566f10",
+    "semantic_hash": "aff5c4220e61b8f9a01ae1217f566f10"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\image-store.ts": {
+    "mtime": 1775279007.4965408,
+    "ast_hash": "ec514e15e2166d347ee34953a0ced545",
+    "semantic_hash": "ec514e15e2166d347ee34953a0ced545"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\index.ts": {
+    "mtime": 1775279007.4965408,
+    "ast_hash": "1b1a3ce1ce4b12451aa57a95cbd54c61",
+    "semantic_hash": "1b1a3ce1ce4b12451aa57a95cbd54c61"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\migration.test.ts": {
+    "mtime": 1775279007.49754,
+    "ast_hash": "8632c4a91298971d99c143f8c44fcc9d",
+    "semantic_hash": "8632c4a91298971d99c143f8c44fcc9d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\migration.ts": {
+    "mtime": 1775279007.49754,
+    "ast_hash": "99ce24c2f14dbca45ce0caba22b3f706",
+    "semantic_hash": "99ce24c2f14dbca45ce0caba22b3f706"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\quick-tools.ts": {
+    "mtime": 1773705874.6553357,
+    "ast_hash": "d56f6a312776b96ffcb76e032bd7407b",
+    "semantic_hash": "d56f6a312776b96ffcb76e032bd7407b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\search-terms.test.ts": {
+    "mtime": 1773705874.6558392,
+    "ast_hash": "92e87c83940028faf72ebb0955cc94b0",
+    "semantic_hash": "92e87c83940028faf72ebb0955cc94b0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\search-terms.ts": {
+    "mtime": 1769886440.3004785,
+    "ast_hash": "e308e9d073fbb928d6632121f70fcc4a",
+    "semantic_hash": "e308e9d073fbb928d6632121f70fcc4a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\settings.ts": {
+    "mtime": 1769886440.3004785,
+    "ast_hash": "23f825c790fd9186ec0dce167c129ed5",
+    "semantic_hash": "23f825c790fd9186ec0dce167c129ed5"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\templates.test.ts": {
+    "mtime": 1773705874.6568449,
+    "ast_hash": "93ca27e24ed2d2ca0aa156a13fb3cb2d",
+    "semantic_hash": "93ca27e24ed2d2ca0aa156a13fb3cb2d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\templates.ts": {
+    "mtime": 1769886440.301479,
+    "ast_hash": "df45887e4afff0593fffa6e974d671af",
+    "semantic_hash": "df45887e4afff0593fffa6e974d671af"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\storage\\window-bounds.ts": {
+    "mtime": 1769886440.301479,
+    "ast_hash": "db6675cc1769bb91c8f6827818208316",
+    "semantic_hash": "db6675cc1769bb91c8f6827818208316"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\tray.ts": {
+    "mtime": 1769886440.301479,
+    "ast_hash": "49a7b786893b9d948c8b1ae815c32de2",
+    "semantic_hash": "49a7b786893b9d948c8b1ae815c32de2"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\updater\\index.test.ts": {
+    "mtime": 1780177493.8077824,
+    "ast_hash": "f02d2bfe188e3c2ebc45f40c57b1ecb8",
+    "semantic_hash": "f02d2bfe188e3c2ebc45f40c57b1ecb8"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\updater\\index.ts": {
+    "mtime": 1780177493.8087807,
+    "ast_hash": "ddbf8f4d9a319e16ac2e719d36b35592",
+    "semantic_hash": "ddbf8f4d9a319e16ac2e719d36b35592"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\window\\bounds.ts": {
+    "mtime": 1775279007.498568,
+    "ast_hash": "16fe669e796fce677cb8ac2d22a0a84f",
+    "semantic_hash": "16fe669e796fce677cb8ac2d22a0a84f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\window\\creation.ts": {
+    "mtime": 1780330398.9736753,
+    "ast_hash": "941ddb76dd868719adc1b27af99a98c3",
+    "semantic_hash": "941ddb76dd868719adc1b27af99a98c3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\window\\index.ts": {
+    "mtime": 1769886440.3034794,
+    "ast_hash": "c29e60befe4d7b228efd2a8ba07b9267",
+    "semantic_hash": "c29e60befe4d7b228efd2a8ba07b9267"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\window\\settings.ts": {
+    "mtime": 1769886440.3034794,
+    "ast_hash": "58ef2dd7aa8cb3ec7de2bf0e70de8a24",
+    "semantic_hash": "58ef2dd7aa8cb3ec7de2bf0e70de8a24"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\preload\\index.d.ts": {
+    "mtime": 1780330398.9751804,
+    "ast_hash": "8f23d689c5eff2a4406a1d94dd33aec0",
+    "semantic_hash": "8f23d689c5eff2a4406a1d94dd33aec0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\preload\\index.ts": {
+    "mtime": 1780330398.9751804,
+    "ast_hash": "783672f318a2c2b1794f1a16a3f5b3c4",
+    "semantic_hash": "783672f318a2c2b1794f1a16a3f5b3c4"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\App.tsx": {
+    "mtime": 1780177493.8107817,
+    "ast_hash": "1887ce552d9350bf76449bf703ff80c2",
+    "semantic_hash": "1887ce552d9350bf76449bf703ff80c2"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\Settings.tsx": {
+    "mtime": 1769886440.3074787,
+    "ast_hash": "06f12d70df452b2c4947771e9801bc7a",
+    "semantic_hash": "06f12d70df452b2c4947771e9801bc7a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\ToolsLauncher.tsx": {
+    "mtime": 1773705874.6598444,
+    "ast_hash": "f5675fbe942897af1c8e3726b1253878",
+    "semantic_hash": "f5675fbe942897af1c8e3726b1253878"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\ConfirmDialog.tsx": {
+    "mtime": 1769886440.3106606,
+    "ast_hash": "3954519424bb74b298a41f7d80264c2f",
+    "semantic_hash": "3954519424bb74b298a41f7d80264c2f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\SearchBar.tsx": {
+    "mtime": 1775279007.5000708,
+    "ast_hash": "8a49ab359686af233c2e69fd8e230d46",
+    "semantic_hash": "8a49ab359686af233c2e69fd8e230d46"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\StatusBar.tsx": {
+    "mtime": 1775279007.5010753,
+    "ast_hash": "e4f9f9231e8a4c8202b5a37182fc886f",
+    "semantic_hash": "e4f9f9231e8a4c8202b5a37182fc886f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\UpdateBanner.test.tsx": {
+    "mtime": 1780177493.811781,
+    "ast_hash": "26727de52c9d3f9975b83cd0d8c049dd",
+    "semantic_hash": "26727de52c9d3f9975b83cd0d8c049dd"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\UpdateBanner.tsx": {
+    "mtime": 1780177493.811781,
+    "ast_hash": "850507345d4c3003d05303c6aa4c2deb",
+    "semantic_hash": "850507345d4c3003d05303c6aa4c2deb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\Clips.tsx": {
+    "mtime": 1775279007.5010753,
+    "ast_hash": "0bd66ae6e7cdc80a295c3365e3c54096",
+    "semantic_hash": "0bd66ae6e7cdc80a295c3365e3c54096"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\QuickClipsScanner.test.tsx": {
+    "mtime": 1779989012.1420524,
+    "ast_hash": "c58297db08c975feac6d7a6dbe58d2e1",
+    "semantic_hash": "c58297db08c975feac6d7a6dbe58d2e1"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\QuickClipsScanner.tsx": {
+    "mtime": 1779989012.1430564,
+    "ast_hash": "8193e339cfba4896ebd61159d5d6e797",
+    "semantic_hash": "8193e339cfba4896ebd61159d5d6e797"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\BookmarkClip.test.tsx": {
+    "mtime": 1773705874.661844,
+    "ast_hash": "1795122c6a4bb08b4428194e13ae8c05",
+    "semantic_hash": "1795122c6a4bb08b4428194e13ae8c05"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\BookmarkClip.tsx": {
+    "mtime": 1775279007.5025797,
+    "ast_hash": "8ca638b636e79bd1e0dac23f45449c89",
+    "semantic_hash": "8ca638b636e79bd1e0dac23f45449c89"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\ClipContextMenu.tsx": {
+    "mtime": 1775279007.503585,
+    "ast_hash": "f8edb8ae2f84e1016c6fbc0c15c39517",
+    "semantic_hash": "f8edb8ae2f84e1016c6fbc0c15c39517"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\ClipOptions.tsx": {
+    "mtime": 1775279007.503585,
+    "ast_hash": "b9971ba8925fa84310c5c92ddfe2b2c1",
+    "semantic_hash": "b9971ba8925fa84310c5c92ddfe2b2c1"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\ClipWrapper.tsx": {
+    "mtime": 1778433675.311437,
+    "ast_hash": "35d93fad1a8dfa31ebd0895d054011c7",
+    "semantic_hash": "35d93fad1a8dfa31ebd0895d054011c7"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\HtmlClip.test.tsx": {
+    "mtime": 1773705874.661844,
+    "ast_hash": "850c1fe2adacbaea20f28e6f7be63b98",
+    "semantic_hash": "850c1fe2adacbaea20f28e6f7be63b98"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\HtmlClip.tsx": {
+    "mtime": 1775279007.504584,
+    "ast_hash": "ba1e51c85956bc9f6123c2108fc911e6",
+    "semantic_hash": "ba1e51c85956bc9f6123c2108fc911e6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\ImageClip.test.tsx": {
+    "mtime": 1775279007.5055842,
+    "ast_hash": "634f82ed3951afc011fdc1e350e6ec80",
+    "semantic_hash": "634f82ed3951afc011fdc1e350e6ec80"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\ImageClip.tsx": {
+    "mtime": 1775279007.5055842,
+    "ast_hash": "f0c58e7184e175221ef5cc4c5dc14130",
+    "semantic_hash": "f0c58e7184e175221ef5cc4c5dc14130"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\RtfClip.tsx": {
+    "mtime": 1775279007.5065844,
+    "ast_hash": "2900ee53679a68a2dbcf2f454a313871",
+    "semantic_hash": "2900ee53679a68a2dbcf2f454a313871"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\SyntaxHighlightedCode.test.tsx": {
+    "mtime": 1775279007.5065844,
+    "ast_hash": "8d659362b32b90903094f6c4604b9cd6",
+    "semantic_hash": "8d659362b32b90903094f6c4604b9cd6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\SyntaxHighlightedCode.tsx": {
+    "mtime": 1775279007.5065844,
+    "ast_hash": "2db15368ce475cd5b157efa1e21b7069",
+    "semantic_hash": "2db15368ce475cd5b157efa1e21b7069"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\TextClip.test.tsx": {
+    "mtime": 1778433675.3124955,
+    "ast_hash": "212b1064f226580a2094a0639b02d59a",
+    "semantic_hash": "212b1064f226580a2094a0639b02d59a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\TextClip.tsx": {
+    "mtime": 1778433675.3130097,
+    "ast_hash": "2a94a2c20b97d5f85556d58357dbba82",
+    "semantic_hash": "2a94a2c20b97d5f85556d58357dbba82"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\clip\\index.ts": {
+    "mtime": 1769886440.3201685,
+    "ast_hash": "348eba5afbd5110ae305d57012ece8e2",
+    "semantic_hash": "348eba5afbd5110ae305d57012ece8e2"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\clips\\quickClipsSelection.ts": {
+    "mtime": 1779989012.1430564,
+    "ast_hash": "38b0e71532cc6b6cb8ba9da843aeddd5",
+    "semantic_hash": "38b0e71532cc6b6cb8ba9da843aeddd5"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\HotkeyManager.tsx": {
+    "mtime": 1769886440.321673,
+    "ast_hash": "ade2e39ba2a7017d54ff46d8c02cae3d",
+    "semantic_hash": "ade2e39ba2a7017d54ff46d8c02cae3d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\QuickClipsManager.tsx": {
+    "mtime": 1769893108.7891903,
+    "ast_hash": "20ab35d2075416b9e768e65a8e632dc2",
+    "semantic_hash": "20ab35d2075416b9e768e65a8e632dc2"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\StorageSettings.tsx": {
+    "mtime": 1769886440.3235734,
+    "ast_hash": "15a1b5b652fae7d64b6d42601a2f4769",
+    "semantic_hash": "15a1b5b652fae7d64b6d42601a2f4769"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\TemplateManager.tsx": {
+    "mtime": 1773705874.6665387,
+    "ast_hash": "19dc98a2a40ea9d34e479ad427f4dcb0",
+    "semantic_hash": "19dc98a2a40ea9d34e479ad427f4dcb0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\ToolsManager.tsx": {
+    "mtime": 1769893108.7901907,
+    "ast_hash": "d37f9d6e536e6c8312c73203e8a4be8a",
+    "semantic_hash": "d37f9d6e536e6c8312c73203e8a4be8a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\UpdaterControl.tsx": {
+    "mtime": 1780084423.0344832,
+    "ast_hash": "65c6deb2a9d5aef405b5c9cd98f9228c",
+    "semantic_hash": "65c6deb2a9d5aef405b5c9cd98f9228c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\UserSettings.tsx": {
+    "mtime": 1769886440.325575,
+    "ast_hash": "af933c2ec50a4ea14e96902fc46ad3e1",
+    "semantic_hash": "af933c2ec50a4ea14e96902fc46ad3e1"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\Versions.tsx": {
+    "mtime": 1769886440.3270798,
+    "ast_hash": "99d8f1f7be4b14aab84d17c36f43198c",
+    "semantic_hash": "99d8f1f7be4b14aab84d17c36f43198c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\GlobalToggle.tsx": {
+    "mtime": 1769886440.3270798,
+    "ast_hash": "d14b1a31595b1006918b7a2d5ad6e603",
+    "semantic_hash": "d14b1a31595b1006918b7a2d5ad6e603"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\HotkeyHeader.tsx": {
+    "mtime": 1769886440.328261,
+    "ast_hash": "0c7d5b3fb19e208c05a5fe1e0409202d",
+    "semantic_hash": "0c7d5b3fb19e208c05a5fe1e0409202d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\HotkeyInstructions.tsx": {
+    "mtime": 1773705874.6675386,
+    "ast_hash": "e661d740220b504ae0f03335da812164",
+    "semantic_hash": "e661d740220b504ae0f03335da812164"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\HotkeyList.tsx": {
+    "mtime": 1769886440.3292613,
+    "ast_hash": "e7e64741a7887486734ce3659383d4cf",
+    "semantic_hash": "e7e64741a7887486734ce3659383d4cf"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\LoadingState.tsx": {
+    "mtime": 1769886440.3292613,
+    "ast_hash": "610e10bc57ea3506aa362ac651180d3b",
+    "semantic_hash": "610e10bc57ea3506aa362ac651180d3b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\SavingIndicator.tsx": {
+    "mtime": 1769886440.3292613,
+    "ast_hash": "11eda03e5718b1d8b6b01effadc0eae6",
+    "semantic_hash": "11eda03e5718b1d8b6b01effadc0eae6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\index.ts": {
+    "mtime": 1769886440.3302593,
+    "ast_hash": "6aae0fb37e513ce95c6ada105c7dffcc",
+    "semantic_hash": "6aae0fb37e513ce95c6ada105c7dffcc"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\hotkeys\\useHotkeyManager.ts": {
+    "mtime": 1773705874.6685388,
+    "ast_hash": "a85c48d56e027e497d71651fdd1eee00",
+    "semantic_hash": "a85c48d56e027e497d71651fdd1eee00"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\quickclips\\InfoTooltip.tsx": {
+    "mtime": 1769886440.3302593,
+    "ast_hash": "e31d837d915b409096c9920d60256059",
+    "semantic_hash": "e31d837d915b409096c9920d60256059"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\quickclips\\SearchTermsSection.tsx": {
+    "mtime": 1773705874.6700437,
+    "ast_hash": "01bada0b5d95ce29f1af7ce2da9c6f0f",
+    "semantic_hash": "01bada0b5d95ce29f1af7ce2da9c6f0f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\quickclips\\TestPatternsSection.tsx": {
+    "mtime": 1769886440.3317637,
+    "ast_hash": "336896c1340046985d50e6c4ee10d82c",
+    "semantic_hash": "336896c1340046985d50e6c4ee10d82c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\quickclips\\ToolsSection.tsx": {
+    "mtime": 1773705874.6710503,
+    "ast_hash": "6fae37178e4c81c703cd72d3a439d6df",
+    "semantic_hash": "6fae37178e4c81c703cd72d3a439d6df"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\quickclips\\index.ts": {
+    "mtime": 1769886440.332769,
+    "ast_hash": "b7968f45944142cec9f01904461ce03c",
+    "semantic_hash": "b7968f45944142cec9f01904461ce03c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\quickclips\\types.ts": {
+    "mtime": 1773705874.672052,
+    "ast_hash": "d8c3ac061380a42ba08f74074b33b3fc",
+    "semantic_hash": "d8c3ac061380a42ba08f74074b33b3fc"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\storagesettings\\DataManagement.tsx": {
+    "mtime": 1769886440.333769,
+    "ast_hash": "8ce8a70cc2d6630ff803eedab6b12451",
+    "semantic_hash": "8ce8a70cc2d6630ff803eedab6b12451"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\storagesettings\\StorageStatistics.tsx": {
+    "mtime": 1769886440.333769,
+    "ast_hash": "3dbcdb1adf1380804e102c51d538e906",
+    "semantic_hash": "3dbcdb1adf1380804e102c51d538e906"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\storagesettings\\index.ts": {
+    "mtime": 1769886440.3347683,
+    "ast_hash": "14b3bee0eaf5d77d8c32a85a7b6cdd51",
+    "semantic_hash": "14b3bee0eaf5d77d8c32a85a7b6cdd51"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\storagesettings\\useStorageSettings.ts": {
+    "mtime": 1769886440.3347683,
+    "ast_hash": "d37d5d5b7e1443dfb26db11a683ca4f3",
+    "semantic_hash": "d37d5d5b7e1443dfb26db11a683ca4f3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\ApplicationSettings.test.tsx": {
+    "mtime": 1780084423.035485,
+    "ast_hash": "f0d3f1088c2d84f284ebbd08e0f8d96f",
+    "semantic_hash": "f0d3f1088c2d84f284ebbd08e0f8d96f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\ApplicationSettings.tsx": {
+    "mtime": 1780084423.0364842,
+    "ast_hash": "cf7c5c12974980832f17003b17020604",
+    "semantic_hash": "cf7c5c12974980832f17003b17020604"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\CloseButton.tsx": {
+    "mtime": 1769886440.3347683,
+    "ast_hash": "de56c52b3659e793ab75d55a55d5d381",
+    "semantic_hash": "de56c52b3659e793ab75d55a55d5d381"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\ErrorState.tsx": {
+    "mtime": 1769886440.3357682,
+    "ast_hash": "79fe3c5e8235f9422de157e75c6c1c11",
+    "semantic_hash": "79fe3c5e8235f9422de157e75c6c1c11"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\LoadingState.tsx": {
+    "mtime": 1769886440.3357682,
+    "ast_hash": "dd4f4d6d182cd4bf493d157663c9106a",
+    "semantic_hash": "dd4f4d6d182cd4bf493d157663c9106a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\SavingIndicator.tsx": {
+    "mtime": 1769886440.3357682,
+    "ast_hash": "fc88502f1c4ce6a594b87955921e710a",
+    "semantic_hash": "fc88502f1c4ce6a594b87955921e710a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\SettingItem.tsx": {
+    "mtime": 1769886440.3357682,
+    "ast_hash": "b444f9150007f9bec127b7d6f2c72fb3",
+    "semantic_hash": "b444f9150007f9bec127b7d6f2c72fb3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\ToggleSwitch.tsx": {
+    "mtime": 1769886440.3357682,
+    "ast_hash": "150820c4ca8c8b3ef30ef3611b4c33c6",
+    "semantic_hash": "150820c4ca8c8b3ef30ef3611b4c33c6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\WindowSettings.tsx": {
+    "mtime": 1773705874.673556,
+    "ast_hash": "f99f9f66ca301a11792facbf74b53d5f",
+    "semantic_hash": "f99f9f66ca301a11792facbf74b53d5f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\index.ts": {
+    "mtime": 1769886440.3372755,
+    "ast_hash": "11331e49ba7368db0a0f66193fe98d5b",
+    "semantic_hash": "11331e49ba7368db0a0f66193fe98d5b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\components\\settings\\usersettings\\useUserSettings.ts": {
+    "mtime": 1780330398.9761865,
+    "ast_hash": "50d3ff10fc1b079fa6db3883afabc9b6",
+    "semantic_hash": "50d3ff10fc1b079fa6db3883afabc9b6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\env.d.ts": {
+    "mtime": 1769886440.3372755,
+    "ast_hash": "62f9f6bc4c280b79695ad10ef416425f",
+    "semantic_hash": "62f9f6bc4c280b79695ad10ef416425f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\fontawesome.ts": {
+    "mtime": 1780177493.811781,
+    "ast_hash": "bc6ca984735a239ee9e251254f86e7e7",
+    "semantic_hash": "bc6ca984735a239ee9e251254f86e7e7"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\hooks\\useContextMenu.ts": {
+    "mtime": 1773705874.675082,
+    "ast_hash": "8a4b986ba7128924647f96601cc8ba86",
+    "semantic_hash": "8a4b986ba7128924647f96601cc8ba86"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\hooks\\useNativeContextMenu.ts": {
+    "mtime": 1775279007.5090933,
+    "ast_hash": "52abb73407d4886f558cae448f1a42ec",
+    "semantic_hash": "52abb73407d4886f558cae448f1a42ec"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\hooks\\usePatternDetection.test.ts": {
+    "mtime": 1773705874.675585,
+    "ast_hash": "7b7e87557973652ecbb33d939c399023",
+    "semantic_hash": "7b7e87557973652ecbb33d939c399023"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\hooks\\usePatternDetection.ts": {
+    "mtime": 1769886440.3392835,
+    "ast_hash": "a4ce4d6bedadc7afd347800ed57641a3",
+    "semantic_hash": "a4ce4d6bedadc7afd347800ed57641a3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\main.tsx": {
+    "mtime": 1769886440.3392835,
+    "ast_hash": "7f6ca8fd409a3e0dd726bd70a83bcb3c",
+    "semantic_hash": "7f6ca8fd409a3e0dd726bd70a83bcb3c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\clipboard.ts": {
+    "mtime": 1775279007.510093,
+    "ast_hash": "91f7374e7d960596fce5d94053b84ca4",
+    "semantic_hash": "91f7374e7d960596fce5d94053b84ca4"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\index.tsx": {
+    "mtime": 1775279007.5105965,
+    "ast_hash": "ff0171baff6734df62c2dd56973a1155",
+    "semantic_hash": "ff0171baff6734df62c2dd56973a1155"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\state.ts": {
+    "mtime": 1769886440.3417835,
+    "ast_hash": "f6ed6efc569c13e6a7b4b71f209bf9c9",
+    "semantic_hash": "f6ed6efc569c13e6a7b4b71f209bf9c9"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\storage.ts": {
+    "mtime": 1775279007.5105965,
+    "ast_hash": "89c13a98deaebbcdafeb9158172329fe",
+    "semantic_hash": "89c13a98deaebbcdafeb9158172329fe"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\types.ts": {
+    "mtime": 1775279007.511604,
+    "ast_hash": "a6c7427f9b0b2e45810db75600b3d06e",
+    "semantic_hash": "a6c7427f9b0b2e45810db75600b3d06e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\utils.ts": {
+    "mtime": 1775279007.511604,
+    "ast_hash": "9232f97d8bbc704fc9af1a10a924de75",
+    "semantic_hash": "9232f97d8bbc704fc9af1a10a924de75"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\constants.ts": {
+    "mtime": 1769886440.342788,
+    "ast_hash": "3b5f2a436a9622f5a4b9bd7076ce74de",
+    "semantic_hash": "3b5f2a436a9622f5a4b9bd7076ce74de"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\languageDetection.tsx": {
+    "mtime": 1773705874.6775894,
+    "ast_hash": "011107c9a259e12ca9415233a8ce232e",
+    "semantic_hash": "011107c9a259e12ca9415233a8ce232e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\theme.test.tsx": {
+    "mtime": 1773705874.6785917,
+    "ast_hash": "6db5781d456cef508814cb7fdada0389",
+    "semantic_hash": "6db5781d456cef508814cb7fdada0389"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\theme.tsx": {
+    "mtime": 1773705874.6785917,
+    "ast_hash": "31df93ff203d7430a09af82572d4800b",
+    "semantic_hash": "31df93ff203d7430a09af82572d4800b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\settings-main.tsx": {
+    "mtime": 1769886440.3447893,
+    "ast_hash": "5a130c16364687479f110bb3de39b470",
+    "semantic_hash": "5a130c16364687479f110bb3de39b470"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\test-setup.ts": {
+    "mtime": 1780330398.9771867,
+    "ast_hash": "2dbdcf6cf4f72035cdd04e28e8a54d55",
+    "semantic_hash": "2dbdcf6cf4f72035cdd04e28e8a54d55"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\tools-launcher-main.tsx": {
+    "mtime": 1769886440.3447893,
+    "ast_hash": "4214849258ae95138ddb0f2f6cbd37ad",
+    "semantic_hash": "4214849258ae95138ddb0f2f6cbd37ad"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\utils\\languageDetection.test.ts": {
+    "mtime": 1775279007.5126033,
+    "ast_hash": "93d47d4d2e698438f2a1cc5e12e7b67d",
+    "semantic_hash": "93d47d4d2e698438f2a1cc5e12e7b67d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\utils\\languageDetection.ts": {
+    "mtime": 1775279007.5126033,
+    "ast_hash": "37c6cb314f5299ade459d48ee13f2def",
+    "semantic_hash": "37c6cb314f5299ade459d48ee13f2def"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\utils\\tlds.ts": {
+    "mtime": 1769886440.34579,
+    "ast_hash": "4b075c09b3a7ef189119cd7e08d0ae7a",
+    "semantic_hash": "4b075c09b3a7ef189119cd7e08d0ae7a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\shared\\constants.ts": {
+    "mtime": 1769886440.34579,
+    "ast_hash": "3b5f2a436a9622f5a4b9bd7076ce74de",
+    "semantic_hash": "3b5f2a436a9622f5a4b9bd7076ce74de"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\shared\\types.ts": {
+    "mtime": 1780084423.0364842,
+    "ast_hash": "f6e71bc1835533e5123556cdd445f61f",
+    "semantic_hash": "f6e71bc1835533e5123556cdd445f61f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\tsconfig.eslint.json": {
+    "mtime": 1773705874.6811023,
+    "ast_hash": "e6b29b5e545257db258e37b8db723d8d",
+    "semantic_hash": "e6b29b5e545257db258e37b8db723d8d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\tsconfig.json": {
+    "mtime": 1769886440.347295,
+    "ast_hash": "f78ff8c2e2efb59fcf218eac57774d94",
+    "semantic_hash": "f78ff8c2e2efb59fcf218eac57774d94"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\tsconfig.node.json": {
+    "mtime": 1769886440.3483007,
+    "ast_hash": "863e1a1de496c6dfdf0c9c0c31649770",
+    "semantic_hash": "863e1a1de496c6dfdf0c9c0c31649770"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\tsconfig.web.json": {
+    "mtime": 1769886440.3483007,
+    "ast_hash": "341db4aec6e77cafa44f12fe2d35a2f6",
+    "semantic_hash": "341db4aec6e77cafa44f12fe2d35a2f6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\vitest.config.ts": {
+    "mtime": 1773705874.6811023,
+    "ast_hash": "2430096a0b2e1348adf519cb4a590e78",
+    "semantic_hash": "2430096a0b2e1348adf519cb4a590e78"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.github\\pull_request_template.md": {
+    "mtime": 1769886440.2643838,
+    "ast_hash": "5ca667d78321484b8fdb4889fce3a877",
+    "semantic_hash": "5ca667d78321484b8fdb4889fce3a877"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.github\\workflows\\build.yml": {
+    "mtime": 1773705874.6234603,
+    "ast_hash": "5ea87b5eddecac747aff0a4eb1e621a5",
+    "semantic_hash": "5ea87b5eddecac747aff0a4eb1e621a5"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.github\\workflows\\manual-tag-release.yml": {
+    "mtime": 1769886440.2643838,
+    "ast_hash": "5c2cb1a9f3bc77cf1d64b1d0487deb9a",
+    "semantic_hash": "5c2cb1a9f3bc77cf1d64b1d0487deb9a"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.github\\workflows\\merge-to-main.yml": {
+    "mtime": 1780620074.974167,
+    "ast_hash": "64035f2bef91effc33de20b413b802a9",
+    "semantic_hash": "64035f2bef91effc33de20b413b802a9"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.github\\workflows\\test.yml": {
+    "mtime": 1773705874.6234603,
+    "ast_hash": "6ba90cc7be15c285da5104a0879ed97f",
+    "semantic_hash": "6ba90cc7be15c285da5104a0879ed97f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\.prettierrc.yaml": {
+    "mtime": 1769886440.266385,
+    "ast_hash": "9be13b65916641ae16a0440f15bf4e29",
+    "semantic_hash": "9be13b65916641ae16a0440f15bf4e29"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\CLAUDE.md": {
+    "mtime": 1780935917.9547515,
+    "ast_hash": "0c214761c818cf7629251967bf747da8",
+    "semantic_hash": "0c214761c818cf7629251967bf747da8"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\README.md": {
+    "mtime": 1780895453.3649378,
+    "ast_hash": "f2df083641d6d795c9e00e390f350f19",
+    "semantic_hash": "f2df083641d6d795c9e00e390f350f19"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\dev-app-update.yml": {
+    "mtime": 1769886440.2761872,
+    "ast_hash": "0e7218abcf5b73cda62b4201b313e95f",
+    "semantic_hash": "0e7218abcf5b73cda62b4201b313e95f"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\CLIP_TYPES_USAGE.md": {
+    "mtime": 1769886440.2771876,
+    "ast_hash": "0101c5487c1de773e6b153d9d91a562e",
+    "semantic_hash": "0101c5487c1de773e6b153d9d91a562e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\DOMAIN_REGEX_TEST.md": {
+    "mtime": 1769886440.2771876,
+    "ast_hash": "9295f51cd1de75956cbed3798589fde7",
+    "semantic_hash": "9295f51cd1de75956cbed3798589fde7"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\GITHUB_ACTIONS_SETUP.md": {
+    "mtime": 1780620074.976676,
+    "ast_hash": "faf1bb9a9196a2678f786d5ad8ae58c9",
+    "semantic_hash": "faf1bb9a9196a2678f786d5ad8ae58c9"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\LANGUAGE_DETECTION_IMPLEMENTATION.md": {
+    "mtime": 1769886440.27848,
+    "ast_hash": "2849db953b7faf4406ab298f3da56e9e",
+    "semantic_hash": "2849db953b7faf4406ab298f3da56e9e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\QUICK_CLIPS_IMPLEMENTATION.md": {
+    "mtime": 1769886440.2794805,
+    "ast_hash": "baf9b2a31371eb4a08c243dbe046de9c",
+    "semantic_hash": "baf9b2a31371eb4a08c243dbe046de9c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\QUICK_CLIPS_STYLING.md": {
+    "mtime": 1769886440.2794805,
+    "ast_hash": "751b5db4277e32e0c6e3b3ff63905974",
+    "semantic_hash": "751b5db4277e32e0c6e3b3ff63905974"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\SETTINGS_WINDOW_POSITIONING.md": {
+    "mtime": 1769886440.2794805,
+    "ast_hash": "1884b48ef60596a9254b372a77de3a62",
+    "semantic_hash": "1884b48ef60596a9254b372a77de3a62"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\STARTUP_PERFORMANCE_OPTIMIZATIONS.md": {
+    "mtime": 1769886440.2804818,
+    "ast_hash": "15b3982a606ab085054892a4d99b2bed",
+    "semantic_hash": "15b3982a606ab085054892a4d99b2bed"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\STORAGE.md": {
+    "mtime": 1775279007.486959,
+    "ast_hash": "1b7b799512b534f77df59d263cbf7731",
+    "semantic_hash": "1b7b799512b534f77df59d263cbf7731"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\THEME_SYSTEM_IMPLEMENTATION.md": {
+    "mtime": 1769886440.2804818,
+    "ast_hash": "375be51cec38613bc532ec4a1be012f3",
+    "semantic_hash": "375be51cec38613bc532ec4a1be012f3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\TOOLS_LAUNCHER_HOTKEY_TESTING.md": {
+    "mtime": 1773705874.6269877,
+    "ast_hash": "5fae8956db8bd09e19965d93377441fb",
+    "semantic_hash": "5fae8956db8bd09e19965d93377441fb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\TOOLS_LAUNCHER_IMPLEMENTATION.md": {
+    "mtime": 1773705874.6279862,
+    "ast_hash": "1b20c5ab5d98bcf4edf557ab639c4f2d",
+    "semantic_hash": "1b20c5ab5d98bcf4edf557ab639c4f2d"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\docs\\WORKFLOW_SUMMARY.md": {
+    "mtime": 1769886440.2814796,
+    "ast_hash": "7e230bba40926ff8d9c340570ffea332",
+    "semantic_hash": "7e230bba40926ff8d9c340570ffea332"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\electron-builder.yml": {
+    "mtime": 1780620074.976676,
+    "ast_hash": "e9c70e4aa1435fdb23a9fa9f259171de",
+    "semantic_hash": "e9c70e4aa1435fdb23a9fa9f259171de"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\screenshots\\README.md": {
+    "mtime": 1780895453.3679383,
+    "ast_hash": "1041454de445c423e2036bd3bffa8db6",
+    "semantic_hash": "1041454de445c423e2036bd3bffa8db6"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\404.html": {
+    "mtime": 1780895453.3704505,
+    "ast_hash": "e24661b66c550340e8ee39c3c8109991",
+    "semantic_hash": "e24661b66c550340e8ee39c3c8109991"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\README.md": {
+    "mtime": 1780620074.983183,
+    "ast_hash": "0d428cc90b49681a7b4400ca8badfe0b",
+    "semantic_hash": "0d428cc90b49681a7b4400ca8badfe0b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\docs\\index.html": {
+    "mtime": 1780895453.3714476,
+    "ast_hash": "feb4e8d377235703c709d5a48a56a177",
+    "semantic_hash": "feb4e8d377235703c709d5a48a56a177"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\download\\index.html": {
+    "mtime": 1780895453.3714476,
+    "ast_hash": "460b02bf6dd6c381bcfe1cc659a9e775",
+    "semantic_hash": "460b02bf6dd6c381bcfe1cc659a9e775"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\index.html": {
+    "mtime": 1780895453.3714476,
+    "ast_hash": "a76f887c6119dd1e8fd09a446dfc4192",
+    "semantic_hash": "a76f887c6119dd1e8fd09a446dfc4192"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\main\\hotkeys\\README.md": {
+    "mtime": 1769886440.2943864,
+    "ast_hash": "61bcb4fa36a133d17449e1a6af9c164b",
+    "semantic_hash": "61bcb4fa36a133d17449e1a6af9c164b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\index.html": {
+    "mtime": 1769886440.3054783,
+    "ast_hash": "190efce3d2a0ed02edaa57ca608f6c74",
+    "semantic_hash": "190efce3d2a0ed02edaa57ca608f6c74"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\settings.html": {
+    "mtime": 1769886440.3054783,
+    "ast_hash": "2180606ccb609425cfd935688f6dae11",
+    "semantic_hash": "2180606ccb609425cfd935688f6dae11"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\providers\\clips\\README.md": {
+    "mtime": 1769886440.3402803,
+    "ast_hash": "52ad47b2509d256e57a685334009d63e",
+    "semantic_hash": "52ad47b2509d256e57a685334009d63e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\tools-launcher.html": {
+    "mtime": 1769886440.34579,
+    "ast_hash": "a69e3fc9b0c8bd86f8ab8ee30696d89b",
+    "semantic_hash": "a69e3fc9b0c8bd86f8ab8ee30696d89b"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\e2e\\fixtures\\test-image.png": {
+    "mtime": 1775279007.4879632,
+    "ast_hash": "a93bb8d34b7be6faf4c4989f00155df3",
+    "semantic_hash": "a93bb8d34b7be6faf4c4989f00155df3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon.png": {
+    "mtime": 1769886440.2854786,
+    "ast_hash": "64153c651863e4f6300b7cce09cbdbdd",
+    "semantic_hash": "64153c651863e4f6300b7cce09cbdbdd"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@1.25x.png": {
+    "mtime": 1769886440.28648,
+    "ast_hash": "117ac9874a6036802b81b69541a79b17",
+    "semantic_hash": "117ac9874a6036802b81b69541a79b17"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@1.33x.png": {
+    "mtime": 1769886440.28648,
+    "ast_hash": "28ea84396f540dac4e599f9cce0cafec",
+    "semantic_hash": "28ea84396f540dac4e599f9cce0cafec"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@1.4x.png": {
+    "mtime": 1769886440.28648,
+    "ast_hash": "adb119f87c0d87d50b91b7d2fe3cb8d8",
+    "semantic_hash": "adb119f87c0d87d50b91b7d2fe3cb8d8"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@1.5x.png": {
+    "mtime": 1769886440.2874787,
+    "ast_hash": "1c168da62e36775e18f55d0500d66944",
+    "semantic_hash": "1c168da62e36775e18f55d0500d66944"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@1.8x.png": {
+    "mtime": 1769886440.2874787,
+    "ast_hash": "dbc15f418028705dddd27b8f0aa20bf3",
+    "semantic_hash": "dbc15f418028705dddd27b8f0aa20bf3"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@2.5x.png": {
+    "mtime": 1769886440.2874787,
+    "ast_hash": "8cb800b653f1f85c3d16648b77515d38",
+    "semantic_hash": "8cb800b653f1f85c3d16648b77515d38"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@2x.png": {
+    "mtime": 1769886440.2874787,
+    "ast_hash": "c82a1d6e89556ec2911734bcc40f074e",
+    "semantic_hash": "c82a1d6e89556ec2911734bcc40f074e"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@3x.png": {
+    "mtime": 1769886440.2885096,
+    "ast_hash": "4aa74537eb96acf3ca41a4e547fdb2f0",
+    "semantic_hash": "4aa74537eb96acf3ca41a4e547fdb2f0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@4x.png": {
+    "mtime": 1769886440.2885096,
+    "ast_hash": "fccef692a39589ff2f9aa27d81ab788c",
+    "semantic_hash": "fccef692a39589ff2f9aa27d81ab788c"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\icon@5x.png": {
+    "mtime": 1769886440.2885096,
+    "ast_hash": "039640a047a4c247c04b442605456a95",
+    "semantic_hash": "039640a047a4c247c04b442605456a95"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\resources\\logo.svg": {
+    "mtime": 1780775965.7657788,
+    "ast_hash": "fc43c087f9357d666ccff86d67e8c738",
+    "semantic_hash": "fc43c087f9357d666ccff86d67e8c738"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\clipless-mark.png": {
+    "mtime": 1780620074.9841833,
+    "ast_hash": "039640a047a4c247c04b442605456a95",
+    "semantic_hash": "039640a047a4c247c04b442605456a95"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\icon.png": {
+    "mtime": 1780620074.9841833,
+    "ast_hash": "4aa74537eb96acf3ca41a4e547fdb2f0",
+    "semantic_hash": "4aa74537eb96acf3ca41a4e547fdb2f0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\main-dark.png": {
+    "mtime": 1780620074.9856868,
+    "ast_hash": "ceefa5de5a946488a10a2e875dbbf845",
+    "semantic_hash": "ceefa5de5a946488a10a2e875dbbf845"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\main-light.png": {
+    "mtime": 1780620074.9866915,
+    "ast_hash": "35a41df9c4010731f59161d7f4e820af",
+    "semantic_hash": "35a41df9c4010731f59161d7f4e820af"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\patterns-dark.png": {
+    "mtime": 1780620074.9876914,
+    "ast_hash": "7ffdb3912831b7567ebbfee23863c2fb",
+    "semantic_hash": "7ffdb3912831b7567ebbfee23863c2fb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\patterns-light.png": {
+    "mtime": 1780620074.98869,
+    "ast_hash": "09ea7ce4b7a7e3bf5955a54dbfd66859",
+    "semantic_hash": "09ea7ce4b7a7e3bf5955a54dbfd66859"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\search-dark.png": {
+    "mtime": 1780620074.98869,
+    "ast_hash": "55e46c0828cc1fd903b4428fba9c9937",
+    "semantic_hash": "55e46c0828cc1fd903b4428fba9c9937"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\search-light.png": {
+    "mtime": 1780620074.9896932,
+    "ast_hash": "4bb9889130328ebb30c6179ac0537996",
+    "semantic_hash": "4bb9889130328ebb30c6179ac0537996"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\settings-general-dark.png": {
+    "mtime": 1780620074.9906907,
+    "ast_hash": "3cc27ecb83faad799507675ce3287355",
+    "semantic_hash": "3cc27ecb83faad799507675ce3287355"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\settings-general-light.png": {
+    "mtime": 1780620074.9921947,
+    "ast_hash": "31f212471e7bc46d5cf531f2ecbb0be0",
+    "semantic_hash": "31f212471e7bc46d5cf531f2ecbb0be0"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\settings-hotkeys-dark.png": {
+    "mtime": 1780620074.9921947,
+    "ast_hash": "c91308f06ea19f5e4c8f9d31397f45f8",
+    "semantic_hash": "c91308f06ea19f5e4c8f9d31397f45f8"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\site\\assets\\screens\\settings-hotkeys-light.png": {
+    "mtime": 1780620074.9932008,
+    "ast_hash": "fd1bee9956dd333d51d73c9d43700abb",
+    "semantic_hash": "fd1bee9956dd333d51d73c9d43700abb"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\assets\\electron.svg": {
+    "mtime": 1769886440.3096619,
+    "ast_hash": "7e350671f4993b01b6110e283cb7ab02",
+    "semantic_hash": "7e350671f4993b01b6110e283cb7ab02"
+  },
+  "C:\\Users\\danes\\OneDrive\\Documents\\Code_Projects\\clipless\\src\\renderer\\src\\assets\\wavy-lines.svg": {
+    "mtime": 1769886440.3096619,
+    "ast_hash": "990cf549e920e993d4c1998c217661c6",
+    "semantic_hash": "990cf549e920e993d4c1998c217661c6"
+  }
+}

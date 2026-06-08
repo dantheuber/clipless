@@ -12,3 +12,5 @@ updatesite.sh
 test-results/
 coverage/
 screenshots/output/
+graphify-out/cost.json
+graphify-out/cache/
