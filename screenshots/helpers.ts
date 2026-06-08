@@ -83,7 +83,10 @@ export async function seed(app: ElectronApplication, page: Page, theme: Theme): 
 
   // Pre-set the OS clipboard to the most-recent clip so the clipboard monitor
   // dedupes against it instead of injecting whatever is currently copied.
-  await app.evaluate(({ clipboard }, text) => clipboard.writeText(text), DEMO_CLIPS[0].clip.content);
+  await app.evaluate(
+    ({ clipboard }, text) => clipboard.writeText(text),
+    DEMO_CLIPS[0].clip.content
+  );
 
   // Persist the curated clip list. The main `storage-save-clips` handler takes a
   // ClipItem[] plus a map of locked indices (it derives StoredClip metadata

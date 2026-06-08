@@ -86,10 +86,22 @@ export const SEARCH_TERMS: { name: string; pattern: string }[] = [
 
 /** Quick Tools — URL templates keyed off the capture groups above. */
 export const QUICK_TOOLS: { name: string; url: string; captureGroups: string[] }[] = [
-  { name: 'VirusTotal — IP', url: 'https://www.virustotal.com/gui/ip-address/{ip}', captureGroups: ['ip'] },
+  {
+    name: 'VirusTotal — IP',
+    url: 'https://www.virustotal.com/gui/ip-address/{ip}',
+    captureGroups: ['ip'],
+  },
   { name: 'AbuseIPDB', url: 'https://www.abuseipdb.com/check/{ip}', captureGroups: ['ip'] },
-  { name: 'Have I Been Pwned', url: 'https://haveibeenpwned.com/account/{email}', captureGroups: ['email'] },
-  { name: 'Incident Dashboard', url: 'https://dashboard.example.com/incidents/{ticket}', captureGroups: ['ticket'] },
+  {
+    name: 'Have I Been Pwned',
+    url: 'https://haveibeenpwned.com/account/{email}',
+    captureGroups: ['email'],
+  },
+  {
+    name: 'Incident Dashboard',
+    url: 'https://dashboard.example.com/incidents/{ticket}',
+    captureGroups: ['ticket'],
+  },
 ];
 
 /** Templates — mix of named-token (matched) and positional (clip) templates. */
@@ -100,7 +112,8 @@ export const TEMPLATES: { name: string; content: string }[] = [
   },
   {
     name: 'Email Reply',
-    content: "Hi — regarding {email}, we've reviewed the recent activity from {ip} and will follow up shortly.",
+    content:
+      "Hi — regarding {email}, we've reviewed the recent activity from {ip} and will follow up shortly.",
   },
   {
     name: 'Clip Digest',

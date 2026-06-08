@@ -33,7 +33,7 @@ tickets and URLs in what you copy and turning them into one-click actions.
 
 <br /><br />
 
-**✓ Windows, macOS &amp; Linux  ·  ✓ Encrypted local storage  ·  ✓ No account needed**
+**✓ Windows, macOS &amp; Linux · ✓ Encrypted local storage · ✓ No account needed**
 
 <br />
 
@@ -98,13 +98,13 @@ patterns, pick your tools, and launch them all at once — no retyping, no tab j
 Real-time clipboard monitoring with 250ms polling, intelligent format prioritization, and
 duplicate prevention — all running quietly in the background so it never interrupts your flow.
 
-| Format | What you get |
-| --- | --- |
-| **Text** | Plain text with automatic programming-language detection |
-| **HTML** | Rich HTML content with visual indicators |
-| **RTF** | Full Rich Text Format support |
-| **Images** | Image clipboard data with preview and generated thumbnails |
-| **Bookmarks** | URLs with titles (macOS / Windows compatible) |
+| Format        | What you get                                               |
+| ------------- | ---------------------------------------------------------- |
+| **Text**      | Plain text with automatic programming-language detection   |
+| **HTML**      | Rich HTML content with visual indicators                   |
+| **RTF**       | Full Rich Text Format support                              |
+| **Images**    | Image clipboard data with preview and generated thumbnails |
+| **Bookmarks** | URLs with titles (macOS / Windows compatible)              |
 
 - **Lock clips** to keep important items from rotating out of history
 - **Clip Quick Search** to filter your entire history instantly
@@ -164,8 +164,8 @@ Clipless shines anywhere people copy the same kinds of data all day — but noth
 is locked to one job. Define your own patterns and tools, and it bends to whatever workflow
 you throw at it.
 
-| ☎️ Call center &amp; support | 🗂️ Data entry &amp; admin | 🛡️ Security &amp; research |
-| --- | --- | --- |
+| ☎️ Call center &amp; support                                                                                            | 🗂️ Data entry &amp; admin                                                                                                         | 🛡️ Security &amp; research                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Copy a customer email or account number and open it across your CRM, billing and knowledge-base tools in a single move. | Bridge legacy and modern systems — extract reference numbers, populate templates and process records in batches without retyping. | Pull IPs, domains and hashes from any text and fan them out to VirusTotal, AbuseIPDB and the rest of your toolkit instantly. |
 
 > **…and whatever you do next.** Custom regex patterns, custom tools, custom templates —
@@ -262,10 +262,10 @@ or the **[GitHub releases](https://github.com/dantheuber/clipless/releases)**.
 macOS builds aren't code-signed yet. This causes `.dmg` files downloaded from releases to not immediately work.
 The sticking point is **Gatekeeper**: anything downloaded through a browser gets a
 `com.apple.quarantine` flag, and macOS refuses to open a quarantined, unsigned app — usually
-with *"Clipless is damaged and can't be opened."* The DMG isn't actually damaged; clearing that
+with _"Clipless is damaged and can't be opened."_ The DMG isn't actually damaged; clearing that
 flag (or building locally, where it's never applied) fixes it. Two ways to install:
 
-**Option 1 — Download a `.dmg` and clear the quarantine flag** *(recommended)*
+**Option 1 — Download a `.dmg` and clear the quarantine flag** _(recommended)_
 
 1. Get the Clipless `.dmg` for your Mac from a [release](https://github.com/dantheuber/clipless/releases) — `arm64` for Apple Silicon, `x64` for Intel (or a build artifact)
 2. Open it and drag **Clipless** into your **Applications** folder
@@ -275,7 +275,7 @@ flag (or building locally, where it's never applied) fixes it. Two ways to insta
    ```
 4. Launch Clipless normally — Gatekeeper will let it through
 
-**Option 2 — Build it yourself** *(no Terminal step on a downloaded file)*
+**Option 2 — Build it yourself** _(no Terminal step on a downloaded file)_
 
 A DMG you compile locally never receives the quarantine flag, so it installs straight away.
 You'll need the **Xcode Command Line Tools** (`xcode-select --install`) and **Node.js 20+**.
@@ -347,16 +347,16 @@ npm run dev      # start with hot reload
 
 ### Scripts
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Start development with hot reload |
-| `npm run build` | Type-check and build all processes |
-| `npm run lint` | ESLint with caching |
-| `npm run format` | Prettier formatting |
-| `npm run typecheck` | Type-check all TypeScript |
-| `npm test` / `npx vitest` | Unit tests (Vitest) |
-| `npx playwright test` | E2E tests (Playwright + Electron) |
-| `npm run build:win` · `build:mac` · `build:linux` | Platform-specific packaging |
+| Command                                           | What it does                       |
+| ------------------------------------------------- | ---------------------------------- |
+| `npm run dev`                                     | Start development with hot reload  |
+| `npm run build`                                   | Type-check and build all processes |
+| `npm run lint`                                    | ESLint with caching                |
+| `npm run format`                                  | Prettier formatting                |
+| `npm run typecheck`                               | Type-check all TypeScript          |
+| `npm test` / `npx vitest`                         | Unit tests (Vitest)                |
+| `npx playwright test`                             | E2E tests (Playwright + Electron)  |
+| `npm run build:win` · `build:mac` · `build:linux` | Platform-specific packaging        |
 
 > **Heads up:** E2E tests interact with your **system clipboard** — they read from and write
 > to it. Avoid copying sensitive data before running them, and expect your clipboard contents

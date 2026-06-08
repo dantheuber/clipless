@@ -50,7 +50,9 @@ for (const theme of THEMES) {
       await settings.waitForTimeout(300);
       await shoot(settings, `settings-hotkeys-${theme}.png`);
       await page.evaluate(() =>
-        (window as unknown as { api: { closeSettings: () => Promise<unknown> } }).api.closeSettings()
+        (
+          window as unknown as { api: { closeSettings: () => Promise<unknown> } }
+        ).api.closeSettings()
       );
 
       // 4. Quick Clips pattern matching in the Tools Launcher.
