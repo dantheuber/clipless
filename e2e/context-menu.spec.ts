@@ -60,12 +60,9 @@ test.describe('Context Menu', () => {
   test('right-click on a clip further down the list shows context menu fully visible', async () => {
     // Add several more clips to push items down the list
     for (let i = 0; i < 8; i++) {
-      await app.evaluate(
-        async ({ clipboard }, t) => {
-          clipboard.writeText(t);
-        },
-        `ctx-filler-${i}-${UNIQUE}`
-      );
+      await app.evaluate(async ({ clipboard }, t) => {
+        clipboard.writeText(t);
+      }, `ctx-filler-${i}-${UNIQUE}`);
       await window.waitForTimeout(500);
     }
     await window.waitForTimeout(1000);

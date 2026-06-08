@@ -1,219 +1,375 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Download — Clipless</title>
-  <meta name="description" content="Download Clipless for Windows, macOS and Linux. Free and open source, with install instructions for every platform." />
-  <link rel="canonical" href="https://clipless.app/download/" />
-  <link rel="icon" type="image/png" href="/assets/icon.png" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download — Clipless</title>
+    <meta
+      name="description"
+      content="Download Clipless for Windows, macOS and Linux. Free and open source, with install instructions for every platform."
+    />
+    <link rel="canonical" href="https://clipless.app/download/" />
+    <link rel="icon" type="image/png" href="/assets/icon.png" />
 
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://clipless.app/download/" />
-  <meta property="og:title" content="Download Clipless" />
-  <meta property="og:description" content="Free, open-source clipboard manager for Windows, macOS and Linux." />
-  <meta property="og:image" content="https://clipless.app/assets/screens/main-dark.png" />
-  <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://clipless.app/download/" />
+    <meta property="og:title" content="Download Clipless" />
+    <meta
+      property="og:description"
+      content="Free, open-source clipboard manager for Windows, macOS and Linux."
+    />
+    <meta property="og:image" content="https://clipless.app/assets/screens/main-dark.png" />
+    <meta name="twitter:card" content="summary_large_image" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
 
-  <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem('clipless-theme');
-        var sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        document.documentElement.dataset.theme = (saved === 'light' || saved === 'dark') ? saved : sys;
-      } catch (e) {
-        document.documentElement.dataset.theme = 'dark';
-      }
-    })();
-  </script>
-</head>
-<body>
-  <div class="bg-field"></div>
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('clipless-theme');
+          var sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.dataset.theme =
+            saved === 'light' || saved === 'dark' ? saved : sys;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="bg-field"></div>
 
-  <!-- ===================== Nav ===================== -->
-  <header class="nav">
-    <div class="wrap nav-inner">
-      <a class="brand" href="/" aria-label="Clipless home">
-        <span class="mark"><span class="mark-img" aria-hidden="true" style="width:30px;height:30px"></span></span>
-        <span class="name">Clipless</span>
-      </a>
-      <nav class="nav-links">
-        <a href="/#quick-clips">Quick Clips</a>
-        <a href="/#tools">Tools</a>
-        <a href="/#theming">Theming</a>
-        <a href="/docs/">Docs</a>
-      </nav>
-      <div class="nav-right">
-        <button class="theme-toggle" data-theme-toggle aria-label="Toggle light / dark theme">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8" /></svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" /></svg>
-        </button>
-        <a class="btn btn-primary btn-sm" href="https://github.com/dantheuber/clipless/releases/latest" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5C6.2 1.5 1.5 6.2 1.5 12c0 4.6 3 8.5 7.2 9.9.5.1.7-.2.7-.5v-1.7c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.8-4.7 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4.2-1.4 7.2-5.3 7.2-9.9C22.5 6.2 17.8 1.5 12 1.5Z" /></svg>
-          GitHub
-        </a>
-        <button class="nav-toggle" data-nav-toggle aria-label="Open menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-        </button>
-      </div>
-    </div>
-    <div class="nav-mobile">
-      <div class="wrap">
-        <a href="/#quick-clips">Quick Clips</a>
-        <a href="/#tools">Tools</a>
-        <a href="/#theming">Theming</a>
-        <a href="/docs/">Docs</a>
-        <a href="https://github.com/dantheuber/clipless/releases/latest" target="_blank" rel="noopener">GitHub Releases</a>
-      </div>
-    </div>
-  </header>
-
-  <main class="wrap">
-    <div class="page-head reveal in">
-      <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg> Download</span>
-      <h1>Get <span class="grad">Clipless.</span></h1>
-      <p class="lead">
-        Free, open source, and ready for Windows, macOS and Linux. Grab the latest
-        signed-by-the-source build straight from GitHub Releases.
-      </p>
-      <div class="hero-cta" style="margin-top:28px">
-        <a class="btn btn-primary btn-lg" href="https://github.com/dantheuber/clipless/releases/latest" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg>
-          Download from GitHub Releases
-        </a>
-      </div>
-      <p style="margin-top:18px">
-        <a href="https://github.com/dantheuber/clipless/releases/latest" target="_blank" rel="noopener">
-          <img src="https://img.shields.io/github/v/release/dantheuber/clipless?style=for-the-badge&color=3b82f6&labelColor=15161c" alt="Latest release version" />
-        </a>
-      </p>
-    </div>
-
-    <article class="prose" style="max-width:none">
-      <section id="platforms">
-        <h2>Platform support</h2>
-        <div class="platform-grid">
-          <div class="platform-card reveal">
-            <span class="pf-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4 10.4 4.3V11.4H3V5.4ZM3 12.6H10.4V19.7L3 18.6V12.6ZM11.4 4.1 21 2.8V11.4H11.4V4.1ZM11.4 12.6H21V21.2L11.4 19.9V12.6Z" /></svg></span>
-            <h3>Windows 10 / 11</h3>
-            <dl>
-              <dt>Format</dt><dd><code>.exe</code> installer</dd>
-              <dt>Arch</dt><dd>x64 (64-bit)</dd>
-            </dl>
-          </div>
-          <div class="platform-card reveal d1">
-            <span class="pf-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 1.5c.1 1.1-.3 2.1-1 2.9-.7.9-1.8 1.6-2.9 1.5-.1-1.1.4-2.2 1-2.9.8-.9 2-1.5 2.9-1.5ZM19.6 17.3c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-3.9-1-2 0-2.5 1-3.9 1-1.7 0-3-1.7-4-3.2C-.6 16.6-1 11 1.6 8.2 2.8 6.9 4.3 6 6 6c1.7 0 2.7 1 4.1 1 1.3 0 2.1-1 4.1-1 1.5 0 3.1.8 4.2 2.2-3.7 2-3.1 7.3.9 8.7l.3.4Z" /></svg></span>
-            <h3>macOS</h3>
-            <dl>
-              <dt>Format</dt><dd><code>.dmg</code> disk image</dd>
-              <dt>Requires</dt><dd>macOS 10.15+ (Catalina)</dd>
-              <dt>Arch</dt><dd>Apple Silicon (arm64) &amp; Intel (x64) — separate downloads</dd>
-            </dl>
-          </div>
-          <div class="platform-card reveal d2">
-            <span class="pf-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c-2 0-3 1.7-3 3.8 0 1.5.5 2.3.5 3.4 0 1-1 2.2-1.8 3.6C6.7 14.5 5.5 16 5.5 17.7c0 1.2.7 1.8.4 2.6-.2.6-.9.8-.9 1.3 0 .6.8.8 1.7.8.7 0 1.4-.2 2-.6.6.4 1.5.6 2.4.6h1.8c.9 0 1.8-.2 2.4-.6.6.4 1.3.6 2 .6.9 0 1.7-.2 1.7-.8 0-.5-.7-.7-.9-1.3-.3-.8.4-1.4.4-2.6 0-1.7-1.2-3.2-2.2-4.9-.8-1.4-1.8-2.6-1.8-3.6 0-1.1.5-1.9.5-3.4C15 3.7 14 2 12 2Z" /></svg></span>
-            <h3>Linux</h3>
-            <dl>
-              <dt>Format</dt><dd><code>.AppImage</code></dd>
-              <dt>Arch</dt><dd>x64 (64-bit)</dd>
-            </dl>
-          </div>
-        </div>
-      </section>
-
-      <section id="installation" style="max-width:760px">
-        <h2>Installation</h2>
-
-        <h3>Windows</h3>
-        <ol class="install-steps">
-          <li>Download the <code>.exe</code> file from GitHub Releases</li>
-          <li>Run the installer</li>
-          <li>If SmartScreen warns you, click "More info" then "Run anyway"</li>
-          <li>Find Clipless in your Start Menu or system tray</li>
-        </ol>
-
-        <h3>macOS</h3>
-        <ol class="install-steps">
-          <li>Download the <code>.dmg</code> for your Mac from GitHub Releases — <code>arm64</code> for Apple Silicon, <code>x64</code> for Intel</li>
-          <li>Open the disk image and drag Clipless to Applications</li>
-          <li>If Gatekeeper blocks the app, go to System Settings &gt; Privacy &amp; Security and click "Open Anyway" (or right-click the app &gt; Open)</li>
-        </ol>
-        <p>If you see "damaged and can't be opened", clear the quarantine attribute:</p>
-        <pre><code>xattr -cr /Applications/Clipless.app</code></pre>
-
-        <h3>Linux</h3>
-        <ol class="install-steps">
-          <li>Download the <code>.AppImage</code> file from GitHub Releases</li>
-          <li>Make it executable and run it</li>
-        </ol>
-        <pre><code>chmod +x Clipless-*.AppImage
-./Clipless-*.AppImage</code></pre>
-      </section>
-
-      <section id="security" style="max-width:760px">
-        <h2>Security warnings</h2>
-        <div class="callout">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.5" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span>
-          <p>
-            Clipless isn't signed with a commercial code-signing certificate, so your OS
-            may show a warning during installation. This is expected for open-source
-            projects without paid certificates — the app is built from
-            <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener">public source code</a>.
-          </p>
-        </div>
-      </section>
-
-      <section id="updates" style="max-width:760px">
-        <h2>Updates</h2>
-        <p>
-          Clipless checks for updates automatically and notifies you when a new version
-          is available. To update manually, download the latest release and install over
-          your existing installation — settings and clipboard history are preserved.
-        </p>
-      </section>
-
-      <section id="troubleshooting" style="max-width:760px">
-        <h2>Troubleshooting</h2>
-        <ul>
-          <li><strong>Windows: "App can't run on this PC"</strong> — ensure you're running 64-bit Windows.</li>
-          <li><strong>macOS: "Damaged and can't be opened"</strong> — run <code>xattr -cr /Applications/Clipless.app</code> in Terminal.</li>
-          <li><strong>Linux: "Permission denied"</strong> — run <code>chmod +x Clipless-*.AppImage</code>.</li>
-          <li><strong>Antivirus blocking installation</strong> — add Clipless to your allowlist. Alerts are caused by the lack of code signing, not actual threats.</li>
-        </ul>
-        <p>For other issues, check <a href="https://github.com/dantheuber/clipless/issues" target="_blank" rel="noopener">GitHub Issues</a>.</p>
-      </section>
-    </article>
-  </main>
-
-  <!-- ===================== Footer ===================== -->
-  <footer class="footer">
-    <div class="wrap">
-      <div class="footer-inner">
-        <a class="brand" href="/">
-          <span class="mark"><span class="mark-img" aria-hidden="true" style="width:26px;height:26px"></span></span>
+    <!-- ===================== Nav ===================== -->
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="/" aria-label="Clipless home">
+          <span class="mark"
+            ><span class="mark-img" aria-hidden="true" style="width: 30px; height: 30px"></span
+          ></span>
           <span class="name">Clipless</span>
         </a>
-        <nav class="footer-links">
+        <nav class="nav-links">
           <a href="/#quick-clips">Quick Clips</a>
           <a href="/#tools">Tools</a>
           <a href="/#theming">Theming</a>
           <a href="/docs/">Docs</a>
-          <a href="/download/">Download</a>
-          <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener">GitHub</a>
         </nav>
+        <div class="nav-right">
+          <button class="theme-toggle" data-theme-toggle aria-label="Toggle light / dark theme">
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4.2" />
+              <path
+                d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"
+              />
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" />
+            </svg>
+          </button>
+          <a
+            class="btn btn-primary btn-sm"
+            href="https://github.com/dantheuber/clipless/releases/latest"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M12 1.5C6.2 1.5 1.5 6.2 1.5 12c0 4.6 3 8.5 7.2 9.9.5.1.7-.2.7-.5v-1.7c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.8-4.7 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4.2-1.4 7.2-5.3 7.2-9.9C22.5 6.2 17.8 1.5 12 1.5Z"
+              />
+            </svg>
+            GitHub
+          </a>
+          <button class="nav-toggle" data-nav-toggle aria-label="Open menu" aria-expanded="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+        </div>
       </div>
-      <p class="footer-fine">
-        Clipless is an open-source clipboard manager built with Electron, React &amp; TypeScript.
-        Data is encrypted with your OS-native keystore and never leaves your machine.
-      </p>
-    </div>
-  </footer>
+      <div class="nav-mobile">
+        <div class="wrap">
+          <a href="/#quick-clips">Quick Clips</a>
+          <a href="/#tools">Tools</a>
+          <a href="/#theming">Theming</a>
+          <a href="/docs/">Docs</a>
+          <a
+            href="https://github.com/dantheuber/clipless/releases/latest"
+            target="_blank"
+            rel="noopener"
+            >GitHub Releases</a
+          >
+        </div>
+      </div>
+    </header>
 
-  <script src="/app.js" defer></script>
-</body>
+    <main class="wrap">
+      <div class="page-head reveal in">
+        <span class="eyebrow"
+          ><svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"
+            />
+          </svg>
+          Download</span
+        >
+        <h1>Get <span class="grad">Clipless.</span></h1>
+        <p class="lead">
+          Free, open source, and ready for Windows, macOS and Linux. Grab the latest
+          signed-by-the-source build straight from GitHub Releases.
+        </p>
+        <div class="hero-cta" style="margin-top: 28px">
+          <a
+            class="btn btn-primary btn-lg"
+            href="https://github.com/dantheuber/clipless/releases/latest"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"
+              />
+            </svg>
+            Download from GitHub Releases
+          </a>
+        </div>
+        <p style="margin-top: 18px">
+          <a
+            href="https://github.com/dantheuber/clipless/releases/latest"
+            target="_blank"
+            rel="noopener"
+          >
+            <img
+              src="https://img.shields.io/github/v/release/dantheuber/clipless?style=for-the-badge&color=3b82f6&labelColor=15161c"
+              alt="Latest release version"
+            />
+          </a>
+        </p>
+      </div>
+
+      <article class="prose" style="max-width: none">
+        <section id="platforms">
+          <h2>Platform support</h2>
+          <div class="platform-grid">
+            <div class="platform-card reveal">
+              <span class="pf-ic"
+                ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M3 5.4 10.4 4.3V11.4H3V5.4ZM3 12.6H10.4V19.7L3 18.6V12.6ZM11.4 4.1 21 2.8V11.4H11.4V4.1ZM11.4 12.6H21V21.2L11.4 19.9V12.6Z"
+                  /></svg
+              ></span>
+              <h3>Windows 10 / 11</h3>
+              <dl>
+                <dt>Format</dt>
+                <dd><code>.exe</code> installer</dd>
+                <dt>Arch</dt>
+                <dd>x64 (64-bit)</dd>
+              </dl>
+            </div>
+            <div class="platform-card reveal d1">
+              <span class="pf-ic"
+                ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M16 1.5c.1 1.1-.3 2.1-1 2.9-.7.9-1.8 1.6-2.9 1.5-.1-1.1.4-2.2 1-2.9.8-.9 2-1.5 2.9-1.5ZM19.6 17.3c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-3.9-1-2 0-2.5 1-3.9 1-1.7 0-3-1.7-4-3.2C-.6 16.6-1 11 1.6 8.2 2.8 6.9 4.3 6 6 6c1.7 0 2.7 1 4.1 1 1.3 0 2.1-1 4.1-1 1.5 0 3.1.8 4.2 2.2-3.7 2-3.1 7.3.9 8.7l.3.4Z"
+                  /></svg
+              ></span>
+              <h3>macOS</h3>
+              <dl>
+                <dt>Format</dt>
+                <dd><code>.dmg</code> disk image</dd>
+                <dt>Requires</dt>
+                <dd>macOS 10.15+ (Catalina)</dd>
+                <dt>Arch</dt>
+                <dd>Apple Silicon (arm64) &amp; Intel (x64) — separate downloads</dd>
+              </dl>
+            </div>
+            <div class="platform-card reveal d2">
+              <span class="pf-ic"
+                ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M12 2c-2 0-3 1.7-3 3.8 0 1.5.5 2.3.5 3.4 0 1-1 2.2-1.8 3.6C6.7 14.5 5.5 16 5.5 17.7c0 1.2.7 1.8.4 2.6-.2.6-.9.8-.9 1.3 0 .6.8.8 1.7.8.7 0 1.4-.2 2-.6.6.4 1.5.6 2.4.6h1.8c.9 0 1.8-.2 2.4-.6.6.4 1.3.6 2 .6.9 0 1.7-.2 1.7-.8 0-.5-.7-.7-.9-1.3-.3-.8.4-1.4.4-2.6 0-1.7-1.2-3.2-2.2-4.9-.8-1.4-1.8-2.6-1.8-3.6 0-1.1.5-1.9.5-3.4C15 3.7 14 2 12 2Z"
+                  /></svg
+              ></span>
+              <h3>Linux</h3>
+              <dl>
+                <dt>Format</dt>
+                <dd><code>.AppImage</code></dd>
+                <dt>Arch</dt>
+                <dd>x64 (64-bit)</dd>
+              </dl>
+            </div>
+          </div>
+        </section>
+
+        <section id="installation" style="max-width: 760px">
+          <h2>Installation</h2>
+
+          <h3>Windows</h3>
+          <ol class="install-steps">
+            <li>Download the <code>.exe</code> file from GitHub Releases</li>
+            <li>Run the installer</li>
+            <li>If SmartScreen warns you, click "More info" then "Run anyway"</li>
+            <li>Find Clipless in your Start Menu or system tray</li>
+          </ol>
+
+          <h3>macOS</h3>
+          <ol class="install-steps">
+            <li>
+              Download the <code>.dmg</code> for your Mac from GitHub Releases —
+              <code>arm64</code> for Apple Silicon, <code>x64</code> for Intel
+            </li>
+            <li>Open the disk image and drag Clipless to Applications</li>
+            <li>
+              If Gatekeeper blocks the app, go to System Settings &gt; Privacy &amp; Security and
+              click "Open Anyway" (or right-click the app &gt; Open)
+            </li>
+          </ol>
+          <p>If you see "damaged and can't be opened", clear the quarantine attribute:</p>
+          <pre><code>xattr -cr /Applications/Clipless.app</code></pre>
+
+          <h3>Linux</h3>
+          <ol class="install-steps">
+            <li>Download the <code>.AppImage</code> file from GitHub Releases</li>
+            <li>Make it executable and run it</li>
+          </ol>
+          <pre><code>chmod +x Clipless-*.AppImage
+./Clipless-*.AppImage</code></pre>
+        </section>
+
+        <section id="security" style="max-width: 760px">
+          <h2>Security warnings</h2>
+          <div class="callout">
+            <span class="ic"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg
+            ></span>
+            <p>
+              Clipless isn't signed with a commercial code-signing certificate, so your OS may show
+              a warning during installation. This is expected for open-source projects without paid
+              certificates — the app is built from
+              <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener"
+                >public source code</a
+              >.
+            </p>
+          </div>
+        </section>
+
+        <section id="updates" style="max-width: 760px">
+          <h2>Updates</h2>
+          <p>
+            Clipless checks for updates automatically and notifies you when a new version is
+            available. To update manually, download the latest release and install over your
+            existing installation — settings and clipboard history are preserved.
+          </p>
+        </section>
+
+        <section id="troubleshooting" style="max-width: 760px">
+          <h2>Troubleshooting</h2>
+          <ul>
+            <li>
+              <strong>Windows: "App can't run on this PC"</strong> — ensure you're running 64-bit
+              Windows.
+            </li>
+            <li>
+              <strong>macOS: "Damaged and can't be opened"</strong> — run
+              <code>xattr -cr /Applications/Clipless.app</code> in Terminal.
+            </li>
+            <li>
+              <strong>Linux: "Permission denied"</strong> — run
+              <code>chmod +x Clipless-*.AppImage</code>.
+            </li>
+            <li>
+              <strong>Antivirus blocking installation</strong> — add Clipless to your allowlist.
+              Alerts are caused by the lack of code signing, not actual threats.
+            </li>
+          </ul>
+          <p>
+            For other issues, check
+            <a href="https://github.com/dantheuber/clipless/issues" target="_blank" rel="noopener"
+              >GitHub Issues</a
+            >.
+          </p>
+        </section>
+      </article>
+    </main>
+
+    <!-- ===================== Footer ===================== -->
+    <footer class="footer">
+      <div class="wrap">
+        <div class="footer-inner">
+          <a class="brand" href="/">
+            <span class="mark"
+              ><span class="mark-img" aria-hidden="true" style="width: 26px; height: 26px"></span
+            ></span>
+            <span class="name">Clipless</span>
+          </a>
+          <nav class="footer-links">
+            <a href="/#quick-clips">Quick Clips</a>
+            <a href="/#tools">Tools</a>
+            <a href="/#theming">Theming</a>
+            <a href="/docs/">Docs</a>
+            <a href="/download/">Download</a>
+            <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener"
+              >GitHub</a
+            >
+          </nav>
+        </div>
+        <p class="footer-fine">
+          Clipless is an open-source clipboard manager built with Electron, React &amp; TypeScript.
+          Data is encrypted with your OS-native keystore and never leaves your machine.
+        </p>
+      </div>
+    </footer>
+
+    <script src="/app.js" defer></script>
+  </body>
 </html>

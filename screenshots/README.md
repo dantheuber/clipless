@@ -22,14 +22,14 @@ npm run screenshots:only   # skips the build (reuse an existing out/ build)
 PNGs are written to `screenshots/output/` (gitignored on the code branch). Each
 screen is captured in both light and dark themes at 2x device scale:
 
-| File                          | Screen                                      |
-| ----------------------------- | ------------------------------------------- |
-| `main-{light,dark}.png`       | Main window with curated clips (hero)       |
-| `search-{light,dark}.png`     | Clip search bar filtering the list          |
-| `settings-general-{…}.png`    | Settings → General                          |
-| `settings-tools-{…}.png`      | Settings → Tools (Quick Clips / Templates)  |
-| `settings-hotkeys-{…}.png`    | Settings → Hotkeys                          |
-| `patterns-{light,dark}.png`   | Tools Launcher: live Quick Clips matching   |
+| File                        | Screen                                     |
+| --------------------------- | ------------------------------------------ |
+| `main-{light,dark}.png`     | Main window with curated clips (hero)      |
+| `search-{light,dark}.png`   | Clip search bar filtering the list         |
+| `settings-general-{…}.png`  | Settings → General                         |
+| `settings-tools-{…}.png`    | Settings → Tools (Quick Clips / Templates) |
+| `settings-hotkeys-{…}.png`  | Settings → Hotkeys                         |
+| `patterns-{light,dark}.png` | Tools Launcher: live Quick Clips matching  |
 
 ## Publishing to the site
 
