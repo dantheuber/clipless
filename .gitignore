@@ -12,3 +12,4 @@ updatesite.sh
 test-results/
 coverage/
 screenshots/output/
+graphify-out/

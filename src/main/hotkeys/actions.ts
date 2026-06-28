@@ -4,6 +4,7 @@ import { storage } from '../storage';
 import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
 import { setSkipNextImageChange } from '../clipboard/monitoring';
+import { getCurrentClipboardData } from '../clipboard/data';
 import type { StoredClip } from '../../shared/types';
 
 /**
@@ -160,29 +161,34 @@ export class HotkeyActions {
   }
 
   /**
-   * Open tools launcher for the first (most recent) clip
+   * Open tools launcher for the content currently on the system clipboard.
+   *
+   * Reads the live clipboard directly rather than the most recent stored clip,
+   * because stored history trails the real clipboard by at least one 250ms poll
+   * plus an IPC/renderer roundtrip. If the user copies and immediately fires the
+   * hotkey, the live read reflects the just-copied content while history does not.
+   * Falls back to the most recent stored clip only when the live read is empty
+   * (e.g. empty clipboard or an unsupported format).
    */
   async openToolsLauncher(): Promise<void> {
     try {
-      const clips = await storage.getClips();
-      if (!clips || clips.length === 0) {
-        console.warn('No clips available for tools launcher');
-        return;
-      }
+      const liveData = getCurrentClipboardData();
+      let content = liveData?.content;
 
-      const firstClip = clips[0];
-      if (!firstClip) {
-        console.warn('No first clip found');
-        return;
+      if (!content) {
+        const clips = await storage.getClips();
+        const firstClip = clips[0];
+        if (!firstClip) {
+          console.warn('No clips available for tools launcher');
+          return;
+        }
+        content = firstClip.clip.content;
       }
 
       // Import the createToolsLauncherWindow function
       const { createToolsLauncherWindow } = await import('../window/creation.js');
 
-      // Open the tools launcher with the first clip's content
-      createToolsLauncherWindow(firstClip.clip.content);
-
-      console.log('Hotkey: Opened tools launcher for first clip');
+      createToolsLauncherWindow(content);
     } catch (error) {
       console.error('Error opening tools launcher:', error);
     }
