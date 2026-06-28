@@ -42,11 +42,16 @@ vi.mock('../clipboard/monitoring', () => ({
   setSkipNextImageChange: vi.fn(),
 }));
 
+vi.mock('../clipboard/data', () => ({
+  getCurrentClipboardData: vi.fn().mockReturnValue(null),
+}));
+
 import { HotkeyActions } from './actions';
 import { clipboard, nativeImage, app } from 'electron';
 import { storage } from '../storage';
 import { loadImage } from '../storage/image-store';
 import { setSkipNextImageChange } from '../clipboard/monitoring';
+import { getCurrentClipboardData } from '../clipboard/data';
 
 describe('HotkeyActions', () => {
   let actions: HotkeyActions;
@@ -331,29 +336,69 @@ describe('HotkeyActions', () => {
   });
 
   describe('openToolsLauncher', () => {
-    it('opens tools launcher with first clip content', async () => {
+    it('opens launcher with live clipboard content even when stored clip is stale', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'fresh' });
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
+        { clip: { type: 'text', content: 'stale' }, isLocked: false, timestamp: 1 },
       ]);
 
       await actions.openToolsLauncher();
 
       const { createToolsLauncherWindow } = await import('../window/creation.js');
-      expect(createToolsLauncherWindow).toHaveBeenCalledWith('hello');
+      expect(createToolsLauncherWindow).toHaveBeenCalledWith('fresh');
     });
 
-    it('does nothing when no clips available', async () => {
+    it('does not read stored history when live clipboard has content', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'fresh' });
+
+      await actions.openToolsLauncher();
+
+      expect(storage.getClips).not.toHaveBeenCalled();
+    });
+
+    it('falls back to most recent stored clip when live read is null', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
+      vi.mocked(storage.getClips).mockResolvedValue([
+        { clip: { type: 'text', content: 'stored' }, isLocked: false, timestamp: 1 },
+      ]);
+
+      await actions.openToolsLauncher();
+
+      const { createToolsLauncherWindow } = await import('../window/creation.js');
+      expect(createToolsLauncherWindow).toHaveBeenCalledWith('stored');
+    });
+
+    it('falls back to stored clip when live read content is empty', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: '' });
+      vi.mocked(storage.getClips).mockResolvedValue([
+        { clip: { type: 'text', content: 'stored' }, isLocked: false, timestamp: 1 },
+      ]);
+
+      await actions.openToolsLauncher();
+
+      const { createToolsLauncherWindow } = await import('../window/creation.js');
+      expect(createToolsLauncherWindow).toHaveBeenCalledWith('stored');
+    });
+
+    it('does nothing when live read is null and no clips available', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
       vi.mocked(storage.getClips).mockResolvedValue([]);
+
       await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
+
+      const { createToolsLauncherWindow } = await import('../window/creation.js');
+      expect(createToolsLauncherWindow).not.toHaveBeenCalled();
     });
 
-    it('does nothing when first clip is null', async () => {
+    it('does nothing when live read is null and first stored clip is null', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(storage.getClips).mockResolvedValue([null as any]);
       await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
     });
 
     it('handles error gracefully', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
       vi.mocked(storage.getClips).mockRejectedValue(new Error('fail'));
       await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
     });
