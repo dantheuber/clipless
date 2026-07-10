@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "okf": {
+      "command": "npx",
+      "args": [
+        "@copperbox/okf-mcp@latest",
+        "--bundle", "okf=./okf-bundle",
+        "--writable"
+      ]
+    }
+  }
+}
