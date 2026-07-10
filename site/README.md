@@ -24,6 +24,12 @@ files as-is (`.nojekyll` disables Jekyll processing).
 └── .nojekyll           Tell GitHub Pages to skip Jekyll
 ```
 
+## Analytics
+
+Every page loads Google Analytics (gtag.js, measurement ID `G-D6QZ5FXQ2J`) via a
+snippet at the top of `<head>`. When adding a new page, copy the snippet from an
+existing one.
+
 ## Theming
 
 The site follows the visitor's OS light/dark preference and remembers a manual
