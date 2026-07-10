@@ -1,6 +1,7 @@
 # Update Log
 
 ## 2026-07-10
+* Documented the manual gh-pages deploy process for clipless.app and the GA tracking added 2026-07-09
 * Re-verified; added CI CSC skip and swallowed update-check errors
 * Re-verified against defaults.ts; added exact default bindings and disabled-by-default master toggle
 * Re-verified against app/index.ts; removed stale docs reference, added auto-start reconciliation and deferred update check details
