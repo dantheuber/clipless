@@ -1,351 +1,914 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="dark">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clipless — the clipboard manager that reads</title>
-  <meta name="description" content="Clipless is a free, open-source clipboard manager that detects emails, IPs, tickets and URLs in what you copy and turns them into one-click tool launches." />
-  <link rel="canonical" href="https://clipless.app/" />
-  <link rel="icon" type="image/png" href="/assets/icon.png" />
-
-  <!-- Open Graph / social -->
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://clipless.app/" />
-  <meta property="og:title" content="Clipless — the clipboard manager that reads" />
-  <meta property="og:description" content="A free, open-source clipboard manager that reads what you copy — spotting emails, IPs, tickets and URLs and turning them into one-click actions." />
-  <meta property="og:image" content="https://clipless.app/assets/screens/main-dark.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/styles.css" />
-
-  <!-- No-flash theme init: localStorage override, else system preference -->
-  <script>
-    (function () {
-      try {
-        var saved = localStorage.getItem('clipless-theme');
-        var sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
-        document.documentElement.dataset.theme = (saved === 'light' || saved === 'dark') ? saved : sys;
-      } catch (e) {
-        document.documentElement.dataset.theme = 'dark';
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-D6QZ5FXQ2J"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
       }
-    })();
-  </script>
-</head>
-<body>
-  <div class="bg-field"></div>
+      gtag('js', new Date());
 
-  <!-- ===================== Nav ===================== -->
-  <header class="nav">
-    <div class="wrap nav-inner">
-      <a class="brand" href="#top" aria-label="Clipless home">
-        <span class="mark"><span class="mark-img" aria-hidden="true" style="width:30px;height:30px"></span></span>
-        <span class="name">Clipless</span>
-      </a>
-      <nav class="nav-links">
-        <a href="#quick-clips">Quick Clips</a>
-        <a href="#tools">Tools</a>
-        <a href="#theming">Theming</a>
-        <a href="#usecases">Who it's for</a>
-        <a href="/docs/">Docs</a>
-      </nav>
-      <div class="nav-right">
-        <button class="theme-toggle" data-theme-toggle aria-label="Toggle light / dark theme">
-          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8" /></svg>
-          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" /></svg>
-        </button>
-        <a class="btn btn-primary btn-sm" href="/download/">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg>
-          Download
+      gtag('config', 'G-D6QZ5FXQ2J');
+    </script>
+    <title>Clipless — the clipboard manager that reads</title>
+    <meta
+      name="description"
+      content="Clipless is a free, open-source clipboard manager that detects emails, IPs, tickets and URLs in what you copy and turns them into one-click tool launches."
+    />
+    <link rel="canonical" href="https://clipless.app/" />
+    <link rel="icon" type="image/png" href="/assets/icon.png" />
+
+    <!-- Open Graph / social -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://clipless.app/" />
+    <meta property="og:title" content="Clipless — the clipboard manager that reads" />
+    <meta
+      property="og:description"
+      content="A free, open-source clipboard manager that reads what you copy — spotting emails, IPs, tickets and URLs and turning them into one-click actions."
+    />
+    <meta property="og:image" content="https://clipless.app/assets/screens/main-dark.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+
+    <!-- No-flash theme init: localStorage override, else system preference -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('clipless-theme');
+          var sys = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.dataset.theme =
+            saved === 'light' || saved === 'dark' ? saved : sys;
+        } catch (e) {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="bg-field"></div>
+
+    <!-- ===================== Nav ===================== -->
+    <header class="nav">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top" aria-label="Clipless home">
+          <span class="mark"
+            ><span class="mark-img" aria-hidden="true" style="width: 30px; height: 30px"></span
+          ></span>
+          <span class="name">Clipless</span>
         </a>
-        <button class="nav-toggle" data-nav-toggle aria-label="Open menu" aria-expanded="false">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
-        </button>
-      </div>
-    </div>
-    <div class="nav-mobile">
-      <div class="wrap">
-        <a href="#quick-clips">Quick Clips</a>
-        <a href="#tools">Tools</a>
-        <a href="#theming">Theming</a>
-        <a href="#usecases">Who it's for</a>
-        <a href="/docs/">Docs</a>
-        <a href="/download/">Download</a>
-      </div>
-    </div>
-  </header>
-
-  <main>
-    <!-- ===================== Hero (split) ===================== -->
-    <section class="hero hero-split section-pad" id="top">
-      <div class="wrap hero-grid">
-        <div class="hero-copy reveal in">
-          <span class="hero-pill">
-            <span class="dot"></span> <b>Free &amp; open source</b> clipboard manager
-          </span>
-          <h1 class="hero-title">The clipboard that <span class="grad">reads between the lines.</span></h1>
-          <p class="hero-sub">
-            Clipless quietly remembers everything you copy, then reads it — spotting
-            emails, IPs, tickets and URLs and turning them into one-click actions.
-          </p>
-          <div class="hero-cta">
-            <a class="btn btn-primary btn-lg" href="/download/">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg>
-              Download Clipless
-            </a>
-            <a class="btn btn-ghost btn-lg" href="#quick-clips">
-              See how it works
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-            </a>
-          </div>
-          <div class="hero-trust">
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5" /></svg> Windows, macOS &amp; Linux</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5" /></svg> Encrypted local storage</span>
-            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5" /></svg> No account needed</span>
-          </div>
+        <nav class="nav-links">
+          <a href="#quick-clips">Quick Clips</a>
+          <a href="#tools">Tools</a>
+          <a href="#theming">Theming</a>
+          <a href="#usecases">Who it's for</a>
+          <a href="/docs/">Docs</a>
+        </nav>
+        <div class="nav-right">
+          <button class="theme-toggle" data-theme-toggle aria-label="Toggle light / dark theme">
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4.2" />
+              <path
+                d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"
+              />
+            </svg>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" />
+            </svg>
+          </button>
+          <a class="btn btn-primary btn-sm" href="/download/">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"
+              />
+            </svg>
+            Download
+          </a>
+          <button class="nav-toggle" data-nav-toggle aria-label="Open menu" aria-expanded="false">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            >
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
         </div>
-        <div class="hero-shot-wrap reveal in d1">
-          <div class="appwin">
-            <div class="appwin-bar"><div class="dots"><i></i><i></i><i></i></div><div class="appwin-title">Clipless — clipboard history</div></div>
-            <div class="shot">
-              <img class="shot-light" src="/assets/screens/main-light.png" alt="Clipless main window listing copied clips, each flagged with a scanner icon" loading="eager" />
-              <img class="shot-dark" src="/assets/screens/main-dark.png" alt="Clipless main window listing copied clips, each flagged with a scanner icon" loading="eager" />
+      </div>
+      <div class="nav-mobile">
+        <div class="wrap">
+          <a href="#quick-clips">Quick Clips</a>
+          <a href="#tools">Tools</a>
+          <a href="#theming">Theming</a>
+          <a href="#usecases">Who it's for</a>
+          <a href="/docs/">Docs</a>
+          <a href="/download/">Download</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- ===================== Hero (split) ===================== -->
+      <section class="hero hero-split section-pad" id="top">
+        <div class="wrap hero-grid">
+          <div class="hero-copy reveal in">
+            <span class="hero-pill">
+              <span class="dot"></span> <b>Free &amp; open source</b> clipboard manager
+            </span>
+            <h1 class="hero-title">
+              The clipboard that <span class="grad">reads between the lines.</span>
+            </h1>
+            <p class="hero-sub">
+              Clipless quietly remembers everything you copy, then reads it — spotting emails, IPs,
+              tickets and URLs and turning them into one-click actions.
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-lg" href="/download/">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"
+                  />
+                </svg>
+                Download Clipless
+              </a>
+              <a class="btn btn-ghost btn-lg" href="#quick-clips">
+                See how it works
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+              </a>
+            </div>
+            <div class="hero-trust">
+              <span
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 12.5 9 17.5 20 6.5" />
+                </svg>
+                Windows, macOS &amp; Linux</span
+              >
+              <span
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 12.5 9 17.5 20 6.5" />
+                </svg>
+                Encrypted local storage</span
+              >
+              <span
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 12.5 9 17.5 20 6.5" />
+                </svg>
+                No account needed</span
+              >
+            </div>
+          </div>
+          <div class="hero-shot-wrap reveal in d1">
+            <div class="appwin">
+              <div class="appwin-bar">
+                <div class="dots"><i></i><i></i><i></i></div>
+                <div class="appwin-title">Clipless — clipboard history</div>
+              </div>
+              <div class="shot">
+                <img
+                  class="shot-light"
+                  src="/assets/screens/main-light.png"
+                  alt="Clipless main window listing copied clips, each flagged with a scanner icon"
+                  loading="eager"
+                />
+                <img
+                  class="shot-dark"
+                  src="/assets/screens/main-dark.png"
+                  alt="Clipless main window listing copied clips, each flagged with a scanner icon"
+                  loading="eager"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===================== Quick Clips ===================== -->
-    <section class="section-pad" id="quick-clips">
-      <div class="wrap feature reverse">
-        <div class="feature-copy reveal">
-          <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6" /><path d="m20 20-3.5-3.5" /></svg> Quick Clips</span>
-          <h2>It reads what you copy.</h2>
-          <p class="lead">
-            The moment something useful lands in your clipboard, Clipless flags it.
-            A scanner icon appears on the clip — open it to see every pattern it
-            pulled out, ready to act on.
-          </p>
-          <ul class="feature-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6" /><path d="m20 20-3.5-3.5" /></svg></span><span><b>Automatic detection</b> <span class="dim">— emails, IPs, URLs, phone numbers, ticket IDs and your own custom regex</span></span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5 9 17.5 20 6.5" /></svg></span><span><b>Pick exactly what you need</b> <span class="dim">— each extracted value is individually selectable</span></span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 13 9 5 9-5" /></svg></span><span><b>Named capture groups</b> <span class="dim">— build patterns once and reuse them across every clip</span></span></li>
-          </ul>
-          <div class="token-row" aria-hidden="true">
-            <span class="token"><b>email</b> mreyes@example.com</span>
-            <span class="token"><b>ip</b> 203.0.113.42</span>
-            <span class="token"><b>ticket</b> INC-4821</span>
+      <!-- ===================== Quick Clips ===================== -->
+      <section class="section-pad" id="quick-clips">
+        <div class="wrap feature reverse">
+          <div class="feature-copy reveal">
+            <span class="eyebrow"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="11" cy="11" r="6" />
+                <path d="m20 20-3.5-3.5" />
+              </svg>
+              Quick Clips</span
+            >
+            <h2>It reads what you copy.</h2>
+            <p class="lead">
+              The moment something useful lands in your clipboard, Clipless flags it. A scanner icon
+              appears on the clip — open it to see every pattern it pulled out, ready to act on.
+            </p>
+            <ul class="feature-list">
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="6" />
+                    <path d="m20 20-3.5-3.5" /></svg></span
+                ><span
+                  ><b>Automatic detection</b>
+                  <span class="dim"
+                    >— emails, IPs, URLs, phone numbers, ticket IDs and your own custom regex</span
+                  ></span
+                >
+              </li>
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 12.5 9 17.5 20 6.5" /></svg></span
+                ><span
+                  ><b>Pick exactly what you need</b>
+                  <span class="dim">— each extracted value is individually selectable</span></span
+                >
+              </li>
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+                    <path d="m3 13 9 5 9-5" /></svg></span
+                ><span
+                  ><b>Named capture groups</b>
+                  <span class="dim"
+                    >— build patterns once and reuse them across every clip</span
+                  ></span
+                >
+              </li>
+            </ul>
+            <div class="token-row" aria-hidden="true">
+              <span class="token"><b>email</b> mreyes@example.com</span>
+              <span class="token"><b>ip</b> 203.0.113.42</span>
+              <span class="token"><b>ticket</b> INC-4821</span>
+            </div>
           </div>
-        </div>
-        <div class="feature-media reveal d1">
-          <div class="appwin">
-            <div class="appwin-bar"><div class="dots"><i></i><i></i><i></i></div><div class="appwin-title">Clipless — scanning clips</div></div>
-            <div class="shot">
-              <img class="shot-light" src="/assets/screens/main-light.png" alt="Clipless scanning a clip and surfacing detected email, IP and ticket values" loading="lazy" />
-              <img class="shot-dark" src="/assets/screens/main-dark.png" alt="Clipless scanning a clip and surfacing detected email, IP and ticket values" loading="lazy" />
+          <div class="feature-media reveal d1">
+            <div class="appwin">
+              <div class="appwin-bar">
+                <div class="dots"><i></i><i></i><i></i></div>
+                <div class="appwin-title">Clipless — scanning clips</div>
+              </div>
+              <div class="shot">
+                <img
+                  class="shot-light"
+                  src="/assets/screens/main-light.png"
+                  alt="Clipless scanning a clip and surfacing detected email, IP and ticket values"
+                  loading="lazy"
+                />
+                <img
+                  class="shot-dark"
+                  src="/assets/screens/main-dark.png"
+                  alt="Clipless scanning a clip and surfacing detected email, IP and ticket values"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===================== Tools Launcher ===================== -->
-    <section class="section-pad" id="tools">
-      <div class="wrap feature">
-        <div class="feature-copy reveal">
-          <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" /></svg> Tools Launcher</span>
-          <h2>One copy. Every tool, open.</h2>
-          <p class="lead">
-            Send the data Clipless found straight into the web tools you already use.
-            Select a few patterns, pick your tools, and launch them all at once —
-            no retyping, no tab juggling.
-          </p>
-          <ul class="feature-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" /></svg></span><span><b>Multi-token URLs</b> <span class="dim">— drop values into any link, e.g. tool.com/{ip}/{email}</span></span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 13 9 5 9-5" /></svg></span><span><b>Open in bulk</b> <span class="dim">— fire off several lookups simultaneously with one click</span></span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span><span><b>Templates &amp; sharing</b> <span class="dim">— match templates automatically and export configs for your team</span></span></li>
-          </ul>
-        </div>
-        <div class="feature-media reveal d1">
-          <div class="appwin">
-            <div class="appwin-bar"><div class="dots"><i></i><i></i><i></i></div><div class="appwin-title">Clipless — Tools Launcher</div></div>
-            <div class="shot">
-              <img class="shot-light" src="/assets/screens/patterns-light.png" alt="Clipless Tools Launcher with found patterns on the left and matching web tools on the right" loading="lazy" />
-              <img class="shot-dark" src="/assets/screens/patterns-dark.png" alt="Clipless Tools Launcher with found patterns on the left and matching web tools on the right" loading="lazy" />
+      <!-- ===================== Tools Launcher ===================== -->
+      <section class="section-pad" id="tools">
+        <div class="wrap feature">
+          <div class="feature-copy reveal">
+            <span class="eyebrow"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" />
+              </svg>
+              Tools Launcher</span
+            >
+            <h2>One copy. Every tool, open.</h2>
+            <p class="lead">
+              Send the data Clipless found straight into the web tools you already use. Select a few
+              patterns, pick your tools, and launch them all at once — no retyping, no tab juggling.
+            </p>
+            <ul class="feature-list">
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z" /></svg></span
+                ><span
+                  ><b>Multi-token URLs</b>
+                  <span class="dim"
+                    >— drop values into any link, e.g. tool.com/{ip}/{email}</span
+                  ></span
+                >
+              </li>
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+                    <path d="m3 13 9 5 9-5" /></svg></span
+                ><span
+                  ><b>Open in bulk</b>
+                  <span class="dim"
+                    >— fire off several lookups simultaneously with one click</span
+                  ></span
+                >
+              </li>
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span
+                ><span
+                  ><b>Templates &amp; sharing</b>
+                  <span class="dim"
+                    >— match templates automatically and export configs for your team</span
+                  ></span
+                >
+              </li>
+            </ul>
+          </div>
+          <div class="feature-media reveal d1">
+            <div class="appwin">
+              <div class="appwin-bar">
+                <div class="dots"><i></i><i></i><i></i></div>
+                <div class="appwin-title">Clipless — Tools Launcher</div>
+              </div>
+              <div class="shot">
+                <img
+                  class="shot-light"
+                  src="/assets/screens/patterns-light.png"
+                  alt="Clipless Tools Launcher with found patterns on the left and matching web tools on the right"
+                  loading="lazy"
+                />
+                <img
+                  class="shot-dark"
+                  src="/assets/screens/patterns-dark.png"
+                  alt="Clipless Tools Launcher with found patterns on the left and matching web tools on the right"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===================== Theming ===================== -->
-    <section class="section-pad" id="theming">
-      <div class="wrap feature reverse">
-        <div class="feature-copy reveal">
-          <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" /></svg> Light &amp; Dark</span>
-          <h2>Looks right, day or night.</h2>
-          <p class="lead">
-            Clipless follows your system theme out of the box and flips instantly when
-            you switch — with smooth, considered transitions instead of a jarring flash.
-            Prefer to set it yourself? One dropdown, done.
-          </p>
-          <ul class="feature-list">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.3M21 4v4h-4" /></svg></span><span><b>Matches your system</b> <span class="dim">— respects your OS light / dark preference automatically</span></span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg></span><span><b>Carefully tuned palettes</b> <span class="dim">— readable contrast and soft surfaces in both modes</span></span></li>
-          </ul>
-          <div class="theme-demo">
-            <span>This whole site does it too —</span>
-            <button data-theme-toggle>
-              <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.2" /><path d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8" /></svg>
-              <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" /></svg>
-              Try <span data-theme-label>light</span> mode
-            </button>
+      <!-- ===================== Theming ===================== -->
+      <section class="section-pad" id="theming">
+        <div class="wrap feature reverse">
+          <div class="feature-copy reveal">
+            <span class="eyebrow"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" />
+              </svg>
+              Light &amp; Dark</span
+            >
+            <h2>Looks right, day or night.</h2>
+            <p class="lead">
+              Clipless follows your system theme out of the box and flips instantly when you switch
+              — with smooth, considered transitions instead of a jarring flash. Prefer to set it
+              yourself? One dropdown, done.
+            </p>
+            <ul class="feature-list">
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M21 12a9 9 0 1 1-2.6-6.3M21 4v4h-4" /></svg></span
+                ><span
+                  ><b>Matches your system</b>
+                  <span class="dim"
+                    >— respects your OS light / dark preference automatically</span
+                  ></span
+                >
+              </li>
+              <li>
+                <span class="ic"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
+                    <circle cx="12" cy="12" r="3" /></svg></span
+                ><span
+                  ><b>Carefully tuned palettes</b>
+                  <span class="dim">— readable contrast and soft surfaces in both modes</span></span
+                >
+              </li>
+            </ul>
+            <div class="theme-demo">
+              <span>This whole site does it too —</span>
+              <button data-theme-toggle>
+                <svg
+                  class="icon-sun"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="12" cy="12" r="4.2" />
+                  <path
+                    d="M12 2.5v2.5M12 19v2.5M4.6 4.6l1.8 1.8M17.6 17.6l1.8 1.8M2.5 12H5M19 12h2.5M4.6 19.4l1.8-1.8M17.6 6.4l1.8-1.8"
+                  />
+                </svg>
+                <svg
+                  class="icon-moon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M20 14.5A8 8 0 1 1 9.5 4 6.3 6.3 0 0 0 20 14.5Z" />
+                </svg>
+                Try <span data-theme-label>light</span> mode
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="feature-media reveal d1">
-          <div class="appwin">
-            <div class="appwin-bar"><div class="dots"><i></i><i></i><i></i></div><div class="appwin-title">Clipless — Settings</div></div>
-            <div class="shot">
-              <img class="shot-light" src="/assets/screens/settings-general-light.png" alt="Clipless settings window showing theme and general options in light mode" loading="lazy" />
-              <img class="shot-dark" src="/assets/screens/settings-general-dark.png" alt="Clipless settings window showing theme and general options in dark mode" loading="lazy" />
+          <div class="feature-media reveal d1">
+            <div class="appwin">
+              <div class="appwin-bar">
+                <div class="dots"><i></i><i></i><i></i></div>
+                <div class="appwin-title">Clipless — Settings</div>
+              </div>
+              <div class="shot">
+                <img
+                  class="shot-light"
+                  src="/assets/screens/settings-general-light.png"
+                  alt="Clipless settings window showing theme and general options in light mode"
+                  loading="lazy"
+                />
+                <img
+                  class="shot-dark"
+                  src="/assets/screens/settings-general-dark.png"
+                  alt="Clipless settings window showing theme and general options in dark mode"
+                  loading="lazy"
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===================== Who it's for ===================== -->
-    <section class="section-pad" id="usecases">
-      <div class="wrap">
-        <div class="usecase-head reveal">
-          <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13v-1a8 8 0 0 1 16 0v1" /><path d="M4 13a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Zm16 0a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z" /><path d="M18 19a4 4 0 0 1-4 3h-2" /></svg> Who it's for</span>
-          <h2>Built for repetitive work — flexible for anything.</h2>
-          <p>
-            Clipless shines anywhere people copy the same kinds of data all day. But
-            nothing about it is locked to one job — define your own patterns and tools,
-            and it bends to whatever workflow you throw at it.
-          </p>
-        </div>
-        <div class="usecase-grid">
-          <div class="usecase reveal d1">
-            <span class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13v-1a8 8 0 0 1 16 0v1" /><path d="M4 13a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Zm16 0a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z" /><path d="M18 19a4 4 0 0 1-4 3h-2" /></svg></span>
-            <h3>Call centre &amp; support</h3>
-            <p>Copy a customer email or account number and open it across your CRM, billing and knowledge-base tools in a single move.</p>
+      <!-- ===================== Who it's for ===================== -->
+      <section class="section-pad" id="usecases">
+        <div class="wrap">
+          <div class="usecase-head reveal">
+            <span class="eyebrow"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
+                <path
+                  d="M4 13a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Zm16 0a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z"
+                />
+                <path d="M18 19a4 4 0 0 1-4 3h-2" />
+              </svg>
+              Who it's for</span
+            >
+            <h2>Built for repetitive work — flexible for anything.</h2>
+            <p>
+              Clipless shines anywhere people copy the same kinds of data all day. But nothing about
+              it is locked to one job — define your own patterns and tools, and it bends to whatever
+              workflow you throw at it.
+            </p>
           </div>
-          <div class="usecase reveal d2">
-            <span class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span>
-            <h3>Data entry &amp; admin</h3>
-            <p>Bridge legacy and modern systems — extract reference numbers, populate templates and process records in batches without retyping.</p>
-          </div>
-          <div class="usecase reveal d3">
-            <span class="uc-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="6" /><path d="m20 20-3.5-3.5" /></svg></span>
-            <h3>Security &amp; research</h3>
-            <p>Pull IPs, domains and hashes from any text and fan them out to VirusTotal, AbuseIPDB and the rest of your toolkit instantly.</p>
-          </div>
-          <div class="flexible reveal">
-            <span class="fx-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.8 8.5a3.5 3.5 0 1 0 0 7c2.2 0 3.6-1.9 5.2-3.5C13.6 9.9 15 8 17.2 8a3.5 3.5 0 1 1 0 7c-2.2 0-3.6-1.9-5.2-3.5C10.4 9.9 9 8.5 6.8 8.5Z" /></svg></span>
-            <div>
-              <h3>…and whatever you do next.</h3>
+          <div class="usecase-grid">
+            <div class="usecase reveal d1">
+              <span class="uc-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
+                  <path
+                    d="M4 13a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2Zm16 0a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2 2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2Z"
+                  />
+                  <path d="M18 19a4 4 0 0 1-4 3h-2" /></svg
+              ></span>
+              <h3>Call centre &amp; support</h3>
               <p>
-                Custom regex patterns, custom tools, custom templates — Clipless is a
-                blank canvas with smart defaults. If you can describe the data and where
-                it should go, you can wire it up. No use case is too niche.
+                Copy a customer email or account number and open it across your CRM, billing and
+                knowledge-base tools in a single move.
+              </p>
+            </div>
+            <div class="usecase reveal d2">
+              <span class="uc-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                  <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                  <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg
+              ></span>
+              <h3>Data entry &amp; admin</h3>
+              <p>
+                Bridge legacy and modern systems — extract reference numbers, populate templates and
+                process records in batches without retyping.
+              </p>
+            </div>
+            <div class="usecase reveal d3">
+              <span class="uc-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="11" cy="11" r="6" />
+                  <path d="m20 20-3.5-3.5" /></svg
+              ></span>
+              <h3>Security &amp; research</h3>
+              <p>
+                Pull IPs, domains and hashes from any text and fan them out to VirusTotal, AbuseIPDB
+                and the rest of your toolkit instantly.
+              </p>
+            </div>
+            <div class="flexible reveal">
+              <span class="fx-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M6.8 8.5a3.5 3.5 0 1 0 0 7c2.2 0 3.6-1.9 5.2-3.5C13.6 9.9 15 8 17.2 8a3.5 3.5 0 1 1 0 7c-2.2 0-3.6-1.9-5.2-3.5C10.4 9.9 9 8.5 6.8 8.5Z"
+                  /></svg
+              ></span>
+              <div>
+                <h3>…and whatever you do next.</h3>
+                <p>
+                  Custom regex patterns, custom tools, custom templates — Clipless is a blank canvas
+                  with smart defaults. If you can describe the data and where it should go, you can
+                  wire it up. No use case is too niche.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===================== More to love ===================== -->
+      <section class="section-pad" style="padding-top: 0">
+        <div class="wrap">
+          <div class="usecase-head reveal" style="text-align: left; margin: 0; max-width: 560px">
+            <span class="eyebrow"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m12 3 9 5-9 5-9-5 9-5Z" />
+                <path d="m3 13 9 5 9-5" />
+              </svg>
+              More to love</span
+            >
+            <h2 style="font-size: clamp(24px, 3vw, 34px)">The quiet details</h2>
+          </div>
+          <div class="more-grid">
+            <div class="more-card reveal d1">
+              <span class="m-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <circle cx="8" cy="8" r="4.5" />
+                  <path d="m11.2 11.2 8.3 8.3M16 16l2-2M18.5 18.5l1.8-1.8" /></svg
+              ></span>
+              <h3>Global hotkeys</h3>
+              <p>
+                Reach recent clips and the launcher from anywhere — even when Clipless is minimised.
+              </p>
+            </div>
+            <div class="more-card reveal d2">
+              <span class="m-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
+                  <path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg
+              ></span>
+              <h3>Encrypted storage</h3>
+              <p>
+                History is encrypted with DPAPI, Keychain or Secret Service and stays on your
+                device.
+              </p>
+            </div>
+            <div class="more-card reveal d3">
+              <span class="m-ic"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 3v9" />
+                  <path d="M6.4 7a8 8 0 1 0 11.2 0" /></svg
+              ></span>
+              <h3>Starts with you</h3>
+              <p>
+                Auto-launch on boot, start minimised to the tray, and update quietly in the
+                background.
               </p>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ===================== More to love ===================== -->
-    <section class="section-pad" style="padding-top:0">
+      <!-- ===================== Download ===================== -->
+      <section class="section-pad" id="download">
+        <div class="wrap">
+          <div class="download-card reveal">
+            <span class="eyebrow" style="justify-content: center; display: flex"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"
+                />
+              </svg>
+              Get Clipless</span
+            >
+            <h2 style="margin-top: 18px">Start copying smarter.</h2>
+            <p>
+              Free, open source, and ready for Windows, macOS and Linux. Grab the latest build or
+              browse the source — it's all on GitHub.
+            </p>
+            <div class="hero-cta">
+              <a class="btn btn-primary btn-lg" href="/download/">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17"
+                  />
+                </svg>
+                Download Clipless
+              </a>
+              <a
+                class="btn btn-ghost btn-lg"
+                href="https://github.com/dantheuber/clipless"
+                target="_blank"
+                rel="noopener"
+              >
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M12 1.5C6.2 1.5 1.5 6.2 1.5 12c0 4.6 3 8.5 7.2 9.9.5.1.7-.2.7-.5v-1.7c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.8-4.7 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4.2-1.4 7.2-5.3 7.2-9.9C22.5 6.2 17.8 1.5 12 1.5Z"
+                  />
+                </svg>
+                View on GitHub
+              </a>
+            </div>
+            <div class="dl-platforms">
+              <span
+                ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M3 5.4 10.4 4.3V11.4H3V5.4ZM3 12.6H10.4V19.7L3 18.6V12.6ZM11.4 4.1 21 2.8V11.4H11.4V4.1ZM11.4 12.6H21V21.2L11.4 19.9V12.6Z"
+                  />
+                </svg>
+                Windows</span
+              >
+              <span
+                ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M16 1.5c.1 1.1-.3 2.1-1 2.9-.7.9-1.8 1.6-2.9 1.5-.1-1.1.4-2.2 1-2.9.8-.9 2-1.5 2.9-1.5ZM19.6 17.3c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-3.9-1-2 0-2.5 1-3.9 1-1.7 0-3-1.7-4-3.2C-.6 16.6-1 11 1.6 8.2 2.8 6.9 4.3 6 6 6c1.7 0 2.7 1 4.1 1 1.3 0 2.1-1 4.1-1 1.5 0 3.1.8 4.2 2.2-3.7 2-3.1 7.3.9 8.7l.3.4Z"
+                  />
+                </svg>
+                macOS</span
+              >
+              <span
+                ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path
+                    d="M12 2c-2 0-3 1.7-3 3.8 0 1.5.5 2.3.5 3.4 0 1-1 2.2-1.8 3.6C6.7 14.5 5.5 16 5.5 17.7c0 1.2.7 1.8.4 2.6-.2.6-.9.8-.9 1.3 0 .6.8.8 1.7.8.7 0 1.4-.2 2-.6.6.4 1.5.6 2.4.6h1.8c.9 0 1.8-.2 2.4-.6.6.4 1.3.6 2 .6.9 0 1.7-.2 1.7-.8 0-.5-.7-.7-.9-1.3-.3-.8.4-1.4.4-2.6 0-1.7-1.2-3.2-2.2-4.9-.8-1.4-1.8-2.6-1.8-3.6 0-1.1.5-1.9.5-3.4C15 3.7 14 2 12 2Z"
+                  />
+                </svg>
+                Linux</span
+              >
+            </div>
+            <p class="dl-note">
+              Clipless isn't code-signed yet, so your OS may warn about an "unidentified developer."
+              It's safe — the build comes straight from the open-source repo. The
+              <a href="/download/" style="color: inherit; text-decoration: underline"
+                >download page</a
+              >
+              explains how to install past the warning.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ===================== Footer ===================== -->
+    <footer class="footer">
       <div class="wrap">
-        <div class="usecase-head reveal" style="text-align:left;margin:0;max-width:560px">
-          <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z" /><path d="m3 13 9 5 9-5" /></svg> More to love</span>
-          <h2 style="font-size:clamp(24px,3vw,34px)">The quiet details</h2>
+        <div class="footer-inner">
+          <a class="brand" href="#top">
+            <span class="mark"
+              ><span class="mark-img" aria-hidden="true" style="width: 26px; height: 26px"></span
+            ></span>
+            <span class="name">Clipless</span>
+          </a>
+          <nav class="footer-links">
+            <a href="#quick-clips">Quick Clips</a>
+            <a href="#tools">Tools</a>
+            <a href="#theming">Theming</a>
+            <a href="/docs/">Docs</a>
+            <a href="/download/">Download</a>
+            <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener"
+              >GitHub</a
+            >
+          </nav>
         </div>
-        <div class="more-grid">
-          <div class="more-card reveal d1">
-            <span class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="4.5" /><path d="m11.2 11.2 8.3 8.3M16 16l2-2M18.5 18.5l1.8-1.8" /></svg></span>
-            <h3>Global hotkeys</h3>
-            <p>Reach recent clips and the launcher from anywhere — even when Clipless is minimised.</p>
-          </div>
-          <div class="more-card reveal d2">
-            <span class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10" width="15" height="10.5" rx="2.5" /><path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg></span>
-            <h3>Encrypted storage</h3>
-            <p>History is encrypted with DPAPI, Keychain or Secret Service and stays on your device.</p>
-          </div>
-          <div class="more-card reveal d3">
-            <span class="m-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v9" /><path d="M6.4 7a8 8 0 1 0 11.2 0" /></svg></span>
-            <h3>Starts with you</h3>
-            <p>Auto-launch on boot, start minimised to the tray, and update quietly in the background.</p>
-          </div>
-        </div>
+        <p class="footer-fine">
+          Clipless is an open-source clipboard manager built with Electron, React &amp; TypeScript.
+          Data is encrypted with your OS-native keystore and never leaves your machine.
+        </p>
       </div>
-    </section>
+    </footer>
 
-    <!-- ===================== Download ===================== -->
-    <section class="section-pad" id="download">
-      <div class="wrap">
-        <div class="download-card reveal">
-          <span class="eyebrow" style="justify-content:center;display:flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg> Get Clipless</span>
-          <h2 style="margin-top:18px">Start copying smarter.</h2>
-          <p>
-            Free, open source, and ready for Windows, macOS and Linux. Grab the latest
-            build or browse the source — it's all on GitHub.
-          </p>
-          <div class="hero-cta">
-            <a class="btn btn-primary btn-lg" href="/download/">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 17v2.5a1.5 1.5 0 0 0 1.5 1.5h13a1.5 1.5 0 0 0 1.5-1.5V17" /></svg>
-              Download Clipless
-            </a>
-            <a class="btn btn-ghost btn-lg" href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5C6.2 1.5 1.5 6.2 1.5 12c0 4.6 3 8.5 7.2 9.9.5.1.7-.2.7-.5v-1.7c-2.9.6-3.5-1.4-3.5-1.4-.5-1.2-1.2-1.5-1.2-1.5-.9-.6.1-.6.1-.6 1 .1 1.6 1 1.6 1 .9 1.6 2.4 1.1 3 .9.1-.7.4-1.1.6-1.4-2.3-.3-4.7-1.2-4.7-5.1 0-1.1.4-2 1-2.7-.1-.3-.5-1.3.1-2.7 0 0 .9-.3 2.8 1a9.6 9.6 0 0 1 5 0c1.9-1.3 2.8-1 2.8-1 .6 1.4.2 2.4.1 2.7.7.7 1 1.6 1 2.7 0 3.9-2.4 4.8-4.7 5 .4.3.7 1 .7 2v2.9c0 .3.2.6.7.5 4.2-1.4 7.2-5.3 7.2-9.9C22.5 6.2 17.8 1.5 12 1.5Z" /></svg>
-              View on GitHub
-            </a>
-          </div>
-          <div class="dl-platforms">
-            <span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 5.4 10.4 4.3V11.4H3V5.4ZM3 12.6H10.4V19.7L3 18.6V12.6ZM11.4 4.1 21 2.8V11.4H11.4V4.1ZM11.4 12.6H21V21.2L11.4 19.9V12.6Z" /></svg> Windows</span>
-            <span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16 1.5c.1 1.1-.3 2.1-1 2.9-.7.9-1.8 1.6-2.9 1.5-.1-1.1.4-2.2 1-2.9.8-.9 2-1.5 2.9-1.5ZM19.6 17.3c-.5 1.2-.8 1.7-1.5 2.8-1 1.5-2.4 3.4-4.1 3.4-1.5 0-1.9-1-3.9-1-2 0-2.5 1-3.9 1-1.7 0-3-1.7-4-3.2C-.6 16.6-1 11 1.6 8.2 2.8 6.9 4.3 6 6 6c1.7 0 2.7 1 4.1 1 1.3 0 2.1-1 4.1-1 1.5 0 3.1.8 4.2 2.2-3.7 2-3.1 7.3.9 8.7l.3.4Z" /></svg> macOS</span>
-            <span><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2c-2 0-3 1.7-3 3.8 0 1.5.5 2.3.5 3.4 0 1-1 2.2-1.8 3.6C6.7 14.5 5.5 16 5.5 17.7c0 1.2.7 1.8.4 2.6-.2.6-.9.8-.9 1.3 0 .6.8.8 1.7.8.7 0 1.4-.2 2-.6.6.4 1.5.6 2.4.6h1.8c.9 0 1.8-.2 2.4-.6.6.4 1.3.6 2 .6.9 0 1.7-.2 1.7-.8 0-.5-.7-.7-.9-1.3-.3-.8.4-1.4.4-2.6 0-1.7-1.2-3.2-2.2-4.9-.8-1.4-1.8-2.6-1.8-3.6 0-1.1.5-1.9.5-3.4C15 3.7 14 2 12 2Z" /></svg> Linux</span>
-          </div>
-          <p class="dl-note">
-            Clipless isn't code-signed yet, so your OS may warn about an "unidentified
-            developer." It's safe — the build comes straight from the open-source repo.
-            The <a href="/download/" style="color:inherit;text-decoration:underline">download page</a> explains how to install past the warning.
-          </p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- ===================== Footer ===================== -->
-  <footer class="footer">
-    <div class="wrap">
-      <div class="footer-inner">
-        <a class="brand" href="#top">
-          <span class="mark"><span class="mark-img" aria-hidden="true" style="width:26px;height:26px"></span></span>
-          <span class="name">Clipless</span>
-        </a>
-        <nav class="footer-links">
-          <a href="#quick-clips">Quick Clips</a>
-          <a href="#tools">Tools</a>
-          <a href="#theming">Theming</a>
-          <a href="/docs/">Docs</a>
-          <a href="/download/">Download</a>
-          <a href="https://github.com/dantheuber/clipless" target="_blank" rel="noopener">GitHub</a>
-        </nav>
-      </div>
-      <p class="footer-fine">
-        Clipless is an open-source clipboard manager built with Electron, React &amp; TypeScript.
-        Data is encrypted with your OS-native keystore and never leaves your machine.
-      </p>
-    </div>
-  </footer>
-
-  <script src="/app.js" defer></script>
-</body>
+    <script src="/app.js" defer></script>
+  </body>
 </html>
