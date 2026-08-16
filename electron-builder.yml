@@ -71,7 +71,11 @@ linux:
     - deb
   maintainer: electronjs.org
   category: Utility
-  icon: build/icon.png
+  # Must be a directory of standard hicolor sizes. A single 1024x1024 png installs
+  # to hicolor/1024x1024/apps, which is not a directory declared in hicolor's
+  # index.theme, so icon-theme lookup of `Icon=clipless` fails and the desktop
+  # shows the generic fallback icon.
+  icon: build/icons
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false

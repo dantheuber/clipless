@@ -11,6 +11,7 @@ import {
   getToolsLauncherWindow,
 } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
+import { applyWindowBackgroundTheme } from '../window/background';
 import { checkForUpdatesWithRetry } from '../updater';
 import { applyAutoStart } from '../autoStart';
 
@@ -44,6 +45,9 @@ export function setupMainIPC(): void {
       if (mainWindow) {
         await applyWindowSettings(mainWindow);
       }
+
+      // Keep the native window background matching the theme
+      applyWindowBackgroundTheme(settings.theme);
 
       // Update hotkeys if settings changed
       await hotkeyManager.onSettingsChanged();

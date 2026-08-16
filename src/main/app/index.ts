@@ -7,6 +7,10 @@ import { configureAutoUpdater, setupAutoUpdaterEvents, runAutomaticUpdateCheck }
 import { setupMainIPC } from '../ipc';
 import { initializeWindowSystem, getMainWindow, getWindowBounds } from '../window';
 import { applyWindowSettings } from '../window/settings';
+import {
+  applyWindowBackgroundTheme,
+  watchSystemThemeForWindowBackground,
+} from '../window/background';
 import { applyAutoStart } from '../autoStart';
 
 export async function initializeApp(): Promise<void> {
@@ -15,6 +19,9 @@ export async function initializeApp(): Promise<void> {
   // item, so a shared default (e.g. 'com.electron') would collide with other
   // Electron apps and let dev builds clobber the installed app's entry.
   electronApp.setAppUserModelId('com.clipless.app');
+
+  // Keep window backgrounds in step with the OS theme for theme: 'system'
+  watchSystemThemeForWindowBackground();
 
   // Create window first for better perceived performance
   await initializeWindowSystem();
@@ -47,6 +54,9 @@ export async function initializeApp(): Promise<void> {
     try {
       const settings = await storage.getSettings();
       applyAutoStart(settings.autoStart);
+      // Windows were created before storage was ready, so their background
+      // still reflects the OS preference — correct it to the stored theme.
+      applyWindowBackgroundTheme(settings.theme);
     } catch (error) {
       console.error('Failed to apply auto-start setting on startup:', error);
     }
