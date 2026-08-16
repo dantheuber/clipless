@@ -153,7 +153,7 @@ The things you don't notice until you'd miss them.
 - **⌨️ Global hotkeys** — reach recent clips and the launcher from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you.
 - **🔒 Encrypted storage** — history is encrypted with your OS keystore (DPAPI, Keychain or Secret Service) and never leaves your machine. Data is split into domain-specific files for efficient saves, with images stored as separate encrypted files and fast-loading thumbnails.
 - **🚀 Non-blocking startup** — the window appears immediately while your history loads in the background.
-- **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background (auto-update is Windows-only for now — see [Installing on macOS](#-installing-on-macos)).
+- **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background (auto-update works on Windows and Linux; macOS still needs a manual reinstall — see [Installing on macOS](#-installing-on-macos)).
 - **💾 Backup-friendly** — export and import your clips, patterns, tools and templates.
 
 ---
@@ -254,8 +254,31 @@ snippets and open them in your documentation.
 
 ## 📥 Installation
 
-Download the latest build for **Windows** or **Linux** from the **[download page](https://clipless.app/download/)**
+Download the latest build for **Windows**, **macOS** or **Linux** from the **[download page](https://clipless.app/download/)**
 or the **[GitHub releases](https://github.com/dantheuber/clipless/releases)**.
+
+### 🐧 Installing on Linux
+
+Releases ship three Linux formats — pick whichever suits your setup:
+
+| Format      | Install                                                  | Auto-update                           |
+| ----------- | -------------------------------------------------------- | ------------------------------------- |
+| `.deb`      | `sudo apt install ./clipless_<version>_amd64.deb`        | ✅ in-app (prompts for your password) |
+| `.AppImage` | `chmod +x clipless-<version>.AppImage` and run it        | ✅ in-app                             |
+| `.snap`     | `sudo snap install --dangerous clipless_<version>*.snap` | ❌ (sideloaded snaps don't refresh)   |
+
+**Debian / Ubuntu (`.deb`)** — the recommended option. Installing with `apt` resolves dependencies
+and registers the desktop entry and icon, so Clipless appears in your app grid and taskbar:
+
+```bash
+sudo apt install ./clipless_<version>_amd64.deb
+```
+
+To remove it: `sudo apt remove clipless`.
+
+> **Auto-update on `.deb`:** when an update is downloaded, installing it needs root, so you'll get a
+> polkit password prompt. Decline it and the app keeps running on the current version — reinstall
+> the newer `.deb` by hand whenever you like.
 
 ### 🍎 Installing on macOS
 

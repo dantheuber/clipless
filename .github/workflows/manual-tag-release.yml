@@ -33,12 +33,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Linux specific setup for AppImage and snap
+      # Linux specific setup for AppImage, snap and deb
+      # squashfs-tools provides mksquashfs, which electron-builder uses to pack
+      # the snap; dpkg/fakeroot back the deb target.
       - name: Install Linux dependencies
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1
+          sudo apt-get install -y libnss3-dev libatk-bridge2.0-dev libdrm2 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libxss1 squashfs-tools fakeroot
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
