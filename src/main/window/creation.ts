@@ -11,6 +11,7 @@ import {
   calculateWindowPosition,
 } from './settings';
 import { saveWindowBounds, getWindowBounds } from './bounds';
+import { resolveWindowBackground } from './background';
 import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
 
@@ -60,6 +61,7 @@ export function createSettingsWindow(tab?: string): void {
     parent: mainWindow || undefined,
     modal: false,
     icon,
+    backgroundColor: resolveWindowBackground(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -117,6 +119,7 @@ export function createToolsLauncherWindow(clipContent: string): void {
     parent: mainWindow || undefined,
     modal: false,
     icon,
+    backgroundColor: resolveWindowBackground(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
@@ -158,6 +161,7 @@ export async function createWindow(): Promise<void> {
     show: false,
     autoHideMenuBar: true,
     icon,
+    backgroundColor: resolveWindowBackground(),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false,
