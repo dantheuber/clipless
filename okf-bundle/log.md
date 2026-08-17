@@ -1,5 +1,8 @@
 # Update Log
 
+## 2026-08-17
+* document how the single-instance lock makes npm run dev hand off to an installed copy
+
 ## 2026-07-10
 * Documented the manual gh-pages deploy process for clipless.app and the GA tracking added 2026-07-09
 * Re-verified; added CI CSC skip and swallowed update-check errors

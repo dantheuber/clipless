@@ -65,9 +65,14 @@ dmg:
   format: UDZO
   internetEnabled: false
 linux:
+  # snap is deliberately not built. electron-builder's snap template pins
+  # base: core20 with the gnome-3-28-1804 platform, whose Mesa is 20.0.8 (2020).
+  # On current GPUs every DRI driver in it fails to load — including swrast — so
+  # the app segfaults during GPU init and no runtime flag avoids it. Reviving the
+  # snap means base: core24 with gnome-46-2404 and the mesa-2404 content snap,
+  # which builds through the real snapcraft toolchain rather than the template.
   target:
     - AppImage
-    - snap
     - deb
   maintainer: electronjs.org
   category: Utility
@@ -78,6 +83,19 @@ linux:
   icon: build/icons
 appImage:
   artifactName: ${name}-${version}.${ext}
+snap:
+  # Inert while snap is off the target list, but keep it: electron-builder
+  # defaults snap artifacts to the Snap Store, which needs snapcraft (and store
+  # credentials) on the build machine. CI has neither, and the failed store
+  # upload aborted the whole linux build *before* the updater metadata was
+  # written — which is why v1.8.8 shipped an AppImage and a deb but no
+  # latest-linux.yml. Re-adding the snap target without this would silently
+  # break Linux auto-update again.
+  publish:
+    provider: github
+    owner: dantheuber
+    repo: clipless
+    releaseType: draft
 npmRebuild: false
 publish:
   provider: github

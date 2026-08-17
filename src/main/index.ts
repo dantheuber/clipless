@@ -1,3 +1,7 @@
+// Must stay first: it redirects userData for dev builds before any other module
+// captures a path derived from it. See src/main/dev-profile.ts.
+import './dev-profile';
+
 import { app } from 'electron';
 import { initializeApp, setupAppEvents, initializeServices } from './app';
 

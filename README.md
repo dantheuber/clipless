@@ -259,13 +259,12 @@ or the **[GitHub releases](https://github.com/dantheuber/clipless/releases)**.
 
 ### 🐧 Installing on Linux
 
-Releases ship three Linux formats — pick whichever suits your setup:
+Releases ship two Linux formats — pick whichever suits your setup:
 
-| Format      | Install                                                  | Auto-update                           |
-| ----------- | -------------------------------------------------------- | ------------------------------------- |
-| `.deb`      | `sudo apt install ./clipless_<version>_amd64.deb`        | ✅ in-app (prompts for your password) |
-| `.AppImage` | `chmod +x clipless-<version>.AppImage` and run it        | ✅ in-app                             |
-| `.snap`     | `sudo snap install --dangerous clipless_<version>*.snap` | ❌ (sideloaded snaps don't refresh)   |
+| Format      | Install                                           | Auto-update                           |
+| ----------- | ------------------------------------------------- | ------------------------------------- |
+| `.deb`      | `sudo apt install ./clipless_<version>_amd64.deb` | ✅ in-app (prompts for your password) |
+| `.AppImage` | `chmod +x clipless-<version>.AppImage` and run it | ✅ in-app                             |
 
 **Debian / Ubuntu (`.deb`)** — the recommended option. Installing with `apt` resolves dependencies
 and registers the desktop entry and icon, so Clipless appears in your app grid and taskbar:
