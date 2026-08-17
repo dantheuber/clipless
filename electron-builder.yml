@@ -78,6 +78,18 @@ linux:
   icon: build/icons
 appImage:
   artifactName: ${name}-${version}.${ext}
+snap:
+  # electron-builder defaults snap artifacts to the Snap Store, which needs
+  # snapcraft (and store credentials) on the build machine. CI has neither, and
+  # the failed store upload aborted the whole linux build *before* the updater
+  # metadata was written — which is why v1.8.8 shipped an AppImage and a deb but
+  # no latest-linux.yml. Publish the snap to the GitHub release like everything
+  # else; the Snap Store is not somewhere we release today.
+  publish:
+    provider: github
+    owner: dantheuber
+    repo: clipless
+    releaseType: draft
 npmRebuild: false
 publish:
   provider: github
