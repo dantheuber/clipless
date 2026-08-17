@@ -103,3 +103,32 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           CSC_LINK: ''
           CSC_KEY_PASSWORD: ''
+
+      # Snap Store publishing is deliberately kept out of the electron-builder
+      # run. Uploading from inside the build makes a store outage or a rejected
+      # review abort the whole linux job, and it aborts *before* the updater
+      # metadata (latest-linux.yml) is written — which silently breaks
+      # auto-update for the deb and AppImage. Keep it a separate, non-fatal
+      # step: the GitHub release is the source of truth, the store is a mirror.
+      # Uploads land on the edge channel; promote to stable by hand alongside
+      # publishing the GitHub draft:
+      #   snapcraft release clipless <revision> stable
+      - name: Publish snap to the Snap Store
+        if: matrix.platform == 'linux'
+        continue-on-error: true
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        run: |
+          if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
+            echo "SNAPCRAFT_STORE_CREDENTIALS is not set - skipping Snap Store upload."
+            exit 0
+          fi
+          snap_count=$(ls -1 dist/*.snap 2>/dev/null | wc -l)
+          if [ "$snap_count" -ne 1 ]; then
+            echo "Expected exactly one snap in dist/, found $snap_count - skipping upload."
+            exit 0
+          fi
+          snap_file=$(ls -1 dist/*.snap)
+          sudo snap install snapcraft --classic
+          echo "Uploading $snap_file to the edge channel"
+          snapcraft upload "$snap_file" --release=edge
