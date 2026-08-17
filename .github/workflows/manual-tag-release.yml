@@ -57,25 +57,3 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           CSC_LINK: ''
           CSC_KEY_PASSWORD: ''
-
-      # Kept out of the electron-builder run on purpose - see the matching step
-      # in merge-to-main.yml for why a store failure must not fail the release.
-      - name: Publish snap to the Snap Store
-        if: matrix.platform == 'linux'
-        continue-on-error: true
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-        run: |
-          if [ -z "$SNAPCRAFT_STORE_CREDENTIALS" ]; then
-            echo "SNAPCRAFT_STORE_CREDENTIALS is not set - skipping Snap Store upload."
-            exit 0
-          fi
-          snap_count=$(ls -1 dist/*.snap 2>/dev/null | wc -l)
-          if [ "$snap_count" -ne 1 ]; then
-            echo "Expected exactly one snap in dist/, found $snap_count - skipping upload."
-            exit 0
-          fi
-          snap_file=$(ls -1 dist/*.snap)
-          sudo snap install snapcraft --classic
-          echo "Uploading $snap_file to the edge channel"
-          snapcraft upload "$snap_file" --release=edge
