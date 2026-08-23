@@ -18,12 +18,7 @@ vi.mock('../storage', () => ({
   },
 }));
 
-import {
-  scanTextForPatterns,
-  openToolsForMatches,
-  exportQuickClipsConfig,
-  importQuickClipsConfig,
-} from './quick-clips';
+import { scanTextForPatterns, exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips';
 import { storage } from '../storage';
 const mockedStorage = vi.mocked(storage);
 
@@ -189,84 +184,6 @@ describe('scanTextForPatterns', () => {
   it('throws when storage.getSearchTerms fails', async () => {
     mockedStorage.getSearchTerms.mockRejectedValue(new Error('storage fail'));
     await expect(scanTextForPatterns('test')).rejects.toThrow('storage fail');
-  });
-});
-
-describe('openToolsForMatches', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  const tool = (url: string, captureGroups: string[]) => ({
-    id: 't1',
-    name: 'Tool',
-    url,
-    captureGroups,
-    createdAt: 0,
-    updatedAt: 0,
-    order: 0,
-  });
-
-  it('opens every URL buildToolUrls produces for the first applicable match', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      tool('https://example.com/search?q={email|phone}', ['email', 'phone']),
-    ]);
-
-    await openToolsForMatches(
-      [
-        { searchTermId: '1', searchTermName: 'Other', captures: { ip: '1.1.1.1' } },
-        {
-          searchTermId: '2',
-          searchTermName: 'Contact',
-          captures: { email: 'test@example.com', phone: '555-1234' },
-        },
-        { searchTermId: '3', searchTermName: 'Later', captures: { email: 'later@example.com' } },
-      ],
-      ['t1']
-    );
-
-    expect(mockOpenExternal.mock.calls.map((c) => c[0])).toEqual([
-      'https://example.com/search?q=test%40example.com',
-      'https://example.com/search?q=555-1234',
-    ]);
-  });
-
-  it('skips a tool when no match holds any of its groups', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([tool('https://example.com/{phone}', ['phone'])]);
-    await openToolsForMatches(
-      [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'a@b.co' } }],
-      ['t1']
-    );
-    expect(mockOpenExternal).not.toHaveBeenCalled();
-  });
-
-  it('skips a tool whose tokens the match cannot all fill', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      tool('https://example.com/{email}/{missing}', ['email', 'missing']),
-    ]);
-    await openToolsForMatches(
-      [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'a@b.co', other: '' } }],
-      ['t1']
-    );
-    expect(mockOpenExternal).not.toHaveBeenCalled();
-  });
-
-  it('skips unknown tool ids', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([]);
-    await openToolsForMatches(
-      [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'a@b.co' } }],
-      ['unknown']
-    );
-    expect(mockOpenExternal).not.toHaveBeenCalled();
-  });
-
-  it('throws when storage fails', async () => {
-    mockedStorage.getQuickTools.mockRejectedValue(new Error('storage error'));
-
-    await expect(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      openToolsForMatches([{ captures: { email: 'a@b.com' } }] as any, ['t1'])
-    ).rejects.toThrow('storage error');
   });
 });
 

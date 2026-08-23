@@ -4,6 +4,9 @@ import type {
   HotkeySettings,
   QuickClipsConfig,
   QuickClipsImportMode,
+  QuickTool,
+  SearchTerm,
+  Template,
   UpdateState,
 } from '../shared/types';
 
@@ -25,7 +28,6 @@ declare global {
       htmlSanitize: (html: string) => Promise<{ html: string; removed: Record<string, number> }>;
       setClipboardImage: (imageData: string) => Promise<void>;
       setClipboardBookmark: (bookmarkData: any) => Promise<void>;
-      notifyClipCopied: (index: number) => Promise<void>;
       startClipboardMonitoring: () => Promise<boolean>;
       stopClipboardMonitoring: () => Promise<boolean>;
       onClipboardChanged: (
@@ -48,29 +50,24 @@ declare global {
       storageImportData: (jsonData: string) => Promise<boolean>;
       storageClearAll: () => Promise<boolean>;
       // Template APIs
-      templatesGetAll: () => Promise<any[]>;
+      templatesGetAll: () => Promise<Template[]>;
       templatesCreate: (name: string, content: string) => Promise<any>;
       templatesUpdate: (id: string, updates: any) => Promise<any>;
       templatesDelete: (id: string) => Promise<void>;
       templatesReorder: (templates: any[]) => Promise<void>;
-      templatesGenerateText: (
-        templateId: string,
-        clipContents: string[],
-        captures?: Record<string, string>
-      ) => Promise<string>;
       // Quick Clips - Search Terms APIs
-      searchTermsGetAll: () => Promise<any[]>;
+      searchTermsGetAll: () => Promise<SearchTerm[]>;
       searchTermsCreate: (name: string, pattern: string) => Promise<any>;
       searchTermsUpdate: (id: string, updates: any) => Promise<any>;
       searchTermsDelete: (id: string) => Promise<void>;
       // Quick Clips - Tools APIs
-      quickToolsGetAll: () => Promise<any[]>;
+      quickToolsGetAll: () => Promise<QuickTool[]>;
       quickToolsCreate: (name: string, url: string, captureGroups: string[]) => Promise<any>;
       quickToolsUpdate: (id: string, updates: any) => Promise<any>;
       quickToolsDelete: (id: string) => Promise<void>;
       // Quick Clips - Scanning APIs
       quickClipsScanText: (text: string) => Promise<any[]>;
-      quickClipsOpenTools: (matches: any[], toolIds: string[]) => Promise<void>;
+      openExternalUrls: (urls: string[]) => Promise<number>;
       quickClipsExportConfig: () => Promise<QuickClipsConfig>;
       quickClipsImportConfig: (
         config: QuickClipsConfig,
@@ -86,6 +83,7 @@ declare global {
       toolsLauncherReady: () => Promise<void>;
       onToolsLauncherInitialize: (callback: (clipContent: string) => void) => () => void;
       onToggleSearch: (callback: () => void) => () => void;
+      onOpenQuickLook: (callback: (payload: { pending: boolean }) => void) => () => void;
       removeAllListeners?: (channel: string) => void;
     };
   }

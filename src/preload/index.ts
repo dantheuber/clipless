@@ -9,7 +9,6 @@ import type {
   Template,
   SearchTerm,
   QuickTool,
-  PatternMatch,
   QuickClipsConfig,
   QuickClipsImportMode,
   GroupColours,
@@ -58,7 +57,6 @@ const api = {
   getFullImage: (imageId: string) => electronAPI.ipcRenderer.invoke('get-full-image', imageId),
   htmlSanitize: (html: string): Promise<{ html: string; removed: Record<string, number> }> =>
     electronAPI.ipcRenderer.invoke('html-sanitize', html),
-  notifyClipCopied: (index: number) => electronAPI.ipcRenderer.invoke('notify-clip-copied', index),
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
   onClipboardChanged: (callback: (clipData: ClipItem) => void) =>
@@ -100,12 +98,6 @@ const api = {
   templatesDelete: (id: string) => electronAPI.ipcRenderer.invoke('templates-delete', id),
   templatesReorder: (templates: Template[]) =>
     electronAPI.ipcRenderer.invoke('templates-reorder', templates),
-  templatesGenerateText: (
-    templateId: string,
-    clipContents: string[],
-    captures?: Record<string, string>
-  ) =>
-    electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents, captures),
 
   // Quick Clips - Search Terms APIs
   searchTermsGetAll: () => electronAPI.ipcRenderer.invoke('search-terms-get-all'),
@@ -126,8 +118,9 @@ const api = {
   // Quick Clips - Scanning APIs
   quickClipsScanText: (text: string) =>
     electronAPI.ipcRenderer.invoke('quick-clips-scan-text', text),
-  quickClipsOpenTools: (matches: PatternMatch[], toolIds: string[]) =>
-    electronAPI.ipcRenderer.invoke('quick-clips-open-tools', matches, toolIds),
+  // Tabs from the tray and the reader: http and https only, opened in order (spec 17.3)
+  openExternalUrls: (urls: string[]): Promise<number> =>
+    electronAPI.ipcRenderer.invoke('open-external-urls', urls),
   quickClipsExportConfig: (): Promise<QuickClipsConfig> =>
     electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
   quickClipsImportConfig: (config: QuickClipsConfig, mode: QuickClipsImportMode = 'merge') =>
@@ -150,6 +143,9 @@ const api = {
   onToolsLauncherInitialize: (callback: (clipContent: string) => void) =>
     subscribe('tools-launcher-initialize', (clipContent: string) => callback(clipContent)),
   onToggleSearch: (callback: () => void) => subscribe('toggle-search', () => callback()),
+  // The quick look hotkey; pending says a clipboard change is on its way (spec 17.3)
+  onOpenQuickLook: (callback: (payload: { pending: boolean }) => void) =>
+    subscribe('open-quick-look', (payload: { pending: boolean }) => callback(payload)),
   removeAllListeners: (channel: string) => electronAPI.ipcRenderer.removeAllListeners(channel),
 };
 

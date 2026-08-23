@@ -1,7 +1,5 @@
-import { shell } from 'electron';
 import { storage } from '../storage';
 import type { PatternMatch, QuickClipsConfig, QuickClipsImportMode } from '../../shared/types';
-import { buildToolUrls } from '../../shared/tools';
 
 // Quick clips scanning functions
 export const scanTextForPatterns = async (text: string): Promise<PatternMatch[]> => {
@@ -45,37 +43,6 @@ export const scanTextForPatterns = async (text: string): Promise<PatternMatch[]>
     return matches;
   } catch (error) {
     console.error('Failed to scan text:', error);
-    throw error;
-  }
-};
-
-/**
- * The launcher window's fan-out, kept until step 2 replaces it. A tool applies when the
- * first match holding any of its groups can fill every token; the URLs come from the one
- * shared buildToolUrls, so the launcher and the tray cannot disagree.
- */
-export const openToolsForMatches = async (matches: PatternMatch[], toolIds: string[]) => {
-  try {
-    const tools = await storage.getQuickTools();
-
-    for (const toolId of toolIds) {
-      const tool = tools.find((t) => t.id === toolId);
-      if (!tool) continue;
-
-      const match = matches.find((m) => tool.captureGroups.some((group) => group in m.captures));
-      if (!match) continue;
-
-      const pins: Record<string, string[]> = {};
-      for (const [group, value] of Object.entries(match.captures)) {
-        if (value) pins[group] = [value];
-      }
-
-      for (const url of buildToolUrls(tool, pins)) {
-        await shell.openExternal(url);
-      }
-    }
-  } catch (error) {
-    console.error('Failed to open tools:', error);
     throw error;
   }
 };

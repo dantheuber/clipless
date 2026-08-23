@@ -29,7 +29,6 @@ import {
   updateTemplate,
   deleteTemplate,
   reorderTemplates,
-  generateTextFromTemplate,
 } from './templates';
 import {
   getAllSearchTerms,
@@ -38,24 +37,18 @@ import {
   deleteSearchTerm,
 } from './search-terms';
 import { getAllQuickTools, createQuickTool, updateQuickTool, deleteQuickTool } from './quick-tools';
-import {
-  scanTextForPatterns,
-  openToolsForMatches,
-  exportQuickClipsConfig,
-  importQuickClipsConfig,
-} from './quick-clips';
+import { scanTextForPatterns, exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips';
+import { openExternalUrls } from './open-external';
 import type {
   ClipItem,
   UserSettings,
   Template,
   SearchTerm,
   QuickTool,
-  PatternMatch,
   QuickClipsConfig,
   QuickClipsImportMode,
   GroupColours,
 } from '../../shared/types';
-import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
 import { storage } from '../storage';
 import { sanitizeHtml } from './sanitize-html';
@@ -105,11 +98,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) =>
       setClipboardBookmark(bookmarkData)
   );
-
-  // Notification for click-to-copy with clip index
-  ipcMain.handle('notify-clip-copied', (_event, index: number) => {
-    showNotification('Clip Copied', `Clip ${index + 1} copied to clipboard`);
-  });
 
   // Clipboard monitoring control
   ipcMain.handle('start-clipboard-monitoring', () => startClipboardMonitoring(mainWindow));
@@ -167,22 +155,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('templates-reorder', async (_event, templates: Template[]) =>
     thenBroadcast(() => reorderTemplates(templates))
   );
-  ipcMain.handle(
-    'templates-generate-text',
-    async (
-      _event,
-      templateId: string,
-      clipContents: string[],
-      captures?: Record<string, string>
-    ) => {
-      const templates = await getAllTemplates();
-      const template = templates.find((t) => t.id === templateId);
-      const templateName = template?.name || 'Unknown';
-      const result = await generateTextFromTemplate(templateId, clipContents, captures);
-      showNotification('Template Generated', `"${templateName}" text copied to clipboard`);
-      return result;
-    }
-  );
 
   // Search terms IPC handlers
   ipcMain.handle('search-terms-get-all', async () => getAllSearchTerms());
@@ -214,11 +186,8 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('quick-clips-scan-text', async (_event, text: string) =>
     scanTextForPatterns(text)
   );
-  ipcMain.handle(
-    'quick-clips-open-tools',
-    async (_event, matches: PatternMatch[], toolIds: string[]) =>
-      openToolsForMatches(matches, toolIds)
-  );
+  // Tabs from the tray and the reader: http and https only, in order (spec 17.3)
+  ipcMain.handle('open-external-urls', async (_event, urls: string[]) => openExternalUrls(urls));
   ipcMain.handle('quick-clips-export-config', async () => exportQuickClipsConfig());
   ipcMain.handle(
     'quick-clips-import-config',
