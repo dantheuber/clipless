@@ -64,7 +64,7 @@ export async function initializeApp(): Promise<void> {
     // Silently check for updates in the background. Errors are swallowed
     // inside the function so unsupported platforms (e.g. unsigned macOS
     // builds) never surface failures to the user.
-    runAutomaticUpdateCheck(getMainWindow());
+    runAutomaticUpdateCheck();
   });
 
   // Apply window bounds if available after initialization

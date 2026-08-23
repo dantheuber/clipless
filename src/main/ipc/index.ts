@@ -13,7 +13,12 @@ import {
 } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
 import { applyWindowBackgroundTheme } from '../window/background';
-import { checkForUpdatesWithRetry } from '../updater';
+import {
+  checkForUpdatesWithRetry,
+  getUpdateState,
+  setUpdateState,
+  updateErrorMessage,
+} from '../updater';
 import { applyAutoStart } from '../autoStart';
 
 export function setupMainIPC(): void {
@@ -98,19 +103,26 @@ export function setupMainIPC(): void {
     // The actual data sending is handled in the window creation
   });
 
-  // Auto-updater IPC handlers
+  // Auto-updater IPC handlers. The electron-updater events move the state; the
+  // handlers only cover what the events cannot see (a timeout, a dev build).
+  ipcMain.handle('get-update-state', () => getUpdateState());
+
   ipcMain.handle('check-for-updates', async () => {
     if (!is.dev) {
       try {
+        setUpdateState({ status: 'checking' });
         const result = await checkForUpdatesWithRetry();
         return result;
       } catch (error) {
         console.error('Update check failed:', error);
+        setUpdateState({ status: 'error', message: updateErrorMessage(error) });
         throw new Error(
           `Failed to check for updates: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       }
     }
+    // Dev builds cannot check; report up to date as the old prose status did
+    setUpdateState({ status: 'upToDate' });
     return null;
   });
 
@@ -173,6 +185,7 @@ export function setupMainIPC(): void {
         return await autoUpdater.downloadUpdate();
       } catch (error) {
         console.error('Update download failed:', error);
+        setUpdateState({ status: 'error', message: updateErrorMessage(error) });
         throw new Error(
           `Failed to download update: ${error instanceof Error ? error.message : 'Unknown error'}`
         );

@@ -1,5 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
-import type { HotkeySettings } from '../shared/types';
+import type { HotkeySettings, UpdateState } from '../shared/types';
 
 declare global {
   interface Window {
@@ -9,7 +9,8 @@ declare global {
       checkForUpdates: () => Promise<any>;
       downloadUpdate: () => Promise<any>;
       quitAndInstall: () => Promise<void>;
-      onUpdateDownloaded: (callback: (info: { version: string }) => void) => () => void;
+      getUpdateState: () => Promise<UpdateState>;
+      onUpdateState: (callback: (state: UpdateState) => void) => () => void;
       getClipboardText: () => Promise<string>;
       getClipboardHTML: () => Promise<string>;
       getClipboardRTF: () => Promise<string>;

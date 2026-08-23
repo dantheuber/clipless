@@ -1,41 +1,56 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useTheme } from '../../providers/theme';
+import type { UpdateState } from '../../../../shared/types';
 import styles from './UpdaterControl.module.css';
 
+/**
+ * The text and dot for each updater status. The state comes from the main process; there
+ * is no display string to match against.
+ */
+export function updateStatusText(state: UpdateState): string {
+  switch (state.status) {
+    case 'idle':
+      return 'Ready';
+    case 'checking':
+      return 'Checking for updates...';
+    case 'available':
+      return `Update ${state.version ?? ''} available, downloading...`.replace('  ', ' ');
+    case 'downloading':
+      return state.progress === undefined ? 'Downloading...' : `Downloading ${state.progress}%`;
+    case 'downloaded':
+      return 'Update downloaded. Restart to install.';
+    case 'upToDate':
+      return 'No updates available';
+    case 'error':
+      return `Error: ${state.message ?? 'Unknown error'}`;
+  }
+}
+
 function UpdaterControl(): React.JSX.Element {
-  const [updateStatus, setUpdateStatus] = useState<string>('Ready');
+  const [state, setState] = useState<UpdateState>({ status: 'idle' });
   const [isChecking, setIsChecking] = useState(false);
 
   const { isLight } = useTheme();
 
+  useEffect(() => {
+    window.api
+      .getUpdateState()
+      .then(setState)
+      .catch((error) => console.error('Failed to read update state:', error));
+    return window.api.onUpdateState(setState);
+  }, []);
+
   const handleCheckForUpdates = async (): Promise<void> => {
     setIsChecking(true);
-    setUpdateStatus('Checking for updates...');
-
     try {
       const result = await window.api.checkForUpdates();
       if (result) {
-        setUpdateStatus('Update available! Downloading...');
         await window.api.downloadUpdate();
-        setUpdateStatus('Update downloaded. Click to restart and install.');
-      } else {
-        setUpdateStatus('No updates available');
       }
     } catch (error) {
+      // The main process has already moved the state to error
       console.error('Update check failed:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      const normalizedErrorMessage = errorMessage.toLowerCase();
-
-      if (normalizedErrorMessage.includes('network') || normalizedErrorMessage.includes('fetch')) {
-        setUpdateStatus('Error: Unable to connect to update server');
-      } else if (normalizedErrorMessage.includes('timeout')) {
-        setUpdateStatus('Error: Update check timed out');
-      } else if (normalizedErrorMessage.includes('github')) {
-        setUpdateStatus('Error: GitHub API unavailable');
-      } else {
-        setUpdateStatus(`Error: ${errorMessage}`);
-      }
     } finally {
       setIsChecking(false);
     }
@@ -46,11 +61,18 @@ function UpdaterControl(): React.JSX.Element {
   };
 
   const getStatusDotClass = () => {
-    if (updateStatus.includes('Error')) return styles.statusDotError;
-    if (updateStatus.includes('available') || updateStatus.includes('downloaded'))
-      return styles.statusDotSuccess;
-    if (updateStatus.includes('Checking')) return styles.statusDotChecking;
-    return styles.statusDotReady;
+    switch (state.status) {
+      case 'error':
+        return styles.statusDotError;
+      case 'available':
+      case 'downloading':
+      case 'downloaded':
+        return styles.statusDotSuccess;
+      case 'checking':
+        return styles.statusDotChecking;
+      default:
+        return styles.statusDotReady;
+    }
   };
 
   return (
@@ -62,7 +84,7 @@ function UpdaterControl(): React.JSX.Element {
           <span className={classNames(styles.statusText, { [styles.light]: isLight })}>
             Status:{' '}
             <span className={classNames(styles.statusValue, { [styles.light]: isLight })}>
-              {updateStatus}
+              {updateStatusText(state)}
             </span>
           </span>
         </div>
@@ -102,7 +124,7 @@ function UpdaterControl(): React.JSX.Element {
           )}
         </button>
 
-        {updateStatus.includes('downloaded') && (
+        {state.status === 'downloaded' && (
           <button
             onClick={handleInstallUpdate}
             className={classNames(styles.button, styles.buttonSuccess)}

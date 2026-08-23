@@ -11,6 +11,7 @@ import type {
   QuickTool,
   PatternMatch,
   QuickClipsConfig,
+  UpdateState,
 } from '../shared/types';
 
 // Custom APIs for renderer
@@ -22,11 +23,11 @@ const api = {
   checkForUpdates: () => electronAPI.ipcRenderer.invoke('check-for-updates'),
   downloadUpdate: () => electronAPI.ipcRenderer.invoke('download-update'),
   quitAndInstall: () => electronAPI.ipcRenderer.invoke('quit-and-install'),
-  onUpdateDownloaded: (callback: (info: { version: string }) => void) => {
-    const listener = (_event: Electron.IpcRendererEvent, info: { version: string }) =>
-      callback(info);
-    electronAPI.ipcRenderer.on('update-downloaded', listener);
-    return () => electronAPI.ipcRenderer.removeListener('update-downloaded', listener);
+  getUpdateState: (): Promise<UpdateState> => electronAPI.ipcRenderer.invoke('get-update-state'),
+  onUpdateState: (callback: (state: UpdateState) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, state: UpdateState) => callback(state);
+    electronAPI.ipcRenderer.on('update-state', listener);
+    return () => electronAPI.ipcRenderer.removeListener('update-state', listener);
   },
 
   // Clipboard APIs

@@ -2,19 +2,24 @@ import React, { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
 import { useTheme } from '../providers/theme';
+import type { UpdateState } from '../../../shared/types';
 import styles from './UpdateBanner.module.css';
 
+/**
+ * Shows once an update has downloaded. Renders from the main process's update state; the
+ * status bar pill replaces this strip in step 2 of the quick look plan.
+ */
 export const UpdateBanner: React.FC = () => {
   const { isLight } = useTheme();
-  const [version, setVersion] = useState<string | null>(null);
-  const [dismissed, setDismissed] = useState(false);
+  const [state, setState] = useState<UpdateState>({ status: 'idle' });
+  const [dismissedVersion, setDismissedVersion] = useState<string | null>(null);
 
   useEffect(() => {
-    const unsubscribe = window.api.onUpdateDownloaded((info) => {
-      setVersion(info.version);
-      setDismissed(false);
-    });
-    return unsubscribe;
+    window.api
+      .getUpdateState()
+      .then(setState)
+      .catch((error) => console.error('Failed to read update state:', error));
+    return window.api.onUpdateState(setState);
   }, []);
 
   const handleRestart = async (): Promise<void> => {
@@ -25,11 +30,8 @@ export const UpdateBanner: React.FC = () => {
     }
   };
 
-  const handleDismiss = (): void => {
-    setDismissed(true);
-  };
-
-  const visible = version !== null && !dismissed;
+  const version = state.status === 'downloaded' ? (state.version ?? '') : null;
+  const visible = version !== null && dismissedVersion !== version;
 
   return (
     <div className={classNames(styles.wrapper, { [styles.visible]: visible })}>
@@ -44,7 +46,7 @@ export const UpdateBanner: React.FC = () => {
           </button>
           <button
             type="button"
-            onClick={handleDismiss}
+            onClick={() => setDismissedVersion(version)}
             className={styles.dismissButton}
             aria-label="Dismiss update notification"
             title="Dismiss"
