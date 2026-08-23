@@ -1,34 +1,18 @@
-import classNames from 'classnames';
-import { useState, useEffect } from 'react';
-import UpdaterControl from './components/settings/UpdaterControl';
-import Versions from './components/settings/Versions';
-import { ClipsProvider } from './providers/clips';
+import { useEffect, useState } from 'react';
 import { ScanIndexProvider } from './providers/scan';
 import { ToastProvider } from './components/Toast';
-import { ThemeProvider, useTheme } from './providers/theme';
-import { LanguageDetectionProvider } from './providers/languageDetection';
-import { StorageSettings } from './components/settings/StorageSettings';
-import { UserSettings } from './components/settings/UserSettings';
-import { ToolsManager } from './components/settings/ToolsManager';
-import HotkeyManager from './components/settings/HotkeyManager';
-import styles from './Settings.module.css';
+import { ThemeProvider } from './providers/theme';
+import { SettingsProvider } from './components/settings/general/SettingsProvider';
+import { useSettingsStore } from './components/settings/general/useSetting';
+import { Rail, type SettingsTab } from './components/settings/shell/Rail';
+import { General } from './components/settings/general/General';
+import { Hotkeys } from './components/settings/hotkeys/Hotkeys';
+import { Tools } from './components/settings/tools/Tools';
+import styles from './components/settings/shell/Shell.module.css';
+import w from './components/settings/shell/widgets.module.css';
 
-type TabType = 'general' | 'tools' | 'hotkeys';
-
-interface Tab {
-  id: TabType;
-  label: string;
-  icon?: string;
-}
-
-const tabs: Tab[] = [
-  { id: 'general', label: 'General' },
-  { id: 'hotkeys', label: 'Hotkeys' },
-  { id: 'tools', label: 'Tools' },
-];
-
-// Map legacy tab params to new tab
-const TAB_PARAM_MAP: Record<string, TabType> = {
+// Legacy tab params map onto the three tabs
+const TAB_PARAM_MAP: Record<string, SettingsTab> = {
   general: 'general',
   hotkeys: 'hotkeys',
   tools: 'tools',
@@ -36,103 +20,47 @@ const TAB_PARAM_MAP: Record<string, TabType> = {
   quickClips: 'tools',
 };
 
-function SettingsContent(): React.JSX.Element {
-  const { isLight } = useTheme();
-  const [activeTab, setActiveTab] = useState<TabType>('general');
+function initialTab(): SettingsTab {
+  const param = new URLSearchParams(window.location.search).get('tab');
+  return (param && TAB_PARAM_MAP[param]) || 'general';
+}
 
-  // Check for URL parameters to set initial tab
+/**
+ * The settings window (spec 15.2): one shell with a left rail, one loading state for the
+ * window, one toast stack. Each tab fills the pane.
+ */
+function SettingsShell(): React.JSX.Element {
+  const [tab, setTab] = useState<SettingsTab>(initialTab);
+  const { settings, loadError, reload } = useSettingsStore();
+
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tabParam = urlParams.get('tab');
-    if (tabParam) {
-      const mappedTab = TAB_PARAM_MAP[tabParam];
-      if (mappedTab) {
-        setActiveTab(mappedTab);
-      }
-    }
+    document.title = 'Clipless settings';
   }, []);
 
-  const renderTabContent = () => {
-    switch (activeTab) {
-      case 'general':
-        return (
-          <div className={styles.grid}>
-            {/* User Settings */}
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <UserSettings />
-            </section>
-
-            {/* App Updates Section */}
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <UpdaterControl />
-            </section>
-
-            {/* Storage Statistics and Data Management */}
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <StorageSettings />
-            </section>
-
-            {/* Version Information */}
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <Versions />
-            </section>
-          </div>
-        );
-
-      case 'tools':
-        return (
-          <div className={styles.grid}>
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <ToolsManager />
-            </section>
-          </div>
-        );
-
-      case 'hotkeys':
-        return (
-          <div className={styles.grid}>
-            <section className={classNames(styles.section, { [styles.light]: isLight })}>
-              <HotkeyManager />
-            </section>
-          </div>
-        );
-
-      default:
-        return null;
-    }
-  };
+  let pane: React.ReactNode;
+  if (loadError) {
+    pane = (
+      <div className={styles.loadError} data-testid="load-error">
+        Settings did not load: {loadError}.
+        <button type="button" className={w.link} onClick={reload}>
+          retry
+        </button>
+      </div>
+    );
+  } else if (!settings) {
+    pane = <div className={styles.loading}>Loading</div>;
+  } else if (tab === 'general') {
+    pane = <General />;
+  } else if (tab === 'hotkeys') {
+    pane = <Hotkeys />;
+  } else {
+    pane = <Tools />;
+  }
 
   return (
-    <div className={classNames(styles.container, { [styles.light]: isLight })}>
-      {/* Tab Navigation */}
-      <div className={classNames(styles.tabsContainer, { [styles.light]: isLight })}>
-        <div className={styles.tabs}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              className={classNames(
-                styles.tab,
-                { [styles.tabActive]: activeTab === tab.id },
-                { [styles.light]: isLight }
-              )}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Tab Content */}
-      <div className={styles.scrollContainer}>
-        <div className={styles.content}>
-          <LanguageDetectionProvider>
-            <ScanIndexProvider>
-              <ClipsProvider>{renderTabContent()}</ClipsProvider>
-            </ScanIndexProvider>
-          </LanguageDetectionProvider>
-        </div>
-      </div>
+    <div className={styles.shell}>
+      <Rail active={tab} onSelect={setTab} version={__APP_VERSION__} />
+      {pane}
     </div>
   );
 }
@@ -141,7 +69,11 @@ function App(): React.JSX.Element {
   return (
     <ThemeProvider>
       <ToastProvider>
-        <SettingsContent />
+        <SettingsProvider>
+          <ScanIndexProvider>
+            <SettingsShell />
+          </ScanIndexProvider>
+        </SettingsProvider>
       </ToastProvider>
     </ThemeProvider>
   );

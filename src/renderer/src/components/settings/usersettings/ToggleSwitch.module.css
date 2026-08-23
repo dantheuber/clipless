@@ -1,0 +1,54 @@
+/* The one toggle (spec 15.7), no ON or OFF text */
+.label {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex: none;
+}
+
+.input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.track {
+  width: 28px;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--toggle-bg);
+  position: relative;
+  display: inline-block;
+  transition: background 0.12s;
+}
+
+.track::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--toggle-knob);
+  transition: left 0.12s;
+}
+
+.on {
+  background: var(--accent);
+}
+
+.on::after {
+  left: 14px;
+  background: #fff;
+}
+
+.input:focus-visible + .track {
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}

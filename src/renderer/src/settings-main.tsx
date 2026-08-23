@@ -1,4 +1,3 @@
-import './assets/settings.css';
 import './assets/theme.css';
 import './fontawesome';
 
