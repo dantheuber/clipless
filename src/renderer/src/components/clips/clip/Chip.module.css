@@ -1,0 +1,51 @@
+.chip {
+  cursor: pointer;
+  position: relative;
+  border-radius: 3px;
+  background: var(--chip-bg);
+  border: 1px dashed var(--chip-bd);
+  padding: 0 4px;
+  margin: 0 1px;
+  color: inherit;
+  white-space: inherit;
+  display: inline;
+}
+
+.chip::after {
+  content: '+';
+  color: var(--dim);
+  font-size: 10px;
+  margin-left: 3px;
+}
+
+.chip:hover {
+  border-color: var(--gc);
+  border-style: solid;
+}
+
+.chip.pinned {
+  background: color-mix(in srgb, var(--gc) 25%, transparent);
+  border: 1px solid var(--gc);
+}
+
+.chip.pinned::after {
+  content: '\2713';
+  color: var(--gc);
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.chip.lit {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--gc) 60%, transparent);
+}
+
+.text {
+  white-space: inherit;
+}
+
+.count {
+  color: var(--dim);
+  font-size: 10px;
+  font-family: var(--mono);
+  margin-left: 4px;
+}

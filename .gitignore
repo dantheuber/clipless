@@ -13,3 +13,5 @@ test-results/
 coverage/
 screenshots/output/
 graphify-out/
+.playwright-mcp/
+okf.config.local.json

@@ -15,9 +15,14 @@ import { resolveWindowBackground } from './background';
 import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
 
+/**
+ * 900 x 600 by default; the General grid collapses to one column and scrolls below 720
+ * wide, and nothing is designed for less than 720 x 440 (spec 15.2, 14.8).
+ */
+export const SETTINGS_WINDOW = { width: 900, height: 600, minWidth: 720, minHeight: 440 };
+
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
-let toolsLauncherWindow: BrowserWindow | null = null;
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
@@ -25,10 +30,6 @@ export function getMainWindow(): BrowserWindow | null {
 
 export function getSettingsWindow(): BrowserWindow | null {
   return settingsWindow;
-}
-
-export function getToolsLauncherWindow(): BrowserWindow | null {
-  return toolsLauncherWindow;
 }
 
 export function createSettingsWindow(tab?: string): void {
@@ -46,18 +47,20 @@ export function createSettingsWindow(tab?: string): void {
   // Calculate positioning to keep settings window within screen bounds
   // This uses minimal padding and allows overlap with main window when needed
   // to keep the settings window close to the screen edges
-  const settingsWidth = 800;
-  const settingsHeight = 650;
+  const settingsWidth = SETTINGS_WINDOW.width;
+  const settingsHeight = SETTINGS_WINDOW.height;
   const position = calculateWindowPosition(mainWindow, settingsWidth, settingsHeight);
 
   settingsWindow = new BrowserWindow({
     width: settingsWidth,
     height: settingsHeight,
+    minWidth: SETTINGS_WINDOW.minWidth,
+    minHeight: SETTINGS_WINDOW.minHeight,
     x: position?.x,
     y: position?.y,
     show: false,
     autoHideMenuBar: true,
-    resizable: false,
+    resizable: true,
     parent: mainWindow || undefined,
     modal: false,
     icon,
@@ -92,64 +95,6 @@ export function createSettingsWindow(tab?: string): void {
     settingsWindow.loadFile(join(__dirname, '../renderer/settings.html'), {
       search: tab ? `tab=${tab}` : undefined,
     });
-  }
-}
-
-export function createToolsLauncherWindow(clipContent: string): void {
-  if (toolsLauncherWindow) {
-    // If window exists, send new content and focus
-    toolsLauncherWindow.webContents.send('tools-launcher-initialize', clipContent);
-    toolsLauncherWindow.focus();
-    return;
-  }
-
-  // Calculate positioning similar to settings window
-  const launcherWidth = 1000;
-  const launcherHeight = 700;
-  const position = calculateWindowPosition(mainWindow, launcherWidth, launcherHeight);
-
-  toolsLauncherWindow = new BrowserWindow({
-    width: launcherWidth,
-    height: launcherHeight,
-    x: position?.x,
-    y: position?.y,
-    show: false,
-    autoHideMenuBar: true,
-    resizable: false,
-    parent: mainWindow || undefined,
-    modal: false,
-    icon,
-    backgroundColor: resolveWindowBackground(),
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
-    },
-  });
-
-  toolsLauncherWindow.on('ready-to-show', () => {
-    if (toolsLauncherWindow) {
-      toolsLauncherWindow.show();
-      // Send initialization data after window is ready
-      toolsLauncherWindow.webContents.send('tools-launcher-initialize', clipContent);
-    }
-  });
-
-  toolsLauncherWindow.on('closed', () => {
-    toolsLauncherWindow = null;
-  });
-
-  // Load the tools-launcher HTML file
-  const baseUrl =
-    is.dev && process.env['ELECTRON_RENDERER_URL']
-      ? process.env['ELECTRON_RENDERER_URL']
-      : 'file://' + join(__dirname, '../renderer');
-
-  const url = baseUrl + '/tools-launcher.html';
-
-  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-    toolsLauncherWindow.loadURL(url);
-  } else {
-    toolsLauncherWindow.loadFile(join(__dirname, '../renderer/tools-launcher.html'));
   }
 }
 

@@ -1,5 +1,68 @@
 # Update Log
 
+## 2026-08-23
+* Add text extraction and image metadata at capture, checkClipboardNow; relative links
+* Drop the removed clips.tsx wrapper; add pins, quick look state, scan index and the redesigned clip components
+* Add clip ids, groupColours, toolsSampleText and the storageVersion caveat; relative links
+* Two windows since the launcher was removed; shared scan, tools and templates modules; relative links
+* Folded into decisions/settings-window-redesign
+* Folded into decisions/settings-window-redesign
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/tools-launcher-window-replaced-by-quick-look-and-pin-tray
+* Folded into decisions/quick-look-engineering-calls
+* Merge the engineering decision and the four step-call records into one concept of what was chosen and why
+* Merge the Tools tab and settings shell decisions into one implemented decision
+* Consolidate the quick look product decision and the outliers review into one implemented decision
+* Migration to OKF 0.2 (okf-mcp migrate): timestamp-to-generated (28 files)
+* **Update**: step 4 decision records the CI fixes after the stack collapsed into PR #146 (setContentSize, the context menu click-away, the extraction bound, the 1.9.0 bump).
+* **Decision**: step 4 calls recorded; the launcher window is deleted and the four-PR quick look stack is ready to merge top down.
+* **Update**: `systems/tools-launcher` now records that step 4 deleted the window and points to what replaced it.
+* **Update**: templates are made in the settings Tools tab's inspector since step 3
+* **Ship**: quick look step 3, the settings window (shell, General, Hotkeys, Tools), on branch `t3code/quick-look-step-3` as PR #148 stacked on #147; 915 unit tests at 100%, 35 of 35 e2e on Linux. Step 4 (delete the launcher window) is next.
+* **Update**: templates are edited in the settings Tools tab since step 3
+* **Update**: the Test Patterns tab and the main-process scan are gone; settings previews use the shared scan (step 3)
+* **Update**: under the x11 wrapper the work area is 0 x 0 and windows open at their minimum size
+* **Update**: registration results per accelerator and the settings Hotkeys tab of step 3
+* **Add**: the calls step 3 of the quick look plan (the settings window, PR #148) made inside the spec's room
+* **Ship**: quick look step 2 (the clips window) landed on `t3code/explore-tool-launcher-ux`: chips, pins, the tray, the reader, the search bar and status bar, the sandboxed rendered view; the launcher window is unreachable and goes in step 4; step 3 (settings window) is next.
+* **Update**: step 2 decision records the verification run
+* **Decision**: the calls made while building quick look step 2 (the clips window)
+* **Update**: e2e on Linux gotcha records the CLIPLESS_PLAINTEXT_STORAGE switch from step 2
+* **Update**: templates: pills in the tray and reader, clip template submenu, {c1} is row 1
+* **Update**: hotkeys: quickLook opens the reader in the main window (step 2)
+* **Update**: quick-clips reflects step 2 (chips, pins, tray; openToolsForMatches gone)
+* **Ship**: quick look plan step 1 (vocabulary and storage) implemented on `t3code/explore-tool-launcher-ux`, 2026-08-23. Shared scan, tools, templates, readiness and group colour modules; clip ids and extracted text; hotkey rename with migration; updater state enum; html and rtf extraction and the sanitiser in main; groupColours and import mode in storage; the save queue fix; the renderer scan index. 599 unit tests at 100% coverage of tested files; 13 of 18 e2e pass on Linux (the other five are the known Linux limit). See the step 1 decision and the two new gotchas.
+* **Update**: coverage gotcha points at the Linux e2e gotcha instead of repeating half of it
+* **Add**: gotcha on running the Playwright suite on Linux (five tools-spec tests fail before any code change; CI runs e2e on Windows)
+* **Add**: the calls made inside the spec's room while implementing quick look step 1
+* **Add**: gotcha on what the 100% coverage bar covers and how to keep it when touching untested glue
+* **Update**: templates records the engine's move to src/shared and the readiness rules
+* **Update**: hotkeys records the openToolsLauncher to quickLook rename and the normalizeSettings migration
+* **Update**: quick-clips reflects step 1 of the quick look plan (shared scanText in the renderer, one BUILTIN_PATTERNS, groupColours)
+
+## 2026-08-22
+* **Spec closed**: quick look redesign is implementable. All open questions in `docs/specs/quick-look-redesign.md` (12, 14.8, 15.8) and the outliers addendum decided; addendum folded in as section 16 (locked); engineering section 17 added with verified file references; `docs/specs/implementation-plan.md` written (four steps: vocabulary and storage, clips window, settings window, remove the launcher). Contrast pass fixed three light bucket values in `settings-tools-prototype.html`. Decisions: outliers promoted to stable, new engineering decision added.
+* **Decision**: engineering choices for the quick look redesign recorded (spec section 17, implementation-plan.md).
+* **Update**: quick look outliers decision locked (was draft); its six open questions decided and the rules folded into spec section 16.
+* **Update**: `docs/specs/index.html` is the hub for the redesign; it embeds the clips window, outliers, Settings Tools and Settings shell prototypes in order, and every prototype page carries a shared nav strip
+* Quick look outliers: rendered HTML must never run code (inert parse, allowlist, sandboxed iframe with default-src none); icons are the app's FontAwesome set; light theme covered in every prototype
+* Settings shell decision: light theme is in scope (one variable set, swapped per theme), no longer an open question
+* Draft decision: the clips window features the quick look spec does not cover (search bar, status bar buttons, update banner, image/HTML/RTF/bookmark clips, clip templates, live list, narrow windows, light theme), with proposed rules and a prototype
+* Tools tab decision: spec locked as a whole, status draft to stable
+* Settings shell decision locked in the spec (section 15)
+* Settings shell decision: C (dense grid) chosen on review over the first recommendation E
+* Link the Tools decision to the General and Hotkeys shell decision
+* Draft decision: Settings shell for General and Hotkeys (variation E from settings-shell-variations.html, with grafts from B and C)
+* Quick Clips: add status note pointing at the settings Tools tab redesign and the three BUILTIN_PATTERNS copies
+* Settings Tools tab decision locked: master-detail inspector with group colour bucket; spec section 14 and standalone prototype added
+* Settings redesign decision: direction is the master-detail inspector (E) with a per-group colour bucket; D's tray preview, Problems filter and sample-driven library suggestions to be folded in
+* Rename settings redesign decision: direction changed from sample-first workbench (D) to master-detail inspector (E) after review
+* Add draft decision: settings redesign variations for search terms, tools and templates; recommends the sample-first workbench (D) with E's fix buttons and start-from page
+* Record the decision to replace the Tools Launcher window with in-window quick look + pin tray (spec in docs/specs)
+
 ## 2026-08-17
 * document how the single-instance lock makes npm run dev hand off to an installed copy
 

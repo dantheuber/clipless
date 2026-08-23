@@ -1,6 +1,6 @@
 {
   "name": "clipless",
-  "version": "1.8.10",
+  "version": "2.0.0",
   "description": "A Clipboard manager for busy people",
   "main": "./out/main/index.js",
   "author": "Daniel Essig",
@@ -43,8 +43,9 @@
     "@tanstack/react-virtual": "^3.13.23",
     "classnames": "^2.5.1",
     "electron-updater": "^6.3.9",
-    "react-outside-click-handler": "^1.3.0",
-    "react-syntax-highlighter": "^16.1.0",
+    "htmlparser2": "^12.0.0",
+    "refractor": "^5.0.0",
+    "sanitize-html": "^2.17.7",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
@@ -58,7 +59,7 @@
     "@types/node": "^22.14.1",
     "@types/react": "^19.1.1",
     "@types/react-dom": "^19.1.2",
-    "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/sanitize-html": "^2.16.1",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^4.1.8",
     "@vitest/ui": "^4.1.8",

@@ -8,7 +8,7 @@ interface FakeAutoUpdater extends EventEmitter {
   quitAndInstall: ReturnType<typeof vi.fn>;
 }
 
-const { isMock, fakeAutoUpdater, getSettings } = vi.hoisted(() => {
+const { isMock, fakeAutoUpdater, getSettings, windows } = vi.hoisted(() => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { EventEmitter: NodeEventEmitter } = require('events');
   const updater = new NodeEventEmitter();
@@ -21,6 +21,10 @@ const { isMock, fakeAutoUpdater, getSettings } = vi.hoisted(() => {
     isMock: { dev: false },
     fakeAutoUpdater: updater as FakeAutoUpdater,
     getSettings: vi.fn(),
+    windows: [] as {
+      isDestroyed: () => boolean;
+      webContents: { send: ReturnType<typeof vi.fn> };
+    }[],
   };
 });
 
@@ -30,6 +34,10 @@ vi.mock('@electron-toolkit/utils', () => ({
 
 vi.mock('electron-updater', () => ({
   autoUpdater: fakeAutoUpdater,
+}));
+
+vi.mock('electron', () => ({
+  BrowserWindow: { getAllWindows: () => windows },
 }));
 
 vi.mock('../storage', () => ({
@@ -43,19 +51,16 @@ import {
   setupAutoUpdaterEvents,
   runAutomaticUpdateCheck,
   checkForUpdatesWithRetry,
+  getUpdateState,
+  setUpdateState,
+  updateErrorMessage,
+  UNSIGNED_MAC_MESSAGE,
 } from './index';
 
-const flush = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
-
-const makeWindow = (
-  overrides: Partial<{ destroyed: boolean; send: ReturnType<typeof vi.fn> }> = {}
-): Parameters<typeof runAutomaticUpdateCheck>[0] => {
-  const send = overrides.send ?? vi.fn();
-  return {
-    isDestroyed: () => overrides.destroyed ?? false,
-    webContents: { send },
-  } as unknown as Parameters<typeof runAutomaticUpdateCheck>[0];
-};
+const makeWindow = (destroyed = false) => ({
+  isDestroyed: () => destroyed,
+  webContents: { send: vi.fn() },
+});
 
 beforeEach(() => {
   isMock.dev = false;
@@ -65,6 +70,8 @@ beforeEach(() => {
   fakeAutoUpdater.checkForUpdates.mockReset().mockResolvedValue(undefined);
   fakeAutoUpdater.quitAndInstall.mockReset();
   getSettings.mockReset();
+  windows.length = 0;
+  setUpdateState({ status: 'idle' });
 });
 
 afterEach(() => {
@@ -91,115 +98,133 @@ describe('configureAutoUpdater', () => {
   });
 });
 
-describe('setupAutoUpdaterEvents', () => {
-  it('logs lifecycle events but does NOT call quitAndInstall on update-downloaded (manual flow bug fix)', () => {
-    const logSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+describe('update state', () => {
+  it('starts idle', () => {
+    expect(getUpdateState()).toEqual({ status: 'idle' });
+  });
 
+  it('pushes every change as update-state to every live window', () => {
+    const a = makeWindow();
+    const gone = makeWindow(true);
+    const b = makeWindow();
+    windows.push(a, gone, b);
+
+    setUpdateState({ status: 'checking' });
+
+    expect(a.webContents.send).toHaveBeenCalledWith('update-state', { status: 'checking' });
+    expect(b.webContents.send).toHaveBeenCalledWith('update-state', { status: 'checking' });
+    expect(gone.webContents.send).not.toHaveBeenCalled();
+    expect(getUpdateState()).toEqual({ status: 'checking' });
+  });
+});
+
+describe('setupAutoUpdaterEvents', () => {
+  it('moves through the states from each event and never installs on its own', () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const win = makeWindow();
+    windows.push(win);
     setupAutoUpdaterEvents();
 
     fakeAutoUpdater.emit('checking-for-update');
-    fakeAutoUpdater.emit('update-available', { version: '1.0.0' });
-    fakeAutoUpdater.emit('update-not-available', { version: '0.9.0' });
-    fakeAutoUpdater.emit('download-progress', { percent: 42 });
-    fakeAutoUpdater.emit('update-downloaded', { version: '1.0.0' });
-    fakeAutoUpdater.emit('error', new Error('boom'));
+    expect(getUpdateState()).toEqual({ status: 'checking' });
 
-    expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
-    expect(logSpy).toHaveBeenCalled();
+    fakeAutoUpdater.emit('update-available', { version: '1.9.0' });
+    expect(getUpdateState()).toEqual({ status: 'available', version: '1.9.0' });
+
+    fakeAutoUpdater.emit('download-progress', { percent: 42.4 });
+    expect(getUpdateState()).toEqual({ status: 'downloading', version: '1.9.0', progress: 42 });
+
+    fakeAutoUpdater.emit('update-downloaded', { version: '1.9.0' });
+    expect(getUpdateState()).toEqual({ status: 'downloaded', version: '1.9.0' });
+
+    fakeAutoUpdater.emit('update-not-available', { version: '1.8.10' });
+    expect(getUpdateState()).toEqual({ status: 'upToDate' });
+
+    fakeAutoUpdater.emit('error', new Error('boom'));
+    expect(getUpdateState().status).toBe('error');
     expect(errSpy).toHaveBeenCalledWith('Error in auto-updater:', expect.any(Error));
 
-    logSpy.mockRestore();
+    expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
+    expect(win.webContents.send).toHaveBeenCalledTimes(6);
+    expect(win.webContents.send).toHaveBeenLastCalledWith('update-state', {
+      status: 'error',
+      message: expect.any(String),
+    });
     errSpy.mockRestore();
+  });
+});
+
+describe('updateErrorMessage', () => {
+  const originalPlatform = process.platform;
+  afterEach(() => {
+    Object.defineProperty(process, 'platform', { value: originalPlatform, writable: true });
+  });
+
+  it('uses the error message off macOS', () => {
+    Object.defineProperty(process, 'platform', { value: 'linux', writable: true });
+    expect(updateErrorMessage(new Error('net down'))).toBe('net down');
+    expect(updateErrorMessage('plain')).toBe('plain');
+  });
+
+  it('carries the unsigned-build message on macOS', () => {
+    Object.defineProperty(process, 'platform', { value: 'darwin', writable: true });
+    expect(updateErrorMessage(new Error('net down'))).toBe(UNSIGNED_MAC_MESSAGE);
   });
 });
 
 describe('runAutomaticUpdateCheck', () => {
   it('is a no-op in dev mode', async () => {
     isMock.dev = true;
-    await runAutomaticUpdateCheck(makeWindow());
+    await runAutomaticUpdateCheck();
     expect(getSettings).not.toHaveBeenCalled();
     expect(fakeAutoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 
   it('returns silently when settings load throws', async () => {
     getSettings.mockRejectedValue(new Error('disk on fire'));
-    await runAutomaticUpdateCheck(makeWindow());
+    await runAutomaticUpdateCheck();
     expect(fakeAutoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 
   it('skips the check when automaticUpdates is false', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: false });
-    await runAutomaticUpdateCheck(makeWindow());
+    await runAutomaticUpdateCheck();
     expect(fakeAutoUpdater.checkForUpdates).not.toHaveBeenCalled();
   });
 
   it('runs the check when automaticUpdates is true and flips autoDownload', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    await runAutomaticUpdateCheck(makeWindow());
+    await runAutomaticUpdateCheck();
     expect(fakeAutoUpdater.autoDownload).toBe(true);
     expect(fakeAutoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
   });
 
   it('treats undefined automaticUpdates as enabled', async () => {
     getSettings.mockResolvedValue({});
-    await runAutomaticUpdateCheck(makeWindow());
+    await runAutomaticUpdateCheck();
     expect(fakeAutoUpdater.checkForUpdates).toHaveBeenCalledTimes(1);
   });
 
-  it('silently swallows a checkForUpdates rejection and clears listeners', async () => {
+  it('silently swallows a checkForUpdates rejection', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
     fakeAutoUpdater.checkForUpdates.mockRejectedValueOnce(new Error('network'));
-    await expect(runAutomaticUpdateCheck(makeWindow())).resolves.toBeUndefined();
-    expect(fakeAutoUpdater.listenerCount('update-downloaded')).toBe(0);
-    expect(fakeAutoUpdater.listenerCount('error')).toBe(0);
+    await expect(runAutomaticUpdateCheck()).resolves.toBeUndefined();
   });
 
-  it('clears the update-downloaded listener if an error event fires mid-download', async () => {
+  it('leaves the downloaded state to the events, which reach the renderer', async () => {
     getSettings.mockResolvedValue({ automaticUpdates: true });
-    const send = vi.fn();
-    await runAutomaticUpdateCheck(makeWindow({ send }));
-    expect(fakeAutoUpdater.listenerCount('update-downloaded')).toBe(1);
+    const win = makeWindow();
+    windows.push(win);
+    setupAutoUpdaterEvents();
 
-    fakeAutoUpdater.emit('error', new Error('mid-download boom'));
-
-    expect(fakeAutoUpdater.listenerCount('update-downloaded')).toBe(0);
-    expect(fakeAutoUpdater.listenerCount('error')).toBe(0);
-    expect(send).not.toHaveBeenCalled();
-  });
-
-  it('sends update-downloaded IPC with version to the renderer when download completes', async () => {
-    getSettings.mockResolvedValue({ automaticUpdates: true });
-    const send = vi.fn();
-    const win = makeWindow({ send });
-
-    await runAutomaticUpdateCheck(win);
+    await runAutomaticUpdateCheck();
     fakeAutoUpdater.emit('update-downloaded', { version: '2.3.4' });
-    await flush();
 
-    expect(send).toHaveBeenCalledWith('update-downloaded', { version: '2.3.4' });
+    expect(win.webContents.send).toHaveBeenCalledWith('update-state', {
+      status: 'downloaded',
+      version: '2.3.4',
+    });
     expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
-  });
-
-  it('does not send IPC when window is null', async () => {
-    getSettings.mockResolvedValue({ automaticUpdates: true });
-    await runAutomaticUpdateCheck(null);
-    fakeAutoUpdater.emit('update-downloaded', { version: '2.3.4' });
-    await flush();
-    // No assertion needed beyond not throwing — the null path is exercised.
-    expect(fakeAutoUpdater.quitAndInstall).not.toHaveBeenCalled();
-  });
-
-  it('does not send IPC when window has been destroyed', async () => {
-    getSettings.mockResolvedValue({ automaticUpdates: true });
-    const send = vi.fn();
-    const win = makeWindow({ send, destroyed: true });
-
-    await runAutomaticUpdateCheck(win);
-    fakeAutoUpdater.emit('update-downloaded', { version: '2.3.4' });
-    await flush();
-
-    expect(send).not.toHaveBeenCalled();
   });
 });
 

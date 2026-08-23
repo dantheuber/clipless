@@ -1,21 +1,23 @@
 ---
 type: system
-title: Tools Launcher
+title: Tools Launcher (removed)
 tags:
   - quick-tools
   - launcher
   - window
-timestamp: 2026-07-10T00:53:58.411Z
+  - history
+generated:
+  by: human:dantheuber
+  at: 2026-08-23T07:14:26.635Z
+status: deprecated
 ---
 
-The Tools Launcher fans extracted data out to web tools. It is a separate window (`tools-launcher.html`, entry `tools-launcher-main.tsx`) with its own global hotkey (Ctrl+Shift+T / Cmd+Shift+T by default).
+The Tools Launcher window no longer exists. The quick look redesign (1.9.0, 2026-08-23, PR #146) deleted it: `tools-launcher.html`, `tools-launcher-main.tsx`, `ToolsLauncher.tsx`, `QuickClipsScanner.tsx` with its CSS and selection helpers, `assets/base.css`, the `tools-launcher` build input, `createToolsLauncherWindow` and `getToolsLauncherWindow` in `src/main/window/creation.ts`, the `open-tools-launcher`, `close-tools-launcher` and `tools-launcher-ready` IPC handlers, the preload methods `openToolsLauncher`, `closeToolsLauncher`, `toolsLauncherReady`, `onToolsLauncherInitialize` and `removeAllListeners`, the `PatternMatch` type and the `faWrench` icon. The app has two renderer entry points, `main.tsx` and `settings-main.tsx`.
 
-Mechanics:
+What replaced it, all inside the main window:
 
-- A **Quick Tool** is a URL template with token placeholders, e.g. `https://tool.com/{ip}/{email}`. Tokens correspond to named capture groups from [Quick Clips](/systems/quick-clips.md) search terms. Multi-token URLs are supported.
-- URL generation lives in `src/main/clipboard/quick-tools.ts`; tool definitions are stored with templates in `templates.enc`.
-- **Smart compatibility**: the launcher only offers tools whose required tokens are all present in the currently selected extracted values.
-- **Bulk open**: selecting several values and several tools launches them all at once via `shell.openExternal`.
-- Tool configs export/import as JSON for team sharing.
+- Chips on every row for each enabled search term match, coloured by capture group, and the pin tray that fans pinned values out to compatible quick tools with Open all. See [Quick Clips](quick-clips.md) and the [quick look decision](../decisions/tools-launcher-window-replaced-by-quick-look-and-pin-tray.md).
+- Quick look, the reader, opened by the row's eye, the status bar button, the context menu or the `quickLook` hotkey (the same default accelerator the launcher had; the settings migration renames the stored `openToolsLauncher` key, see [hotkeys](hotkeys.md)).
+- Template pills in the status bar and the reader for [templates](templates.md).
 
-Typical flow: copy text -> scanner icon appears -> open launcher -> select extracted values -> pick compatible tools -> everything opens in the browser. Example use: pull an IP and fan it out to VirusTotal + AbuseIPDB in one click.
+What the launcher used to do, for reading old decisions: a separate 1000 x 700 window that scanned one clip against the search terms, listed the captures on the left and the compatible tools on the right, and opened every selected value in every selected tool through `shell.openExternal`. Tool URL generation (`src/shared/tools.ts`) and the config export and import (`src/main/clipboard/quick-clips-config.ts`) survive it.

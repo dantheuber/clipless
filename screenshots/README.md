@@ -29,7 +29,7 @@ screen is captured in both light and dark themes at 2x device scale:
 | `settings-general-{…}.png`  | Settings → General                         |
 | `settings-tools-{…}.png`    | Settings → Tools (Quick Clips / Templates) |
 | `settings-hotkeys-{…}.png`  | Settings → Hotkeys                         |
-| `patterns-{light,dark}.png` | Tools Launcher: live Quick Clips matching  |
+| `patterns-{light,dark}.png` | Quick look with chips, a pin and the tray  |
 
 ## Publishing to the site
 

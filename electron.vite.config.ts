@@ -28,7 +28,6 @@ export default defineConfig({
         input: {
           main: resolve('src/renderer/index.html'),
           settings: resolve('src/renderer/settings.html'),
-          'tools-launcher': resolve('src/renderer/tools-launcher.html'),
         },
       },
     },

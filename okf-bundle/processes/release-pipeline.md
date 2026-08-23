@@ -5,7 +5,9 @@ tags:
   - ci
   - release
   - github-actions
-timestamp: 2026-07-10T01:01:30.380Z
+generated:
+  by: human:dantheuber
+  at: 2026-07-10T01:01:30.380Z
 ---
 
 Releases are driven by the version field in `package.json` -- there is no manual tagging in the normal flow. Verified against `.github/workflows/` (older repo docs described workflows that no longer exist).
@@ -21,6 +23,6 @@ Gotchas:
 
 - Linux builds are NOT produced by the merge-to-main path; getting a Linux artifact requires the manual tag workflow.
 - There is no "promote release" workflow; publishing the draft release (and editing notes) happens manually in the GitHub UI.
-- Both build workflows explicitly skip macOS code signing (`CSC_IDENTITY_AUTO_DISCOVERY: false`) -- see [macOS unsigned builds](/gotchas/macos-unsigned-builds.md).
+- Both build workflows explicitly skip macOS code signing (`CSC_IDENTITY_AUTO_DISCOVERY: false`) -- see [macOS unsigned builds](../gotchas/macos-unsigned-builds.md).
 
 Auto-update: the app updates itself via electron-updater from GitHub releases -- Windows only in practice, since macOS builds are unsigned.

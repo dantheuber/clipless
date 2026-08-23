@@ -30,28 +30,21 @@ vi.mock('../notifications', () => ({
   showNotification: vi.fn(),
 }));
 
-vi.mock('../window/creation.js', () => ({
-  createToolsLauncherWindow: vi.fn(),
-}));
-
 vi.mock('../storage/image-store', () => ({
   loadImage: vi.fn().mockResolvedValue('data:image/png;base64,fullimage'),
 }));
 
 vi.mock('../clipboard/monitoring', () => ({
   setSkipNextImageChange: vi.fn(),
+  checkClipboardNow: vi.fn().mockResolvedValue(false),
 }));
 
-vi.mock('../clipboard/data', () => ({
-  getCurrentClipboardData: vi.fn().mockReturnValue(null),
-}));
-
-import { HotkeyActions } from './actions';
+import { HotkeyActions, clipSummary } from './actions';
 import { clipboard, nativeImage, app } from 'electron';
 import { storage } from '../storage';
+import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
-import { setSkipNextImageChange } from '../clipboard/monitoring';
-import { getCurrentClipboardData } from '../clipboard/data';
+import { setSkipNextImageChange, checkClipboardNow } from '../clipboard/monitoring';
 
 describe('HotkeyActions', () => {
   let actions: HotkeyActions;
@@ -103,7 +96,7 @@ describe('HotkeyActions', () => {
   describe('copyQuickClip', () => {
     it('copies text clip to clipboard', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c1', type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('hello');
@@ -111,7 +104,7 @@ describe('HotkeyActions', () => {
 
     it('copies html clip to clipboard', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'html', content: '<p>hi</p>' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c1', type: 'html', content: '<p>hi</p>' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeHTML).toHaveBeenCalledWith('<p>hi</p>');
@@ -125,7 +118,7 @@ describe('HotkeyActions', () => {
 
     it('sends hotkey-clip-copied event to renderer', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c1', type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
       expect(mockWindow.webContents.send).toHaveBeenCalledWith('hotkey-clip-copied', 0);
@@ -133,7 +126,11 @@ describe('HotkeyActions', () => {
 
     it('copies rtf clip to clipboard', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'rtf', content: '{\\rtf1 hello}' }, isLocked: false, timestamp: 1 },
+        {
+          clip: { id: 'c1', type: 'rtf', content: '{\\rtf1 hello}' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeRTF).toHaveBeenCalledWith('{\\rtf1 hello}');
@@ -143,6 +140,7 @@ describe('HotkeyActions', () => {
       vi.mocked(storage.getClips).mockResolvedValue([
         {
           clip: {
+            id: 'c1',
             type: 'bookmark',
             content: 'Example',
             title: 'Example',
@@ -158,7 +156,11 @@ describe('HotkeyActions', () => {
 
     it('copies bookmark clip as text when missing title/url', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'bookmark', content: 'some content' }, isLocked: false, timestamp: 1 },
+        {
+          clip: { id: 'c1', type: 'bookmark', content: 'some content' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('some content');
@@ -171,7 +173,7 @@ describe('HotkeyActions', () => {
       } as any);
       vi.mocked(storage.getClips).mockResolvedValue([
         {
-          clip: { type: 'image', content: 'data:image/png;base64,abc' },
+          clip: { id: 'c1', type: 'image', content: 'data:image/png;base64,abc' },
           isLocked: false,
           timestamp: 1,
         },
@@ -187,7 +189,7 @@ describe('HotkeyActions', () => {
       } as any);
       vi.mocked(storage.getClips).mockResolvedValue([
         {
-          clip: { type: 'image', content: 'data:image/png;base64,abc' },
+          clip: { id: 'c1', type: 'image', content: 'data:image/png;base64,abc' },
           isLocked: false,
           timestamp: 1,
         },
@@ -201,7 +203,7 @@ describe('HotkeyActions', () => {
         throw new Error('bad image');
       });
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'image', content: 'bad-data' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c1', type: 'image', content: 'bad-data' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('bad-data');
@@ -216,6 +218,7 @@ describe('HotkeyActions', () => {
       vi.mocked(storage.getClips).mockResolvedValue([
         {
           clip: {
+            id: 'c1',
             type: 'image',
             content: 'data:image/png;base64,thumbnail',
             imageId: 'img-123',
@@ -233,8 +236,12 @@ describe('HotkeyActions', () => {
 
     it('copies unknown type as text', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        { clip: { type: 'unknown' as any, content: 'fallback' }, isLocked: false, timestamp: 1 },
+        {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          clip: { id: 'c1', type: 'unknown' as any, content: 'fallback' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).toHaveBeenCalledWith('fallback');
@@ -243,7 +250,7 @@ describe('HotkeyActions', () => {
     it('does not send event when window is destroyed', async () => {
       mockWindow.isDestroyed.mockReturnValue(true);
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c1', type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },
       ]);
       await actions.copyQuickClip(0);
       expect(mockWindow.webContents.send).not.toHaveBeenCalled();
@@ -256,7 +263,7 @@ describe('HotkeyActions', () => {
 
     it('handles null clip at valid index', async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sparseClips = [null as any, { clip: { type: 'text', content: 'hello' } }];
+      const sparseClips = [null as any, { clip: { id: 'c1', type: 'text', content: 'hello' } }];
       vi.mocked(storage.getClips).mockResolvedValue(sparseClips);
       await actions.copyQuickClip(0);
       expect(clipboard.writeText).not.toHaveBeenCalled();
@@ -335,72 +342,94 @@ describe('HotkeyActions', () => {
     });
   });
 
-  describe('openToolsLauncher', () => {
-    it('opens launcher with live clipboard content even when stored clip is stale', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'fresh' });
+  describe('quickLook', () => {
+    it('checks the clipboard, shows the window and sends open-quick-look with pending', async () => {
+      vi.mocked(checkClipboardNow).mockResolvedValue(true);
+
+      await actions.quickLook();
+
+      expect(checkClipboardNow).toHaveBeenCalledTimes(1);
+      expect(mockWindow.show).toHaveBeenCalled();
+      expect(mockWindow.focus).toHaveBeenCalled();
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('open-quick-look', {
+        pending: true,
+      });
+    });
+
+    it('reports pending false when the poll found no change', async () => {
+      vi.mocked(checkClipboardNow).mockResolvedValue(false);
+      mockWindow.isMinimized.mockReturnValue(true);
+
+      await actions.quickLook();
+
+      expect(mockWindow.restore).toHaveBeenCalled();
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('open-quick-look', {
+        pending: false,
+      });
+    });
+
+    it('does nothing without a window or with a destroyed one', async () => {
+      actions.setMainWindow(null);
+      await expect(actions.quickLook()).resolves.toBeUndefined();
+      expect(checkClipboardNow).not.toHaveBeenCalled();
+
+      mockWindow.isDestroyed.mockReturnValue(true);
+      actions.setMainWindow(mockWindow);
+      await actions.quickLook();
+      expect(checkClipboardNow).not.toHaveBeenCalled();
+    });
+
+    it('logs and keeps going when the clipboard check throws', async () => {
+      const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.mocked(checkClipboardNow).mockRejectedValue(new Error('poll failed'));
+      await expect(actions.quickLook()).resolves.toBeUndefined();
+      expect(errSpy).toHaveBeenCalledWith('Error opening quick look:', expect.any(Error));
+      expect(mockWindow.webContents.send).not.toHaveBeenCalled();
+      errSpy.mockRestore();
+    });
+  });
+
+  describe('clipSummary', () => {
+    it('names the first non-empty line, trimmed to 80 characters', () => {
+      expect(clipSummary({ id: 'a', type: 'text', content: '\n  first line \nsecond' })).toBe(
+        'first line'
+      );
+      const long = 'x'.repeat(100);
+      expect(clipSummary({ id: 'a', type: 'text', content: long })).toHaveLength(80);
+      expect(clipSummary({ id: 'a', type: 'text', content: '   ' })).toBe('');
+    });
+
+    it('uses the extracted text for html, the title for a bookmark, and Image for images', () => {
+      expect(clipSummary({ id: 'a', type: 'html', content: '<p>x</p>', text: 'plain' })).toBe(
+        'plain'
+      );
+      expect(clipSummary({ id: 'a', type: 'rtf', content: '{\\rtf1 x}' })).toBe('{\\rtf1 x}');
+      expect(
+        clipSummary({
+          id: 'a',
+          type: 'bookmark',
+          content: 'https://x',
+          title: 'T',
+          url: 'https://x',
+        })
+      ).toBe('T');
+      expect(
+        clipSummary({ id: 'a', type: 'bookmark', content: 'https://x', url: 'https://x' })
+      ).toBe('https://x');
+      expect(clipSummary({ id: 'a', type: 'bookmark', content: 'https://c' })).toBe('https://c');
+      expect(clipSummary({ id: 'a', type: 'image', content: 'img' })).toBe('Image');
+    });
+
+    it('is what the hotkey copy notification says', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'stale' }, isLocked: false, timestamp: 1 },
+        {
+          clip: { id: 'c1', type: 'text', content: 'hello there\nmore' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
-
-      await actions.openToolsLauncher();
-
-      const { createToolsLauncherWindow } = await import('../window/creation.js');
-      expect(createToolsLauncherWindow).toHaveBeenCalledWith('fresh');
-    });
-
-    it('does not read stored history when live clipboard has content', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'fresh' });
-
-      await actions.openToolsLauncher();
-
-      expect(storage.getClips).not.toHaveBeenCalled();
-    });
-
-    it('falls back to most recent stored clip when live read is null', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
-      vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'stored' }, isLocked: false, timestamp: 1 },
-      ]);
-
-      await actions.openToolsLauncher();
-
-      const { createToolsLauncherWindow } = await import('../window/creation.js');
-      expect(createToolsLauncherWindow).toHaveBeenCalledWith('stored');
-    });
-
-    it('falls back to stored clip when live read content is empty', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: '' });
-      vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { type: 'text', content: 'stored' }, isLocked: false, timestamp: 1 },
-      ]);
-
-      await actions.openToolsLauncher();
-
-      const { createToolsLauncherWindow } = await import('../window/creation.js');
-      expect(createToolsLauncherWindow).toHaveBeenCalledWith('stored');
-    });
-
-    it('does nothing when live read is null and no clips available', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
-      vi.mocked(storage.getClips).mockResolvedValue([]);
-
-      await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
-
-      const { createToolsLauncherWindow } = await import('../window/creation.js');
-      expect(createToolsLauncherWindow).not.toHaveBeenCalled();
-    });
-
-    it('does nothing when live read is null and first stored clip is null', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      vi.mocked(storage.getClips).mockResolvedValue([null as any]);
-      await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
-    });
-
-    it('handles error gracefully', async () => {
-      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
-      vi.mocked(storage.getClips).mockRejectedValue(new Error('fail'));
-      await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
+      await actions.copyQuickClip(0);
+      expect(showNotification).toHaveBeenCalledWith('Clip copied', 'hello there');
     });
   });
 });

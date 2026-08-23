@@ -39,4 +39,28 @@ test.describe('App Launch', () => {
 
     await app.close();
   });
+
+  test('quick look opens in the main window, no launcher window exists', async () => {
+    const app = await electron.launch({
+      args: [resolve(__dirname, '../out/main/index.js')],
+      env: { ...process.env, CLIPLESS_PLAINTEXT_STORAGE: '1' },
+    });
+
+    const window = await app.firstWindow();
+    await window.waitForSelector('#root > *');
+    const text = `launch check ${Date.now().toString(36)}`;
+    await app.evaluate(({ clipboard }, t) => clipboard.writeText(t), text);
+    await expect(window.locator('[data-testid="clip-row"]', { hasText: text })).toBeVisible({
+      timeout: 10000,
+    });
+
+    await window.getByTestId('quick-look-button').click();
+    await expect(window.getByTestId('quick-look')).toBeVisible();
+
+    const urls = app.windows().map((w) => w.url());
+    expect(urls.some((url) => url.includes('tools-launcher'))).toBe(false);
+    expect(app.windows().length).toBe(1);
+
+    await app.close();
+  });
 });

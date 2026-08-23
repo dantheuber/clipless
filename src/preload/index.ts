@@ -4,36 +4,51 @@ import type {
   BookmarkData,
   ClipItem,
   UserSettings,
+  HotkeySettings,
   StoredClip,
   Template,
   SearchTerm,
   QuickTool,
-  PatternMatch,
   QuickClipsConfig,
+  QuickClipsImportMode,
+  GroupColours,
+  UpdateState,
+  SettingsApplyResult,
+  AppPathName,
 } from '../shared/types';
+
+/**
+ * Every on* method returns a function that removes only its own listener, so two
+ * subscribers to one channel never remove each other.
+ */
+function subscribe<Args extends unknown[]>(
+  channel: string,
+  handler: (...args: Args) => void
+): () => void {
+  const listener = (_event: Electron.IpcRendererEvent, ...args: unknown[]) =>
+    handler(...(args as Args));
+  electronAPI.ipcRenderer.on(channel, listener);
+  return () => electronAPI.ipcRenderer.removeListener(channel, listener);
+}
 
 // Custom APIs for renderer
 const api = {
   // Platform info
   platform: process.platform,
+  arch: process.arch,
 
   // Auto-updater APIs
   checkForUpdates: () => electronAPI.ipcRenderer.invoke('check-for-updates'),
   downloadUpdate: () => electronAPI.ipcRenderer.invoke('download-update'),
   quitAndInstall: () => electronAPI.ipcRenderer.invoke('quit-and-install'),
-  onUpdateDownloaded: (callback: (info: { version: string }) => void) => {
-    const listener = (_event: Electron.IpcRendererEvent, info: { version: string }) =>
-      callback(info);
-    electronAPI.ipcRenderer.on('update-downloaded', listener);
-    return () => electronAPI.ipcRenderer.removeListener('update-downloaded', listener);
+  getUpdateState: (): Promise<UpdateState> => electronAPI.ipcRenderer.invoke('get-update-state'),
+  onUpdateState: (callback: (state: UpdateState) => void) => {
+    const listener = (_event: Electron.IpcRendererEvent, state: UpdateState) => callback(state);
+    electronAPI.ipcRenderer.on('update-state', listener);
+    return () => electronAPI.ipcRenderer.removeListener('update-state', listener);
   },
 
   // Clipboard APIs
-  getClipboardText: () => electronAPI.ipcRenderer.invoke('get-clipboard-text'),
-  getClipboardHTML: () => electronAPI.ipcRenderer.invoke('get-clipboard-html'),
-  getClipboardRTF: () => electronAPI.ipcRenderer.invoke('get-clipboard-rtf'),
-  getClipboardImage: () => electronAPI.ipcRenderer.invoke('get-clipboard-image'),
-  getClipboardBookmark: () => electronAPI.ipcRenderer.invoke('get-clipboard-bookmark'),
   getCurrentClipboardData: () => electronAPI.ipcRenderer.invoke('get-current-clipboard-data'),
   setClipboardText: (text: string) => electronAPI.ipcRenderer.invoke('set-clipboard-text', text),
   setClipboardHTML: (html: string) => electronAPI.ipcRenderer.invoke('set-clipboard-html', html),
@@ -43,37 +58,33 @@ const api = {
   setClipboardBookmark: (bookmarkData: BookmarkData) =>
     electronAPI.ipcRenderer.invoke('set-clipboard-bookmark', bookmarkData),
   getFullImage: (imageId: string) => electronAPI.ipcRenderer.invoke('get-full-image', imageId),
-  notifyClipCopied: (index: number) => electronAPI.ipcRenderer.invoke('notify-clip-copied', index),
+  htmlSanitize: (html: string): Promise<{ html: string; removed: Record<string, number> }> =>
+    electronAPI.ipcRenderer.invoke('html-sanitize', html),
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
   onClipboardChanged: (callback: (clipData: ClipItem) => void) =>
-    electronAPI.ipcRenderer.on('clipboard-changed', (_event, clipData) => callback(clipData)),
-  removeClipboardListeners: () => electronAPI.ipcRenderer.removeAllListeners('clipboard-changed'),
+    subscribe('clipboard-changed', (clipData: ClipItem) => callback(clipData)),
   onHotkeyClipCopied: (callback: (clipIndex: number) => void) =>
-    electronAPI.ipcRenderer.on('hotkey-clip-copied', (_event, clipIndex) => callback(clipIndex)),
-  removeHotkeyListeners: () => electronAPI.ipcRenderer.removeAllListeners('hotkey-clip-copied'),
+    subscribe('hotkey-clip-copied', (clipIndex: number) => callback(clipIndex)),
 
   // Settings APIs
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),
-  closeSettings: () => electronAPI.ipcRenderer.invoke('close-settings'),
-  getSettings: () => electronAPI.ipcRenderer.invoke('get-settings'),
   getAutoStartState: (): Promise<boolean | null> =>
     electronAPI.ipcRenderer.invoke('auto-start-get-state'),
-  settingsChanged: (settings: UserSettings) =>
+  settingsChanged: (settings: UserSettings): Promise<SettingsApplyResult> =>
     electronAPI.ipcRenderer.invoke('settings-changed', settings),
-  onSettingsUpdated: (callback: (settings: UserSettings) => void) => {
-    const listener = (_event: Electron.IpcRendererEvent, settings: UserSettings) =>
-      callback(settings);
-    electronAPI.ipcRenderer.on('settings-updated', listener);
-    // Return a cleanup function that removes only this specific listener
-    return () => electronAPI.ipcRenderer.removeListener('settings-updated', listener);
-  },
-  removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated'),
+  // Import with replace restarts the app after the save queue drains (spec 15.5)
+  restartApp: (): Promise<void> => electronAPI.ipcRenderer.invoke('app-restart'),
+  // The About panel's folder links; resolves to the shell's error text, empty on success
+  openAppPath: (name: AppPathName): Promise<string> =>
+    electronAPI.ipcRenderer.invoke('open-app-path', name),
+  onSettingsUpdated: (callback: (settings: UserSettings) => void) =>
+    subscribe('settings-updated', (settings: UserSettings) => callback(settings)),
+  hotkeysGetDefaults: (): Promise<HotkeySettings> =>
+    electronAPI.ipcRenderer.invoke('hotkeys-get-defaults'),
 
   // Storage APIs
-  onStorageReady: (callback: () => void) =>
-    electronAPI.ipcRenderer.on('storage-ready', () => callback()),
-  removeStorageReadyListeners: () => electronAPI.ipcRenderer.removeAllListeners('storage-ready'),
+  onStorageReady: (callback: () => void) => subscribe('storage-ready', () => callback()),
   storageGetClips: () => electronAPI.ipcRenderer.invoke('storage-get-clips'),
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
     electronAPI.ipcRenderer.invoke('storage-save-clips', clips, lockedIndices),
@@ -95,12 +106,6 @@ const api = {
   templatesDelete: (id: string) => electronAPI.ipcRenderer.invoke('templates-delete', id),
   templatesReorder: (templates: Template[]) =>
     electronAPI.ipcRenderer.invoke('templates-reorder', templates),
-  templatesGenerateText: (
-    templateId: string,
-    clipContents: string[],
-    captures?: Record<string, string>
-  ) =>
-    electronAPI.ipcRenderer.invoke('templates-generate-text', templateId, clipContents, captures),
 
   // Quick Clips - Search Terms APIs
   searchTermsGetAll: () => electronAPI.ipcRenderer.invoke('search-terms-get-all'),
@@ -109,10 +114,6 @@ const api = {
   searchTermsUpdate: (id: string, updates: Partial<SearchTerm>) =>
     electronAPI.ipcRenderer.invoke('search-terms-update', id, updates),
   searchTermsDelete: (id: string) => electronAPI.ipcRenderer.invoke('search-terms-delete', id),
-  searchTermsReorder: (searchTerms: SearchTerm[]) =>
-    electronAPI.ipcRenderer.invoke('search-terms-reorder', searchTerms),
-  searchTermsTest: (pattern: string, testText: string) =>
-    electronAPI.ipcRenderer.invoke('search-terms-test', pattern, testText),
 
   // Quick Clips - Tools APIs
   quickToolsGetAll: () => electronAPI.ipcRenderer.invoke('quick-tools-get-all'),
@@ -121,44 +122,28 @@ const api = {
   quickToolsUpdate: (id: string, updates: Partial<QuickTool>) =>
     electronAPI.ipcRenderer.invoke('quick-tools-update', id, updates),
   quickToolsDelete: (id: string) => electronAPI.ipcRenderer.invoke('quick-tools-delete', id),
-  quickToolsReorder: (tools: QuickTool[]) =>
-    electronAPI.ipcRenderer.invoke('quick-tools-reorder', tools),
-  quickToolsValidateUrl: (url: string, captureGroups: string[]) =>
-    electronAPI.ipcRenderer.invoke('quick-tools-validate-url', url, captureGroups),
 
-  // Quick Clips - Scanning APIs
-  quickClipsScanText: (text: string) =>
-    electronAPI.ipcRenderer.invoke('quick-clips-scan-text', text),
-  quickClipsOpenTools: (matches: PatternMatch[], toolIds: string[]) =>
-    electronAPI.ipcRenderer.invoke('quick-clips-open-tools', matches, toolIds),
-  quickClipsExportConfig: () => electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
-  quickClipsImportConfig: (config: QuickClipsConfig) =>
-    electronAPI.ipcRenderer.invoke('quick-clips-import-config', config),
-  // Tools Launcher Window APIs
-  openToolsLauncher: (clipContent: string) =>
-    electronAPI.ipcRenderer.invoke('open-tools-launcher', clipContent),
-  closeToolsLauncher: () => electronAPI.ipcRenderer.invoke('close-tools-launcher'),
-  toolsLauncherReady: () => electronAPI.ipcRenderer.invoke('tools-launcher-ready'),
-  onToolsLauncherInitialize: (callback: (clipContent: string) => void) =>
-    electronAPI.ipcRenderer.on('tools-launcher-initialize', (_event, clipContent) =>
-      callback(clipContent)
-    ),
-  onToggleSearch: (callback: () => void) =>
-    electronAPI.ipcRenderer.on('toggle-search', () => callback()),
-  removeToggleSearchListeners: () => electronAPI.ipcRenderer.removeAllListeners('toggle-search'),
-  removeAllListeners: (channel: string) => electronAPI.ipcRenderer.removeAllListeners(channel),
+  // Tabs from the tray and the reader: http and https only, opened in order (spec 17.3)
+  openExternalUrls: (urls: string[]): Promise<number> =>
+    electronAPI.ipcRenderer.invoke('open-external-urls', urls),
+  quickClipsExportConfig: (): Promise<QuickClipsConfig> =>
+    electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
+  quickClipsImportConfig: (config: QuickClipsConfig, mode: QuickClipsImportMode = 'merge') =>
+    electronAPI.ipcRenderer.invoke('quick-clips-import-config', { config, mode }),
+  onQuickClipsConfigChanged: (callback: () => void) => {
+    const listener = () => callback();
+    electronAPI.ipcRenderer.on('quick-clips-config-changed', listener);
+    return () => electronAPI.ipcRenderer.removeListener('quick-clips-config-changed', listener);
+  },
 
-  // Native Context Menu APIs
-  showClipContextMenu: (options: {
-    index: number;
-    isFirstClip: boolean;
-    isLocked: boolean;
-    hasPatterns: boolean;
-  }) => electronAPI.ipcRenderer.invoke('show-clip-context-menu', options),
-  onContextMenuAction: (callback: (data: { action: string; index: number }) => void) =>
-    electronAPI.ipcRenderer.on('context-menu-action', (_event, data) => callback(data)),
-  removeContextMenuListeners: () =>
-    electronAPI.ipcRenderer.removeAllListeners('context-menu-action'),
+  // Group colours
+  groupColoursGet: (): Promise<GroupColours> => electronAPI.ipcRenderer.invoke('group-colours-get'),
+  groupColoursSet: (groupColours: GroupColours): Promise<GroupColours> =>
+    electronAPI.ipcRenderer.invoke('group-colours-set', groupColours),
+  onToggleSearch: (callback: () => void) => subscribe('toggle-search', () => callback()),
+  // The quick look hotkey; pending says a clipboard change is on its way (spec 17.3)
+  onOpenQuickLook: (callback: (payload: { pending: boolean }) => void) =>
+    subscribe('open-quick-look', (payload: { pending: boolean }) => callback(payload)),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

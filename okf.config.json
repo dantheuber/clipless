@@ -1,0 +1,5 @@
+{
+  "bundles": {
+    "brain": { "path": "okf-bundle/", "writable": true }
+  }
+}

@@ -3,9 +3,24 @@ import { join } from 'path';
 import { storage } from '../storage';
 import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
-import { setSkipNextImageChange } from '../clipboard/monitoring';
-import { getCurrentClipboardData } from '../clipboard/data';
-import type { StoredClip } from '../../shared/types';
+import { checkClipboardNow, setSkipNextImageChange } from '../clipboard/monitoring';
+import type { ClipItem, StoredClip } from '../../shared/types';
+
+/**
+ * What the OS notification for a hotkey copy says: the clip's first line, since the window
+ * may be hidden and "Clip 2" means nothing there (spec 17.7).
+ */
+export function clipSummary(clip: ClipItem): string {
+  if (clip.type === 'image') return 'Image';
+  const text =
+    clip.type === 'bookmark' ? clip.title || clip.url || clip.content : (clip.text ?? clip.content);
+  const line =
+    text
+      .split(/\r?\n/)
+      .find((l) => l.trim().length > 0)
+      ?.trim() ?? '';
+  return line.length > 80 ? `${line.slice(0, 79)}…` : line;
+}
 
 /**
  * Handles all hotkey action implementations
@@ -30,20 +45,26 @@ export class HotkeyActions {
         return;
       }
 
-      // Otherwise, show and focus the window
-      if (this.mainWindow.isMinimized()) {
-        this.mainWindow.restore();
-      }
-
-      this.mainWindow.show();
-      this.mainWindow.focus();
-
-      // On macOS, we need to bring the app to front
-      if (process.platform === 'darwin') {
-        app.focus();
-      }
+      this.showWindow(this.mainWindow);
     } catch (error) {
       console.error('Error toggling window visibility:', error);
+    }
+  }
+
+  /**
+   * Show and focus the main window, restoring it if minimised
+   */
+  private showWindow(window: BrowserWindow): void {
+    if (window.isMinimized()) {
+      window.restore();
+    }
+
+    window.show();
+    window.focus();
+
+    // On macOS, we need to bring the app to front
+    if (process.platform === 'darwin') {
+      app.focus();
     }
   }
 
@@ -73,7 +94,7 @@ export class HotkeyActions {
       await this.copyClipToClipboard(clipToCopy);
 
       console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
-      showNotification('Clip Copied', `Clip ${index + 1} copied to clipboard`);
+      showNotification('Clip copied', clipSummary(clipToCopy.clip));
     } catch (error) {
       console.error(`Error copying quick clip ${index}:`, error);
     }
@@ -161,36 +182,20 @@ export class HotkeyActions {
   }
 
   /**
-   * Open tools launcher for the content currently on the system clipboard.
-   *
-   * Reads the live clipboard directly rather than the most recent stored clip,
-   * because stored history trails the real clipboard by at least one 250ms poll
-   * plus an IPC/renderer roundtrip. If the user copies and immediately fires the
-   * hotkey, the live read reflects the just-copied content while history does not.
-   * Falls back to the most recent stored clip only when the live read is empty
-   * (e.g. empty clipboard or an unsupported format).
+   * The quick look hotkey (spec 9, 17.3): run the clipboard poll once so a copy made just
+   * before the hotkey reaches the renderer as clipboard-changed, bring the window forward,
+   * then tell the renderer to open the reader on row 1. pending says whether a change was
+   * sent, so the renderer waits for it only when there is one.
    */
-  async openToolsLauncher(): Promise<void> {
+  async quickLook(): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
+
     try {
-      const liveData = getCurrentClipboardData();
-      let content = liveData?.content;
-
-      if (!content) {
-        const clips = await storage.getClips();
-        const firstClip = clips[0];
-        if (!firstClip) {
-          console.warn('No clips available for tools launcher');
-          return;
-        }
-        content = firstClip.clip.content;
-      }
-
-      // Import the createToolsLauncherWindow function
-      const { createToolsLauncherWindow } = await import('../window/creation.js');
-
-      createToolsLauncherWindow(content);
+      const pending = await checkClipboardNow();
+      this.showWindow(this.mainWindow);
+      this.mainWindow.webContents.send('open-quick-look', { pending });
     } catch (error) {
-      console.error('Error opening tools launcher:', error);
+      console.error('Error opening quick look:', error);
     }
   }
 }

@@ -10,8 +10,7 @@ export const useClipState = (
   setClips: React.Dispatch<React.SetStateAction<ClipItem[]>>,
   maxClips: number,
   lockedClips: Record<number, boolean>,
-  setLockedClips: React.Dispatch<React.SetStateAction<Record<number, boolean>>>,
-  setClipCopyIndex: React.Dispatch<React.SetStateAction<number | null>>
+  setLockedClips: React.Dispatch<React.SetStateAction<Record<number, boolean>>>
 ) => {
   /**
    * Get the clip at the specified index.
@@ -144,10 +143,6 @@ export const useClipState = (
         newClip.content.substring(0, 50)
       );
 
-      // Only reset copy index when actually adding a new clip (not a hotkey copy)
-      console.log('🔄 Resetting clipCopyIndex due to new clip being added');
-      setClipCopyIndex(null);
-
       // Create new clips array by shifting existing clips down
       const newClips = [...clips];
       let lastClip = newClip;
@@ -168,7 +163,7 @@ export const useClipState = (
       const finalClips = updateClipsLength(newClips, maxClips);
       setClips(finalClips);
     },
-    [clips, maxClips, lockedClips, setClips, isDuplicateOfMostRecent, setClipCopyIndex]
+    [clips, maxClips, lockedClips, setClips, isDuplicateOfMostRecent]
   );
 
   return {

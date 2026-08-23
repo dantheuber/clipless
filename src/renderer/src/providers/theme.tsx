@@ -7,6 +7,7 @@ import React, {
   ReactNode,
 } from 'react';
 import type { UserSettings } from '../../../shared/types';
+import { GROUP_COLOUR_SLOTS } from '../../../shared/groupColours';
 
 export type Theme = 'light' | 'dark' | 'system';
 
@@ -19,6 +20,18 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+/**
+ * --slot-0 to --slot-11 on the root element, from the dark or light value of each bucket
+ * pair (spec 17.2). Chips, dots, swatches and pills reference these and never a hex.
+ */
+// eslint-disable-next-line react-refresh/only-export-components
+export function applySlotVariables(theme: 'light' | 'dark'): void {
+  const root = document.documentElement.style;
+  GROUP_COLOUR_SLOTS.forEach((slot, index) => {
+    root.setProperty(`--slot-${index}`, theme === 'light' ? slot.light : slot.dark);
+  });
+}
 
 interface ThemeProviderProps {
   children: ReactNode;
@@ -39,6 +52,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
 
     setEffectiveTheme(resolvedTheme);
+    applySlotVariables(resolvedTheme);
 
     // Apply theme to document body for global CSS
     if (resolvedTheme === 'light') {

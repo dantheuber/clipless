@@ -1,0 +1,186 @@
+/*
+ * General (spec 15.4): Application and Window side by side, Storage, Updates and About as
+ * three short panels across the bottom. Nothing scrolls at 900 x 600; below 760 wide the
+ * grid collapses to one column and scrolls inside the pane.
+ */
+
+.grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+@media (max-width: 759px) {
+  .grid2,
+  .grid3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: var(--pnl-bg);
+  border: 1px solid var(--pnl-bd);
+  border-radius: 7px;
+  padding: 6px 10px;
+  min-width: 0;
+}
+
+.panel .sec {
+  margin: 2px 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--line3);
+  min-height: 32px;
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.tight {
+  border-bottom: none;
+  min-height: 28px;
+  padding: 2px 0;
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.dimmed .label {
+  color: var(--dim);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px 0 2px;
+  font-size: 12px;
+}
+
+.line {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+}
+
+.num {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.of {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.bar {
+  height: 4px;
+  background: var(--line2);
+  border-radius: 2px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.bar i {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.bar .warn {
+  background: var(--amber);
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 11.5px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.sub b {
+  color: var(--text);
+  font-weight: 600;
+  font-family: var(--mono);
+}
+
+.statusLine {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  line-height: 1.4;
+}
+
+.statusLine .dot {
+  margin-top: 5px;
+  width: 8px;
+  height: 8px;
+}
+
+.statusText {
+  min-width: 0;
+}
+
+.detail {
+  color: var(--dim);
+  font-size: 11px;
+}
+
+.acts {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.version {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.env {
+  color: var(--dim);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+
+.inlineErr {
+  color: var(--err-text);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.fileInput {
+  display: none;
+}

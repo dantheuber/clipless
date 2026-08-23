@@ -1,0 +1,129 @@
+import { describe, it, expect } from 'vitest';
+import type { ClipItem } from '../../../../shared/types';
+import {
+  INITIAL_QUICK_LOOK,
+  closeState,
+  hasContent,
+  openOn,
+  quickLookPosition,
+  walkTarget,
+  walkable,
+  type VisibleClip,
+} from './quickLook';
+
+const clip = (id: string, content: string, extra: Partial<ClipItem> = {}): ClipItem => ({
+  id,
+  type: 'text',
+  content,
+  ...extra,
+});
+
+const all = (clips: ClipItem[]): VisibleClip[] =>
+  clips.map((c, originalIndex) => ({ clip: c, originalIndex }));
+
+describe('quick look state', () => {
+  it('opens by id with the text view and remembers the row to return focus to', () => {
+    const state = openOn({ ...INITIAL_QUICK_LOOK, view: 'rendered', wrap: true }, 'b', 4);
+    expect(state).toEqual({
+      openClipId: 'b',
+      view: 'text',
+      editing: false,
+      returnFocusIndex: 4,
+      wrap: true,
+    });
+  });
+
+  it('keeps the return row when walking to another clip', () => {
+    const opened = openOn(INITIAL_QUICK_LOOK, 'b', 4);
+    expect(openOn({ ...opened, editing: true }, 'c').returnFocusIndex).toBe(4);
+    expect(openOn(opened, 'c').editing).toBe(false);
+  });
+
+  it('closes and forgets the row but keeps wrap for the session', () => {
+    const closed = closeState({ ...openOn(INITIAL_QUICK_LOOK, 'b', 4), wrap: true, editing: true });
+    expect(closed.openClipId).toBeNull();
+    expect(closed.returnFocusIndex).toBeNull();
+    expect(closed.editing).toBe(false);
+    expect(closed.wrap).toBe(true);
+  });
+
+  it('treats whitespace-only text and empty images as having no content', () => {
+    expect(hasContent(clip('a', '  \n'))).toBe(false);
+    expect(hasContent(clip('i', '', { type: 'image' }))).toBe(false);
+    expect(hasContent(clip('i', 'img-id', { type: 'image', imageId: 'img-id' }))).toBe(true);
+    expect(hasContent(clip('b', '', { type: 'bookmark', title: 'T', url: 'https://x' }))).toBe(
+      true
+    );
+  });
+});
+
+describe('quickLookPosition', () => {
+  const clips = [clip('a', 'one'), clip('b', ''), clip('c', 'three'), clip('d', 'four')];
+
+  it('counts only clips with content and numbers from the visible set', () => {
+    const position = quickLookPosition(clips, all(clips), 'c', false);
+    expect(position).toEqual({
+      index: 2,
+      visibleIndex: 1,
+      visibleCount: 3,
+      hidden: false,
+      label: '2 / 3',
+    });
+  });
+
+  it('renumbers when a clip lands above: the index follows the id', () => {
+    const landed = [clip('new', 'fresh'), ...clips];
+    const position = quickLookPosition(landed, all(landed), 'c', false);
+    expect(position.index).toBe(3);
+    expect(position.label).toBe('3 / 4');
+  });
+
+  it('reports the clip gone when its id left the list', () => {
+    const rotated = clips.slice(0, 2);
+    const position = quickLookPosition(rotated, all(rotated), 'c', false);
+    expect(position.index).toBe(-1);
+    expect(position.hidden).toBe(false);
+  });
+
+  it('says filtered and counts the filtered set', () => {
+    const visible = all(clips).filter(({ clip: c }) => c.id !== 'a');
+    expect(quickLookPosition(clips, visible, 'd', true).label).toBe('2 / 2 filtered');
+  });
+
+  it('says hidden by filter when the open clip is not in the visible set', () => {
+    const visible = all(clips).filter(({ clip: c }) => c.id === 'd');
+    const position = quickLookPosition(clips, visible, 'a', true);
+    expect(position.hidden).toBe(true);
+    expect(position.label).toBe('hidden by filter');
+    expect(position.index).toBe(0);
+  });
+});
+
+describe('walkTarget', () => {
+  const clips = [clip('a', 'one'), clip('b', ''), clip('c', 'three'), clip('d', 'four')];
+
+  it('skips empty rows in both directions and stops at the ends', () => {
+    expect(walkTarget(clips, all(clips), 'a', 1)).toBe('c');
+    expect(walkTarget(clips, all(clips), 'c', -1)).toBe('a');
+    expect(walkTarget(clips, all(clips), 'a', -1)).toBeNull();
+    expect(walkTarget(clips, all(clips), 'd', 1)).toBeNull();
+  });
+
+  it('walks the visible set only', () => {
+    const visible = all(clips).filter(({ clip: c }) => c.id !== 'c');
+    expect(walkTarget(clips, visible, 'a', 1)).toBe('d');
+    expect(walkable(visible).map(({ clip: c }) => c.id)).toEqual(['a', 'd']);
+  });
+
+  it('jumps to the nearest visible clip from a clip the filter hides', () => {
+    const visible = all(clips).filter(({ clip: c }) => c.id === 'a' || c.id === 'd');
+    expect(walkTarget(clips, visible, 'c', 1)).toBe('d');
+    expect(walkTarget(clips, visible, 'c', -1)).toBe('a');
+  });
+
+  it('returns null when the clip is gone or nothing lies in that direction', () => {
+    expect(walkTarget(clips, all(clips), 'zzz', 1)).toBeNull();
+    const onlyLast = all(clips).filter(({ clip: c }) => c.id === 'd');
+    expect(walkTarget(clips, onlyLast, 'a', -1)).toBeNull();
+  });
+});

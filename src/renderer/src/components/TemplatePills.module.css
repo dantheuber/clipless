@@ -1,0 +1,55 @@
+.pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.label {
+  color: var(--dim);
+  font-size: 10.5px;
+  margin-right: 2px;
+}
+
+.pill {
+  border: 1px solid var(--tpl-bd);
+  background: var(--tpl-bg);
+  color: var(--tpl-fg);
+  border-radius: 999px;
+  padding: 0 8px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--sans);
+  line-height: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pill:hover {
+  background: var(--tpl-hover);
+}
+
+.pill.needs {
+  opacity: 0.55;
+  border-style: dashed;
+  background: transparent;
+}
+
+.pill.needs:hover {
+  opacity: 0.85;
+}
+
+.pill.inert,
+.pill.inert:hover {
+  cursor: default;
+  opacity: 0.3;
+  background: transparent;
+}
+
+.need {
+  font-size: 10px;
+  opacity: 0.8;
+}

@@ -1,7 +1,41 @@
 import { autoUpdater, type UpdateInfo } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
-import type { BrowserWindow } from 'electron';
+import { BrowserWindow } from 'electron';
 import { storage } from '../storage';
+import type { UpdateState } from '../../shared/types';
+
+/**
+ * The one copy of the updater state. Set from the electron-updater events and the
+ * check-for-updates and download-update handlers, pushed as update-state to every window
+ * on each change, readable through get-update-state. The status bar pill and the settings
+ * Updates panel both render from it; nothing substring-matches a display string.
+ */
+let updateState: UpdateState = { status: 'idle' };
+
+export function getUpdateState(): UpdateState {
+  return updateState;
+}
+
+export function setUpdateState(next: UpdateState): void {
+  updateState = next;
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (!window.isDestroyed()) {
+      window.webContents.send('update-state', updateState);
+    }
+  }
+}
+
+/**
+ * Unsigned macOS builds cannot update themselves; every updater error there means the
+ * same thing, so say that and point at the releases page (spec 15.4).
+ */
+export const UNSIGNED_MAC_MESSAGE =
+  'Automatic updates are not available for this macOS build. Download the latest release from GitHub.';
+
+export function updateErrorMessage(error: unknown): string {
+  if (process.platform === 'darwin') return UNSIGNED_MAC_MESSAGE;
+  return error instanceof Error ? error.message : String(error);
+}
 
 // Helper function to check for updates with timeout and retry
 export async function checkForUpdatesWithRetry(
@@ -78,41 +112,48 @@ export function configureAutoUpdater(): void {
   }
 }
 
+/**
+ * The six electron-updater events drive the state. Lifecycle decisions (download,
+ * install and restart) stay with the manual UpdaterControl flow and
+ * runAutomaticUpdateCheck so the user is never restarted without consent.
+ */
 export function setupAutoUpdaterEvents(): void {
-  // Auto-updater events — logging only. Lifecycle decisions (download,
-  // install/restart) are owned by the manual UpdaterControl flow and by
-  // runAutomaticUpdateCheck so the user is never restarted without consent.
   autoUpdater.on('checking-for-update', () => {
-    console.log('Checking for update...');
+    setUpdateState({ status: 'checking' });
   });
 
   autoUpdater.on('update-available', (info) => {
-    console.log('Update available:', info);
+    setUpdateState({ status: 'available', version: info.version });
   });
 
-  autoUpdater.on('update-not-available', (info) => {
-    console.log('Update not available:', info);
+  autoUpdater.on('update-not-available', () => {
+    setUpdateState({ status: 'upToDate' });
   });
 
   autoUpdater.on('error', (err) => {
     console.error('Error in auto-updater:', err);
+    setUpdateState({ status: 'error', message: updateErrorMessage(err) });
   });
 
   autoUpdater.on('download-progress', (progressObj) => {
-    console.log('Download progress:', Math.round(progressObj.percent) + '%');
+    setUpdateState({
+      status: 'downloading',
+      version: updateState.version,
+      progress: Math.round(progressObj.percent),
+    });
   });
 
   autoUpdater.on('update-downloaded', (info) => {
-    console.log('Update downloaded:', info);
+    setUpdateState({ status: 'downloaded', version: info.version });
   });
 }
 
 // Runs at app startup: silently checks for an update and, if one is available,
-// downloads it and notifies the renderer (via the `update-downloaded` IPC
-// channel) so the in-app UpdateBanner can prompt the user to restart. All
-// failures are swallowed silently so unsupported platforms (e.g. unsigned
-// macOS builds) never surface errors to the user.
-export async function runAutomaticUpdateCheck(targetWindow: BrowserWindow | null): Promise<void> {
+// downloads it. The events above move the state to downloaded, which the
+// status bar pill and the banner render. All failures are swallowed so
+// unsupported platforms (e.g. unsigned macOS builds) never surface errors
+// beyond the error state.
+export async function runAutomaticUpdateCheck(): Promise<void> {
   if (is.dev) return;
 
   let enabled = true;
@@ -124,27 +165,10 @@ export async function runAutomaticUpdateCheck(targetWindow: BrowserWindow | null
   }
   if (!enabled) return;
 
-  const onError = (): void => {
-    autoUpdater.off('update-downloaded', onDownloaded);
-    autoUpdater.off('error', onError);
-  };
-
-  const onDownloaded = (info: UpdateInfo): void => {
-    autoUpdater.off('update-downloaded', onDownloaded);
-    autoUpdater.off('error', onError);
-    if (targetWindow && !targetWindow.isDestroyed()) {
-      targetWindow.webContents.send('update-downloaded', { version: info.version });
-    }
-  };
-
-  autoUpdater.once('update-downloaded', onDownloaded);
-  autoUpdater.once('error', onError);
-
   try {
     autoUpdater.autoDownload = true;
     await autoUpdater.checkForUpdates();
   } catch {
-    autoUpdater.off('update-downloaded', onDownloaded);
-    autoUpdater.off('error', onError);
+    // The error event has already set the state
   }
 }

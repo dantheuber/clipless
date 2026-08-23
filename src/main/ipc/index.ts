@@ -1,19 +1,22 @@
-import { ipcMain, Menu, MenuItemConstructorOptions } from 'electron';
+import { ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 import { storage } from '../storage';
+import { DEFAULT_HOTKEY_SETTINGS } from '../storage/defaults';
 import { hotkeyManager } from '../hotkeys';
-import {
-  getMainWindow,
-  getSettingsWindow,
-  createSettingsWindow,
-  createToolsLauncherWindow,
-  getToolsLauncherWindow,
-} from '../window/creation';
+import { getMainWindow, getSettingsWindow, createSettingsWindow } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
 import { applyWindowBackgroundTheme } from '../window/background';
-import { checkForUpdatesWithRetry } from '../updater';
+import {
+  checkForUpdatesWithRetry,
+  getUpdateState,
+  setUpdateState,
+  updateErrorMessage,
+} from '../updater';
 import { applyAutoStart } from '../autoStart';
+import { restartApp } from '../app/restart';
+import { openAppPath } from '../app/open-path';
+import type { AppPathName, SettingsApplyResult, UserSettings } from '../../shared/types';
 
 export function setupMainIPC(): void {
   // IPC test
@@ -24,144 +27,85 @@ export function setupMainIPC(): void {
     createSettingsWindow(tab);
   });
 
-  ipcMain.handle('close-settings', () => {
-    const settingsWindow = getSettingsWindow();
-    if (settingsWindow) {
-      settingsWindow.close();
-    }
-  });
+  // The one write path for settings: save, apply, re-register the hotkeys, relay to
+  // every window, and answer what the OS refused so the row can say "not saved" (15.3).
+  ipcMain.handle(
+    'settings-changed',
+    async (_event, settings: UserSettings): Promise<SettingsApplyResult> => {
+      try {
+        const previous = await storage.getSettings();
+        await storage.saveSettings(settings);
 
-  // Settings communication between windows
-  ipcMain.handle('settings-changed', async (_event, settings) => {
-    try {
-      // Save settings to storage
-      await storage.saveSettings(settings);
+        // The one expected refusal on General: the OS declining the login item (15.5)
+        const autoStartApplied = applyAutoStart(settings.autoStart);
+        const autoStartRefused = !autoStartApplied && settings.autoStart !== previous.autoStart;
 
-      // Apply auto-start setting to OS login items
-      applyAutoStart(settings.autoStart);
+        const mainWindow = getMainWindow();
+        if (mainWindow) {
+          await applyWindowSettings(mainWindow);
+        }
+        applyWindowBackgroundTheme(settings.theme);
 
-      // Apply window settings immediately
-      const mainWindow = getMainWindow();
-      if (mainWindow) {
-        await applyWindowSettings(mainWindow);
+        const hotkeys = await hotkeyManager.onSettingsChanged();
+
+        const settingsWindow = getSettingsWindow();
+        if (mainWindow) {
+          mainWindow.webContents.send('settings-updated', settings);
+        }
+        if (settingsWindow) {
+          settingsWindow.webContents.send('settings-updated', settings);
+        }
+
+        if (autoStartRefused) {
+          return {
+            ok: false,
+            failed: hotkeys.failed,
+            message: 'the system refused the login item',
+          };
+        }
+        return { ok: hotkeys.ok, failed: hotkeys.failed };
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+        return {
+          ok: false,
+          failed: [],
+          message: error instanceof Error ? error.message : String(error),
+        };
       }
-
-      // Keep the native window background matching the theme
-      applyWindowBackgroundTheme(settings.theme);
-
-      // Update hotkeys if settings changed
-      await hotkeyManager.onSettingsChanged();
-
-      // Relay settings changes to all windows
-      const settingsWindow = getSettingsWindow();
-      if (mainWindow) {
-        mainWindow.webContents.send('settings-updated', settings);
-      }
-      if (settingsWindow) {
-        settingsWindow.webContents.send('settings-updated', settings);
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      return false;
     }
-  });
+  );
 
-  ipcMain.handle('get-settings', async () => {
-    try {
-      return await storage.getSettings();
-    } catch (error) {
-      console.error('Failed to get settings:', error);
-      return {};
-    }
-  });
+  // Import with replace restarts (15.5); the restart waits for the save queue first
+  ipcMain.handle('app-restart', () => restartApp());
 
-  // Tools Launcher window IPC handlers
-  ipcMain.handle('open-tools-launcher', (_event, clipContent: string) => {
-    createToolsLauncherWindow(clipContent);
-  });
+  // The About panel's data folder and log links (15.4)
+  ipcMain.handle('open-app-path', (_event, name: AppPathName) => openAppPath(name));
 
-  ipcMain.handle('close-tools-launcher', () => {
-    const toolsLauncherWindow = getToolsLauncherWindow();
-    if (toolsLauncherWindow) {
-      toolsLauncherWindow.close();
-    }
-  });
+  // The one copy of the hotkey defaults; the settings window reads them from here
+  ipcMain.handle('hotkeys-get-defaults', () => DEFAULT_HOTKEY_SETTINGS);
 
-  ipcMain.handle('tools-launcher-ready', () => {
-    // This is called when the tools launcher window is ready to receive data
-    // The actual data sending is handled in the window creation
-  });
+  // Auto-updater IPC handlers. The electron-updater events move the state; the
+  // handlers only cover what the events cannot see (a timeout, a dev build).
+  ipcMain.handle('get-update-state', () => getUpdateState());
 
-  // Auto-updater IPC handlers
   ipcMain.handle('check-for-updates', async () => {
     if (!is.dev) {
       try {
+        setUpdateState({ status: 'checking' });
         const result = await checkForUpdatesWithRetry();
         return result;
       } catch (error) {
         console.error('Update check failed:', error);
+        setUpdateState({ status: 'error', message: updateErrorMessage(error) });
         throw new Error(
           `Failed to check for updates: ${error instanceof Error ? error.message : 'Unknown error'}`
         );
       }
     }
+    // Dev builds cannot check; report up to date as the old prose status did
+    setUpdateState({ status: 'upToDate' });
     return null;
   });
-
-  // Context Menu IPC handler
-  ipcMain.handle(
-    'show-clip-context-menu',
-    async (
-      event,
-      options: {
-        index: number;
-        isFirstClip: boolean;
-        isLocked: boolean;
-        hasPatterns: boolean;
-      }
-    ) => {
-      const { index, isFirstClip, isLocked, hasPatterns } = options;
-
-      const template: MenuItemConstructorOptions[] = [
-        {
-          label: 'Copy to Clipboard',
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'copy', index });
-          },
-        },
-        { type: 'separator' },
-        {
-          label: hasPatterns ? 'Open Tools Launcher ⚡' : 'Open Tools Launcher',
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'scan', index });
-          },
-        },
-        { type: 'separator' },
-        {
-          label: isLocked ? 'Unlock Clip' : 'Lock Clip',
-          enabled: !isFirstClip,
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'lock', index });
-          },
-        },
-        {
-          label: 'Delete Clip',
-          enabled: !isFirstClip,
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'delete', index });
-          },
-        },
-      ];
-
-      const contextMenu = Menu.buildFromTemplate(template);
-      const window = getMainWindow();
-      if (window) {
-        contextMenu.popup({ window });
-      }
-    }
-  );
 
   ipcMain.handle('download-update', async () => {
     if (!is.dev) {
@@ -169,6 +113,7 @@ export function setupMainIPC(): void {
         return await autoUpdater.downloadUpdate();
       } catch (error) {
         console.error('Update download failed:', error);
+        setUpdateState({ status: 'error', message: updateErrorMessage(error) });
         throw new Error(
           `Failed to download update: ${error instanceof Error ? error.message : 'Unknown error'}`
         );

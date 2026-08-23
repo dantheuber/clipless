@@ -8,10 +8,15 @@
  *      a Clipless instance you already have running.
  *
  * Each capture run starts from an empty profile, seeds curated demo data via the
- * same IPC the renderer uses, then drives the three window types and writes PNGs
+ * same IPC the renderer uses, then drives the main and settings windows and writes PNGs
  * to `screenshots/output/`.
  */
-import { _electron as electron, type ElectronApplication, type Page } from '@playwright/test';
+import {
+  _electron as electron,
+  type ElectronApplication,
+  type Locator,
+  type Page,
+} from '@playwright/test';
 import { mkdtempSync, mkdirSync, rmSync } from 'fs';
 import { tmpdir } from 'os';
 import { join, resolve } from 'path';
@@ -27,6 +32,10 @@ export type Theme = 'light' | 'dark';
 
 /** Built main-process entry point. Requires `npm run build` first. */
 const MAIN_ENTRY = resolve(__dirname, '../out/main/index.js');
+
+/** Window sizes the app opens at by default; set explicitly so captures match everywhere. */
+const MAIN_WINDOW_SIZE = { width: 900, height: 670 };
+const SETTINGS_WINDOW_SIZE = { width: 900, height: 600 };
 
 /** Where captured PNGs are written (gitignored on the code branch). */
 export const OUTPUT_DIR = resolve(__dirname, 'output');
@@ -49,9 +58,15 @@ export async function launchApp(): Promise<LaunchedApp> {
   const userDataDir = mkdtempSync(join(tmpdir(), 'clipless-shots-'));
   const app = await electron.launch({
     args: [MAIN_ENTRY, `--user-data-dir=${userDataDir}`, '--force-device-scale-factor=2'],
+    // Linux only: Playwright's basic password store leaves safeStorage without encryption.
+    env: { ...process.env, CLIPLESS_PLAINTEXT_STORAGE: '1' },
   });
   const page = await app.firstWindow();
   await page.waitForSelector('#root > *');
+  // Pin the size so captures match across machines and window managers.
+  await app.evaluate(({ BrowserWindow }, size) => {
+    BrowserWindow.getAllWindows()[0]?.setSize(size.width, size.height);
+  }, MAIN_WINDOW_SIZE);
   return { app, page, userDataDir };
 }
 
@@ -132,24 +147,38 @@ export async function openSettingsWindow(app: ElectronApplication, page: Page): 
   ]);
   await win.waitForSelector('#root > *');
   await win.waitForFunction(() => /light|dark/.test(document.body.className));
+  await app.evaluate(({ BrowserWindow }, size) => {
+    const settings = BrowserWindow.getAllWindows().find((w) => w.getTitle().includes('Settings'));
+    settings?.setSize(size.width, size.height);
+  }, SETTINGS_WINDOW_SIZE);
   return win;
 }
 
-/** Open the Tools Launcher for the given clip content and wait for the scan. */
-export async function openToolsLauncher(
-  app: ElectronApplication,
+/**
+ * Open quick look on the clip with the given content and wait for the reader to
+ * paint its chips, so the capture is stable. Pass `pinGroup` to also pin the
+ * first chip of that capture group, which brings up the tray with its tools.
+ * Close it afterwards with `page.keyboard.press('Escape')`.
+ */
+export async function openQuickLook(
   page: Page,
-  content: string
-): Promise<Page> {
-  const [win] = await Promise.all([
-    app.waitForEvent('window'),
-    page.evaluate((c) => (window as unknown as WindowWithApi).api.openToolsLauncher(c), content),
-  ]);
-  await win.waitForSelector('#root > *');
-  await win.waitForFunction(() => /light|dark/.test(document.body.className));
-  // Wait for the pattern scan to populate before capturing.
-  await win.getByText(/Found Patterns/).waitFor({ timeout: 10_000 });
-  return win;
+  content: string,
+  pinGroup?: string
+): Promise<Locator> {
+  const row = page.locator('[data-testid="clip-row"]', { hasText: content }).first();
+  await row.waitFor({ timeout: 10_000 });
+  await row.hover();
+  await row.getByTestId('eye').click();
+  const reader = page.getByTestId('quick-look');
+  await reader.waitFor();
+  const body = reader.getByTestId('ql-content');
+  await body.locator('[data-key]').first().waitFor({ timeout: 10_000 });
+  if (pinGroup) {
+    await body.locator(`[data-key^="${pinGroup}|"]`).first().click();
+    await page.getByTestId('tray').waitFor();
+    await page.getByTestId('open-all').waitFor();
+  }
+  return reader;
 }
 
 /** Best-effort removal of the temporary profile after the app has closed. */

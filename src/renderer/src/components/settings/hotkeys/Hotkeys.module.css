@@ -1,0 +1,131 @@
+/*
+ * Hotkeys (spec 15.6): the master toggle first, then a table with the keycaps as the
+ * recorder. Off dims the table and blocks recording; the table is never hidden.
+ */
+
+.master {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0 6px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 2px;
+}
+
+.masterName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.masterDesc {
+  font-size: 11px;
+  color: var(--dim);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table th {
+  font-size: 10.5px;
+  color: var(--dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--line3);
+  vertical-align: middle;
+}
+
+.off .name {
+  color: var(--dim);
+}
+
+.desc {
+  color: var(--dim);
+  font-size: 10.5px;
+}
+
+@media (max-width: 759px) {
+  .desc {
+    display: none;
+  }
+}
+
+.dimmed {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+.reset {
+  visibility: hidden;
+}
+
+.table tr:hover .reset,
+.table tr.recording .reset {
+  visibility: visible;
+}
+
+.keys {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.clickable {
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 1px 3px;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+}
+
+.clickable:hover kbd {
+  border-color: var(--kbd-hover-bd);
+}
+
+.kcOff kbd {
+  opacity: 0.45;
+}
+
+.rec kbd {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+
+.ell {
+  color: var(--accent);
+  letter-spacing: 2px;
+}
+
+.hint {
+  color: var(--dim);
+  font-family: var(--sans);
+  font-size: 10.5px;
+  margin-left: 6px;
+}
+
+.line {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  min-height: 0;
+}
+
+.dotCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

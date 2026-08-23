@@ -5,6 +5,9 @@ vi.mock('electron', () => ({
     getPath: vi.fn().mockReturnValue('/mock/userData'),
   },
   BrowserWindow: vi.fn(),
+  nativeImage: {
+    createFromDataURL: vi.fn().mockReturnValue({ getSize: () => ({ width: 640, height: 480 }) }),
+  },
 }));
 
 vi.mock('./data', () => ({
@@ -28,6 +31,8 @@ import {
   startClipboardMonitoring,
   stopClipboardMonitoring,
   setSkipNextImageChange,
+  checkClipboardNow,
+  imageMetadata,
 } from './monitoring';
 
 function createMockWindow(destroyed = false): {
@@ -119,6 +124,61 @@ describe('monitoring', () => {
       expect(mockWindow.webContents.send).not.toHaveBeenCalled();
     });
 
+    it('returns whether a change was sent', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'r1' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(false);
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'r2' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'r3' });
+      await expect(checkClipboard(null)).resolves.toBe(false);
+    });
+
+    it('extracts text for html clips before sending', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'pre-html' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'html',
+        content: '<p>Hi &amp; <b>bye</b></p><script>alert(1)</script>',
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await checkClipboard(mockWindow as any);
+
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
+        type: 'html',
+        content: '<p>Hi &amp; <b>bye</b></p><script>alert(1)</script>',
+        text: 'Hi & bye',
+      });
+    });
+
+    it('extracts text for rtf clips before sending', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'pre-rtf' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'rtf',
+        content: "{\\rtf1 caf\\'e9\\par done}",
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await checkClipboard(mockWindow as any);
+
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
+        type: 'rtf',
+        content: "{\\rtf1 caf\\'e9\\par done}",
+        text: 'café\ndone',
+      });
+    });
+
     it('detects change when type changes but content is the same', async () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'data' });
       const mockWindow = createMockWindow();
@@ -132,6 +192,7 @@ describe('monitoring', () => {
       expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
         type: 'html',
         content: 'data',
+        text: 'data',
       });
     });
 
@@ -162,7 +223,14 @@ describe('monitoring', () => {
         content: 'img-uuid-123',
         imageId: 'img-uuid-123',
         thumbnailDataUrl: 'data:image/png;base64,thumbnail',
+        imageWidth: 640,
+        imageHeight: 480,
+        imageBytes: 6, // "fulldata" is 8 base64 characters
       });
+    });
+
+    it('imageMetadata measures a data URL without a comma as all payload', () => {
+      expect(imageMetadata('abcd')).toEqual({ imageWidth: 640, imageHeight: 480, imageBytes: 3 });
     });
 
     it('skips image when skipNextImageChange flag is set', async () => {
@@ -216,6 +284,9 @@ describe('monitoring', () => {
         content: 'img-2',
         imageId: 'img-2',
         thumbnailDataUrl: 'data:image/png;base64,thumb2',
+        imageWidth: 640,
+        imageHeight: 480,
+        imageBytes: 5,
       });
     });
 
@@ -398,6 +469,26 @@ describe('monitoring', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = startClipboardMonitoring(mockWindow as any);
       expect(result).toBe(true);
+    });
+  });
+
+  describe('checkClipboardNow', () => {
+    it('checks against the monitored window and reports a change', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'now-base' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      startClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'now-new' });
+      await expect(checkClipboardNow()).resolves.toBe(true);
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
+        type: 'text',
+        content: 'now-new',
+      });
+
+      await expect(checkClipboardNow()).resolves.toBe(false);
     });
   });
 

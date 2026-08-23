@@ -8,4 +8,4 @@
 * [Quick Clips Pattern Scanning](quick-clips.md)
 * [Secure Storage](secure-storage.md)
 * [Templates](templates.md)
-* [Tools Launcher](tools-launcher.md)
+* [Tools Launcher (removed)](tools-launcher.md)

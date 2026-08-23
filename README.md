@@ -28,7 +28,7 @@ tickets and URLs in what you copy and turning them into one-click actions.
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/main-dark.png" />
   <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/main-light.png" />
-  <img src="site/assets/screens/main-dark.png" width="820" alt="Clipless main window listing copied clips, each flagged with a scanner icon" />
+  <img src="site/assets/screens/main-dark.png" width="820" alt="Clipless main window listing copied clips, with matched values shown as chips" />
 </picture>
 
 <br /><br />
@@ -37,7 +37,7 @@ tickets and URLs in what you copy and turning them into one-click actions.
 
 <br />
 
-[Quick Clips](#-quick-clips) · [Tools Launcher](#-tools-launcher) · [Capture](#-capture-everything) · [Theming](#-looks-right-day-or-night) · [Who it's for](#-who-its-for) · [Install](#-installation) · [Develop](#-development)
+[Quick Clips](#-quick-clips) · [Quick look](#-quick-look) · [Capture](#-capture-everything) · [Theming](#-looks-right-day-or-night) · [Who it's for](#-who-its-for) · [Install](#-installation) · [Develop](#-development)
 
 </div>
 
@@ -47,8 +47,8 @@ tickets and URLs in what you copy and turning them into one-click actions.
 
 ### It reads what you copy.
 
-The moment something useful lands in your clipboard, Clipless flags it. A scanner icon
-appears on the clip — open it to see every pattern it pulled out, ready to act on.
+The moment something useful lands in your clipboard, Clipless flags it. Every value it
+pulls out is a chip on the clip row, ready to pin.
 
 - **Automatic detection** — emails, IPs, URLs, phone numbers, ticket IDs and your own custom regex
 - **Pick exactly what you need** — each extracted value is individually selectable
@@ -67,24 +67,26 @@ appears on the clip — open it to see every pattern it pulled out, ready to act
 
 ---
 
-## ⚡ Tools Launcher
+## ⚡ Quick look
 
-### One copy. Every tool, open.
+### Pin a value. Open every tool.
 
-Send the data Clipless found straight into the web tools you already use. Select a few
-patterns, pick your tools, and launch them all at once — no retyping, no tab juggling.
+Every match Clipless finds is a chip on the clip row. Click a chip to pin it. The tray under
+the list offers the tools that take your pins, and "Open all" turns them into browser tabs in
+one click. Quick look opens any clip in full inside the main window, with the same chips and
+pins, so nothing leaves the window you were already in.
 
 - **Multi-token URLs** — drop values into any link, e.g. `https://tool.com/{ip}/{email}`
-- **Open in bulk** — fire off several lookups simultaneously with one click
-- **Smart compatibility** — only the tools that match your available data are offered
-- **Templates &amp; sharing** — match templates automatically and export / import configs for your team
+- **Open in bulk** — pin several values; the tray states how many tabs it will open before you click
+- **Only what fits** — a tool is offered only when every token in its URL has a pinned value
+- **Templates &amp; sharing** — ready templates copy their filled-in text to the clipboard, and configs export / import for your team
 
 <div align="center">
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site/assets/screens/patterns-dark.png" />
   <source media="(prefers-color-scheme: light)" srcset="site/assets/screens/patterns-light.png" />
-  <img src="site/assets/screens/patterns-dark.png" width="760" alt="Clipless Tools Launcher with found patterns on the left and matching web tools on the right" />
+  <img src="site/assets/screens/patterns-dark.png" width="760" alt="Clipless quick look reading a clip inside the main window, with matched values as chips and the tools that take them" />
 </picture>
 
 </div>
@@ -150,7 +152,7 @@ dropdown, done.
 
 The things you don't notice until you'd miss them.
 
-- **⌨️ Global hotkeys** — reach recent clips and the launcher from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you.
+- **⌨️ Global hotkeys** — reach recent clips and quick look from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you.
 - **🔒 Encrypted storage** — history is encrypted with your OS keystore (DPAPI, Keychain or Secret Service) and never leaves your machine. Data is split into domain-specific files for efficient saves, with images stored as separate encrypted files and fast-loading thumbnails.
 - **🚀 Non-blocking startup** — the window appears immediately while your history loads in the background.
 - **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background (auto-update works on Windows and Linux; macOS still needs a manual reinstall — see [Installing on macOS](#-installing-on-macos)).
@@ -229,10 +231,9 @@ you throw at it.
 ### Quick Clips workflow
 
 1. **Copy content** containing patterns (emails, URLs, etc.)
-2. **Look for the scanner icon** — a blue search icon appears when patterns are detected
-3. **Click the scanner** to open the launcher and see the extracted data
-4. **Select data** — choose which extracted values you want to use
-5. **Open tools** — pick compatible tools to launch with your selected data
+2. **Look for the chips** — every match is highlighted on the clip row, one colour per capture group
+3. **Pin what you need** — click a chip, or open quick look to read the clip in full and pin from there
+4. **Open tools** — the tray lists the tools that take your pins; "Open all" opens every tab at once
 
 **Example uses:** extract emails and open them in validation tools · pull domains and run them
 through security scanners · gather multiple data points to research across tools · grab code

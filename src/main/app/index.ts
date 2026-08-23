@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, safeStorage } from 'electron';
 import { electronApp, optimizer } from '@electron-toolkit/utils';
 import { storage } from '../storage';
 import { hotkeyManager } from '../hotkeys';
@@ -14,6 +14,13 @@ import {
 import { applyAutoStart } from '../autoStart';
 
 export async function initializeApp(): Promise<void> {
+  // Playwright launches Electron with --password-store=basic, and with that store Linux
+  // reports no encryption, so every encrypted write fails. The e2e suite sets this variable
+  // to use an in-memory key instead; nothing else does, and it is ignored off Linux.
+  if (process.env.CLIPLESS_PLAINTEXT_STORAGE === '1' && process.platform === 'linux') {
+    safeStorage.setUsePlainTextEncryption(true);
+  }
+
   // Set app user model id for windows. This must be unique to Clipless: on
   // Windows it is also used as the registry value name for the autostart login
   // item, so a shared default (e.g. 'com.electron') would collide with other
@@ -64,7 +71,7 @@ export async function initializeApp(): Promise<void> {
     // Silently check for updates in the background. Errors are swallowed
     // inside the function so unsupported platforms (e.g. unsigned macOS
     // builds) never surface failures to the user.
-    runAutomaticUpdateCheck(getMainWindow());
+    runAutomaticUpdateCheck();
   });
 
   // Apply window bounds if available after initialization

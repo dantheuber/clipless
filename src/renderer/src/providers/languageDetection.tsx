@@ -111,13 +111,7 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
       }
     };
 
-    window.api.onSettingsUpdated(handleSettingsUpdate);
-
-    return () => {
-      if (window.api?.removeSettingsListeners) {
-        window.api.removeSettingsListeners();
-      }
-    };
+    return window.api.onSettingsUpdated(handleSettingsUpdate);
   }, []);
 
   /**

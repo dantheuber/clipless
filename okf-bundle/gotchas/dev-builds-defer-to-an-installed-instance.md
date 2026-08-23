@@ -5,7 +5,9 @@ tags:
   - development
   - electron
   - linux
-timestamp: 2026-08-17T04:02:57.964Z
+generated:
+  by: human:dantheuber
+  at: 2026-08-17T04:02:57.964Z
 status: stable
 ---
 
@@ -36,7 +38,7 @@ Two ways out:
   under `~/.config/clipless/clipless-data` and survive.
 - Give dev its own profile: `npx electron-vite dev -- --user-data-dir=/tmp/clipless-dev`.
   This also keeps dev runs from mutating real clip history — related:
-  [E2E Tests Touch the Real System Clipboard](/gotchas/e2e-tests-touch-system-clipboard.md).
+  [E2E Tests Touch the Real System Clipboard](../gotchas/e2e-tests-touch-system-clipboard.md).
 
 The same shadowing hits packaged installs: `apt install` of a new .deb does not
 restart a running app, and replacing `app.asar` under a live process invalidates
@@ -44,5 +46,5 @@ the archive offsets it cached — reads of `settings.html` then return bytes fro
 the middle of another packed file, and the settings window renders that JS as
 plain text. It looks like a renderer bug; it is a stale process.
 
-See also [Non-Blocking Startup](/decisions/non-blocking-startup.md) for the
+See also [Non-Blocking Startup](../decisions/non-blocking-startup.md) for the
 single-instance lock in its intended role.

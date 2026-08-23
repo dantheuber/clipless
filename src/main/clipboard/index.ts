@@ -9,7 +9,7 @@ export * from './storage-integration';
 export * from './templates';
 export * from './search-terms';
 export * from './quick-tools';
-export * from './quick-clips';
+export * from './quick-clips-config';
 export { setupClipboardIPC } from './ipc';
 
 // Main initialization function for clipboard functionality

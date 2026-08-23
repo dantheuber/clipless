@@ -158,8 +158,8 @@
         >
         <h1>Everything Clipless <span class="grad">can do.</span></h1>
         <p class="lead">
-          A complete reference for clipboard history, Quick Clips pattern extraction, the Tools
-          Launcher, templates, hotkeys and every setting.
+          A complete reference for clipboard history, Quick Clips pattern extraction, quick look,
+          templates, hotkeys and every setting.
         </p>
       </div>
 
@@ -174,7 +174,7 @@
             <li><a href="#quick-tools">Quick Tools</a></li>
             <li><a href="#templates">Templates</a></li>
             <li><a href="#clip-quick-search">Clip Quick Search</a></li>
-            <li><a href="#tools-launcher">Tools Launcher</a></li>
+            <li><a href="#quick-look">Quick look</a></li>
             <li><a href="#global-hotkeys">Global Hotkeys</a></li>
             <li><a href="#settings">Settings Reference</a></li>
             <li><a href="#code-detection">Code Detection</a></li>
@@ -222,9 +222,7 @@
             </p>
 
             <h3>Clip Actions</h3>
-            <p>
-              Each clip has a cog icon menu and a right-click context menu with actions including:
-            </p>
+            <p>Each clip has a right-click context menu with actions including:</p>
             <ul>
               <li>
                 <strong>Lock / Unlock</strong> — prevent a clip from being removed when the history
@@ -232,9 +230,8 @@
               </li>
               <li><strong>Delete</strong> — remove a clip from history</li>
               <li>
-                <strong>Scan for Search Terms</strong> — scan a previous clip's content against your
-                Quick Clips patterns and open the Tools Launcher with the results. This lets you use
-                Quick Tools on any clip in your history, not just the most recent one.
+                <strong>Quick look</strong> — open the clip in the reader, with every Quick Clips
+                match shown as a chip you can pin. Works on any clip in your history.
               </li>
             </ul>
 
@@ -350,11 +347,14 @@ https://tool.com/check?email={email}&amp;domain={domainName}</code></pre>
             <h3>Usage</h3>
             <p>When Quick Clips detects patterns in a clip, you can:</p>
             <ul>
-              <li>Click the scanner icon on the clip to see matches and open tools</li>
-              <li>Use the Tools Launcher window (Ctrl+Shift+T) for quick access</li>
               <li>
-                Use the cog icon or right-click menu on any clip and select "Scan for Search Terms"
-                to scan older clips and open the Tools Launcher with their extracted data
+                Click a chip on the clip row to pin that value; the tray below the list offers the
+                tools that take it
+              </li>
+              <li>Press Ctrl+Shift+T to open quick look on the newest clip</li>
+              <li>
+                Hover a row and click the eye, press Space on a focused row, or pick "Quick look"
+                from the right-click menu to read any older clip and pin from there
               </li>
             </ul>
 
@@ -415,15 +415,29 @@ Regards</code></pre>
             </p>
           </section>
 
-          <section id="tools-launcher">
-            <h2>Tools Launcher Window</h2>
-            <p>The Tools Launcher is a dedicated window for quickly acting on clipboard content.</p>
+          <section id="quick-look">
+            <h2>Quick look</h2>
+            <p>
+              Quick look is a reader that opens inside the main window and shows one clip in full.
+              Every Quick Clips match in the clip is a chip; pinned chips feed the tray.
+            </p>
             <ul>
-              <li>Open with Ctrl+Shift+T (default hotkey)</li>
-              <li>Automatically scans the most recent clip against your Quick Clips patterns</li>
-              <li>Shows matched values and available Quick Tools</li>
-              <li>If already open, sending a new clip refreshes the content</li>
+              <li>
+                Open with Ctrl+Shift+T (default hotkey) on the newest clip, or from any row via the
+                eye icon, Space, or the right-click menu
+              </li>
+              <li>Shows the clip's matches grouped by capture group, with a pin-all per group</li>
+              <li>Up and Down walk to the previous and next clip without closing the reader</li>
+              <li>Ready templates appear in the footer and copy their text to the clipboard</li>
+              <li>Esc closes the reader and returns focus to the row</li>
             </ul>
+            <h3>Tray</h3>
+            <p>
+              The tray sits under the clip list and appears on the first pin. It groups pinned
+              values by capture group and lists one button per compatible tool. A button carries
+              a multiplier when its group has several pinned values ("VirusTotal x2"), and "Open
+              all" states the exact number of tabs it will open.
+            </p>
           </section>
 
           <section id="global-hotkeys">
@@ -471,7 +485,7 @@ Regards</code></pre>
                   </tr>
                   <tr>
                     <td><code>Ctrl+Shift+T</code></td>
-                    <td>Open Tools Launcher</td>
+                    <td>Quick look on the newest clip</td>
                   </tr>
                 </tbody>
               </table>
@@ -604,7 +618,8 @@ Regards</code></pre>
               <li>Create Quick Tools pointing to your CRM, billing system, and helpdesk</li>
               <li>When a customer provides their info, copy it once</li>
               <li>
-                Open the Tools Launcher (Ctrl+Shift+T) to see extracted data and launch lookups
+                Press Ctrl+Shift+T to open quick look, pin the values, and open the lookups from
+                the tray
               </li>
             </ol>
 

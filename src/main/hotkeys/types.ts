@@ -5,14 +5,14 @@
 export interface HotkeyCallbackMap {
   focusWindow: () => void;
   quickClip: (index: number) => void;
-  openToolsLauncher: () => void;
+  quickLook: () => void;
   searchClips: () => void;
 }
 
 export interface RegisteredHotkey {
   accelerator: string;
   callback: () => void;
-  type: 'focusWindow' | 'quickClip' | 'openToolsLauncher' | 'searchClips';
+  type: 'focusWindow' | 'quickClip' | 'quickLook' | 'searchClips';
   index?: number; // For quick clip hotkeys
 }
 

@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ClipItem } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
-import { updateClipsLength } from './utils';
+import { shrinkClips, updateClipsLength } from './utils';
 import { UserSettings, StoredClip } from '../../../../shared/types';
 
 /**
@@ -85,17 +85,15 @@ export const useClipsStorage = (
   useEffect(() => {
     if (!window.api?.onStorageReady) return;
 
-    window.api.onStorageReady(() => {
+    return window.api.onStorageReady(() => {
       console.log('Storage ready event received, re-loading data');
       loadStoredData();
     });
-
-    return () => {
-      if (window.api?.removeStorageReadyListeners) {
-        window.api.removeStorageReadyListeners();
-      }
-    };
   }, [loadStoredData]);
+
+  // The latest list and locks, for the settings listener below
+  const latest = useRef({ clips, lockedClips });
+  latest.current = { clips, lockedClips };
 
   // Listen for settings updates from other windows (like settings window)
   useEffect(() => {
@@ -104,34 +102,18 @@ export const useClipsStorage = (
     const handleSettingsUpdate = (updatedSettings: UserSettings) => {
       console.log('Received settings update from other window:', updatedSettings);
       if (updatedSettings && typeof updatedSettings.maxClips === 'number') {
-        setMaxClips(updatedSettings.maxClips);
+        const max = updatedSettings.maxClips;
+        setMaxClips(max);
 
-        // Update clips array to match new max clips limit
-        setClips((prevClips) => updateClipsLength(prevClips, updatedSettings.maxClips));
-
-        // Update locked clips to remove any locks beyond the new maxClips limit
-        setLockedClips((prevLocked) => {
-          const newLocked: Record<number, boolean> = {};
-          Object.keys(prevLocked).forEach((key) => {
-            const index = parseInt(key);
-            if (index < updatedSettings.maxClips) {
-              newLocked[index] = prevLocked[index];
-            }
-          });
-          return newLocked;
-        });
+        // A lower limit drops the oldest unlocked clips first; locked clips stay (15.5)
+        const shrunk = shrinkClips(latest.current.clips, latest.current.lockedClips, max);
+        setClips(shrunk.clips);
+        setLockedClips(shrunk.locked);
       }
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };
 
-    window.api.onSettingsUpdated(handleSettingsUpdate);
-
-    // Cleanup listener on unmount
-    return () => {
-      if (window.api?.removeSettingsListeners) {
-        window.api.removeSettingsListeners();
-      }
-    };
+    return window.api.onSettingsUpdated(handleSettingsUpdate);
   }, [setMaxClips, setClips, setLockedClips]);
 
   // Save clips to storage whenever they change
@@ -175,23 +157,4 @@ export const useClipsStorage = (
     const timeoutId = setTimeout(saveSettingsToStorage, 500);
     return () => clearTimeout(timeoutId);
   }, [maxClips, isInitiallyLoading]);
-
-  // Settings listener
-  useEffect(() => {
-    if (window.api) {
-      window.api.onSettingsUpdated((settings: UserSettings) => {
-        console.log('Settings updated in main window:', settings);
-        // Handle settings changes here if needed
-      });
-
-      // Cleanup
-      return () => {
-        if (window.api) {
-          window.api.removeSettingsListeners();
-        }
-      };
-    }
-
-    return () => {}; // Return empty cleanup function if window.api is not available
-  }, []);
 };
