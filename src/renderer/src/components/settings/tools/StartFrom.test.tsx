@@ -26,6 +26,8 @@ describe('StartFrom', () => {
     expect(screen.getByTestId('library-ip')).toHaveTextContent(
       BUILTIN_PATTERNS[1].pattern.slice(0, 20)
     );
+    expect(screen.getByTestId('library-ip')).toHaveTextContent('IPv4 Address dotted quad');
+    expect(screen.getByTestId('library-guid')).toHaveTextContent('UUID v1-5, also called a GUID');
 
     fireEvent.click(screen.getByTestId('library-ip'));
     expect(onPick).toHaveBeenCalledWith(BUILTIN_PATTERNS[1]);

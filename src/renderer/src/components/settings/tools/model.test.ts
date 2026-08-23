@@ -148,7 +148,7 @@ describe('library', () => {
 
   it('names the group an entry produces', () => {
     expect(libraryGroup(email)).toBe('email');
-    expect(libraryGroup({ name: 'x', pattern: 'plain' })).toBe('');
+    expect(libraryGroup({ name: 'x', description: '', pattern: 'plain' })).toBe('');
   });
 });
 

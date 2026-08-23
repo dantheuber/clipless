@@ -551,13 +551,17 @@
 }
 
 /* start from */
+/* minmax(0, 1fr) and min-width: 0: a grid item's default min-width is its content, so the
+   nowrap pattern line of a long entry (Domain Name) would otherwise widen its column past
+   the pane. */
 .start {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 8px;
 }
 
 .option {
+  min-width: 0;
   background: var(--pnl-bg);
   border: 1px solid var(--input-bd);
   border-radius: 7px;

@@ -141,7 +141,7 @@ describe('Tools', () => {
     fireEvent.click(screen.getByTestId('new-term'));
     expect(screen.getByTestId('start-from')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('library-guid'));
-    expect(screen.getByTestId('term-name')).toHaveValue('GUID');
+    expect(screen.getByTestId('term-name')).toHaveValue('UUID');
     fireEvent.change(screen.getByTestId('sample-text'), {
       target: { value: 'id 123e4567-e89b-12d3-a456-426614174000 here' },
     });
@@ -152,10 +152,10 @@ describe('Tools', () => {
     fireEvent.click(screen.getByTestId('term-save'));
     await flush();
     expect(api().searchTermsCreate).toHaveBeenCalledWith(
-      'GUID',
+      'UUID',
       expect.stringContaining('(?<guid>')
     );
-    expect(screen.getByTestId('inspector-title')).toHaveTextContent('GUID');
+    expect(screen.getByTestId('inspector-title')).toHaveTextContent('UUID');
     expect(screen.getByTestId('uses')).toBeInTheDocument();
     expect(screen.getByTestId('section-term')).toHaveTextContent('5');
   });

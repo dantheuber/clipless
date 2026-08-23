@@ -40,6 +40,7 @@ export function StartFrom({ onPick, onExisting }: StartFromProps) {
               data-added={existing ? 'true' : undefined}
             >
               <GroupPill group={libraryGroup(entry)} /> <b>{entry.name}</b>{' '}
+              <span className={w.dim}>{entry.description}</span>{' '}
               {existing ? (
                 <span className={w.dim}>
                   {existing.enabled ? 'already added' : 'already added, off'}

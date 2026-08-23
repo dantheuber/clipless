@@ -12,6 +12,17 @@ describe('BUILTIN_PATTERNS', () => {
     }
   });
 
+  it('names IPv4 and UUID so they can be found next to IPv6 and under either name', () => {
+    const names = BUILTIN_PATTERNS.map((p) => p.name);
+    expect(names).toContain('IPv4 Address');
+    expect(names).toContain('UUID');
+    const uuid = BUILTIN_PATTERNS.find((p) => p.name === 'UUID');
+    expect(uuid?.description).toContain('GUID');
+    for (const entry of BUILTIN_PATTERNS) {
+      expect(entry.description.length).toBeGreaterThan(0);
+    }
+  });
+
   it('uses the spec 3 group names', () => {
     const text = [
       'mail me at ops@example.com',
