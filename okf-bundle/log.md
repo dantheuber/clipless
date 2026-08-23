@@ -1,6 +1,13 @@
 # Update Log
 
 ## 2026-08-23
+* **Ship**: quick look step 2 (the clips window) landed on `t3code/explore-tool-launcher-ux`: chips, pins, the tray, the reader, the search bar and status bar, the sandboxed rendered view; the launcher window is unreachable and goes in step 4; step 3 (settings window) is next.
+* **Update**: step 2 decision records the verification run
+* **Decision**: the calls made while building quick look step 2 (the clips window)
+* **Update**: e2e on Linux gotcha records the CLIPLESS_PLAINTEXT_STORAGE switch from step 2
+* **Update**: templates: pills in the tray and reader, clip template submenu, {c1} is row 1
+* **Update**: hotkeys: quickLook opens the reader in the main window (step 2)
+* **Update**: quick-clips reflects step 2 (chips, pins, tray; openToolsForMatches gone)
 * **Ship**: quick look plan step 1 (vocabulary and storage) implemented on `t3code/explore-tool-launcher-ux`, 2026-08-23. Shared scan, tools, templates, readiness and group colour modules; clip ids and extracted text; hotkey rename with migration; updater state enum; html and rtf extraction and the sanitiser in main; groupColours and import mode in storage; the save queue fix; the renderer scan index. 599 unit tests at 100% coverage of tested files; 13 of 18 e2e pass on Linux (the other five are the known Linux limit). See the step 1 decision and the two new gotchas.
 * **Update**: coverage gotcha points at the Linux e2e gotcha instead of repeating half of it
 * **Add**: gotcha on running the Playwright suite on Linux (five tools-spec tests fail before any code change; CI runs e2e on Windows)

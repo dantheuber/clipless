@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import UpdaterControl from './components/settings/UpdaterControl';
 import Versions from './components/settings/Versions';
 import { ClipsProvider } from './providers/clips';
+import { ScanIndexProvider } from './providers/scan';
+import { ToastProvider } from './components/Toast';
 import { ThemeProvider, useTheme } from './providers/theme';
 import { LanguageDetectionProvider } from './providers/languageDetection';
 import { StorageSettings } from './components/settings/StorageSettings';
@@ -125,7 +127,9 @@ function SettingsContent(): React.JSX.Element {
       <div className={styles.scrollContainer}>
         <div className={styles.content}>
           <LanguageDetectionProvider>
-            <ClipsProvider>{renderTabContent()}</ClipsProvider>
+            <ScanIndexProvider>
+              <ClipsProvider>{renderTabContent()}</ClipsProvider>
+            </ScanIndexProvider>
           </LanguageDetectionProvider>
         </div>
       </div>
@@ -136,7 +140,9 @@ function SettingsContent(): React.JSX.Element {
 function App(): React.JSX.Element {
   return (
     <ThemeProvider>
-      <SettingsContent />
+      <ToastProvider>
+        <SettingsContent />
+      </ToastProvider>
     </ThemeProvider>
   );
 }

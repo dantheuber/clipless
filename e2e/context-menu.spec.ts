@@ -49,16 +49,13 @@ test.describe('Context Menu', () => {
 
     const menu = window.getByTestId('clip-context-menu');
     await expect(menu).toBeVisible({ timeout: 3000 });
-    for (const id of [
-      'menu-copy',
-      'menu-quick-look',
-      'menu-fill-clip-template',
-      'menu-lock',
-      'menu-delete',
-    ]) {
+    for (const id of ['menu-copy', 'menu-quick-look', 'menu-lock', 'menu-delete']) {
       await expect(window.getByTestId(id)).toBeVisible();
       await expect(window.getByTestId(id)).not.toHaveAttribute('aria-disabled', 'true');
     }
+    // no clip templates are seeded here, so the submenu is present and says so
+    await expect(window.getByTestId('menu-fill-clip-template')).toBeVisible();
+    await expect(window.getByTestId('menu-fill-clip-template')).toContainText('no clip templates');
 
     // Close by pressing Escape
     await window.keyboard.press('Escape');

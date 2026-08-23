@@ -24,9 +24,10 @@ test.describe('Image Clipboard', () => {
     const imgPreview = window.locator('img[alt="Clipboard image preview"]');
     await expect(imgPreview.first()).toBeVisible({ timeout: 5000 });
 
-    // Verify image metadata is displayed
-    const body = await window.textContent('body');
-    expect(body).toContain('Image (PNG)');
+    // Verify the row shows the format tag and a size (spec 16 rule 6)
+    const row = window.locator('[data-testid="clip-row"]', { has: imgPreview.first() });
+    await expect(row).toContainText('png');
+    await expect(row).toContainText(/\d+ (B|KB)/);
 
     await app.close();
   });

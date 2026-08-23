@@ -222,9 +222,9 @@ test.describe.serial('Quick look — clipboard writes', () => {
   test('the number cell copies the clip and toasts', async () => {
     const row = rowWith(window, `alert ${UNIQUE}`);
     await row.getByTestId('row-number').click();
-    await expect(window.getByTestId('toast').first()).toContainText(
-      'Copied clip 2 to the clipboard'
-    );
+    await expect(
+      window.getByTestId('toast').filter({ hasText: 'Copied clip 2 to the clipboard' })
+    ).toBeVisible();
     const clipboardText = await app.evaluate(async ({ clipboard }) => clipboard.readText());
     expect(clipboardText).toBe(CLIP_ONE);
   });
@@ -235,9 +235,9 @@ test.describe.serial('Quick look — clipboard writes', () => {
     await row.getByTestId('eye').click();
     await expect(window.getByTestId('quick-look')).toBeVisible();
     await window.keyboard.press('c');
-    await expect(window.getByTestId('toast').first()).toContainText(
-      'Copied clip 1 to the clipboard'
-    );
+    await expect(
+      window.getByTestId('toast').filter({ hasText: 'Copied clip 1 to the clipboard' })
+    ).toBeVisible();
     const clipboardText = await app.evaluate(async ({ clipboard }) => clipboard.readText());
     expect(clipboardText).toBe(CLIP_TWO);
     await window.keyboard.press('Escape');
@@ -252,8 +252,8 @@ test.describe.serial('Quick look — clipboard writes', () => {
       .locator('[data-state="ready"]', { hasText: 'IP block' });
     await expect(pill).toBeVisible();
     await pill.click();
-    const toast = window.getByTestId('toast').first();
-    await expect(toast).toContainText('Copied "IP block" to the clipboard');
+    const toast = window.getByTestId('toast').filter({ hasText: 'Copied "IP block"' });
+    await expect(toast).toBeVisible();
     await expect(toast).toContainText(`ip ${IP_A}`);
     const clipboardText = await app.evaluate(async ({ clipboard }) => clipboard.readText());
     expect(clipboardText).toBe(`Block ${IP_A} reported by ${EMAIL}`);
