@@ -19,3 +19,5 @@ Mechanics:
 - Tool configs export/import as JSON for team sharing.
 
 Typical flow: copy text -> scanner icon appears -> open launcher -> select extracted values -> pick compatible tools -> everything opens in the browser. Example use: pull an IP and fan it out to VirusTotal + AbuseIPDB in one click.
+
+> Status (2026-08-22): this window is slated for removal. See the decision [Tools Launcher Window Replaced by Quick Look and Pin Tray](../decisions/tools-launcher-window-replaced-by-quick-look-and-pin-tray.md) and `docs/specs/quick-look-redesign.md`. The mechanics above describe the current code until that ships.

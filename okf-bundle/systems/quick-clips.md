@@ -5,7 +5,7 @@ tags:
   - quick-clips
   - regex
   - patterns
-timestamp: 2026-07-10T01:02:13.442Z
+timestamp: 2026-08-22T19:47:34.181Z
 ---
 
 Quick Clips is the pattern-extraction feature that makes Clipless "read" clips. Scanning happens in the main process: `scanTextForPatterns` in `src/main/clipboard/quick-clips.ts`, with the renderer hook `usePatternDetection` and the `QuickClipsScanner` UI on top.
@@ -20,3 +20,5 @@ How it works (verified in source):
 - Domain/URL detection is TLD-aware: `src/renderer/src/utils/tlds.ts` maintains TLD lists (gTLDs, ccTLDs, special-use) used by the domain pattern.
 
 Quick Clips configs (search terms + tools) are exportable/importable for team sharing.
+
+> Status (2026-08-22): the settings UI for search terms, tools and templates is slated for a rebuild as a master-detail inspector with per-group colours. See [Settings for search terms, tools and templates: master-detail inspector](../decisions/settings-for-search-terms-tools-and-templates-master-detail-inspector.md) and `docs/specs/quick-look-redesign.md` section 14. Note for that work: `BUILTIN_PATTERNS` currently exists in three divergent copies (`QuickClipsManager.tsx`, `ToolsManager.tsx`, `SearchTermsSection.tsx`); only the last is used, and `QuickClipsManager.tsx` is dead code. The `enabled` flag is honoured by the scanner but nothing in the current UI sets it.

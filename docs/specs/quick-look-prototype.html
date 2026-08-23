@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quick look, polished: the G5 clip reader refined</title>
+<style>
+  :root {
+    --bg: #000; --panel: #0d0d0d; --panel2: #161616; --panel3: #1f1f1f;
+    --line: #2a2a2a; --line2: #3a3a3a;
+    --text: #fff; --muted: #a3a3a3; --dim: #6b6b6b;
+    --accent: #3b82f6; --accent-soft: rgba(59,130,246,.16);
+    --green: #10b981; --amber: #f59e0b; --red: #ef4444;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --g-ip: #f87171; --g-email: #60a5fa; --g-ticket: #34d399; --g-domain: #fbbf24; --g-url: #22d3ee; --g-user: #c084fc;
+    --row-a: #2e2e2e; --row-b: #383838; --row-hover: #424242; --app-bg: #262626; --num-bg: #222;
+    --tk-key: #7fdbca; --tk-str: #ecc48d; --tk-num: #f78c6c; --tk-pun: #89ddff; --tk-cmd: #82aaff; --tk-flag: #c792ea; --tk-ts: #7a8599; --tk-kw: #c792ea; --tk-fn: #82aaff; --tk-cm: #676e95;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body { font: 15px/1.55 Inter, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif; padding: 24px 16px 90px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 24px; margin: 0 0 4px; font-weight: 600; }
+  h2 { font-size: 19px; margin: 44px 0 10px; font-weight: 600; padding-top: 14px; border-top: 1px solid var(--line); }
+  h3 { font-size: 15px; margin: 18px 0 6px; font-weight: 600; }
+  p { margin: 8px 0; }
+  .lede { color: var(--muted); margin-bottom: 18px; }
+  code, kbd { font-family: var(--mono); font-size: 12.5px; }
+  code { background: var(--panel2); padding: 1px 5px; border-radius: 4px; color: var(--c-e5e5e5); }
+  kbd { background: var(--panel3); border: 1px solid var(--line2); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; color: var(--c-ddd); font-size: 11.5px; }
+  ol, ul { padding-left: 22px; } li { margin: 5px 0; }
+  .muted { color: var(--muted); } .dim { color: var(--dim); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 10px 0; }
+  th, td { text-align: left; padding: 7px 9px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 500; font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+  td:first-child { white-space: nowrap; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .note { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; font-size: 14px; }
+  .note h3 { margin-top: 4px; }
+  .try { color: var(--dim); font-size: 12px; font-style: italic; margin: 2px 0 0; }
+  .sw { display: inline-block; width: 9px; height: 9px; border-radius: 2px; vertical-align: -1px; margin-right: 4px; }
+
+  /* ===== app frame ===== */
+  .app { background: var(--app-bg); border: 2px solid var(--c-6b6b6b); border-radius: 8px; box-shadow: 0 20px 50px var(--c-rgba000.6); margin: 14px 0; font-size: 13.5px; position: relative; overflow: hidden; height: 520px; display: flex; flex-direction: column; }
+  .app.short { height: 300px; }
+  .bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--c-1e1e1e); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 12px; flex: none; }
+  .bar .dots { display: flex; gap: 5px; } .bar .dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--c-3a3a3a); display: block; }
+  .bar .size { margin-left: auto; color: var(--dim); font-family: var(--mono); font-size: 11px; }
+  .rows { flex: 1; overflow: auto; min-height: 0; }
+  .row { display: grid; grid-template-columns: 40px 1fr auto; align-items: stretch; min-height: 40px; background: var(--row-a); border-bottom: 1px solid var(--c-242424); position: relative; outline: none; }
+  .row:nth-child(even) { background: var(--row-b); }
+  .row:hover, .row:focus-visible { background: var(--row-hover); }
+  .row.sel { box-shadow: inset 3px 0 0 var(--accent); }
+  .num { min-height: 40px; display: grid; place-items: center; background: var(--num-bg); color: var(--c-ddd); font-weight: 600; font-size: 14px; cursor: pointer; }
+  .body { min-width: 0; font-family: var(--mono); font-size: 13px; color: var(--c-eee); }
+  .line { padding: 0 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 40px; cursor: text; }
+  .right { display: flex; align-items: center; gap: 6px; padding: 0 8px 0 4px; height: 40px; }
+  .status { display: flex; align-items: center; gap: 16px; padding: 9px 12px; background: var(--c-1e1e1e); border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; flex: none; }
+  .status .sp { flex: 1; }
+  .lock { color: #ffc107; font-size: 12px; }
+  .lang { font-family: Inter, sans-serif; font-size: 10px; color: var(--c-999); background: var(--c-1e1e1e); border: 1px solid var(--c-4a4a4a); border-radius: 3px; padding: 0 5px; margin-right: 8px; vertical-align: middle; }
+  .k { color: var(--tk-key); } .s { color: var(--tk-str); } .n { color: var(--tk-num); } .p { color: var(--tk-pun); } .cmd { color: var(--tk-cmd); } .fl { color: var(--tk-flag); } .ts { color: var(--tk-ts); } .kw { color: var(--tk-kw); } .fn { color: var(--tk-fn); } .cm { color: var(--tk-cm); font-style: italic; }
+  .line .k, .line .s, .line .n, .line .p, .line .cmd, .line .fl, .line .ts, .line .kw, .line .fn, .line .cm { color: inherit; font-style: normal; }
+  .dots-only { display: inline-flex; gap: 3px; padding: 0 4px; }
+  .dots-only i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+  .ib { width: 22px; height: 22px; border-radius: 5px; display: grid; place-items: center; font-size: 12px; color: var(--c-bbb); cursor: pointer; user-select: none; border: 1px solid transparent; opacity: 0; transition: opacity .12s; }
+  .row:hover .ib, .row:focus-visible .ib, .ib.on, .row.sel .ib { opacity: 1; }
+  .ib:hover { background: var(--c-555); color: var(--c-fff); }
+  .ib.on { background: var(--accent-soft); border-color: var(--accent); color: var(--c-fff); }
+
+  /* chips */
+  .m { cursor: pointer; position: relative; border-radius: 3px; background: var(--c-rgba255255255.06); border: 1px dashed var(--c-666); padding: 0 4px; margin: 0 1px; color: var(--c-fff); }
+  .m[data-g="ip"] { --gc: var(--g-ip); } .m[data-g="email"] { --gc: var(--g-email); } .m[data-g="ticket"] { --gc: var(--g-ticket); } .m[data-g="domain"] { --gc: var(--g-domain); } .m[data-g="url"] { --gc: var(--g-url); } .m[data-g="user"] { --gc: var(--g-user); }
+  .m::after { content: "+"; color: var(--dim); font-size: 10px; margin-left: 3px; }
+  .m:hover { border-color: var(--gc); border-style: solid; }
+  .m.pinned { background: color-mix(in srgb, var(--gc) 25%, transparent); border: 1px solid var(--gc); }
+  .m.pinned::after { content: ""; display: inline-block; width: 8px; height: 8px; vertical-align: -1px; margin-left: 4px; background: var(--gc); -webkit-mask: var(--i-check) center / contain no-repeat; mask: var(--i-check) center / contain no-repeat; }
+  .m.lit { box-shadow: 0 0 0 2px color-mix(in srgb, var(--gc) 60%, transparent); }
+  .editor .m { cursor: text; } .editor .m::after, .editor .m.pinned::after { content: ""; margin: 0; }
+
+  /* ===== quick look ===== */
+  .dimmer { position: absolute; inset: 0; background: var(--c-rgba000.6); z-index: 19; display: none; }
+  .dimmer.show { display: block; }
+  .ql { position: absolute; left: 4%; right: 4%; top: 38px; bottom: 44px; z-index: 21; background: var(--c-1b1b1b); border: 1px solid var(--c-5a5a5a); border-radius: 8px; box-shadow: 0 24px 60px var(--c-rgba000.8); display: none; flex-direction: column; overflow: hidden; outline: none; transform: scale(.985); opacity: 0; transition: transform .12s ease, opacity .12s ease; }
+  .ql.show { display: flex; }
+  .ql.in { transform: none; opacity: 1; }
+  .app.short .ql { top: 34px; bottom: 40px; left: 3%; right: 3%; }
+  .qh { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-bottom: 1px solid var(--c-333); flex: none; font-size: 12px; color: var(--muted); }
+  .qh .clipno { font-weight: 600; color: var(--c-fff); font-size: 13px; }
+  .qh .meta { color: var(--muted); }
+  .qh .meta .lang { margin: 0 4px 0 0; }
+  .qh .pos { color: var(--dim); font-family: var(--mono); font-size: 11px; margin-left: 2px; }
+  .qh .sp { flex: 1; }
+  .ibtn { height: 24px; min-width: 24px; padding: 0 5px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; font-size: 12px; color: var(--c-ccc); cursor: pointer; border: 1px solid transparent; user-select: none; white-space: nowrap; }
+  .ibtn:hover { background: var(--c-3a3a3a); color: var(--c-fff); }
+  .ibtn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--c-fff); }
+  .ibtn.disabled { opacity: .3; pointer-events: none; }
+  .ibtn .lbl { font-size: 11px; color: inherit; }
+  .ibtn::before { content: ""; display: inline-block; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; }
+  .ibtn.prev { --i: var(--i-arrow-up); } .ibtn.next { --i: var(--i-arrow-down); }
+  .ibtn.pin { --i: var(--i-thumbtack); } .ibtn.edit { --i: var(--i-pen-to-square); } .ibtn.copy { --i: var(--i-copy); }
+  .ibtn.close { --i: var(--i-xmark); } .ibtn.close::before { width: 13px; height: 13px; }
+  .ibtn.wrap { --i: var(--i-arrow-turn-down); }
+  .qb { display: grid; grid-template-columns: 1fr 220px; flex: 1; min-height: 0; }
+  .app.short .qb { grid-template-columns: 1fr 170px; }
+  .qc { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .pb { flex: 1; min-height: 0; overflow: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.6; padding: 6px 0; }
+  .pb .l { display: grid; grid-template-columns: 40px 1fr; }
+  .pb .ln { color: var(--c-555); text-align: right; padding-right: 10px; user-select: none; position: sticky; left: 0; background: var(--c-1b1b1b); }
+  .pb .lt { white-space: pre; padding-right: 14px; }
+  .pb.wrap .lt { white-space: pre-wrap; overflow-wrap: anywhere; }
+  .pb .l.has { background: var(--c-rgba255255255.025); }
+  .pb .l.has .ln { color: var(--c-8a8a8a); }
+  .editor { display: none; flex: 1; min-height: 0; overflow: auto; margin: 6px 8px 8px 8px; padding: 6px 8px; white-space: pre; line-height: 1.6; border: 1px solid var(--c-555); border-radius: 4px; background: var(--c-1c1c1c); outline: none; font: inherit; font-family: var(--mono); font-size: 12.5px; color: inherit; caret-color: var(--c-fff); }
+  .editor:focus { border-color: var(--c-8a8a8a); }
+  .ql.ed .pb { display: none; } .ql.ed .editor { display: block; }
+  .side { border-left: 1px solid var(--c-333); display: flex; flex-direction: column; min-height: 0; }
+  .side .sh { padding: 6px 10px 4px; font-size: 10.5px; color: var(--dim); text-transform: uppercase; letter-spacing: .05em; display: flex; align-items: center; gap: 6px; flex: none; }
+  .side .sh .sp { flex: 1; }
+  .side .sl { flex: 1; min-height: 0; overflow: auto; padding: 0 8px 8px; }
+  .grp { margin: 4px 0 8px; }
+  .grp .gh { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); padding: 2px 2px; }
+  .grp .gh .c { color: var(--dim); font-family: var(--mono); font-size: 10.5px; }
+  .grp .gh .sp { flex: 1; }
+  .grp .gh .ga { font-size: 10.5px; color: var(--dim); cursor: pointer; padding: 0 4px; border-radius: 3px; }
+  .grp .gh .ga:hover { background: var(--c-333); color: var(--c-fff); }
+  .grp .gi { display: flex; align-items: center; gap: 6px; padding: 2px 2px; font-family: var(--mono); font-size: 11.5px; min-width: 0; }
+  .grp .gi .m { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: calc(100% - 30px); }
+  .grp .gi .x { color: var(--dim); font-size: 10px; font-family: var(--mono); flex: none; }
+  .side .none { padding: 12px 10px; color: var(--dim); font-size: 12px; }
+  .qf { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-top: 1px solid var(--c-333); flex: none; font-size: 11px; color: var(--dim); }
+  .qf .sp { flex: 1; }
+  .qf kbd { font-size: 10px; padding: 0 4px; }
+  .qf .pc { color: var(--muted); font-size: 11.5px; }
+  .qf .pc b { color: var(--c-fff); font-weight: 600; }
+  .btn { display: inline-block; padding: 2px 10px; border-radius: 5px; border: 1px solid var(--c-555); background: var(--c-2a2a2a); color: var(--c-fff); font-size: 11.5px; cursor: pointer; user-select: none; white-space: nowrap; font-family: Inter, sans-serif; }
+  .btn.primary { background: var(--accent); border-color: var(--accent); }
+  .btn.disabled { opacity: .4; pointer-events: none; }
+  .app.short .qf kbd, .app.short .qf .hints { display: none; }
+  .qf .tpls { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .qf .tpls .tl { color: var(--dim); font-size: 10.5px; margin-right: 2px; }
+  .tpl { border: 1px solid var(--c-6b5d2a); background: var(--c-2a2616); color: var(--c-fde68a); border-radius: 999px; padding: 0 8px; font-size: 11px; cursor: pointer; white-space: nowrap; font-family: Inter, sans-serif; line-height: 18px; display: inline-flex; align-items: center; gap: 4px; }
+  .tpl::before { content: ""; display: inline-block; width: 10px; height: 10px; background: currentColor; -webkit-mask: var(--i-copy) center / contain no-repeat; mask: var(--i-copy) center / contain no-repeat; }
+  .tpl:hover { background: var(--c-3a3420); border-color: var(--c-fde68a); }
+  .tpl.nr { opacity: .5; border-style: dashed; background: transparent; }
+  .tpl.nr:hover { opacity: .85; }
+  .tpl.nr.cant { cursor: default; opacity: .3; }
+  .tpl.nr.cant:hover { opacity: .3; border-color: var(--c-6b5d2a); background: transparent; }
+  .tpl .need { color: #a89a5a; font-size: 10px; }
+  .app.short .tpl.nr { display: none; }
+  .app.short .qf .tpls .tl { display: none; }
+
+  /* tray under the list (unchanged from E5, compact) */
+  .tray { border-top: 1px solid var(--accent); background: var(--c-1a2230); padding: 6px 12px; display: none; flex: none; max-height: 34%; overflow: auto; }
+  .tray.show { display: block; }
+  .tray .th { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+  .tray .th b { color: var(--c-fff); font-weight: 600; } .tray .th .sp { flex: 1; }
+  .tray .grow { display: grid; grid-template-columns: 58px 1fr auto; gap: 8px; align-items: center; padding: 2px 0; font-size: 12px; }
+  .tray .grow .gname { color: var(--muted); font-size: 11px; display: flex; align-items: center; gap: 5px; }
+  .tray .grow .vals { display: flex; flex-wrap: wrap; gap: 4px; font-family: var(--mono); font-size: 11px; }
+  .tray .grow .vals span { background: var(--c-2c3a4e); border: 1px solid var(--c-3f5474); padding: 0 6px; border-radius: 3px; }
+  .tray .grow .vals span i { color: var(--dim); font-style: normal; margin-left: 4px; cursor: pointer; }
+  .tray .tools { display: flex; gap: 4px; flex-wrap: wrap; }
+  .pill { border: 1px solid var(--c-555); background: var(--c-2a2a2a); border-radius: 999px; padding: 0 8px; font-size: 11px; cursor: pointer; white-space: nowrap; font-family: Inter, sans-serif; line-height: 18px; }
+  .pill:hover { border-color: var(--accent); background: var(--accent-soft); }
+  .tray .tfoot { display: flex; gap: 8px; align-items: center; margin-top: 6px; padding-top: 6px; border-top: 1px dashed var(--c-34425a); font-size: 11.5px; color: var(--muted); flex-wrap: wrap; }
+  .tray .tfoot .sp { flex: 1; }
+
+  #toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px); background: var(--c-111); border: 1px solid var(--line2); border-radius: 8px; padding: 10px 14px; max-width: min(92vw, 640px); font-size: 12.5px; color: var(--c-eee); opacity: 0; pointer-events: none; transition: all .18s ease; box-shadow: 0 16px 40px var(--c-rgba000.7); z-index: 50; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast .t { color: var(--green); font-weight: 600; margin-bottom: 3px; }
+  #toast ul { list-style: none; padding: 0; margin: 0; font-family: var(--mono); font-size: 11.5px; color: var(--c-bbb); }
+  #toast li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #clipsrc { display: none; }
+  .keys { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 13.5px; margin: 8px 0; align-items: baseline; }
+
+  /* FontAwesome free solid icons, the set the app registers in src/renderer/src/fontawesome.ts, inlined as CSS masks so they tint with currentColor */
+  :root {
+    --i-lock: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M144%20144l0%2048%20160%200%200-48c0-44.2-35.8-80-80-80s-80%2035.8-80%2080zM80%20192l0-48C80%2064.5%20144.5%200%20224%200s144%2064.5%20144%20144l0%2048%2016%200c35.3%200%2064%2028.7%2064%2064l0%20192c0%2035.3-28.7%2064-64%2064L64%20512c-35.3%200-64-28.7-64-64L0%20256c0-35.3%2028.7-64%2064-64l16%200z%22%2F%3E%3C%2Fsvg%3E");
+    --i-lock-open: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20576%20512%22%3E%3Cpath%20d%3D%22M352%20144c0-44.2%2035.8-80%2080-80s80%2035.8%2080%2080l0%2048c0%2017.7%2014.3%2032%2032%2032s32-14.3%2032-32l0-48C576%2064.5%20511.5%200%20432%200S288%2064.5%20288%20144l0%2048L64%20192c-35.3%200-64%2028.7-64%2064L0%20448c0%2035.3%2028.7%2064%2064%2064l320%200c35.3%200%2064-28.7%2064-64l0-192c0-35.3-28.7-64-64-64l-32%200%200-48z%22%2F%3E%3C%2Fsvg%3E");
+    --i-magnifying-glass: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M416%20208c0%2045.9-14.9%2088.3-40%20122.7L502.6%20457.4c12.5%2012.5%2012.5%2032.8%200%2045.3s-32.8%2012.5-45.3%200L330.7%20376c-34.4%2025.2-76.8%2040-122.7%2040C93.1%20416%200%20322.9%200%20208S93.1%200%20208%200S416%2093.1%20416%20208zM208%20352a144%20144%200%201%200%200-288%20144%20144%200%201%200%200%20288z%22%2F%3E%3C%2Fsvg%3E");
+    --i-screwdriver-wrench: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M78.6%205C69.1-2.4%2055.6-1.5%2047%207L7%2047c-8.5%208.5-9.4%2022-2.1%2031.6l80%20104c4.5%205.9%2011.6%209.4%2019%209.4l54.1%200%20109%20109c-14.7%2029-10%2065.4%2014.3%2089.6l112%20112c12.5%2012.5%2032.8%2012.5%2045.3%200l64-64c12.5-12.5%2012.5-32.8%200-45.3l-112-112c-24.2-24.2-60.6-29-89.6-14.3l-109-109%200-54.1c0-7.5-3.5-14.5-9.4-19L78.6%205zM19.9%20396.1C7.2%20408.8%200%20426.1%200%20444.1C0%20481.6%2030.4%20512%2067.9%20512c18%200%2035.3-7.2%2048-19.9L233.7%20374.3c-7.8-20.9-9-43.6-3.6-65.1l-61.7-61.7L19.9%20396.1zM512%20144c0-10.5-1.1-20.7-3.2-30.5c-2.4-11.2-16.1-14.1-24.2-6l-63.9%2063.9c-3%203-7.1%204.7-11.3%204.7L352%20176c-8.8%200-16-7.2-16-16l0-57.4c0-4.2%201.7-8.3%204.7-11.3l63.9-63.9c8.1-8.1%205.2-21.8-6-24.2C388.7%201.1%20378.5%200%20368%200C288.5%200%20224%2064.5%20224%20144l0%20.8%2085.3%2085.3c36-9.1%2075.8%20.5%20104%2028.7L429%20274.5c49-23%2083-72.8%2083-130.5zM56%20432a24%2024%200%201%201%2048%200%2024%2024%200%201%201%20-48%200z%22%2F%3E%3C%2Fsvg%3E");
+    --i-clipboard: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M192%200c-41.8%200-77.4%2026.7-90.5%2064L64%2064C28.7%2064%200%2092.7%200%20128L0%20448c0%2035.3%2028.7%2064%2064%2064l256%200c35.3%200%2064-28.7%2064-64l0-320c0-35.3-28.7-64-64-64l-37.5%200C269.4%2026.7%20233.8%200%20192%200zm0%2064a32%2032%200%201%201%200%2064%2032%2032%200%201%201%200-64zM112%20192l160%200c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016l-160%200c-8.8%200-16-7.2-16-16s7.2-16%2016-16z%22%2F%3E%3C%2Fsvg%3E");
+    --i-clipboard-check: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M192%200c-41.8%200-77.4%2026.7-90.5%2064L64%2064C28.7%2064%200%2092.7%200%20128L0%20448c0%2035.3%2028.7%2064%2064%2064l256%200c35.3%200%2064-28.7%2064-64l0-320c0-35.3-28.7-64-64-64l-37.5%200C269.4%2026.7%20233.8%200%20192%200zm0%2064a32%2032%200%201%201%200%2064%2032%2032%200%201%201%200-64zM305%20273L177%20401c-9.4%209.4-24.6%209.4-33.9%200L79%20337c-9.4-9.4-9.4-24.6%200-33.9s24.6-9.4%2033.9%200l47%2047L271%20239c9.4-9.4%2024.6-9.4%2033.9%200s9.4%2024.6%200%2033.9z%22%2F%3E%3C%2Fsvg%3E");
+    --i-copy: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M208%200L332.1%200c12.7%200%2024.9%205.1%2033.9%2014.1l67.9%2067.9c9%209%2014.1%2021.2%2014.1%2033.9L448%20336c0%2026.5-21.5%2048-48%2048l-192%200c-26.5%200-48-21.5-48-48l0-288c0-26.5%2021.5-48%2048-48zM48%20128l80%200%200%2064-64%200%200%20256%20192%200%200-32%2064%200%200%2048c0%2026.5-21.5%2048-48%2048L48%20512c-26.5%200-48-21.5-48-48L0%20176c0-26.5%2021.5-48%2048-48z%22%2F%3E%3C%2Fsvg%3E");
+    --i-eye: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20576%20512%22%3E%3Cpath%20d%3D%22M288%2032c-80.8%200-145.5%2036.8-192.6%2080.6C48.6%20156%2017.3%20208%202.5%20243.7c-3.3%207.9-3.3%2016.7%200%2024.6C17.3%20304%2048.6%20356%2095.4%20399.4C142.5%20443.2%20207.2%20480%20288%20480s145.5-36.8%20192.6-80.6c46.8-43.5%2078.1-95.4%2093-131.1c3.3-7.9%203.3-16.7%200-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5%2068.8%20368.8%2032%20288%2032zM144%20256a144%20144%200%201%201%20288%200%20144%20144%200%201%201%20-288%200zm144-64c0%2035.3-28.7%2064-64%2064c-7.1%200-13.9-1.2-20.3-3.3c-5.5-1.8-11.9%201.6-11.7%207.4c.3%206.9%201.3%2013.8%203.2%2020.7c13.7%2051.2%2066.4%2081.6%20117.6%2067.9s81.6-66.4%2067.9-117.6c-11.1-41.5-47.8-69.4-88.6-71.1c-5.8-.2-9.2%206.1-7.4%2011.7c2.1%206.4%203.3%2013.2%203.3%2020.3z%22%2F%3E%3C%2Fsvg%3E");
+    --i-circle-arrow-up: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M256%20512A256%20256%200%201%200%20256%200a256%20256%200%201%200%200%20512zM385%20215c9.4%209.4%209.4%2024.6%200%2033.9s-24.6%209.4-33.9%200l-71-71L280%20392c0%2013.3-10.7%2024-24%2024s-24-10.7-24-24l0-214.1-71%2071c-9.4%209.4-24.6%209.4-33.9%200s-9.4-24.6%200-33.9L239%20103c9.4-9.4%2024.6-9.4%2033.9%200L385%20215z%22%2F%3E%3C%2Fsvg%3E");
+    --i-xmark: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M342.6%20150.6c12.5-12.5%2012.5-32.8%200-45.3s-32.8-12.5-45.3%200L192%20210.7%2086.6%20105.4c-12.5-12.5-32.8-12.5-45.3%200s-12.5%2032.8%200%2045.3L146.7%20256%2041.4%20361.4c-12.5%2012.5-12.5%2032.8%200%2045.3s32.8%2012.5%2045.3%200L192%20301.3%20297.4%20406.6c12.5%2012.5%2032.8%2012.5%2045.3%200s12.5-32.8%200-45.3L237.3%20256%20342.6%20150.6z%22%2F%3E%3C%2Fsvg%3E");
+    --i-trash: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M135.2%2017.7L128%2032%2032%2032C14.3%2032%200%2046.3%200%2064S14.3%2096%2032%2096l384%200c17.7%200%2032-14.3%2032-32s-14.3-32-32-32l-96%200-7.2-14.3C307.4%206.8%20296.3%200%20284.2%200L163.8%200c-12.1%200-23.2%206.8-28.6%2017.7zM416%20128L32%20128%2053.2%20467c1.6%2025.3%2022.6%2045%2047.9%2045l245.8%200c25.3%200%2046.3-19.7%2047.9-45L416%20128z%22%2F%3E%3C%2Fsvg%3E");
+    --i-pen-to-square: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M471.6%2021.7c-21.9-21.9-57.3-21.9-79.2%200L362.3%2051.7l97.9%2097.9%2030.1-30.1c21.9-21.9%2021.9-57.3%200-79.2L471.6%2021.7zm-299.2%20220c-6.1%206.1-10.8%2013.6-13.5%2021.9l-29.6%2088.8c-2.9%208.6-.6%2018.1%205.8%2024.6s15.9%208.7%2024.6%205.8l88.8-29.6c8.2-2.7%2015.7-7.4%2021.9-13.5L437.7%20172.3%20339.7%2074.3%20172.4%20241.7zM96%2064C43%2064%200%20107%200%20160L0%20416c0%2053%2043%2096%2096%2096l256%200c53%200%2096-43%2096-96l0-96c0-17.7-14.3-32-32-32s-32%2014.3-32%2032l0%2096c0%2017.7-14.3%2032-32%2032L96%20448c-17.7%200-32-14.3-32-32l0-256c0-17.7%2014.3-32%2032-32l96%200c17.7%200%2032-14.3%2032-32s-14.3-32-32-32L96%2064z%22%2F%3E%3C%2Fsvg%3E");
+    --i-thumbtack: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M32%2032C32%2014.3%2046.3%200%2064%200L320%200c17.7%200%2032%2014.3%2032%2032s-14.3%2032-32%2032l-29.5%200%2011.4%20148.2c36.7%2019.9%2065.7%2053.2%2079.5%2094.7l1%203c3.3%209.8%201.6%2020.5-4.4%2028.8s-15.7%2013.3-26%2013.3L32%20352c-10.3%200-19.9-4.9-26-13.3s-7.7-19.1-4.4-28.8l1-3c13.8-41.5%2042.8-74.8%2079.5-94.7L93.5%2064%2064%2064C46.3%2064%2032%2049.7%2032%2032zM160%20384l64%200%200%2096c0%2017.7-14.3%2032-32%2032s-32-14.3-32-32l0-96z%22%2F%3E%3C%2Fsvg%3E");
+    --i-arrow-up: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M214.6%2041.4c-12.5-12.5-32.8-12.5-45.3%200l-160%20160c-12.5%2012.5-12.5%2032.8%200%2045.3s32.8%2012.5%2045.3%200L160%20141.2%20160%20448c0%2017.7%2014.3%2032%2032%2032s32-14.3%2032-32l0-306.7L329.4%20246.6c12.5%2012.5%2032.8%2012.5%2045.3%200s12.5-32.8%200-45.3l-160-160z%22%2F%3E%3C%2Fsvg%3E");
+    --i-arrow-down: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M169.4%20470.6c12.5%2012.5%2032.8%2012.5%2045.3%200l160-160c12.5-12.5%2012.5-32.8%200-45.3s-32.8-12.5-45.3%200L224%20370.8%20224%2064c0-17.7-14.3-32-32-32s-32%2014.3-32%2032l0%20306.7L54.6%20265.4c-12.5-12.5-32.8-12.5-45.3%200s-12.5%2032.8%200%2045.3l160%20160z%22%2F%3E%3C%2Fsvg%3E");
+    --i-arrow-turn-down: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M32%2064C14.3%2064%200%2049.7%200%2032S14.3%200%2032%200l96%200c53%200%2096%2043%2096%2096l0%20306.7%2073.4-73.4c12.5-12.5%2032.8-12.5%2045.3%200s12.5%2032.8%200%2045.3l-128%20128c-12.5%2012.5-32.8%2012.5-45.3%200l-128-128c-12.5-12.5-12.5-32.8%200-45.3s32.8-12.5%2045.3%200L160%20402.7%20160%2096c0-17.7-14.3-32-32-32L32%2064z%22%2F%3E%3C%2Fsvg%3E");
+    --i-chevron-right: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20320%20512%22%3E%3Cpath%20d%3D%22M310.6%20233.4c12.5%2012.5%2012.5%2032.8%200%2045.3l-192%20192c-12.5%2012.5-32.8%2012.5-45.3%200s-12.5-32.8%200-45.3L242.7%20256%2073.4%2086.6c-12.5-12.5-12.5-32.8%200-45.3s32.8-12.5%2045.3%200l192%20192z%22%2F%3E%3C%2Fsvg%3E");
+    --i-chevron-down: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20512%20512%22%3E%3Cpath%20d%3D%22M233.4%20406.6c12.5%2012.5%2032.8%2012.5%2045.3%200l192-192c12.5-12.5%2012.5-32.8%200-45.3s-32.8-12.5-45.3%200L256%20338.7%2086.6%20169.4c-12.5-12.5-32.8-12.5-45.3%200s-12.5%2032.8%200%2045.3l192%20192z%22%2F%3E%3C%2Fsvg%3E");
+    --i-check: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20448%20512%22%3E%3Cpath%20d%3D%22M438.6%20105.4c12.5%2012.5%2012.5%2032.8%200%2045.3l-256%20256c-12.5%2012.5-32.8%2012.5-45.3%200l-128-128c-12.5-12.5-12.5-32.8%200-45.3s32.8-12.5%2045.3%200L160%20338.7%20393.4%20105.4c12.5-12.5%2032.8-12.5%2045.3%200z%22%2F%3E%3C%2Fsvg%3E");
+    --i-file-lines: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20384%20512%22%3E%3Cpath%20d%3D%22M64%200C28.7%200%200%2028.7%200%2064L0%20448c0%2035.3%2028.7%2064%2064%2064l256%200c35.3%200%2064-28.7%2064-64l0-288-128%200c-17.7%200-32-14.3-32-32L224%200%2064%200zM256%200l0%20128%20128%200L256%200zM112%20256l160%200c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016l-160%200c-8.8%200-16-7.2-16-16s7.2-16%2016-16zm0%2064l160%200c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016l-160%200c-8.8%200-16-7.2-16-16s7.2-16%2016-16zm0%2064l160%200c8.8%200%2016%207.2%2016%2016s-7.2%2016-16%2016l-160%200c-8.8%200-16-7.2-16-16s7.2-16%2016-16z%22%2F%3E%3C%2Fsvg%3E");
+  }
+  .ico { display: inline-block; width: 1em; height: 1em; vertical-align: -0.125em; background: currentColor; -webkit-mask: var(--i) center / contain no-repeat; mask: var(--i) center / contain no-repeat; flex: none; }
+  .ico.lock { --i: var(--i-lock); }
+  .ico.lock-open { --i: var(--i-lock-open); }
+  .ico.magnifying-glass { --i: var(--i-magnifying-glass); }
+  .ico.screwdriver-wrench { --i: var(--i-screwdriver-wrench); }
+  .ico.clipboard { --i: var(--i-clipboard); }
+  .ico.clipboard-check { --i: var(--i-clipboard-check); }
+  .ico.copy { --i: var(--i-copy); }
+  .ico.eye { --i: var(--i-eye); }
+  .ico.circle-arrow-up { --i: var(--i-circle-arrow-up); }
+  .ico.xmark { --i: var(--i-xmark); }
+  .ico.trash { --i: var(--i-trash); }
+  .ico.pen-to-square { --i: var(--i-pen-to-square); }
+  .ico.thumbtack { --i: var(--i-thumbtack); }
+  .ico.arrow-up { --i: var(--i-arrow-up); }
+  .ico.arrow-down { --i: var(--i-arrow-down); }
+  .ico.arrow-turn-down { --i: var(--i-arrow-turn-down); }
+  .ico.chevron-right { --i: var(--i-chevron-right); }
+  .ico.chevron-down { --i: var(--i-chevron-down); }
+  .ico.check { --i: var(--i-check); }
+  .ico.file-lines { --i: var(--i-file-lines); }
+
+  /* light theme: every colour in the frames goes through a variable; .light on a frame swaps the set */
+  :root {
+    --c-6b5d2a: #6b5d2a;
+    --c-2a2616: #2a2616;
+    --c-3a3420: #3a3420;
+    --c-1a2230: #1a2230;
+    --c-2c3a4e: #2c3a4e;
+    --c-3f5474: #3f5474;
+    --c-34425a: #34425a;
+    --c-e5e5e5: #e5e5e5;
+    --c-ddd: #ddd;
+    --c-6b6b6b: #6b6b6b;
+    --c-rgba000.6: rgba(0,0,0,.6);
+    --c-1e1e1e: #1e1e1e;
+    --c-3a3a3a: #3a3a3a;
+    --c-242424: #242424;
+    --c-eee: #eee;
+    --c-999: #999;
+    --c-4a4a4a: #4a4a4a;
+    --c-bbb: #bbb;
+    --c-555: #555;
+    --c-fff: #fff;
+    --c-rgba255255255.06: rgba(255,255,255,.06);
+    --c-666: #666;
+    --c-1b1b1b: #1b1b1b;
+    --c-5a5a5a: #5a5a5a;
+    --c-rgba000.8: rgba(0,0,0,.8);
+    --c-333: #333;
+    --c-ccc: #ccc;
+    --c-rgba255255255.025: rgba(255,255,255,.025);
+    --c-8a8a8a: #8a8a8a;
+    --c-1c1c1c: #1c1c1c;
+    --c-2a2a2a: #2a2a2a;
+    --c-fde68a: #fde68a;
+    --c-111: #111;
+    --c-rgba000.7: rgba(0,0,0,.7);
+  }
+  .light {
+    color: var(--text);
+    --c-6b5d2a: #eae3c9;
+    --c-2a2616: #f4f2ea;
+    --c-3a3420: #efece2;
+    --c-1a2230: #e7ebf2;
+    --c-2c3a4e: #d8dfe9;
+    --c-3f5474: #c5d0df;
+    --c-34425a: #d2d9e5;
+    --bg: #f7f7f7;
+    --panel: #ffffff;
+    --panel2: #f3f3f3;
+    --panel3: #e9e9e9;
+    --line: #d4d4d4;
+    --line2: #c4c4c4;
+    --text: #161616;
+    --muted: #555555;
+    --dim: #8a8a8a;
+    --accent: #0848b0;
+    --accent-soft: rgba(59,130,246,.16);
+    --green: #047857;
+    --amber: #b45309;
+    --red: #b91c1c;
+    --g-ip: #b91c1c;
+    --g-email: #1d4ed8;
+    --g-ticket: #047857;
+    --g-domain: #b45309;
+    --g-url: #0e7490;
+    --g-user: #7e22ce;
+    --row-a: #fbfbfb;
+    --row-b: #f1f1f1;
+    --row-hover: #e4e4e4;
+    --app-bg: #f4f4f4;
+    --num-bg: #e9e9e9;
+    --tk-key: #288f7c;
+    --tk-str: #9d661a;
+    --tk-num: #ae2f09;
+    --tk-pun: #0083b8;
+    --tk-cmd: #003bb8;
+    --tk-flag: #691e9a;
+    --tk-ts: #7a8599;
+    --tk-kw: #691e9a;
+    --tk-fn: #003bb8;
+    --tk-cm: #676e95;
+    --c-e5e5e5: #191919;
+    --c-ddd: #202020;
+    --c-6b6b6b: #bdbdbd;
+    --c-rgba000.6: rgba(0,0,0,0.21);
+    --c-1e1e1e: #ececec;
+    --c-3a3a3a: #dbdbdb;
+    --c-242424: #e9e9e9;
+    --c-eee: #101010;
+    --c-999: #616161;
+    --c-4a4a4a: #d1d1d1;
+    --c-bbb: #414141;
+    --c-555: #cacaca;
+    --c-fff: #000000;
+    --c-rgba255255255.06: rgba(0,0,0,0.048);
+    --c-666: #c0c0c0;
+    --c-1b1b1b: #eeeeee;
+    --c-5a5a5a: #c7c7c7;
+    --c-rgba000.8: rgba(0,0,0,0.28);
+    --c-333: #dfdfdf;
+    --c-ccc: #303030;
+    --c-rgba255255255.025: rgba(0,0,0,0.02);
+    --c-8a8a8a: #6f6f6f;
+    --c-1c1c1c: #eeeeee;
+    --c-2a2a2a: #e5e5e5;
+    --c-fde68a: #b59103;
+    --c-111: #f4f4f4;
+    --c-rgba000.7: rgba(0,0,0,0.245);
+  }
+  #themebtn { position: sticky; top: 10px; float: right; z-index: 5; font: inherit; font-size: 12.5px; background: #1f1f1f; color: #eee; border: 1px solid #3a3a3a; border-radius: 5px; padding: 4px 10px; cursor: pointer; }
+
+  .specnav { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: #6b6b6b; margin: 0 0 18px; padding: 0 0 10px; border-bottom: 1px solid #2a2a2a; }
+  .specnav a { color: #93c5fd; text-decoration: none; } .specnav a:hover { text-decoration: underline; } .specnav .cur { color: #fff; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<button id="themebtn" type="button">Theme: dark</button>
+<nav class="specnav"><span>Clipless redesign</span><a href="index.html">Overview</a><span class="cur">Clips window</span><a href="quick-look-outliers-prototype.html">Outliers</a><a href="settings-tools-prototype.html">Settings: Tools</a><a href="settings-shell-variations.html">Settings: shell</a><a href="quick-look-redesign.md">Spec</a><a href="quick-look-outliers.md">Review</a></nav>
+<h1>Quick look, polished: the G5 clip reader refined</h1>
+<p class="lede">G5 from the last round: Space (or the eye) opens a reader over the dimmed list, drawn inside the Electron window. This version fixes the content column so it scrolls, drops the redundant "pinned" list from the side column, and tightens everything else: a real line-number gutter, matches grouped by capture group with hover-to-locate, wrap toggle for long lines, copy and edit in the header, and a footer that shows what the pins add up to without listing them again. Two frames below: the default 900x520 window, and a 300px-tall window to show the reader still fits and still scrolls. Clicking a launch target shows a toast instead of opening tabs.</p>
+
+<h2>What changed from G5</h2>
+<ul>
+  <li><b>Content scrolls.</b> The left column is a flex column with <code>min-height: 0</code> and the content pane is <code>flex: 1; overflow: auto</code>. Clip 5 is a 30-line log and clip 6 is a 14-line Python file so you can see both the vertical scrollbar and, with wrap off, the horizontal one. The gutter sticks to the left edge during horizontal scroll.</li>
+  <li><b>No pinned list.</b> The side column is just the matches, grouped. A pinned chip looks pinned (solid border, tick), so state is visible where you set it. The footer says "3 pinned" and offers the launch button; the full tray is one click away and still under the list when the reader closes.</li>
+  <li><b>Matches grouped by capture group.</b> Each group has a colour swatch, a count, and a "pin all" link for that group alone. Values that occur more than once show "x2". Hovering a match outlines every occurrence in the content and scrolls the first one into view, so you can find it before you pin it.</li>
+  <li><b>Header carries everything that acts on the whole clip.</b> Prev/next with "2 / 6", the clip number and type, then pin all (with a pinned/total count), copy clip, edit, wrap, close. Pin all and edit show an on-state when active.</li>
+  <li><b>Edit is the same surface, scrolled the same way.</b> The editor replaces the content pane and inherits its size. Esc leaves edit first, then closes the reader. Committing updates the collapsed line and re-scans.</li>
+  <li><b>Templates copy from the footer.</b> Every template with named tokens is listed next to the pinned count. One whose tokens are all pinned is a solid yellow pill; clicking it generates the text and copies it, with a toast saying which values it used. One that is missing tokens is dimmed with "needs ticket" on it; if the current clip contains the missing values, clicking the dimmed pill pins them from this clip (first occurrence) and the pill turns ready. If the clip does not have them, the pill is inert and the tooltip says to pin from another clip. <kbd>t</kbd> copies the first ready template. See <a href="#templates">Templates in the reader</a>.</li>
+  <li><b>Entrance is visible.</b> A 120ms scale-and-fade so the reader clearly comes from the list rather than just appearing. Focus moves into the reader on open and returns to the row on close.</li>
+</ul>
+
+<!-- hidden source; cloned into the reader by script -->
+<div id="clipsrc">
+  <div data-clip="c1" data-meta="json · 7 lines · 128 B" data-lang="json"><div class="l"><span class="lt"><span class="p">{</span></span></div><div class="l"><span class="lt">  <span class="k">"event"</span><span class="p">:</span> <span class="s">"auth_failure"</span><span class="p">,</span></span></div><div class="l"><span class="lt">  <span class="k">"user"</span><span class="p">:</span> <span class="s">"<span class="m" data-g="email" data-v="mreyes@example.com">mreyes@example.com</span>"</span><span class="p">,</span></span></div><div class="l"><span class="lt">  <span class="k">"sourceIp"</span><span class="p">:</span> <span class="s">"<span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span>"</span><span class="p">,</span></span></div><div class="l"><span class="lt">  <span class="k">"attempts"</span><span class="p">:</span> <span class="n">5</span><span class="p">,</span></span></div><div class="l"><span class="lt">  <span class="k">"ticket"</span><span class="p">:</span> <span class="s">"<span class="m" data-g="ticket" data-v="INC-4821">INC-4821</span>"</span></span></div><div class="l"><span class="lt"><span class="p">}</span></span></div></div>
+  <div data-clip="c2" data-meta="text · 3 lines · 214 B"><div class="l"><span class="lt">Investigating alert: failed logins from <span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> for <span class="m" data-g="email" data-v="mreyes@example.com">mreyes@example.com</span>.</span></div><div class="l"><span class="lt">Second source <span class="m" data-g="ip" data-v="198.51.100.7">198.51.100.7</span> seen overnight, resolves to <span class="m" data-g="domain" data-v="suspicious-domain.example.org">suspicious-domain.example.org</span>.</span></div><div class="l"><span class="lt">Tracking in <span class="m" data-g="ticket" data-v="INC-4821">INC-4821</span>. Escalate if attempts exceed 10.</span></div></div>
+  <div data-clip="c3" data-meta="url · 1 line · 48 B"><div class="l"><span class="lt"><span class="m" data-g="url" data-v="https://dashboard.example.com/incidents/INC-4821">https://dashboard.example.com/incidents/INC-4821</span></span></div></div>
+  <div data-clip="c4" data-meta="bash · 1 line · 44 B" data-lang="bash"><div class="l"><span class="lt"><span class="cmd">ssh</span> admin@<span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> <span class="fl">-p</span> <span class="n">2222</span> <span class="fl">-i</span> ~/.ssh/ir_key</span></div></div>
+  <div data-clip="c5" data-meta="log · 30 lines · 2.6 KB" data-gen="log"></div>
+  <div data-clip="c6" data-meta="python · 14 lines · 512 B" data-lang="python"><div class="l"><span class="lt"><span class="cm"># triage.py: enrich an alert and open the ticket</span></span></div><div class="l"><span class="lt"><span class="kw">import</span> requests</span></div><div class="l"><span class="lt"></span></div><div class="l"><span class="lt">API = <span class="s">"<span class="m" data-g="url" data-v="https://intel.example.com/api/v2/lookup">https://intel.example.com/api/v2/lookup</span>"</span></span></div><div class="l"><span class="lt">OWNER = <span class="s">"<span class="m" data-g="email" data-v="secops@example.com">secops@example.com</span>"</span></span></div><div class="l"><span class="lt"></span></div><div class="l"><span class="lt"><span class="kw">def</span> <span class="fn">enrich</span>(ip: str) -&gt; dict:</span></div><div class="l"><span class="lt">    r = requests.get(API, params={<span class="s">"ip"</span>: ip}, timeout=<span class="n">10</span>)</span></div><div class="l"><span class="lt">    r.raise_for_status()</span></div><div class="l"><span class="lt">    <span class="kw">return</span> r.json()</span></div><div class="l"><span class="lt"></span></div><div class="l"><span class="lt"><span class="kw">if</span> __name__ == <span class="s">"__main__"</span>:</span></div><div class="l"><span class="lt">    data = enrich(<span class="s">"<span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span>"</span>)</span></div><div class="l"><span class="lt">    print(data.get(<span class="s">"ticket"</span>, <span class="s">"<span class="m" data-g="ticket" data-v="INC-4821">INC-4821</span>"</span>), OWNER)</span></div></div>
+</div>
+
+<h2>Default window, 900 x 520</h2>
+<div class="app" id="app1">
+  <div class="bar"><span class="dots"><i></i><i></i><i></i></span> Clipless <span class="size">900 x 520</span></div>
+  <div class="rows">
+    <div class="row" data-row data-clip="c1"><div class="num">1</div><div class="body"><div class="line"><span class="lang">json</span>{ "event": "auth_failure", "user": "<span class="m" data-g="email" data-v="mreyes@example.com">mreyes@example.com</span>", "sourceIp": "<span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span>", "attempts": 5, "ticket": "<span class="m" data-g="ticket" data-v="INC-4821">INC-4821</span>" }</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-email)"></i><i style="background:var(--g-ip)"></i><i style="background:var(--g-ticket)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row data-clip="c2"><div class="num">2</div><div class="body"><div class="line">Investigating alert: failed logins from <span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> for <span class="m" data-g="email" data-v="mreyes@example.com">mreyes@example.com</span>. Second source <span class="m" data-g="ip" data-v="198.51.100.7">198.51.100.7</span> seen overnight, resolves to <span class="m" data-g="domain" data-v="suspicious-domain.example.org">suspicious-domain.example.org</span>.</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-ip)"></i><i style="background:var(--g-email)"></i><i style="background:var(--g-domain)"></i><i style="background:var(--g-ticket)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row data-clip="c3"><div class="num">3</div><div class="body"><div class="line"><span class="m" data-g="url" data-v="https://dashboard.example.com/incidents/INC-4821">https://dashboard.example.com/incidents/INC-4821</span></div></div><div class="right"><span class="dots-only"><i style="background:var(--g-url)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span><span class="lock" title="Locked"><i class="ico lock"></i></span></div></div>
+    <div class="row" data-row data-clip="c4"><div class="num">4</div><div class="body"><div class="line"><span class="lang">bash</span>ssh admin@<span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> -p 2222 -i ~/.ssh/ir_key</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-ip)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row data-clip="c5"><div class="num">5</div><div class="body"><div class="line">2026-08-21T02:14:07Z sshd[1182]: Failed password for <span class="m" data-g="user" data-v="admin">admin</span> from <span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> port 52211 2026-08-21T02:14:09Z sshd[1182]: Failed password for admin from 203.0.113.42 port 52213 2026-08-21T02:15:31Z sshd[1190] ...</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-user)"></i><i style="background:var(--g-ip)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row data-clip="c6"><div class="num">6</div><div class="body"><div class="line"><span class="lang">python</span># triage.py: enrich an alert and open the ticket import requests API = "<span class="m" data-g="url" data-v="https://intel.example.com/api/v2/lookup">https://intel.example.com/api/v2/lookup</span>" OWNER = "<span class="m" data-g="email" data-v="secops@example.com">secops@example.com</span>" def enrich(ip: str) ...</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-url)"></i><i style="background:var(--g-email)"></i><i style="background:var(--g-ip)"></i><i style="background:var(--g-ticket)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row><div class="num">7</div><div class="body"><div class="line">Customer order #100043912 refunded, case closed</div></div><div class="right"></div></div>
+    <div class="row" data-row><div class="num">8</div><div class="body"><div class="line dim">(empty)</div></div><div class="right"></div></div>
+    <div class="row" data-row><div class="num">9</div><div class="body"><div class="line dim">(empty)</div></div><div class="right"></div></div>
+    <div class="row" data-row><div class="num">10</div><div class="body"><div class="line dim">(empty)</div></div><div class="right"></div></div>
+  </div>
+  <div class="tray" data-tray></div>
+  <div class="status"><span>6 / 25 clips</span><span>1 locked</span><span class="sp"></span><span class="dim">Space: quick look</span></div>
+  <div class="dimmer" data-dimmer></div>
+  <div class="ql" data-ql tabindex="-1" role="dialog" aria-label="Quick look">
+    <div class="qh">
+      <span class="ibtn prev" data-prev title="Previous clip (Up)"></span><span class="ibtn next" data-next title="Next clip (Down)"></span>
+      <span class="clipno" data-clipno></span><span class="meta" data-meta></span><span class="pos" data-pos></span>
+      <span class="sp"></span>
+      <span class="ibtn pin" data-pinall title="Pin all values in this clip (p)"><span class="lbl" data-pinlbl></span></span>
+      <span class="ibtn copy" data-copy title="Copy clip to clipboard (c)"></span>
+      <span class="ibtn edit" data-edit title="Edit (e)"></span>
+      <span class="ibtn wrap" data-wrap title="Wrap long lines (w)"></span>
+      <span class="ibtn close" data-close title="Close (Esc)"></span>
+    </div>
+    <div class="qb">
+      <div class="qc"><div class="pb" data-pb></div><pre class="editor" data-editor contenteditable="true" spellcheck="false"></pre></div>
+      <div class="side"><div class="sh"><span>Matches</span><span class="sp"></span><span data-mcount></span></div><div class="sl" data-matches></div></div>
+    </div>
+    <div class="qf">
+      <span class="hints"><kbd>&uarr;</kbd><kbd>&darr;</kbd> clips &middot; <kbd>p</kbd> pin all &middot; <kbd>t</kbd> copy template &middot; <kbd>e</kbd> edit &middot; <kbd>Esc</kbd> close</span>
+      <span class="sp"></span>
+      <span class="tpls" data-tpls></span>
+      <span class="pc" data-pincount></span>
+      <span class="btn primary" data-launch>Launch</span>
+    </div>
+  </div>
+</div>
+<p class="try">Try it: open clip 5 (the 30-line log) and scroll the content. Hover a value in the matches column to see it outlined in the text. Click the gutter-less "pin all" link on the ip group. Toggle wrap on clip 2. Press &darr; to walk to clip 6 and see Python highlighting. Press e to edit, Esc to leave edit, Esc again to close. Templates: open clip 2, pin the ticket, and "IP block request" is still dimmed; click it and it pins the IP from this clip and turns solid. Pin the email too and "Incident Summary" becomes ready; click it (or press t) to copy.</p>
+
+<h2>Shrunk window, 300 tall</h2>
+<div class="app short" id="app2">
+  <div class="bar"><span class="dots"><i></i><i></i><i></i></span> Clipless <span class="size">700 x 300</span></div>
+  <div class="rows">
+    <div class="row" data-row data-clip="c2"><div class="num">2</div><div class="body"><div class="line">Investigating alert: failed logins from <span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> for <span class="m" data-g="email" data-v="mreyes@example.com">mreyes@example.com</span>. Second source <span class="m" data-g="ip" data-v="198.51.100.7">198.51.100.7</span> ...</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-ip)"></i><i style="background:var(--g-email)"></i><i style="background:var(--g-domain)"></i><i style="background:var(--g-ticket)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row data-clip="c5"><div class="num">5</div><div class="body"><div class="line">2026-08-21T02:14:07Z sshd[1182]: Failed password for <span class="m" data-g="user" data-v="admin">admin</span> from <span class="m" data-g="ip" data-v="203.0.113.42">203.0.113.42</span> port 52211 ...</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-user)"></i><i style="background:var(--g-ip)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row data-clip="c6"><div class="num">6</div><div class="body"><div class="line"><span class="lang">python</span># triage.py: enrich an alert and open the ticket import requests API = "<span class="m" data-g="url" data-v="https://intel.example.com/api/v2/lookup">https://intel.example.com/api/v2/lookup</span>" ...</div></div><div class="right"><span class="dots-only"><i style="background:var(--g-url)"></i><i style="background:var(--g-email)"></i><i style="background:var(--g-ip)"></i><i style="background:var(--g-ticket)"></i></span><span class="ib" data-open title="Quick look (Space)"><i class="ico eye"></i></span></div></div>
+    <div class="row" data-row><div class="num">7</div><div class="body"><div class="line">Customer order #100043912 refunded, case closed</div></div><div class="right"></div></div>
+    <div class="row" data-row><div class="num">8</div><div class="body"><div class="line dim">(empty)</div></div><div class="right"></div></div>
+  </div>
+  <div class="tray" data-tray></div>
+  <div class="status"><span>6 / 25 clips</span><span class="sp"></span><span class="dim">Space: quick look</span></div>
+  <div class="dimmer" data-dimmer></div>
+  <div class="ql" data-ql tabindex="-1" role="dialog" aria-label="Quick look">
+    <div class="qh">
+      <span class="ibtn prev" data-prev title="Previous clip (Up)"></span><span class="ibtn next" data-next title="Next clip (Down)"></span>
+      <span class="clipno" data-clipno></span><span class="meta" data-meta></span><span class="pos" data-pos></span>
+      <span class="sp"></span>
+      <span class="ibtn pin" data-pinall title="Pin all (p)"><span class="lbl" data-pinlbl></span></span>
+      <span class="ibtn copy" data-copy title="Copy clip (c)"></span>
+      <span class="ibtn edit" data-edit title="Edit (e)"></span>
+      <span class="ibtn wrap" data-wrap title="Wrap (w)"></span>
+      <span class="ibtn close" data-close title="Close (Esc)"></span>
+    </div>
+    <div class="qb">
+      <div class="qc"><div class="pb" data-pb></div><pre class="editor" data-editor contenteditable="true" spellcheck="false"></pre></div>
+      <div class="side"><div class="sh"><span>Matches</span><span class="sp"></span><span data-mcount></span></div><div class="sl" data-matches></div></div>
+    </div>
+    <div class="qf"><span class="hints"></span><span class="sp"></span><span class="tpls" data-tpls></span><span class="pc" data-pincount></span><span class="btn primary" data-launch>Launch</span></div>
+  </div>
+</div>
+<p class="try">Same reader, same code, in a window the user has dragged small. The hints drop out of the footer, the side column narrows, and the content still scrolls. Open clip 5 to see the log scroll inside roughly 160px.</p>
+
+<h2>Keyboard</h2>
+<div class="keys">
+  <span><kbd>Space</kbd></span><span>on a focused row, open quick look. While open, Space scrolls the content (browser default), as it should in a reader.</span>
+  <span><kbd>&uarr;</kbd> <kbd>&darr;</kbd></span><span>previous / next clip, skipping clips with no content. Wraps at neither end; the arrow buttons grey out instead.</span>
+  <span><kbd>p</kbd></span><span>pin all values in this clip. Press again to unpin them all. The header shows "3/5" when some are pinned.</span>
+  <span><kbd>e</kbd></span><span>toggle edit. Esc leaves edit without closing the reader. Enter commits as it does in the row editor today, Shift+Enter inserts a newline.</span>
+  <span><kbd>c</kbd></span><span>copy the whole clip to the clipboard, same as clicking the row number in the list.</span>
+  <span><kbd>t</kbd></span><span>copy the first ready template. With none ready, a toast says what to pin. Click a specific pill in the footer to choose among several ready templates.</span>
+  <span><kbd>w</kbd></span><span>toggle wrap for long lines. Remembered per session.</span>
+  <span><kbd>Esc</kbd></span><span>close. Focus returns to the row that was open, so &uarr;&darr; in the list continue from there.</span>
+</div>
+
+<h2>Side column rules</h2>
+<ul>
+  <li>Groups are ordered by first appearance in the clip, not alphabetically, so the column reads top to bottom the way the text does.</li>
+  <li>A value that appears more than once in the clip is listed once with "x<i>n</i>". Pinning it pins every occurrence, and the tray dedupes by value anyway.</li>
+  <li>"pin all" on a group pins that group only. The header's pin-all covers every group. Both are toggles: if everything they cover is already pinned, they unpin.</li>
+  <li>Hovering a value outlines its occurrences in the content and scrolls the first into view. Hovering a chip in the content lifts its row in the side column. Neither hover pins anything.</li>
+  <li>With no matches, the column says so in one line and the pin controls grey out. The reader still works as a plain viewer for clips with nothing to extract.</li>
+</ul>
+
+<h2 id="templates">Templates in the reader</h2>
+<p>The launch button and the template pills sit together in the footer because they are the same kind of thing: outcomes of the pinned set. Launch opens tabs from it; a template copies text built from it. Three rules:</p>
+<ol>
+  <li><b>Readiness comes from pins, not from the clip.</b> "Incident Summary" needs <code>{ticket}</code>, <code>{ip}</code> and <code>{email}</code>. It is ready when all three groups have a pinned value, whichever clips they came from. This is the cross-clip case the old launcher window could not do: ticket from clip 2, IP from clip 5, email from clip 6, one copy.</li>
+  <li><b>Not-ready pills are a shortcut, not a dead end.</b> A dimmed pill names what is missing. If the clip you are reading has that value, clicking the pill pins it (first occurrence) and the pill becomes ready; a toast says what got pinned. If the clip does not have it, the pill is inert and the tooltip points you to another clip. In the 300px frame not-ready pills are hidden to save space; ready ones always show.</li>
+  <li><b>One value per token.</b> With two IPs pinned, the template uses the first one pinned and the tooltip and toast both say so ("ip 203.0.113.42 (first of 2)"). To use the other, unpin the first. This replaces the old launcher's disabled-with-warning state, which blocked instead of choosing.</li>
+</ol>
+<p>Copying is a clipboard write with no visible result, so the toast is not optional: it names the template, the character count, and the values used. Clip templates that use only positional tokens (<code>{c1}</code>, <code>{c2}</code>) are not shown here; they do not depend on pins and belong in the context menu, as argued in the earlier inline-variants document.</p>
+
+<h2>Implementation notes</h2>
+<ul>
+  <li><b>Layout.</b> The reader is <code>position: absolute; inset: 38px 4% 44px 4%</code> inside the window's root element, so it is bounded by definition. Inside: a column flexbox (header, body, footer) where body is <code>flex: 1; min-height: 0</code> and a two-column grid. Each grid column is itself a column flexbox with <code>min-height: 0</code>, and the scrolling panes are <code>flex: 1; overflow: auto</code>. The <code>min-height: 0</code> at every level is what was missing in G5.</li>
+  <li><b>Lines, not a pre.</b> Content is rendered as one grid row per line (gutter cell, text cell) so line numbers are real elements, the gutter can be sticky during horizontal scroll, and lines with matches can be tinted. This is also what lets "scroll the first occurrence into view" work.</li>
+  <li><b>Prism tokens with chips inside.</b> Run Prism on the clip text, then walk the token tree splitting text nodes at match offsets (from the <code>d</code>-flag regex) to wrap values in chip spans. Tokens are never split across lines, so split into lines first, then tokenise per line with Prism's <code>tokenize</code> rather than <code>highlight</code>, keeping multi-line token state out of scope.</li>
+  <li><b>Editor.</b> Reuse the existing textarea plus Prism overlay, sized to the same pane. Chips are not rendered in edit mode. On commit: update clip, re-scan, re-render the reader in place (do not close it).</li>
+  <li><b>Focus and accessibility.</b> The reader is <code>role="dialog"</code>, gets focus on open, traps Tab within itself, and returns focus to the originating row on close. The dimmer is <code>aria-hidden</code> and clickable.</li>
+  <li><b>Pins.</b> Same <code>group|value</code> map in the clips provider as every previous round. The reader reads and writes it; the list chips and the tray re-render from it.</li>
+</ul>
+
+<div id="toast" role="status" aria-live="polite"><div class="t"></div><ul></ul></div>
+
+<script>
+(function () {
+  var toast = document.getElementById('toast'), toastTimer = null;
+  function showToast(title, urls) { toast.querySelector('.t').textContent = title; var ul = toast.querySelector('ul'); ul.innerHTML = ''; urls.forEach(function (u) { var li = document.createElement('li'); li.textContent = u; ul.appendChild(li); }); toast.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(function () { toast.classList.remove('show'); }, 3400); }
+  function launchUrls(urls) { var n = urls.filter(function (u) { return u.indexOf('http') === 0; }).length; showToast(n === 0 ? 'Would do' : 'Would open ' + n + (n === 1 ? ' tab' : ' tabs'), urls); }
+  function enc(v) { return encodeURIComponent(v); }
+  var TOOLS = { ip: [['VirusTotal', 'https://www.virustotal.com/gui/ip-address/{v}'], ['AbuseIPDB', 'https://www.abuseipdb.com/check/{v}'], ['Shodan', 'https://www.shodan.io/host/{v}']], email: [['Have I Been Pwned', 'https://haveibeenpwned.com/account/{v}'], ['Hunter', 'https://hunter.io/email-verifier/{v}']], ticket: [['ServiceNow', 'https://sn.example.com/incident.do?number={v}']], domain: [['urlscan', 'https://urlscan.io/domain/{v}']], url: [['Open', '{raw}'], ['urlscan', 'https://urlscan.io/search/#{v}']], user: [['Directory', 'https://people.example.com/search?q={v}']] };
+  var COLORS = { ip: 'var(--g-ip)', email: 'var(--g-email)', ticket: 'var(--g-ticket)', domain: 'var(--g-domain)', url: 'var(--g-url)', user: 'var(--g-user)' };
+  var TEMPLATES = [
+    { name: 'Incident Summary', tokens: ['ticket', 'ip', 'email'], chars: 412 },
+    { name: 'IP block request', tokens: ['ip'], chars: 186 },
+    { name: 'Domain report', tokens: ['domain', 'ticket'], chars: 240 }
+  ];
+  var ORDER = ['ip', 'email', 'ticket', 'domain', 'url', 'user'];
+  function all(root, sel) { return Array.prototype.slice.call(root.querySelectorAll(sel)); }
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  /* generated 30-line log for clip 5 */
+  (function () {
+    var src = document.querySelector('#clipsrc [data-gen="log"]'); var users = ['admin', 'root', 'mreyes', 'svc-backup', 'oracle', 'admin', 'root', 'postgres']; var ips = ['203.0.113.42', '198.51.100.7', '192.0.2.88', '203.0.113.42', '203.0.113.42'];
+    var html = ''; for (var i = 0; i < 30; i++) { var u = users[i % users.length], ip = ips[(i * 7) % ips.length], m = 14 + Math.floor(i / 4), s = (i * 13) % 60; var ok = i % 9 === 5;
+      html += '<div class="l"><span class="lt"><span class="ts">2026-08-21T02:' + (m < 10 ? '0' + m : m) + ':' + (s < 10 ? '0' + s : s) + 'Z</span> sshd[' + (1182 + i * 3) + ']: ' + (ok ? 'Accepted publickey for ' : 'Failed password for ') + '<span class="m" data-g="user" data-v="' + u + '">' + u + '</span> from <span class="m" data-g="ip" data-v="' + ip + '">' + ip + '</span> port ' + (52211 + i * 17) + (ok ? ' ssh2: ED25519 SHA256:Qm3k...' : '') + '</span></div>'; }
+    src.innerHTML = html;
+  })();
+  var SRC = {}; all(document.getElementById('clipsrc'), '[data-clip]').forEach(function (d) { SRC[d.getAttribute('data-clip')] = d; });
+
+  function setupApp(app) {
+    var pins = {}; var rows = all(app, '[data-row][data-clip]'); var ql = app.querySelector('[data-ql]'); var dim = app.querySelector('[data-dimmer]'); var cur = -1; var wrap = false;
+    function key(g, v) { return g + '|' + v; }
+    function keyOf(m) { return key(m.getAttribute('data-g'), m.getAttribute('data-v')); }
+    function paint() { all(app, '.m').forEach(function (m) { m.classList.toggle('pinned', !!pins[keyOf(m)]); }); renderTray(); renderFooter(); renderHeaderPin(); }
+    function toggleKey(k, g, v) { if (pins[k]) delete pins[k]; else pins[k] = { g: g, v: v }; paint(); }
+    function pinKeys(list) { var allOn = list.length > 0 && list.every(function (x) { return pins[x.k]; }); list.forEach(function (x) { if (allOn) delete pins[x.k]; else pins[x.k] = { g: x.g, v: x.v }; }); paint(); }
+    function clipKeys(root) { var seen = {}, out = []; all(root, '.m').forEach(function (m) { if (m.closest('.editor')) return; var k = keyOf(m); if (seen[k]) return; seen[k] = 1; out.push({ k: k, g: m.getAttribute('data-g'), v: m.getAttribute('data-v') }); }); return out; }
+    function byGroup() { var by = {}; Object.keys(pins).forEach(function (k) { var p = pins[k]; (by[p.g] = by[p.g] || []).push(p.v); }); return by; }
+    function urlsFor(g, vals, tool) { return vals.map(function (v) { return tool[1].replace('{raw}', v).replace('{v}', enc(v)); }); }
+    function allUrls(by) { var out = []; Object.keys(by).forEach(function (g) { (TOOLS[g] || []).forEach(function (t) { out = out.concat(urlsFor(g, by[g], t)); }); }); return out; }
+    function renderTray() {
+      var tray = app.querySelector('[data-tray]'); var by = byGroup(); var groups = ORDER.filter(function (g) { return by[g]; }); var total = 0; groups.forEach(function (g) { total += by[g].length; });
+      tray.classList.toggle('show', total > 0); tray.innerHTML = ''; if (!total) return;
+      var th = el('div', 'th'); th.appendChild(el('b', null, 'Launch tray')); th.appendChild(el('span', null, total + (total === 1 ? ' value' : ' values'))); th.appendChild(el('span', 'sp')); var clr = el('span', 'dim', 'clear'); clr.style.cursor = 'pointer'; clr.addEventListener('click', function () { pins = {}; paint(); }); th.appendChild(clr); tray.appendChild(th);
+      groups.forEach(function (g) { var d = el('div', 'grow'); var gn = el('div', 'gname'); var sw = el('i', 'sw'); sw.style.background = COLORS[g]; gn.appendChild(sw); gn.appendChild(document.createTextNode(g + (by[g].length > 1 ? ' x' + by[g].length : ''))); var vs = el('div', 'vals'); by[g].forEach(function (v) { var s = el('span', null, v.length > 30 ? v.slice(0, 28) + '…' : v); s.title = v; var x = el('i', null, '×'); x.addEventListener('click', function () { delete pins[key(g, v)]; paint(); }); s.appendChild(x); vs.appendChild(s); }); var ts = el('div', 'tools'); (TOOLS[g] || []).forEach(function (t) { var p = el('span', 'pill', t[0] + (by[g].length > 1 ? ' x' + by[g].length : '')); p.addEventListener('click', function () { launchUrls(urlsFor(g, by[g], t)); }); ts.appendChild(p); }); d.appendChild(gn); d.appendChild(vs); d.appendChild(ts); tray.appendChild(d); });
+      var tf = el('div', 'tfoot'); var tpl = el('span'); if (by.ticket && by.ip && by.email) { tpl.appendChild(document.createTextNode('Template ready: ')); var p = el('span', 'pill', 'Incident Summary'); p.style.color = 'var(--c-fde68a)'; p.addEventListener('click', function () { launchUrls(['(copies Incident Summary text built from ' + by.ticket[0] + ', ' + by.ip[0] + ', ' + by.email[0] + ')']); }); tpl.appendChild(p); } else { tpl.className = 'dim'; tpl.textContent = 'Incident Summary needs ticket + ip + email'; } tf.appendChild(tpl); tf.appendChild(el('span', 'sp')); var urls = allUrls(by); var go = el('span', 'btn primary', 'Open all (' + urls.length + (urls.length === 1 ? ' tab)' : ' tabs)')); go.addEventListener('click', function () { launchUrls(urls); }); tf.appendChild(go); tray.appendChild(tf);
+    }
+    function templateState(t) {
+      var by = byGroup(); var missing = t.tokens.filter(function (g) { return !by[g]; });
+      if (!missing.length) return { ready: true, uses: t.tokens.map(function (g) { return g + ' ' + by[g][0] + (by[g].length > 1 ? ' (first of ' + by[g].length + ')' : ''); }) };
+      var here = {}; if (cur >= 0) clipKeys(ql.querySelector('[data-pb]')).forEach(function (x) { if (!here[x.g]) here[x.g] = x; });
+      var fromClip = missing.map(function (g) { return here[g] || null; });
+      return { ready: false, missing: missing, fromClip: fromClip.every(Boolean) ? fromClip : null };
+    }
+    function copyTemplate(t) { var st = templateState(t); if (!st.ready) return false; showToast('Would copy "' + t.name + '" to the clipboard (' + t.chars + ' chars)', st.uses); return true; }
+    function renderTemplates() {
+      var box = ql.querySelector('[data-tpls]'); box.innerHTML = ''; box.appendChild(el('span', 'tl', 'Templates'));
+      TEMPLATES.forEach(function (t) {
+        var st = templateState(t); var p = el('span', 'tpl' + (st.ready ? '' : ' nr' + (st.fromClip ? '' : ' cant')), t.name);
+        if (st.ready) { p.title = 'Copy "' + t.name + '" using ' + st.uses.join(', '); p.addEventListener('click', function () { copyTemplate(t); }); }
+        else {
+          var need = el('span', 'need', 'needs ' + st.missing.join(' + ')); p.appendChild(need);
+          if (st.fromClip) { p.title = 'Click to pin ' + st.fromClip.map(function (x) { return x.g + ' ' + x.v; }).join(', ') + ' from this clip'; p.addEventListener('click', function () { st.fromClip.forEach(function (x) { pins[x.k] = { g: x.g, v: x.v }; }); paint(); showToast('Pinned ' + st.fromClip.map(function (x) { return x.v; }).join(', ') + ' for "' + t.name + '"', ['Click the template again to copy it.']); }); }
+          else { var here = {}; clipKeys(ql.querySelector('[data-pb]')).forEach(function (x) { here[x.g] = 1; }); var notHere = st.missing.filter(function (g) { return !here[g]; }); var list = notHere.length > 1 ? notHere.slice(0, -1).join(', ') + ' and ' + notHere[notHere.length - 1] : notHere[0]; p.title = 'Needs ' + st.missing.join(' + ') + '. ' + list + (notHere.length > 1 ? ' are' : ' is') + ' not in this clip; pin ' + (notHere.length > 1 ? 'them' : 'it') + ' from another clip.'; }
+        }
+        box.appendChild(p);
+      });
+    }
+    function renderFooter() { var n = Object.keys(pins).length; var urls = allUrls(byGroup()); var pc = ql.querySelector('[data-pincount]'); pc.innerHTML = ''; if (n) { var b = el('b', null, String(n)); pc.appendChild(b); pc.appendChild(document.createTextNode(n === 1 ? ' pinned' : ' pinned')); } else pc.textContent = 'nothing pinned'; var lb = ql.querySelector('[data-launch]'); lb.textContent = n ? 'Launch (' + urls.length + (urls.length === 1 ? ' tab)' : ' tabs)') : 'Launch'; lb.classList.toggle('disabled', !n); renderTemplates(); }
+    function renderHeaderPin() { if (cur < 0) return; var ks = clipKeys(ql.querySelector('[data-pb]')); var on = ks.filter(function (x) { return pins[x.k]; }).length; var b = ql.querySelector('[data-pinall]'); b.querySelector('[data-pinlbl]').textContent = ks.length ? on + '/' + ks.length : ''; b.classList.toggle('on', ks.length > 0 && on === ks.length); b.classList.toggle('disabled', ks.length === 0); }
+    function renderMatches() {
+      var box = ql.querySelector('[data-matches]'); box.innerHTML = ''; var pb = ql.querySelector('[data-pb]'); var groups = [], byG = {}, counts = {};
+      all(pb, '.m').forEach(function (m) { var g = m.getAttribute('data-g'), v = m.getAttribute('data-v'), k = key(g, v); if (!byG[g]) { byG[g] = []; groups.push(g); } if (!counts[k]) { counts[k] = 0; byG[g].push(v); } counts[k]++; });
+      var total = 0; groups.forEach(function (g) { total += byG[g].length; });
+      ql.querySelector('[data-mcount]').textContent = total ? total + (total === 1 ? ' value' : ' values') : '';
+      if (!total) { box.appendChild(el('div', 'none', 'No search terms match this clip.')); return; }
+      groups.forEach(function (g) {
+        var gd = el('div', 'grp'); var gh = el('div', 'gh'); var sw = el('i', 'sw'); sw.style.background = COLORS[g]; gh.appendChild(sw); gh.appendChild(el('span', null, g)); gh.appendChild(el('span', 'c', String(byG[g].length))); gh.appendChild(el('span', 'sp'));
+        var ga = el('span', 'ga', 'pin all'); ga.title = 'Pin every ' + g + ' in this clip'; ga.addEventListener('click', function () { pinKeys(byG[g].map(function (v) { return { k: key(g, v), g: g, v: v }; })); }); gh.appendChild(ga); gd.appendChild(gh);
+        byG[g].forEach(function (v) { var gi = el('div', 'gi'); var m = el('span', 'm', v); m.setAttribute('data-g', g); m.setAttribute('data-v', v); m.title = v; gi.appendChild(m); if (counts[key(g, v)] > 1) gi.appendChild(el('span', 'x', 'x' + counts[key(g, v)]));
+          gi.addEventListener('mouseenter', function () { var first = null; all(pb, '.m').forEach(function (t) { if (keyOf(t) === key(g, v)) { t.classList.add('lit'); if (!first) first = t; } }); if (first) first.scrollIntoView({ block: 'nearest', inline: 'nearest' }); });
+          gi.addEventListener('mouseleave', function () { all(pb, '.m.lit').forEach(function (t) { t.classList.remove('lit'); }); });
+          gd.appendChild(gi); });
+        box.appendChild(gd);
+      });
+    }
+    function fill(i) {
+      var row = rows[i]; var id = row.getAttribute('data-clip'); var src = SRC[id]; var pb = ql.querySelector('[data-pb]'); pb.innerHTML = '';
+      all(src, '.l').forEach(function (l, n) { var d = el('div', 'l'); if (l.querySelector('.m')) d.classList.add('has'); d.appendChild(el('span', 'ln', String(n + 1))); var lt = el('span', 'lt'); lt.innerHTML = l.querySelector('.lt').innerHTML; d.appendChild(lt); pb.appendChild(d); });
+      pb.classList.toggle('wrap', wrap); ql.querySelector('[data-wrap]').classList.toggle('on', wrap);
+      var ed = ql.querySelector('[data-editor]'); ed.innerHTML = all(src, '.l').map(function (l) { var c = l.querySelector('.lt').cloneNode(true); all(c, '.m').forEach(function (m) { m.classList.remove('pinned'); }); return c.innerHTML; }).join('\n');
+      ql.querySelector('[data-clipno]').textContent = 'Clip ' + row.querySelector('.num').textContent.trim();
+      var meta = ql.querySelector('[data-meta]'); meta.innerHTML = ''; var lang = src.getAttribute('data-lang'); if (lang) meta.appendChild(el('span', 'lang', lang)); meta.appendChild(document.createTextNode(src.getAttribute('data-meta').replace(/^\w+ · /, '')));
+      ql.querySelector('[data-pos]').textContent = (i + 1) + ' / ' + rows.length;
+      ql.querySelector('[data-prev]').classList.toggle('disabled', i === 0); ql.querySelector('[data-next]').classList.toggle('disabled', i === rows.length - 1);
+      ql.classList.remove('ed'); ql.querySelector('[data-edit]').classList.remove('on');
+      renderMatches(); paint(); pb.scrollTop = 0; pb.scrollLeft = 0;
+    }
+    function open(i) { if (i < 0 || i >= rows.length) return; var wasOpen = ql.classList.contains('show'); cur = i; fill(i); rows.forEach(function (r, j) { r.classList.toggle('sel', j === i); all(r, '[data-open]').forEach(function (b) { b.classList.toggle('on', j === i); }); }); dim.classList.add('show'); ql.classList.add('show'); if (!wasOpen) { requestAnimationFrame(function () { ql.classList.add('in'); }); } else ql.classList.add('in'); ql.focus({ preventScroll: true }); rows[i].scrollIntoView({ block: 'nearest' }); }
+    function close() { if (!ql.classList.contains('show')) return; ql.classList.remove('show', 'in', 'ed'); dim.classList.remove('show'); rows.forEach(function (r) { r.classList.remove('sel'); all(r, '[data-open]').forEach(function (b) { b.classList.remove('on'); }); }); var back = cur >= 0 ? rows[cur] : null; cur = -1; if (back) back.focus({ preventScroll: true }); }
+    function toggleEdit() { ql.classList.toggle('ed'); var on = ql.classList.contains('ed'); ql.querySelector('[data-edit]').classList.toggle('on', on); if (on) ql.querySelector('[data-editor]').focus(); else ql.focus(); }
+    function copyClip() { showToast('Would copy clip ' + rows[cur].querySelector('.num').textContent.trim() + ' to the clipboard', []); }
+    function toggleWrap() { wrap = !wrap; ql.querySelector('[data-pb]').classList.toggle('wrap', wrap); ql.querySelector('[data-wrap]').classList.toggle('on', wrap); }
+
+    rows.forEach(function (r) { r.setAttribute('tabindex', '0'); });
+    app.addEventListener('click', function (ev) {
+      var t = ev.target; var m = t.closest('.m');
+      if (m && !m.closest('.editor')) { ev.stopPropagation(); toggleKey(keyOf(m), m.getAttribute('data-g'), m.getAttribute('data-v')); return; }
+      var ob = t.closest('[data-open]'); if (ob) { ev.stopPropagation(); open(rows.indexOf(ob.closest('[data-row]'))); return; }
+      if (t.closest('[data-dimmer]')) { close(); return; }
+      if (t.closest('[data-close]')) close();
+      else if (t.closest('[data-prev]')) open(cur - 1);
+      else if (t.closest('[data-next]')) open(cur + 1);
+      else if (t.closest('[data-pinall]')) pinKeys(clipKeys(ql.querySelector('[data-pb]')));
+      else if (t.closest('[data-edit]')) toggleEdit();
+      else if (t.closest('[data-copy]')) copyClip();
+      else if (t.closest('[data-wrap]')) toggleWrap();
+      else if (t.closest('[data-launch]')) { var u = allUrls(byGroup()); if (u.length) launchUrls(u); }
+      else if (t.closest('.num') && t.closest('[data-row]')) showToast('Would copy clip ' + t.closest('.num').textContent.trim() + ' to the clipboard', []);
+    });
+    all(app, '.m').forEach(function (m) { m.addEventListener('mouseenter', function () { if (!ql.contains(m) || m.closest('.side')) return; all(ql, '.side .m').forEach(function (s) { if (keyOf(s) === keyOf(m)) s.classList.add('lit'); }); }); m.addEventListener('mouseleave', function () { all(ql, '.side .m.lit').forEach(function (s) { s.classList.remove('lit'); }); }); });
+    app.addEventListener('keydown', function (ev) {
+      var inEditor = !!ev.target.closest('.editor');
+      if (inEditor) { if (ev.key === 'Escape') { ev.preventDefault(); toggleEdit(); } return; }
+      if (ql.classList.contains('show')) {
+        if (ev.key === 'Escape') { ev.preventDefault(); close(); }
+        else if (ev.key === 'ArrowDown') { ev.preventDefault(); open(cur + 1); }
+        else if (ev.key === 'ArrowUp') { ev.preventDefault(); open(cur - 1); }
+        else if (ev.key === 'p') pinKeys(clipKeys(ql.querySelector('[data-pb]')));
+        else if (ev.key === 'e') toggleEdit();
+        else if (ev.key === 'c') copyClip();
+        else if (ev.key === 'w') toggleWrap();
+        else if (ev.key === 't') { var ready = TEMPLATES.filter(function (t) { return templateState(t).ready; }); if (ready.length) copyTemplate(ready[0]); else showToast('No template is ready', ['Pin the values a template needs; the footer shows which.']); }
+        else if (ev.key === 'Tab') { var f = all(ql, '[data-close], [data-prev], [data-next], [data-pinall], [data-edit], [data-copy], [data-wrap], [data-launch], .ga, .side .m').filter(function (x) { return !x.classList.contains('disabled'); }); if (f.length) { var idx = f.indexOf(document.activeElement); var nx = ev.shiftKey ? (idx <= 0 ? f.length - 1 : idx - 1) : (idx >= f.length - 1 ? 0 : idx + 1); f.forEach(function (x) { x.setAttribute('tabindex', '-1'); }); f[nx].focus(); ev.preventDefault(); } }
+        return;
+      }
+      var r = ev.target.closest('[data-row]'); if (!r) return;
+      if (ev.key === ' ' && r.getAttribute('data-clip')) { ev.preventDefault(); open(rows.indexOf(r)); }
+      else if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') { var list = all(app, '[data-row]'); var i = list.indexOf(r) + (ev.key === 'ArrowDown' ? 1 : -1); if (list[i]) { ev.preventDefault(); list[i].focus(); } }
+    });
+    renderFooter();
+    return { open: open, close: close, pins: function () { return pins; } };
+  }
+  window.__apps = { app1: setupApp(document.getElementById('app1')), app2: setupApp(document.getElementById('app2')) };
+})();
+</script>
+
+<script>
+(function () { var btn = document.getElementById('themebtn'); var light = /[?&]light\b/.test(location.search); function paint() { document.querySelectorAll('.app').forEach(function (f) { f.classList.toggle('light', light); }); btn.textContent = 'Theme: ' + (light ? 'light' : 'dark'); } btn.addEventListener('click', function () { light = !light; paint(); }); paint(); })();
+</script>
+<script>if (window.self !== window.top) { var n = document.querySelector(".specnav"); if (n) n.remove(); }</script>
+</body>
+</html>
