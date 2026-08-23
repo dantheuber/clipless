@@ -45,6 +45,8 @@ const api = {
   setClipboardBookmark: (bookmarkData: BookmarkData) =>
     electronAPI.ipcRenderer.invoke('set-clipboard-bookmark', bookmarkData),
   getFullImage: (imageId: string) => electronAPI.ipcRenderer.invoke('get-full-image', imageId),
+  htmlSanitize: (html: string): Promise<{ html: string; removed: Record<string, number> }> =>
+    electronAPI.ipcRenderer.invoke('html-sanitize', html),
   notifyClipCopied: (index: number) => electronAPI.ipcRenderer.invoke('notify-clip-copied', index),
   startClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('start-clipboard-monitoring'),
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),

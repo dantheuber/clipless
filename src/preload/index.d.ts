@@ -21,6 +21,7 @@ declare global {
       setClipboardHTML: (html: string) => Promise<void>;
       setClipboardRTF: (rtf: string) => Promise<void>;
       getFullImage: (imageId: string) => Promise<string | null>;
+      htmlSanitize: (html: string) => Promise<{ html: string; removed: Record<string, number> }>;
       setClipboardImage: (imageData: string) => Promise<void>;
       setClipboardBookmark: (bookmarkData: any) => Promise<void>;
       notifyClipCopied: (index: number) => Promise<void>;

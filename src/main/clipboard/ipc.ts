@@ -69,6 +69,7 @@ import type {
 } from '../../shared/types';
 import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
+import { sanitizeHtml } from './sanitize-html';
 
 let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
 
@@ -133,6 +134,10 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
   ipcMain.handle('storage-clear-all', async () => clearAllData());
+
+  // Rendered view of an html clip: sanitised here, shown only in a sandboxed iframe.
+  // Called when the user switches to the rendered view, never at capture.
+  ipcMain.handle('html-sanitize', (_event, html: string) => sanitizeHtml(html));
 
   // Image storage handler - load full image on demand
   ipcMain.handle('get-full-image', async (_event, imageId: string) => {
