@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
 import { PatternMatch, QuickTool, Template } from '../../../../shared/types';
+import { scanText } from '../../../../shared/scan';
 import { generateTextFromTemplate } from '../../../../shared/templates';
 import { buildToolUrls } from '../../../../shared/tools';
 import { useTheme } from '../../providers/theme';
@@ -191,7 +192,14 @@ export function QuickClipsScanner({
   const scanContent = useCallback(async () => {
     setLoading(true);
     try {
-      const scanResults = await window.api.quickClipsScanText(clipContent);
+      // The quick-clips-scan-text IPC is gone (spec 17.6); this window is unreachable and
+      // goes in step 4, so it scans locally only to keep compiling until then.
+      const terms = await window.api.searchTermsGetAll();
+      const scanResults: PatternMatch[] = scanText(clipContent, terms).matches.map((m) => ({
+        searchTermId: m.termId,
+        searchTermName: '',
+        captures: { [m.group]: m.value },
+      }));
       setMatches(scanResults);
 
       const captureMap = new Map<string, CaptureItem>();

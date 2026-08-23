@@ -182,7 +182,8 @@ export interface QuickTool {
 }
 
 /**
- * Result of pattern matching on clipboard content
+ * Result of pattern matching on clipboard content. Only the launcher window still reads
+ * it; it goes with that window in step 4.
  */
 export interface PatternMatch {
   searchTermId: string;
@@ -247,3 +248,20 @@ export interface UpdateState {
   progress?: number; // 0 to 100 while downloading
   message?: string; // set when status is error
 }
+
+/**
+ * What the main process answers to settings-changed. ok means the write landed and every
+ * enabled shortcut registered. failed lists the accelerators the OS refused, so the
+ * Hotkeys tab can say "not saved" on the right row. message says why ok is false when
+ * no accelerator failed: the write itself, or the OS refusing the login item.
+ */
+export interface SettingsApplyResult {
+  ok: boolean;
+  failed: string[];
+  message?: string;
+}
+
+/**
+ * Folders the About panel can open
+ */
+export type AppPathName = 'data' | 'logs';

@@ -1,4 +1,5 @@
 import { storage } from '../storage';
+import { DEFAULT_SETTINGS } from '../storage/defaults';
 import type { ClipItem, StoredClip, UserSettings } from '../../shared/types';
 
 // Storage integration functions
@@ -29,7 +30,8 @@ export const getSettings = async (): Promise<UserSettings> => {
     return await storage.getSettings();
   } catch (error) {
     console.error('Failed to get settings from storage:', error);
-    return {} as UserSettings;
+    // The defaults, not {}: maxClips and the hotkey map must exist downstream (spec 17.8)
+    return { ...DEFAULT_SETTINGS };
   }
 };
 

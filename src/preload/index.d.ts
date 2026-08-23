@@ -1,5 +1,6 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
 import type {
+  AppPathName,
   GroupColours,
   HotkeySettings,
   QuickClipsConfig,
@@ -8,6 +9,9 @@ import type {
   SearchTerm,
   Template,
   UpdateState,
+  SettingsApplyResult,
+  StorageStats,
+  UserSettings,
 } from '../shared/types';
 
 declare global {
@@ -15,6 +19,7 @@ declare global {
     electron: ElectronAPI;
     api: {
       platform: NodeJS.Platform;
+      arch: string;
       checkForUpdates: () => Promise<any>;
       downloadUpdate: () => Promise<any>;
       quitAndInstall: () => Promise<void>;
@@ -36,16 +41,18 @@ declare global {
       onHotkeyClipCopied: (callback: (clipIndex: number) => void) => () => void;
       openSettings: (tab?: string) => Promise<void>;
       getAutoStartState: () => Promise<boolean | null>;
-      settingsChanged: (settings: any) => Promise<boolean>;
-      onSettingsUpdated: (callback: (settings: any) => void) => () => void;
+      settingsChanged: (settings: UserSettings) => Promise<SettingsApplyResult>;
+      restartApp: () => Promise<void>;
+      openAppPath: (name: AppPathName) => Promise<string>;
+      onSettingsUpdated: (callback: (settings: UserSettings) => void) => () => void;
       hotkeysGetDefaults: () => Promise<HotkeySettings>;
       // Storage APIs
       onStorageReady: (callback: () => void) => () => void;
       storageGetClips: () => Promise<any[]>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
-      storageGetSettings: () => Promise<any>;
-      storageSaveSettings: (settings: any) => Promise<boolean>;
-      storageGetStats: () => Promise<{ clipCount: number; lockedCount: number; dataSize: number }>;
+      storageGetSettings: () => Promise<UserSettings>;
+      storageSaveSettings: (settings: Partial<UserSettings>) => Promise<boolean>;
+      storageGetStats: () => Promise<StorageStats>;
       storageExportData: () => Promise<string>;
       storageImportData: (jsonData: string) => Promise<boolean>;
       storageClearAll: () => Promise<boolean>;
@@ -65,8 +72,6 @@ declare global {
       quickToolsCreate: (name: string, url: string, captureGroups: string[]) => Promise<any>;
       quickToolsUpdate: (id: string, updates: any) => Promise<any>;
       quickToolsDelete: (id: string) => Promise<void>;
-      // Quick Clips - Scanning APIs
-      quickClipsScanText: (text: string) => Promise<any[]>;
       openExternalUrls: (urls: string[]) => Promise<number>;
       quickClipsExportConfig: () => Promise<QuickClipsConfig>;
       quickClipsImportConfig: (

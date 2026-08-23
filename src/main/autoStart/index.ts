@@ -26,10 +26,14 @@ const canManageAutoStart = (): boolean => isAutoStartSupported() && app.isPackag
  * Reconcile the OS login-item state with the desired setting. Clears the legacy
  * Windows entry first so the migration to the current AppUserModelId is
  * self-healing across upgrades.
+ *
+ * Returns whether the OS now holds the requested state. Where login items are not
+ * managed (Linux, dev builds) there is nothing to refuse, so that counts as applied.
+ * The settings window shows "not saved, retry" on the row when this is false (spec 15.5).
  */
-export const applyAutoStart = (enabled: boolean): void => {
+export const applyAutoStart = (enabled: boolean): boolean => {
   if (!canManageAutoStart()) {
-    return;
+    return true;
   }
 
   try {
@@ -37,8 +41,10 @@ export const applyAutoStart = (enabled: boolean): void => {
       app.setLoginItemSettings({ openAtLogin: false, name: LEGACY_LOGIN_ITEM_NAME });
     }
     app.setLoginItemSettings({ openAtLogin: enabled });
+    return app.getLoginItemSettings().openAtLogin === enabled;
   } catch (error) {
     console.error('Failed to apply auto-start setting:', error);
+    return false;
   }
 };
 

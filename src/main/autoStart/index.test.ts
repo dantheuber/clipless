@@ -83,10 +83,26 @@ describe('autoStart', () => {
       expect(app.setLoginItemSettings).toHaveBeenCalledWith({ openAtLogin: true });
     });
 
-    it('does not call setLoginItemSettings on linux', () => {
+    it('does not call setLoginItemSettings on linux, and counts as applied', () => {
       setPlatform('linux');
-      applyAutoStart(true);
+      expect(applyAutoStart(true)).toBe(true);
       expect(app.setLoginItemSettings).not.toHaveBeenCalled();
+    });
+
+    it('reports true when the OS holds the requested state afterwards', () => {
+      setPlatform('win32');
+      vi.mocked(app.getLoginItemSettings).mockReturnValue({
+        openAtLogin: true,
+      } as unknown as Electron.LoginItemSettings);
+      expect(applyAutoStart(true)).toBe(true);
+    });
+
+    it('reports false when the OS quietly kept the old state', () => {
+      setPlatform('win32');
+      vi.mocked(app.getLoginItemSettings).mockReturnValue({
+        openAtLogin: false,
+      } as unknown as Electron.LoginItemSettings);
+      expect(applyAutoStart(true)).toBe(false);
     });
 
     it('does not call setLoginItemSettings in an unpackaged (dev) build', () => {
@@ -103,7 +119,7 @@ describe('autoStart', () => {
         throw new Error('boom');
       });
 
-      expect(() => applyAutoStart(true)).not.toThrow();
+      expect(applyAutoStart(true)).toBe(false);
       expect(consoleSpy).toHaveBeenCalledWith(
         'Failed to apply auto-start setting:',
         expect.any(Error)

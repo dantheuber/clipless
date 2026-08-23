@@ -152,7 +152,84 @@ describe('HotkeyManager', () => {
 
     // Then fail on re-register
     vi.mocked(storage.getSettings).mockRejectedValue(new Error('fail'));
-    await expect(manager.onSettingsChanged()).resolves.toBeUndefined();
+    await expect(manager.onSettingsChanged()).resolves.toEqual({ ok: false, failed: [] });
+  });
+
+  it('reports the accelerators the OS refused, per row', async () => {
+    vi.mocked(globalShortcut.register).mockImplementation((acc: string) => acc !== 'Ctrl+Shift+1');
+    vi.mocked(storage.getSettings).mockResolvedValue({
+      maxClips: 100,
+      startMinimized: false,
+      autoStart: false,
+      hotkeys: {
+        enabled: true,
+        focusWindow: { enabled: true, key: 'Ctrl+Shift+V' },
+        quickClip1: { enabled: true, key: 'Ctrl+Shift+1' },
+        quickClip2: { enabled: false, key: 'Ctrl+Shift+2' },
+        quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
+        quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
+        quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
+        quickLook: { enabled: true, key: 'Ctrl+Shift+T' },
+        searchClips: { enabled: false, key: 'Ctrl+Shift+F' },
+      },
+    });
+
+    await manager.initialize();
+    const result = await manager.onSettingsChanged();
+
+    expect(result).toEqual({ ok: false, failed: ['Ctrl+Shift+1'] });
+    expect(manager.isHotkeyRegistered('Ctrl+Shift+V')).toBe(true);
+    expect(manager.isHotkeyRegistered('Ctrl+Shift+1')).toBe(false);
+  });
+
+  it('two rows on one accelerator: the second is refused and reported', async () => {
+    vi.mocked(storage.getSettings).mockResolvedValue({
+      maxClips: 100,
+      startMinimized: false,
+      autoStart: false,
+      hotkeys: {
+        enabled: true,
+        focusWindow: { enabled: true, key: 'Ctrl+Shift+V' },
+        quickClip1: { enabled: true, key: 'Ctrl+Shift+V' },
+        quickClip2: { enabled: false, key: 'Ctrl+Shift+2' },
+        quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
+        quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
+        quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
+        quickLook: { enabled: false, key: 'Ctrl+Shift+T' },
+        searchClips: { enabled: false, key: 'Ctrl+Shift+F' },
+      },
+    });
+
+    const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const result = await manager.onSettingsChanged();
+    spy.mockRestore();
+
+    expect(manager.isInitialized).toBe(true);
+    expect(result).toEqual({ ok: false, failed: ['Ctrl+Shift+V'] });
+    expect(globalShortcut.register).toHaveBeenCalledTimes(1);
+  });
+
+  it('answers ok with no failures when every enabled row registers', async () => {
+    vi.mocked(globalShortcut.register).mockImplementation(() => true);
+    vi.mocked(storage.getSettings).mockResolvedValue({
+      maxClips: 100,
+      startMinimized: false,
+      autoStart: false,
+      hotkeys: {
+        enabled: true,
+        focusWindow: { enabled: true, key: 'Ctrl+Shift+V' },
+        quickClip1: { enabled: true, key: 'Ctrl+Shift+1' },
+        quickClip2: { enabled: true, key: 'Ctrl+Shift+2' },
+        quickClip3: { enabled: true, key: 'Ctrl+Shift+3' },
+        quickClip4: { enabled: true, key: 'Ctrl+Shift+4' },
+        quickClip5: { enabled: true, key: 'Ctrl+Shift+5' },
+        quickLook: { enabled: true, key: 'Ctrl+Shift+T' },
+        searchClips: { enabled: true, key: 'Ctrl+Shift+F' },
+      },
+    });
+
+    await manager.initialize();
+    await expect(manager.onSettingsChanged()).resolves.toEqual({ ok: true, failed: [] });
   });
 
   it('registers quick look and search hotkeys', async () => {

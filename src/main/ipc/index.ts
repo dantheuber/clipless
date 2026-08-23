@@ -20,6 +20,9 @@ import {
   updateErrorMessage,
 } from '../updater';
 import { applyAutoStart } from '../autoStart';
+import { restartApp } from '../app/restart';
+import { openAppPath } from '../app/open-path';
+import type { AppPathName, SettingsApplyResult, UserSettings } from '../../shared/types';
 
 export function setupMainIPC(): void {
   // IPC test
@@ -30,42 +33,59 @@ export function setupMainIPC(): void {
     createSettingsWindow(tab);
   });
 
-  // Settings communication between windows
-  ipcMain.handle('settings-changed', async (_event, settings) => {
-    try {
-      // Save settings to storage
-      await storage.saveSettings(settings);
+  // The one write path for settings: save, apply, re-register the hotkeys, relay to
+  // every window, and answer what the OS refused so the row can say "not saved" (15.3).
+  ipcMain.handle(
+    'settings-changed',
+    async (_event, settings: UserSettings): Promise<SettingsApplyResult> => {
+      try {
+        const previous = await storage.getSettings();
+        await storage.saveSettings(settings);
 
-      // Apply auto-start setting to OS login items
-      applyAutoStart(settings.autoStart);
+        // The one expected refusal on General: the OS declining the login item (15.5)
+        const autoStartApplied = applyAutoStart(settings.autoStart);
+        const autoStartRefused = !autoStartApplied && settings.autoStart !== previous.autoStart;
 
-      // Apply window settings immediately
-      const mainWindow = getMainWindow();
-      if (mainWindow) {
-        await applyWindowSettings(mainWindow);
+        const mainWindow = getMainWindow();
+        if (mainWindow) {
+          await applyWindowSettings(mainWindow);
+        }
+        applyWindowBackgroundTheme(settings.theme);
+
+        const hotkeys = await hotkeyManager.onSettingsChanged();
+
+        const settingsWindow = getSettingsWindow();
+        if (mainWindow) {
+          mainWindow.webContents.send('settings-updated', settings);
+        }
+        if (settingsWindow) {
+          settingsWindow.webContents.send('settings-updated', settings);
+        }
+
+        if (autoStartRefused) {
+          return {
+            ok: false,
+            failed: hotkeys.failed,
+            message: 'the system refused the login item',
+          };
+        }
+        return { ok: hotkeys.ok, failed: hotkeys.failed };
+      } catch (error) {
+        console.error('Failed to save settings:', error);
+        return {
+          ok: false,
+          failed: [],
+          message: error instanceof Error ? error.message : String(error),
+        };
       }
-
-      // Keep the native window background matching the theme
-      applyWindowBackgroundTheme(settings.theme);
-
-      // Update hotkeys if settings changed
-      await hotkeyManager.onSettingsChanged();
-
-      // Relay settings changes to all windows
-      const settingsWindow = getSettingsWindow();
-      if (mainWindow) {
-        mainWindow.webContents.send('settings-updated', settings);
-      }
-      if (settingsWindow) {
-        settingsWindow.webContents.send('settings-updated', settings);
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      return false;
     }
-  });
+  );
+
+  // Import with replace restarts (15.5); the restart waits for the save queue first
+  ipcMain.handle('app-restart', () => restartApp());
+
+  // The About panel's data folder and log links (15.4)
+  ipcMain.handle('open-app-path', (_event, name: AppPathName) => openAppPath(name));
 
   // The one copy of the hotkey defaults; the settings window reads them from here
   ipcMain.handle('hotkeys-get-defaults', () => DEFAULT_HOTKEY_SETTINGS);

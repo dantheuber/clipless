@@ -37,7 +37,7 @@ import {
   deleteSearchTerm,
 } from './search-terms';
 import { getAllQuickTools, createQuickTool, updateQuickTool, deleteQuickTool } from './quick-tools';
-import { scanTextForPatterns, exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips';
+import { exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips';
 import { openExternalUrls } from './open-external';
 import type {
   ClipItem,
@@ -182,10 +182,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     thenBroadcast(() => deleteQuickTool(id))
   );
 
-  // Quick clips scanning IPC handlers
-  ipcMain.handle('quick-clips-scan-text', async (_event, text: string) =>
-    scanTextForPatterns(text)
-  );
   // Tabs from the tray and the reader: http and https only, in order (spec 17.3)
   ipcMain.handle('open-external-urls', async (_event, urls: string[]) => openExternalUrls(urls));
   ipcMain.handle('quick-clips-export-config', async () => exportQuickClipsConfig());

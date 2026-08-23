@@ -13,6 +13,8 @@ import type {
   QuickClipsImportMode,
   GroupColours,
   UpdateState,
+  SettingsApplyResult,
+  AppPathName,
 } from '../shared/types';
 
 /**
@@ -33,6 +35,7 @@ function subscribe<Args extends unknown[]>(
 const api = {
   // Platform info
   platform: process.platform,
+  arch: process.arch,
 
   // Auto-updater APIs
   checkForUpdates: () => electronAPI.ipcRenderer.invoke('check-for-updates'),
@@ -68,8 +71,13 @@ const api = {
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),
   getAutoStartState: (): Promise<boolean | null> =>
     electronAPI.ipcRenderer.invoke('auto-start-get-state'),
-  settingsChanged: (settings: UserSettings) =>
+  settingsChanged: (settings: UserSettings): Promise<SettingsApplyResult> =>
     electronAPI.ipcRenderer.invoke('settings-changed', settings),
+  // Import with replace restarts the app after the save queue drains (spec 15.5)
+  restartApp: (): Promise<void> => electronAPI.ipcRenderer.invoke('app-restart'),
+  // The About panel's folder links; resolves to the shell's error text, empty on success
+  openAppPath: (name: AppPathName): Promise<string> =>
+    electronAPI.ipcRenderer.invoke('open-app-path', name),
   onSettingsUpdated: (callback: (settings: UserSettings) => void) =>
     subscribe('settings-updated', (settings: UserSettings) => callback(settings)),
   hotkeysGetDefaults: (): Promise<HotkeySettings> =>
@@ -115,9 +123,6 @@ const api = {
     electronAPI.ipcRenderer.invoke('quick-tools-update', id, updates),
   quickToolsDelete: (id: string) => electronAPI.ipcRenderer.invoke('quick-tools-delete', id),
 
-  // Quick Clips - Scanning APIs
-  quickClipsScanText: (text: string) =>
-    electronAPI.ipcRenderer.invoke('quick-clips-scan-text', text),
   // Tabs from the tray and the reader: http and https only, opened in order (spec 17.3)
   openExternalUrls: (urls: string[]): Promise<number> =>
     electronAPI.ipcRenderer.invoke('open-external-urls', urls),
