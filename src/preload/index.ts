@@ -4,6 +4,7 @@ import type {
   BookmarkData,
   ClipItem,
   UserSettings,
+  HotkeySettings,
   StoredClip,
   Template,
   SearchTerm,
@@ -69,6 +70,8 @@ const api = {
     return () => electronAPI.ipcRenderer.removeListener('settings-updated', listener);
   },
   removeSettingsListeners: () => electronAPI.ipcRenderer.removeAllListeners('settings-updated'),
+  hotkeysGetDefaults: (): Promise<HotkeySettings> =>
+    electronAPI.ipcRenderer.invoke('hotkeys-get-defaults'),
 
   // Storage APIs
   onStorageReady: (callback: () => void) =>

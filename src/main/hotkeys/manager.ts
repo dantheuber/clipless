@@ -1,5 +1,6 @@
 import { BrowserWindow } from 'electron';
 import { storage } from '../storage';
+import { DEFAULT_HOTKEY_SETTINGS } from '../storage/defaults';
 import { HotkeyRegistry } from './registry';
 import { HotkeyActions } from './actions';
 import type { UserSettings } from '../../shared/types';
@@ -54,8 +55,8 @@ export class HotkeyManager {
       // Register quick clip hotkeys
       this.registerQuickClipHotkeys(hotkeys);
 
-      // Register tools launcher hotkey
-      this.registerToolsLauncherHotkey(hotkeys);
+      // Register quick look hotkey
+      this.registerQuickLookHotkey(hotkeys);
 
       // Register search clips hotkey
       this.registerSearchHotkey(hotkeys);
@@ -99,19 +100,17 @@ export class HotkeyManager {
     }
   }
 
-  private registerToolsLauncherHotkey(hotkeys: UserSettings['hotkeys']): void {
-    // Handle case where openToolsLauncher setting doesn't exist yet (new feature)
-    const toolsLauncherConfig = hotkeys?.openToolsLauncher || {
-      enabled: true,
-      key: 'CommandOrControl+Shift+T',
-    };
+  private registerQuickLookHotkey(hotkeys: UserSettings['hotkeys']): void {
+    // normalizeSettings fills a missing action from the defaults; the fallback here only
+    // covers a caller that bypasses storage.
+    const quickLookConfig = hotkeys?.quickLook || DEFAULT_HOTKEY_SETTINGS.quickLook;
 
-    if (toolsLauncherConfig.enabled) {
+    if (quickLookConfig.enabled) {
       console.log(
-        `Hotkey Manager: Attempting to register tools launcher hotkey: ${toolsLauncherConfig.key}`
+        `Hotkey Manager: Attempting to register quick look hotkey: ${quickLookConfig.key}`
       );
-      this.registry.registerHotkey(toolsLauncherConfig.key, () => {
-        this.actions.openToolsLauncher();
+      this.registry.registerHotkey(quickLookConfig.key, () => {
+        this.actions.quickLook();
       });
     }
   }

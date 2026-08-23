@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
+import type { HotkeySettings } from '../shared/types';
 
 declare global {
   interface Window {
@@ -35,6 +36,7 @@ declare global {
       settingsChanged: (settings: any) => Promise<boolean>;
       onSettingsUpdated: (callback: (settings: any) => void) => void;
       removeSettingsListeners: () => void;
+      hotkeysGetDefaults: () => Promise<HotkeySettings>;
       // Storage APIs
       onStorageReady: (callback: () => void) => void;
       removeStorageReadyListeners: () => void;

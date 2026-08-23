@@ -363,8 +363,9 @@ class SecureStorage {
 
     const settings = normalizeSettings(this.settings);
 
-    // Save if hotkeys were missing and added
-    if (!this.settings.hotkeys) {
+    // Persist a migration (missing hotkeys, the openToolsLauncher rename, a missing
+    // action) the first time it applies; after that normalizeSettings is a no-op.
+    if (JSON.stringify(settings) !== JSON.stringify(this.settings)) {
       this.settings = settings;
       await this.saveSettingsData();
     }

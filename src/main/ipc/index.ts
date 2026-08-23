@@ -2,6 +2,7 @@ import { ipcMain, Menu, MenuItemConstructorOptions } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 import { storage } from '../storage';
+import { DEFAULT_HOTKEY_SETTINGS } from '../storage/defaults';
 import { hotkeyManager } from '../hotkeys';
 import {
   getMainWindow,
@@ -76,6 +77,9 @@ export function setupMainIPC(): void {
       return {};
     }
   });
+
+  // The one copy of the hotkey defaults; the settings window reads them from here
+  ipcMain.handle('hotkeys-get-defaults', () => DEFAULT_HOTKEY_SETTINGS);
 
   // Tools Launcher window IPC handlers
   ipcMain.handle('open-tools-launcher', (_event, clipContent: string) => {

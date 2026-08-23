@@ -51,7 +51,7 @@ export interface HotkeySettings {
   quickClip3: HotkeyConfig;
   quickClip4: HotkeyConfig;
   quickClip5: HotkeyConfig;
-  openToolsLauncher: HotkeyConfig;
+  quickLook: HotkeyConfig; // was openToolsLauncher; normalizeSettings migrates stored maps
   searchClips: HotkeyConfig;
 }
 

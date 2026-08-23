@@ -46,7 +46,7 @@ describe('HotkeyManager', () => {
         quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
-        openToolsLauncher: { enabled: false, key: 'Ctrl+Shift+T' },
+        quickLook: { enabled: false, key: 'Ctrl+Shift+T' },
         searchClips: { enabled: false, key: 'Ctrl+Shift+F' },
       },
     });
@@ -155,7 +155,7 @@ describe('HotkeyManager', () => {
     await expect(manager.onSettingsChanged()).resolves.toBeUndefined();
   });
 
-  it('registers tools launcher and search hotkeys', async () => {
+  it('registers quick look and search hotkeys', async () => {
     vi.mocked(storage.getSettings).mockResolvedValue({
       maxClips: 100,
       startMinimized: false,
@@ -168,7 +168,7 @@ describe('HotkeyManager', () => {
         quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
-        openToolsLauncher: { enabled: true, key: 'Ctrl+Shift+T' },
+        quickLook: { enabled: true, key: 'Ctrl+Shift+T' },
         searchClips: { enabled: true, key: 'Ctrl+Shift+F' },
       },
     });
@@ -178,7 +178,7 @@ describe('HotkeyManager', () => {
     expect(globalShortcut.register).toHaveBeenCalledTimes(2);
   });
 
-  it('uses default tools launcher config when missing', async () => {
+  it('uses the default quick look config when missing', async () => {
     vi.mocked(storage.getSettings).mockResolvedValue({
       maxClips: 100,
       startMinimized: false,
@@ -191,7 +191,7 @@ describe('HotkeyManager', () => {
         quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
-        // openToolsLauncher and searchClips deliberately missing
+        // quickLook and searchClips deliberately missing
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
     });
@@ -215,7 +215,7 @@ describe('HotkeyManager', () => {
         quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
-        openToolsLauncher: { enabled: false, key: 'Ctrl+Shift+T' },
+        quickLook: { enabled: false, key: 'Ctrl+Shift+T' },
         searchClips: { enabled: false, key: 'Ctrl+Shift+F' },
       },
     });
@@ -310,7 +310,7 @@ describe('HotkeyManager', () => {
         quickClip3: { enabled: false, key: 'Ctrl+Shift+3' },
         quickClip4: { enabled: false, key: 'Ctrl+Shift+4' },
         quickClip5: { enabled: false, key: 'Ctrl+Shift+5' },
-        openToolsLauncher: { enabled: true, key: 'Ctrl+Shift+T' },
+        quickLook: { enabled: true, key: 'Ctrl+Shift+T' },
         searchClips: { enabled: true, key: 'Ctrl+Shift+F' },
       },
     });

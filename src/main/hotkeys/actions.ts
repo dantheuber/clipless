@@ -161,7 +161,8 @@ export class HotkeyActions {
   }
 
   /**
-   * Open tools launcher for the content currently on the system clipboard.
+   * The quick look hotkey. Until step 2 of the quick look plan lands it still opens the
+   * tools launcher window for the content currently on the system clipboard.
    *
    * Reads the live clipboard directly rather than the most recent stored clip,
    * because stored history trails the real clipboard by at least one 250ms poll
@@ -170,7 +171,7 @@ export class HotkeyActions {
    * Falls back to the most recent stored clip only when the live read is empty
    * (e.g. empty clipboard or an unsupported format).
    */
-  async openToolsLauncher(): Promise<void> {
+  async quickLook(): Promise<void> {
     try {
       const liveData = getCurrentClipboardData();
       let content = liveData?.content;

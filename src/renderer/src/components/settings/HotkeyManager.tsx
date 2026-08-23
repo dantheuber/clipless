@@ -30,7 +30,7 @@ export const HotkeyManager: React.FC<HotkeyManagerProps> = () => {
     cancelKeyCapture,
   } = useHotkeyManager();
 
-  if (loading) {
+  if (loading || !hotkeySettings) {
     return <LoadingState />;
   }
 

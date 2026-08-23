@@ -335,14 +335,14 @@ describe('HotkeyActions', () => {
     });
   });
 
-  describe('openToolsLauncher', () => {
+  describe('quickLook', () => {
     it('opens launcher with live clipboard content even when stored clip is stale', async () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'fresh' });
       vi.mocked(storage.getClips).mockResolvedValue([
         { clip: { type: 'text', content: 'stale' }, isLocked: false, timestamp: 1 },
       ]);
 
-      await actions.openToolsLauncher();
+      await actions.quickLook();
 
       const { createToolsLauncherWindow } = await import('../window/creation.js');
       expect(createToolsLauncherWindow).toHaveBeenCalledWith('fresh');
@@ -351,7 +351,7 @@ describe('HotkeyActions', () => {
     it('does not read stored history when live clipboard has content', async () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'fresh' });
 
-      await actions.openToolsLauncher();
+      await actions.quickLook();
 
       expect(storage.getClips).not.toHaveBeenCalled();
     });
@@ -362,7 +362,7 @@ describe('HotkeyActions', () => {
         { clip: { type: 'text', content: 'stored' }, isLocked: false, timestamp: 1 },
       ]);
 
-      await actions.openToolsLauncher();
+      await actions.quickLook();
 
       const { createToolsLauncherWindow } = await import('../window/creation.js');
       expect(createToolsLauncherWindow).toHaveBeenCalledWith('stored');
@@ -374,7 +374,7 @@ describe('HotkeyActions', () => {
         { clip: { type: 'text', content: 'stored' }, isLocked: false, timestamp: 1 },
       ]);
 
-      await actions.openToolsLauncher();
+      await actions.quickLook();
 
       const { createToolsLauncherWindow } = await import('../window/creation.js');
       expect(createToolsLauncherWindow).toHaveBeenCalledWith('stored');
@@ -384,7 +384,7 @@ describe('HotkeyActions', () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue(null);
       vi.mocked(storage.getClips).mockResolvedValue([]);
 
-      await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
+      await expect(actions.quickLook()).resolves.toBeUndefined();
 
       const { createToolsLauncherWindow } = await import('../window/creation.js');
       expect(createToolsLauncherWindow).not.toHaveBeenCalled();
@@ -394,13 +394,13 @@ describe('HotkeyActions', () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue(null);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       vi.mocked(storage.getClips).mockResolvedValue([null as any]);
-      await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
+      await expect(actions.quickLook()).resolves.toBeUndefined();
     });
 
     it('handles error gracefully', async () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue(null);
       vi.mocked(storage.getClips).mockRejectedValue(new Error('fail'));
-      await expect(actions.openToolsLauncher()).resolves.toBeUndefined();
+      await expect(actions.quickLook()).resolves.toBeUndefined();
     });
   });
 });

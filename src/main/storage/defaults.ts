@@ -27,7 +27,7 @@ export const DEFAULT_HOTKEY_SETTINGS: HotkeySettings = {
     enabled: true,
     key: 'CommandOrControl+Shift+5',
   },
-  openToolsLauncher: {
+  quickLook: {
     enabled: true,
     key: 'CommandOrControl+Shift+T',
   },

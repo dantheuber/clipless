@@ -1,43 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { UserSettings, HotkeySettings } from '../../../../../shared/types';
 
-// Default hotkey configurations
-export const defaultHotkeySettings: HotkeySettings = {
-  enabled: false,
-  focusWindow: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+V',
-  },
-  quickClip1: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+1',
-  },
-  quickClip2: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+2',
-  },
-  quickClip3: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+3',
-  },
-  quickClip4: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+4',
-  },
-  quickClip5: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+5',
-  },
-  openToolsLauncher: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+T',
-  },
-  searchClips: {
-    enabled: true,
-    key: 'CommandOrControl+Shift+F',
-  },
-};
-
 export const hotkeyDescriptions = {
   focusWindow: 'Show/Focus Clipless Window',
   quickClip1: 'Copy 1st Clip',
@@ -45,13 +8,14 @@ export const hotkeyDescriptions = {
   quickClip3: 'Copy 3rd Clip',
   quickClip4: 'Copy 4th Clip',
   quickClip5: 'Copy 5th Clip',
-  openToolsLauncher: 'Open Tools Launcher for Latest Clip',
+  quickLook: 'Quick look on newest clip',
   searchClips: 'Search/Filter Clips',
 };
 
 export const useHotkeyManager = () => {
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [hotkeySettings, setHotkeySettings] = useState<HotkeySettings>(defaultHotkeySettings);
+  // null until the main process has answered with its defaults and the stored map
+  const [hotkeySettings, setHotkeySettings] = useState<HotkeySettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editingHotkey, setEditingHotkey] = useState<string | null>(null);
@@ -63,19 +27,13 @@ export const useHotkeyManager = () => {
       if (!window.api) return;
 
       try {
-        const loadedSettings = await window.api.storageGetSettings();
+        // The main process holds the one copy of the defaults (spec 15.6)
+        const [defaults, loadedSettings] = await Promise.all([
+          window.api.hotkeysGetDefaults(),
+          window.api.storageGetSettings(),
+        ]);
         setSettings(loadedSettings);
-
-        // Use existing hotkey settings or defaults, ensuring all properties exist
-        if (loadedSettings.hotkeys) {
-          const completeHotkeySettings = {
-            ...defaultHotkeySettings,
-            ...loadedSettings.hotkeys,
-          };
-          setHotkeySettings(completeHotkeySettings);
-        } else {
-          setHotkeySettings(defaultHotkeySettings);
-        }
+        setHotkeySettings({ ...defaults, ...(loadedSettings.hotkeys ?? {}) });
       } catch (error) {
         console.error('Failed to load settings:', error);
       } finally {
@@ -117,6 +75,7 @@ export const useHotkeyManager = () => {
   );
 
   const handleGlobalToggle = async (enabled: boolean) => {
+    if (!hotkeySettings) return;
     const updatedSettings = { ...hotkeySettings, enabled };
     await saveSettings(updatedSettings);
   };
@@ -125,6 +84,7 @@ export const useHotkeyManager = () => {
     hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>,
     enabled: boolean
   ) => {
+    if (!hotkeySettings) return;
     const updatedSettings = {
       ...hotkeySettings,
       [hotkeyKey]: { ...hotkeySettings[hotkeyKey], enabled },
@@ -134,6 +94,7 @@ export const useHotkeyManager = () => {
 
   const handleHotkeyChange = useCallback(
     async (hotkeyKey: keyof Omit<HotkeySettings, 'enabled'>, key: string) => {
+      if (!hotkeySettings) return;
       const updatedSettings = {
         ...hotkeySettings,
         [hotkeyKey]: { ...hotkeySettings[hotkeyKey], key },
