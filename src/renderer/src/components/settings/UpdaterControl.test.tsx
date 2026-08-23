@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, act } from '@testing-library/react';
-import UpdaterControl, { updateStatusText } from './UpdaterControl';
+import UpdaterControl from './UpdaterControl';
+import { updateStatusText } from './updateStatusText';
 import type { UpdateState } from '../../../../shared/types';
 
 const theme = vi.hoisted(() => ({ isLight: false }));

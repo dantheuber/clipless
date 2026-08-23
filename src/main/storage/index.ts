@@ -570,26 +570,6 @@ class SecureStorage {
     await this.saveTemplatesData();
   }
 
-  /**
-   * Reorder search terms
-   */
-  async reorderSearchTerms(searchTerms: SearchTerm[]): Promise<void> {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
-
-    searchTerms.forEach((searchTerm, index) => {
-      const existingSearchTerm = this.templatesData.searchTerms.find((t) => t.id === searchTerm.id);
-      if (existingSearchTerm) {
-        existingSearchTerm.order = index;
-      }
-    });
-
-    // Sort search terms by order
-    this.templatesData.searchTerms.sort((a, b) => a.order - b.order);
-    await this.saveTemplatesData();
-  }
-
   // ===== QUICK TOOLS MANAGEMENT =====
 
   /**
@@ -658,26 +638,6 @@ class SecureStorage {
 
     this.templatesData.quickTools.splice(quickToolIndex, 1);
     this.templatesData.quickTools = reorderQuickToolsArray(this.templatesData.quickTools);
-    await this.saveTemplatesData();
-  }
-
-  /**
-   * Reorder quick tools
-   */
-  async reorderQuickTools(quickTools: QuickTool[]): Promise<void> {
-    if (!this.isInitialized) {
-      await this.initialize();
-    }
-
-    quickTools.forEach((quickTool, index) => {
-      const existingQuickTool = this.templatesData.quickTools.find((t) => t.id === quickTool.id);
-      if (existingQuickTool) {
-        existingQuickTool.order = index;
-      }
-    });
-
-    // Sort quick tools by order
-    this.templatesData.quickTools.sort((a, b) => a.order - b.order);
     await this.saveTemplatesData();
   }
 

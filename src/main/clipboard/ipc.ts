@@ -1,11 +1,6 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import {
   getCurrentClipboardData,
-  getClipboardText,
-  getClipboardHTML,
-  getClipboardRTF,
-  getClipboardImage,
-  getClipboardBookmark,
   setClipboardText,
   setClipboardHTML,
   setClipboardRTF,
@@ -41,17 +36,8 @@ import {
   createSearchTerm,
   updateSearchTerm,
   deleteSearchTerm,
-  reorderSearchTerms,
-  testSearchTerm,
 } from './search-terms';
-import {
-  getAllQuickTools,
-  createQuickTool,
-  updateQuickTool,
-  deleteQuickTool,
-  reorderQuickTools,
-  validateToolUrl,
-} from './quick-tools';
+import { getAllQuickTools, createQuickTool, updateQuickTool, deleteQuickTool } from './quick-tools';
 import {
   scanTextForPatterns,
   openToolsForMatches,
@@ -102,13 +88,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     console.log('Clipboard IPC handlers already registered, skipping...');
     return;
   }
-
-  // Basic clipboard read operations
-  ipcMain.handle('get-clipboard-text', () => getClipboardText());
-  ipcMain.handle('get-clipboard-html', () => getClipboardHTML());
-  ipcMain.handle('get-clipboard-rtf', () => getClipboardRTF());
-  ipcMain.handle('get-clipboard-image', () => getClipboardImage());
-  ipcMain.handle('get-clipboard-bookmark', () => getClipboardBookmark());
 
   // Get current clipboard data using same prioritization as monitoring
   ipcMain.handle('get-current-clipboard-data', () => getCurrentClipboardData());
@@ -216,12 +195,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('search-terms-delete', async (_event, id: string) =>
     thenBroadcast(() => deleteSearchTerm(id))
   );
-  ipcMain.handle('search-terms-reorder', async (_event, searchTerms: SearchTerm[]) =>
-    reorderSearchTerms(searchTerms)
-  );
-  ipcMain.handle('search-terms-test', async (_event, pattern: string, testText: string) =>
-    testSearchTerm(pattern, testText)
-  );
 
   // Quick tools IPC handlers
   ipcMain.handle('quick-tools-get-all', async () => getAllQuickTools());
@@ -235,12 +208,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   );
   ipcMain.handle('quick-tools-delete', async (_event, id: string) =>
     thenBroadcast(() => deleteQuickTool(id))
-  );
-  ipcMain.handle('quick-tools-reorder', async (_event, tools: QuickTool[]) =>
-    reorderQuickTools(tools)
-  );
-  ipcMain.handle('quick-tools-validate-url', async (_event, url: string, captureGroups: string[]) =>
-    validateToolUrl(url, captureGroups)
   );
 
   // Quick clips scanning IPC handlers

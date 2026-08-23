@@ -17,11 +17,6 @@ declare global {
       quitAndInstall: () => Promise<void>;
       getUpdateState: () => Promise<UpdateState>;
       onUpdateState: (callback: (state: UpdateState) => void) => () => void;
-      getClipboardText: () => Promise<string>;
-      getClipboardHTML: () => Promise<string>;
-      getClipboardRTF: () => Promise<string>;
-      getClipboardImage: () => Promise<string | null>;
-      getClipboardBookmark: () => Promise<{ title: string; url: string } | null>;
       getCurrentClipboardData: () => Promise<{ type: string; content: string } | null>;
       setClipboardText: (text: string) => Promise<void>;
       setClipboardHTML: (html: string) => Promise<void>;
@@ -33,21 +28,17 @@ declare global {
       notifyClipCopied: (index: number) => Promise<void>;
       startClipboardMonitoring: () => Promise<boolean>;
       stopClipboardMonitoring: () => Promise<boolean>;
-      onClipboardChanged: (callback: (clipData: { type: string; content: string }) => void) => void;
-      removeClipboardListeners: () => void;
-      onHotkeyClipCopied: (callback: (clipIndex: number) => void) => void;
-      removeHotkeyListeners: () => void;
+      onClipboardChanged: (
+        callback: (clipData: { type: string; content: string; text?: string }) => void
+      ) => () => void;
+      onHotkeyClipCopied: (callback: (clipIndex: number) => void) => () => void;
       openSettings: (tab?: string) => Promise<void>;
-      closeSettings: () => Promise<void>;
-      getSettings: () => Promise<any>;
       getAutoStartState: () => Promise<boolean | null>;
       settingsChanged: (settings: any) => Promise<boolean>;
-      onSettingsUpdated: (callback: (settings: any) => void) => void;
-      removeSettingsListeners: () => void;
+      onSettingsUpdated: (callback: (settings: any) => void) => () => void;
       hotkeysGetDefaults: () => Promise<HotkeySettings>;
       // Storage APIs
-      onStorageReady: (callback: () => void) => void;
-      removeStorageReadyListeners: () => void;
+      onStorageReady: (callback: () => void) => () => void;
       storageGetClips: () => Promise<any[]>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<any>;
@@ -72,18 +63,11 @@ declare global {
       searchTermsCreate: (name: string, pattern: string) => Promise<any>;
       searchTermsUpdate: (id: string, updates: any) => Promise<any>;
       searchTermsDelete: (id: string) => Promise<void>;
-      searchTermsReorder: (searchTerms: any[]) => Promise<void>;
-      searchTermsTest: (pattern: string, testText: string) => Promise<any[]>;
       // Quick Clips - Tools APIs
       quickToolsGetAll: () => Promise<any[]>;
       quickToolsCreate: (name: string, url: string, captureGroups: string[]) => Promise<any>;
       quickToolsUpdate: (id: string, updates: any) => Promise<any>;
       quickToolsDelete: (id: string) => Promise<void>;
-      quickToolsReorder: (tools: any[]) => Promise<void>;
-      quickToolsValidateUrl: (
-        url: string,
-        captureGroups: string[]
-      ) => Promise<{ isValid: boolean; errors: string[] }>;
       // Quick Clips - Scanning APIs
       quickClipsScanText: (text: string) => Promise<any[]>;
       quickClipsOpenTools: (matches: any[], toolIds: string[]) => Promise<void>;
@@ -100,19 +84,9 @@ declare global {
       openToolsLauncher: (clipContent: string) => Promise<void>;
       closeToolsLauncher: () => Promise<void>;
       toolsLauncherReady: () => Promise<void>;
-      onToolsLauncherInitialize: (callback: (clipContent: string) => void) => void;
-      onToggleSearch: (callback: () => void) => void;
-      removeToggleSearchListeners: () => void;
+      onToolsLauncherInitialize: (callback: (clipContent: string) => void) => () => void;
+      onToggleSearch: (callback: () => void) => () => void;
       removeAllListeners?: (channel: string) => void;
-      // Native Context Menu APIs
-      showClipContextMenu: (options: {
-        index: number;
-        isFirstClip: boolean;
-        isLocked: boolean;
-        hasPatterns: boolean;
-      }) => Promise<void>;
-      onContextMenuAction: (callback: (data: { action: string; index: number }) => void) => void;
-      removeContextMenuListeners: () => void;
     };
   }
 }

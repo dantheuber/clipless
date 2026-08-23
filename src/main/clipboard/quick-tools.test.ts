@@ -6,63 +6,13 @@ vi.mock('../storage', () => ({
     createQuickTool: vi.fn(),
     updateQuickTool: vi.fn(),
     deleteQuickTool: vi.fn(),
-    reorderQuickTools: vi.fn(),
   },
 }));
 
-import {
-  getAllQuickTools,
-  createQuickTool,
-  updateQuickTool,
-  deleteQuickTool,
-  reorderQuickTools,
-  validateToolUrl,
-} from './quick-tools';
+import { getAllQuickTools, createQuickTool, updateQuickTool, deleteQuickTool } from './quick-tools';
 import { storage } from '../storage';
 
 const mockedStorage = vi.mocked(storage);
-
-describe('validateToolUrl', () => {
-  it('returns valid for a proper URL with matching capture groups', async () => {
-    const result = await validateToolUrl('https://example.com/search?q={query}', ['query']);
-    expect(result.isValid).toBe(true);
-    expect(result.errors).toHaveLength(0);
-  });
-
-  it('returns error for invalid URL format', async () => {
-    const result = await validateToolUrl('not-a-url', []);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toContain('Invalid URL format');
-  });
-
-  it('returns error when URL token is not in capture groups list', async () => {
-    const result = await validateToolUrl('https://example.com/{email}', ['phone']);
-    expect(result.isValid).toBe(false);
-    expect(result.errors.some((e) => e.includes("'{email}'"))).toBe(true);
-  });
-
-  it('accepts URL with no tokens', async () => {
-    const result = await validateToolUrl('https://example.com/page', []);
-    expect(result.isValid).toBe(true);
-  });
-
-  it('validates multiple tokens', async () => {
-    const result = await validateToolUrl('https://example.com/{name}/{email}', ['name', 'email']);
-    expect(result.isValid).toBe(true);
-  });
-
-  it('reports all missing capture groups', async () => {
-    const result = await validateToolUrl('https://example.com/{a}/{b}', []);
-    expect(result.isValid).toBe(false);
-    expect(result.errors).toHaveLength(2);
-  });
-
-  it('throws when an unexpected error occurs', async () => {
-    // Force an error by passing null as url
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await expect(validateToolUrl(null as any, [])).rejects.toThrow();
-  });
-});
 
 describe('getAllQuickTools', () => {
   beforeEach(() => vi.clearAllMocks());
@@ -128,22 +78,5 @@ describe('deleteQuickTool', () => {
   it('throws when storage fails', async () => {
     mockedStorage.deleteQuickTool.mockRejectedValue(new Error('fail'));
     await expect(deleteQuickTool('1')).rejects.toThrow('fail');
-  });
-});
-
-describe('reorderQuickTools', () => {
-  beforeEach(() => vi.clearAllMocks());
-
-  it('delegates to storage.reorderQuickTools', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tools = [{ id: '1' }, { id: '2' }] as any;
-    mockedStorage.reorderQuickTools.mockResolvedValue(undefined);
-    await reorderQuickTools(tools);
-    expect(mockedStorage.reorderQuickTools).toHaveBeenCalledWith(tools);
-  });
-
-  it('throws when storage fails', async () => {
-    mockedStorage.reorderQuickTools.mockRejectedValue(new Error('fail'));
-    await expect(reorderQuickTools([])).rejects.toThrow('fail');
   });
 });

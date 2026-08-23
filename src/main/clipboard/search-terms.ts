@@ -1,5 +1,5 @@
 import { storage } from '../storage';
-import type { PatternMatch, SearchTerm } from '../../shared/types';
+import type { SearchTerm } from '../../shared/types';
 
 const RESERVED_GROUP_NAME = /^c\d+$/;
 
@@ -57,53 +57,6 @@ export const deleteSearchTerm = async (id: string) => {
     await storage.deleteSearchTerm(id);
   } catch (error) {
     console.error('Failed to delete search term:', error);
-    throw error;
-  }
-};
-
-export const reorderSearchTerms = async (searchTerms: SearchTerm[]) => {
-  try {
-    await storage.reorderSearchTerms(searchTerms);
-  } catch (error) {
-    console.error('Failed to reorder search terms:', error);
-    throw error;
-  }
-};
-
-export const testSearchTerm = async (
-  pattern: string,
-  testText: string
-): Promise<PatternMatch[]> => {
-  try {
-    // Test a single pattern against text
-    const regex = new RegExp(pattern, 'g');
-    const matches: PatternMatch[] = [];
-    let match;
-
-    while ((match = regex.exec(testText)) !== null) {
-      const captures: Record<string, string> = {};
-
-      // Extract named groups
-      if (match.groups) {
-        Object.entries(match.groups).forEach(([groupName, value]) => {
-          if (value !== undefined && value !== null && typeof value === 'string') {
-            captures[groupName] = value;
-          }
-        });
-      }
-
-      if (Object.keys(captures).length > 0) {
-        matches.push({
-          searchTermId: 'test',
-          searchTermName: 'Test Pattern',
-          captures,
-        });
-      }
-    }
-
-    return matches;
-  } catch (error) {
-    console.error('Failed to test search term:', error);
     throw error;
   }
 };

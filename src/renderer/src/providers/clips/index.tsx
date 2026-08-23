@@ -138,14 +138,8 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (window.api?.onToggleSearch) {
-      window.api.onToggleSearch(toggleSearch);
-    }
-    return () => {
-      if (window.api?.removeToggleSearchListeners) {
-        window.api.removeToggleSearchListeners();
-      }
-    };
+    if (!window.api?.onToggleSearch) return;
+    return window.api.onToggleSearch(toggleSearch);
   }, [toggleSearch]);
 
   // Reset search state when window is hidden

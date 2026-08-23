@@ -1,4 +1,4 @@
-import { ipcMain, Menu, MenuItemConstructorOptions } from 'electron';
+import { ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import { is } from '@electron-toolkit/utils';
 import { storage } from '../storage';
@@ -28,13 +28,6 @@ export function setupMainIPC(): void {
   // Settings window IPC handlers
   ipcMain.handle('open-settings', (_event, tab?: string) => {
     createSettingsWindow(tab);
-  });
-
-  ipcMain.handle('close-settings', () => {
-    const settingsWindow = getSettingsWindow();
-    if (settingsWindow) {
-      settingsWindow.close();
-    }
   });
 
   // Settings communication between windows
@@ -71,15 +64,6 @@ export function setupMainIPC(): void {
     } catch (error) {
       console.error('Failed to save settings:', error);
       return false;
-    }
-  });
-
-  ipcMain.handle('get-settings', async () => {
-    try {
-      return await storage.getSettings();
-    } catch (error) {
-      console.error('Failed to get settings:', error);
-      return {};
     }
   });
 
@@ -125,59 +109,6 @@ export function setupMainIPC(): void {
     setUpdateState({ status: 'upToDate' });
     return null;
   });
-
-  // Context Menu IPC handler
-  ipcMain.handle(
-    'show-clip-context-menu',
-    async (
-      event,
-      options: {
-        index: number;
-        isFirstClip: boolean;
-        isLocked: boolean;
-        hasPatterns: boolean;
-      }
-    ) => {
-      const { index, isFirstClip, isLocked, hasPatterns } = options;
-
-      const template: MenuItemConstructorOptions[] = [
-        {
-          label: 'Copy to Clipboard',
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'copy', index });
-          },
-        },
-        { type: 'separator' },
-        {
-          label: hasPatterns ? 'Open Tools Launcher ⚡' : 'Open Tools Launcher',
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'scan', index });
-          },
-        },
-        { type: 'separator' },
-        {
-          label: isLocked ? 'Unlock Clip' : 'Lock Clip',
-          enabled: !isFirstClip,
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'lock', index });
-          },
-        },
-        {
-          label: 'Delete Clip',
-          enabled: !isFirstClip,
-          click: () => {
-            event.sender.send('context-menu-action', { action: 'delete', index });
-          },
-        },
-      ];
-
-      const contextMenu = Menu.buildFromTemplate(template);
-      const window = getMainWindow();
-      if (window) {
-        contextMenu.popup({ window });
-      }
-    }
-  );
 
   ipcMain.handle('download-update', async () => {
     if (!is.dev) {

@@ -2,30 +2,8 @@ import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useTheme } from '../../providers/theme';
 import type { UpdateState } from '../../../../shared/types';
+import { updateStatusText } from './updateStatusText';
 import styles from './UpdaterControl.module.css';
-
-/**
- * The text and dot for each updater status. The state comes from the main process; there
- * is no display string to match against.
- */
-export function updateStatusText(state: UpdateState): string {
-  switch (state.status) {
-    case 'idle':
-      return 'Ready';
-    case 'checking':
-      return 'Checking for updates...';
-    case 'available':
-      return `Update ${state.version ?? ''} available, downloading...`.replace('  ', ' ');
-    case 'downloading':
-      return state.progress === undefined ? 'Downloading...' : `Downloading ${state.progress}%`;
-    case 'downloaded':
-      return 'Update downloaded. Restart to install.';
-    case 'upToDate':
-      return 'No updates available';
-    case 'error':
-      return `Error: ${state.message ?? 'Unknown error'}`;
-  }
-}
 
 function UpdaterControl(): React.JSX.Element {
   const [state, setState] = useState<UpdateState>({ status: 'idle' });

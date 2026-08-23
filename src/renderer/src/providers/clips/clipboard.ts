@@ -205,11 +205,12 @@ export const useClipboardOperations = (
 
   // Start clipboard monitoring when component mounts
   useEffect(() => {
+    const unsubscribers: (() => void)[] = [];
     const startMonitoring = async () => {
       if (window.api) {
         try {
           // Set up hotkey clip copied listener - this needs to happen before clipboard monitoring
-          window.api.onHotkeyClipCopied((clipIndex: number) => {
+          const offHotkey = window.api.onHotkeyClipCopied((clipIndex: number) => {
             console.log('🔥 Hotkey copied clip at index:', clipIndex);
 
             // The hotkey path sends an index; the marker follows the clip by id from here
@@ -240,6 +241,7 @@ export const useClipboardOperations = (
               setIsHotkeyOperation(false);
             }, 1000); // Ignore clipboard changes for 1 second after hotkey operation
           });
+          unsubscribers.push(offHotkey);
 
           // Read current clipboard content only on initial mount (not on effect re-runs)
           if (!hasReadInitialClipboard.current) {
@@ -251,7 +253,7 @@ export const useClipboardOperations = (
           await window.api.startClipboardMonitoring();
 
           // Set up clipboard change listener
-          window.api.onClipboardChanged((clipData: { type: string; content: string }) => {
+          const offClipboard = window.api.onClipboardChanged((clipData) => {
             const currentIsHotkeyOperation = isHotkeyOperationRef.current;
             const currentLastCopiedContent = lastCopiedContentRef.current;
 
@@ -324,6 +326,7 @@ export const useClipboardOperations = (
               console.log('Clipboard change detected but content is duplicate, not adding');
             }
           });
+          unsubscribers.push(offClipboard);
         } catch (error) {
           console.error('Failed to start clipboard monitoring:', error);
         }
@@ -336,9 +339,8 @@ export const useClipboardOperations = (
     return () => {
       if (window.api) {
         window.api.stopClipboardMonitoring();
-        window.api.removeClipboardListeners();
-        window.api.removeHotkeyListeners();
       }
+      for (const unsubscribe of unsubscribers) unsubscribe();
     };
   }, [
     clipboardUpdated,

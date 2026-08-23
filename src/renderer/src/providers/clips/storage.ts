@@ -85,16 +85,10 @@ export const useClipsStorage = (
   useEffect(() => {
     if (!window.api?.onStorageReady) return;
 
-    window.api.onStorageReady(() => {
+    return window.api.onStorageReady(() => {
       console.log('Storage ready event received, re-loading data');
       loadStoredData();
     });
-
-    return () => {
-      if (window.api?.removeStorageReadyListeners) {
-        window.api.removeStorageReadyListeners();
-      }
-    };
   }, [loadStoredData]);
 
   // Listen for settings updates from other windows (like settings window)
@@ -124,14 +118,7 @@ export const useClipsStorage = (
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };
 
-    window.api.onSettingsUpdated(handleSettingsUpdate);
-
-    // Cleanup listener on unmount
-    return () => {
-      if (window.api?.removeSettingsListeners) {
-        window.api.removeSettingsListeners();
-      }
-    };
+    return window.api.onSettingsUpdated(handleSettingsUpdate);
   }, [setMaxClips, setClips, setLockedClips]);
 
   // Save clips to storage whenever they change
@@ -175,23 +162,4 @@ export const useClipsStorage = (
     const timeoutId = setTimeout(saveSettingsToStorage, 500);
     return () => clearTimeout(timeoutId);
   }, [maxClips, isInitiallyLoading]);
-
-  // Settings listener
-  useEffect(() => {
-    if (window.api) {
-      window.api.onSettingsUpdated((settings: UserSettings) => {
-        console.log('Settings updated in main window:', settings);
-        // Handle settings changes here if needed
-      });
-
-      // Cleanup
-      return () => {
-        if (window.api) {
-          window.api.removeSettingsListeners();
-        }
-      };
-    }
-
-    return () => {}; // Return empty cleanup function if window.api is not available
-  }, []);
 };

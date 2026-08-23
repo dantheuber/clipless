@@ -49,11 +49,7 @@ for (const theme of THEMES) {
       await settings.getByRole('button', { name: 'Hotkeys' }).click();
       await settings.waitForTimeout(300);
       await shoot(settings, `settings-hotkeys-${theme}.png`);
-      await page.evaluate(() =>
-        (
-          window as unknown as { api: { closeSettings: () => Promise<unknown> } }
-        ).api.closeSettings()
-      );
+      await settings.close();
 
       // 4. Quick Clips pattern matching in the Tools Launcher.
       const launcher = await openToolsLauncher(app, page, LAUNCHER_SCAN_CONTENT);
