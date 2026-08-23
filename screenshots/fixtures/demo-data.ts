@@ -18,6 +18,7 @@ export interface DemoClip {
 export const DEMO_CLIPS: DemoClip[] = [
   {
     clip: {
+      id: 'demo-1',
       type: 'text',
       content:
         'Investigating alert: failed logins from 203.0.113.42 for mreyes@example.com (ref INC-4821)',
@@ -25,6 +26,7 @@ export const DEMO_CLIPS: DemoClip[] = [
   },
   {
     clip: {
+      id: 'demo-2',
       type: 'text',
       content: [
         '{',
@@ -39,12 +41,14 @@ export const DEMO_CLIPS: DemoClip[] = [
   },
   {
     clip: {
+      id: 'demo-3',
       type: 'text',
       content: 'https://dashboard.example.com/incidents/INC-4821',
     },
   },
   {
     clip: {
+      id: 'demo-4',
       type: 'text',
       content: 'Ticket INC-4821 — escalated to Tier 2 security review',
     },
@@ -52,24 +56,28 @@ export const DEMO_CLIPS: DemoClip[] = [
   },
   {
     clip: {
+      id: 'demo-5',
       type: 'html',
       content: '<b>Quarterly access review</b> — 14 accounts flagged for MFA enforcement',
     },
   },
   {
     clip: {
+      id: 'demo-6',
       type: 'text',
       content: 'Endpoint MAC 3c:22:fb:1a:9d:7e quarantined pending review',
     },
   },
   {
     clip: {
+      id: 'demo-7',
       type: 'text',
       content: 'suspicious-domain.example.org resolves to 198.51.100.23',
     },
   },
   {
     clip: {
+      id: 'demo-8',
       type: 'text',
       content: 'Customer order #100043912 refunded — case closed',
     },
@@ -121,9 +129,12 @@ export const TEMPLATES: { name: string; content: string }[] = [
   },
 ];
 
-/** Content fed to the Tools Launcher to demonstrate live pattern matching. */
-export const LAUNCHER_SCAN_CONTENT =
-  'Auth failure for mreyes@example.com from 203.0.113.42 — ref INC-4821';
+/**
+ * The clip quick look opens on for the "patterns" screenshot. It is the newest
+ * demo clip, so its IP, email, and ticket each match a search term above and
+ * render as chips in the reader.
+ */
+export const QUICK_LOOK_CONTENT = DEMO_CLIPS[0].clip.content;
 
 /** Filter string typed into the clip search bar for the "search" screenshot. */
 export const SEARCH_FILTER = 'INC-4821';

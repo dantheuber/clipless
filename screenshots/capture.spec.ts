@@ -15,14 +15,14 @@ import {
   shoot,
   showSearch,
   openSettingsWindow,
-  openToolsLauncher,
+  openQuickLook,
   cleanup,
   type Theme,
 } from './helpers';
-import { LAUNCHER_SCAN_CONTENT, SEARCH_FILTER } from './fixtures/demo-data';
+import { QUICK_LOOK_CONTENT, SEARCH_FILTER } from './fixtures/demo-data';
 
 const THEMES: Theme[] = ['dark', 'light'];
-const SEARCH_INPUT = 'input[placeholder="Filter clips..."]';
+const SEARCH_INPUT = '#clip-search-input';
 
 for (const theme of THEMES) {
   test(`capture ${theme} theme screenshots`, async () => {
@@ -38,7 +38,10 @@ for (const theme of THEMES) {
       await page.fill(SEARCH_INPUT, SEARCH_FILTER);
       await page.waitForTimeout(400);
       await shoot(page, `search-${theme}.png`);
+      // The first Escape clears the filter, the second hides the bar.
       await page.press(SEARCH_INPUT, 'Escape');
+      await page.press(SEARCH_INPUT, 'Escape');
+      await page.locator(SEARCH_INPUT).waitFor({ state: 'hidden' });
 
       // 3. Settings tabs.
       const settings = await openSettingsWindow(app, page);
@@ -51,15 +54,13 @@ for (const theme of THEMES) {
       await shoot(settings, `settings-hotkeys-${theme}.png`);
       await settings.close();
 
-      // 4. Quick Clips pattern matching in the Tools Launcher.
-      const launcher = await openToolsLauncher(app, page, LAUNCHER_SCAN_CONTENT);
-      await launcher.waitForTimeout(500);
-      await shoot(launcher, `patterns-${theme}.png`);
-      await page.evaluate(() =>
-        (
-          window as unknown as { api: { closeToolsLauncher: () => Promise<unknown> } }
-        ).api.closeToolsLauncher()
-      );
+      // 4. Quick look on the newest clip, with the IP pinned so the tray shows its tools.
+      await openQuickLook(page, QUICK_LOOK_CONTENT, 'ip');
+      // Wrap the long line so every chip is in view.
+      await page.keyboard.press('w');
+      await page.waitForTimeout(500);
+      await shoot(page, `patterns-${theme}.png`);
+      await page.keyboard.press('Escape');
     } finally {
       await app.close();
       cleanup(userDataDir);
