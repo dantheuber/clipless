@@ -104,8 +104,9 @@ test.describe('Context Menu', () => {
 
     await expect(window.getByTestId('menu-copy')).toBeVisible({ timeout: 3000 });
 
-    // Click elsewhere to close
-    await window.locator('body').click({ position: { x: 5, y: 5 } });
+    // Click elsewhere to close. The status bar's left edge is inert; (5, 5) on the body is
+    // row 1's number cell, which copies the clip and leaves a toast for later cases.
+    await window.getByTestId('status-bar').click({ position: { x: 5, y: 5 } });
 
     await expect(window.getByTestId('menu-copy')).toBeHidden({ timeout: 3000 });
   });
@@ -132,7 +133,9 @@ test.describe('Context Menu', () => {
 
     // Menu should close after action
     await expect(window.getByTestId('menu-copy')).toBeHidden({ timeout: 3000 });
-    await expect(window.getByTestId('toast')).toContainText('Copied clip', { timeout: 3000 });
+    await expect(window.getByTestId('toast').filter({ hasText: 'Copied clip' })).toBeVisible({
+      timeout: 3000,
+    });
 
     // Verify clipboard contains the expected text
     const clipboardText = await app.evaluate(async ({ clipboard }) => {
