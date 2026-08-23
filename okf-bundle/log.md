@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-08-23
+* **Decision**: step 4 calls recorded; the launcher window is deleted and the four-PR quick look stack is ready to merge top down.
+* **Update**: `systems/tools-launcher` now records that step 4 deleted the window and points to what replaced it.
 * **Update**: templates are made in the settings Tools tab's inspector since step 3
 * **Ship**: quick look step 3, the settings window (shell, General, Hotkeys, Tools), on branch `t3code/quick-look-step-3` as PR #148 stacked on #147; 915 unit tests at 100%, 35 of 35 e2e on Linux. Step 4 (delete the launcher window) is next.
 * **Update**: templates are edited in the settings Tools tab since step 3
