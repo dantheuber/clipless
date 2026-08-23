@@ -83,6 +83,21 @@ describe('RenderedView', () => {
     errSpy.mockRestore();
   });
 
+  it('ignores a failure that lands after the markup changed', async () => {
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    let rejectFirst: (e: Error) => void = () => {};
+    api().htmlSanitize.mockReturnValueOnce(new Promise((_, r) => (rejectFirst = r)));
+    const { rerender } = render(<RenderedView html="<p>one</p>" onSanitized={vi.fn()} />);
+    rerender(<RenderedView html="<p>two</p>" onSanitized={vi.fn()} />);
+    await act(async () => {
+      rejectFirst(new Error('late'));
+    });
+    expect(
+      (screen.getByTestId('ql-frame') as HTMLIFrameElement).getAttribute('srcdoc')
+    ).not.toContain('Could not render');
+    errSpy.mockRestore();
+  });
+
   it('ignores a result that lands after the markup changed', async () => {
     let resolveFirst: (r: { html: string; removed: Record<string, number> }) => void = () => {};
     api().htmlSanitize.mockReturnValueOnce(new Promise((r) => (resolveFirst = r)));

@@ -99,6 +99,17 @@ describe('Chip', () => {
     expect(onHover).toHaveBeenCalledWith(null);
   });
 
+  it('keeps mousedown from the row so a click cannot start a drag or focus change', () => {
+    const rowMouseDown = vi.fn();
+    render(
+      <div onMouseDown={rowMouseDown}>
+        <Chip group="ip" value="1.1.1.1" />
+      </div>
+    );
+    fireEvent.mouseDown(screen.getByText('1.1.1.1'));
+    expect(rowMouseDown).not.toHaveBeenCalled();
+  });
+
   it('hides a count of one', () => {
     render(<Chip group="ip" value="1.1.1.1" count={1} />);
     expect(screen.queryByText(/x1/)).toBeNull();

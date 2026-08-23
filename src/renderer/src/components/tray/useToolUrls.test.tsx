@@ -57,6 +57,15 @@ describe('useToolUrls', () => {
     ]);
   });
 
+  it('counts a url once when two tools produce it', () => {
+    state.tools = [
+      { id: 'a', name: 'A', url: 'https://same.example/{ip}' },
+      { id: 'b', name: 'B', url: 'https://same.example/{ip}' },
+    ];
+    state.pinsByGroup = { ip: ['1.1.1.1'] };
+    expect(probe().allUrls).toEqual(['https://same.example/1.1.1.1']);
+  });
+
   it('has nothing with no pins', () => {
     state.pinsByGroup = {};
     expect(probe().allUrls).toEqual([]);

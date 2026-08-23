@@ -54,7 +54,6 @@ export const TextClip = ({
   };
 
   const commit = () => {
-    if (!isEditing) return;
     if (editValue !== clip.content) onUpdate(editValue);
     stopEdit();
   };

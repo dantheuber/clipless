@@ -26,10 +26,10 @@ const ipScan = (text: string): ScanResult => {
   return { matches, groups: matches.length ? ['ip'] : [], errors: [], large: false };
 };
 
-vi.mock('../../../providers/clips', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../providers/clips')>();
+vi.mock('../../../providers/clips', async () => {
+  const utils = await import('../../../providers/clips/utils');
   return {
-    clipText: actual.clipText,
+    clipText: utils.clipText,
     useClipsActions: () => ({
       copyClipToClipboard: state.copyClipToClipboard,
       updateClip: state.updateClip,
@@ -113,12 +113,14 @@ describe('ClipWrapper', () => {
     expect(screen.getByTestId('row-number')).not.toHaveTextContent('2');
   });
 
-  it('an empty row has no dots and no eye and Space does nothing', () => {
+  it('an empty row has no dots and no eye; Space and Enter do nothing', () => {
     row(empty);
     expect(screen.queryByTestId('group-dots')).toBeNull();
     expect(screen.queryByTestId('eye')).toBeNull();
     fireEvent.keyDown(screen.getByTestId('clip-row'), { key: ' ' });
+    fireEvent.keyDown(screen.getByTestId('clip-row'), { key: 'Enter' });
     expect(state.openQuickLook).not.toHaveBeenCalled();
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 
   it('the eye opens quick look and lights while its clip is open', () => {

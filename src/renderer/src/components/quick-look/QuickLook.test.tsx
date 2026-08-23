@@ -47,12 +47,12 @@ const ipScan = (text: string): ScanResult => {
   return { matches, groups: matches.length ? ['ip'] : [], errors: [], large: false };
 };
 
-vi.mock('../../providers/clips', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../providers/clips')>();
+vi.mock('../../providers/clips', async () => {
+  const utils = await import('../../providers/clips/utils');
   const { quickLookPosition } = await import('../../providers/clips/quickLook');
   const visible = () => state.clips.map((clip, originalIndex) => ({ clip, originalIndex }));
   return {
-    clipText: actual.clipText,
+    clipText: utils.clipText,
     useQuickLook: () => ({
       quickLook: state.quickLook as QuickLookState,
       openClip: state.clips.find((c) => c.id === state.quickLook.openClipId) ?? null,
@@ -328,6 +328,40 @@ describe('QuickLook', () => {
     expect(state.setEditing).toHaveBeenLastCalledWith(false);
   });
 
+  it('committing an unchanged edit saves nothing', () => {
+    const { rerender } = render(<QuickLook />);
+    fireEvent.keyDown(screen.getByTestId('quick-look'), { key: 'e' });
+    state.quickLook.editing = true;
+    rerender(<QuickLook />);
+    fireEvent.keyDown(screen.getByTestId('clip-editor'), { key: 'Enter' });
+    expect(state.updateClip).not.toHaveBeenCalled();
+    expect(state.setEditing).toHaveBeenLastCalledWith(false);
+  });
+
+  it('p with no matches pins nothing', () => {
+    openOn('b');
+    render(<QuickLook />);
+    fireEvent.keyDown(screen.getByTestId('quick-look'), { key: 'p' });
+    expect(state.togglePins).not.toHaveBeenCalled();
+  });
+
+  it('ignores the thumbnail load and reports the size once the full image is in', async () => {
+    let resolveFull: (s: string) => void = () => {};
+    api().getFullImage.mockReturnValueOnce(new Promise((r) => (resolveFull = r)));
+    openOn('i');
+    render(<QuickLook />);
+    const img = screen.getByTestId('ql-image').querySelector('img') as HTMLImageElement;
+    Object.defineProperty(img, 'naturalWidth', { value: 200, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 150, configurable: true });
+    fireEvent.load(img);
+    expect(screen.getByTestId('ql-side')).toHaveTextContent('640 x 480 px');
+    await act(async () => {
+      resolveFull('data:image/png;base64,full');
+    });
+    fireEvent.load(img);
+    expect(screen.getByTestId('ql-side')).toHaveTextContent('200 x 150 px');
+  });
+
   it('e while already editing does nothing, and the editor keeps its own keys', () => {
     state.quickLook.editing = true;
     render(<QuickLook />);
@@ -452,6 +486,63 @@ describe('QuickLook', () => {
     render(<QuickLook />);
     expect(screen.getByTestId('ql-footer')).not.toHaveTextContent('pin all');
     expect(screen.queryByTestId('template-pills')).toBeNull();
+  });
+
+  it('the prev button walks up from a later clip', () => {
+    openOn('j');
+    render(<QuickLook />);
+    expect(screen.getByTestId('ql-prev')).not.toBeDisabled();
+    fireEvent.click(screen.getByTestId('ql-prev'));
+    expect(state.walkQuickLook).toHaveBeenCalledWith(-1);
+  });
+
+  it('rtf source view has no chips and no syntax colouring', () => {
+    openOn('r');
+    state.quickLook.view = 'source';
+    render(<QuickLook />);
+    expect(screen.getByTestId('ql-content').querySelectorAll('[data-key]')).toHaveLength(0);
+    expect(screen.getByTestId('ql-content').querySelector('[class^="tok-"]')).toBeNull();
+  });
+
+  it('lists what the sanitiser removed, or nothing', async () => {
+    openOn('h');
+    state.quickLook.view = 'rendered';
+    api().htmlSanitize.mockResolvedValue({ html: '<p>x</p>', removed: {} });
+    render(<QuickLook />);
+    await act(async () => {});
+    expect(screen.getByTestId('ql-side')).toHaveTextContent('nothing removed');
+    cleanup();
+    api().htmlSanitize.mockResolvedValue({ html: '<p>x</p>', removed: { img: 1 } });
+    render(<QuickLook />);
+    await act(async () => {});
+    expect(screen.getByTestId('ql-side')).toHaveTextContent('removed: img');
+  });
+
+  it('an image with no data url format says image and unknown', async () => {
+    state.clips = [{ id: 'i3', type: 'image', content: 'img3', imageId: 'img3' }];
+    api().getFullImage.mockResolvedValue(null);
+    openOn('i3');
+    render(<QuickLook />);
+    await act(async () => {});
+    expect(screen.getByTestId('ql-header')).toHaveTextContent('image');
+    expect(screen.getByTestId('ql-side')).toHaveTextContent('format unknown');
+    const img = screen.getByTestId('ql-image').querySelector('img') as HTMLImageElement;
+    expect(img.getAttribute('src')).toBe('img3');
+  });
+
+  it('hovering a value with no chip in the text is harmless, as is a pane without scrollIntoView', () => {
+    const original = HTMLElement.prototype.scrollIntoView;
+    // @ts-expect-error jsdom has no scrollIntoView; make sure the reader copes without one
+    delete HTMLElement.prototype.scrollIntoView;
+    render(<QuickLook />);
+    const sideChip = screen
+      .getByTestId('ql-group-ip')
+      .querySelector('[data-key="ip|2.2.2.2"]') as HTMLElement;
+    fireEvent.mouseEnter(sideChip);
+    expect(
+      screen.getByTestId('ql-content').querySelector('[data-key="ip|2.2.2.2"]')?.className
+    ).toContain('lit');
+    HTMLElement.prototype.scrollIntoView = original;
   });
 
   it('textMeta counts lines and bytes', () => {

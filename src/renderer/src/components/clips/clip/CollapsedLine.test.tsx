@@ -65,6 +65,13 @@ describe('CollapsedLine', () => {
     ]);
   });
 
+  it('starts with a chip when the match is at the start', () => {
+    const { container } = render(
+      <CollapsedLine text="1.1.1.1 x" scan={scan([m('ip', '1.1.1.1', 0)])} />
+    );
+    expect(container.firstElementChild).toHaveAttribute('data-key', 'ip|1.1.1.1');
+  });
+
   it('marks hits in plain text only, never inside a chip', () => {
     const text = 'ip 1.1.1.1 ip';
     const { container } = render(

@@ -3,10 +3,10 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { HtmlClip } from './HtmlClip';
 import { RtfClip } from './RtfClip';
 
-vi.mock('../../../providers/clips', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../../../providers/clips')>();
+vi.mock('../../../providers/clips', async () => {
+  const utils = await import('../../../providers/clips/utils');
   return {
-    clipText: actual.clipText,
+    clipText: utils.clipText,
     useClipsPins: () => ({ isPinned: () => false, togglePins: vi.fn() }),
   };
 });

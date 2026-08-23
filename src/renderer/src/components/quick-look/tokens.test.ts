@@ -119,6 +119,10 @@ describe('splitLines', () => {
     expect(lines[0].matches).toHaveLength(1);
     expect(lines[1].matches).toHaveLength(1);
     expect(splitLines('', [])).toEqual([{ start: 0, text: '', matches: [] }]);
+    // a match that ends on the line break belongs to the first line only
+    const edge = splitLines('ab\ncd', [m('x', 'b\n', 1)]);
+    expect(edge[0].matches).toHaveLength(1);
+    expect(edge[1].matches).toHaveLength(0);
   });
 });
 

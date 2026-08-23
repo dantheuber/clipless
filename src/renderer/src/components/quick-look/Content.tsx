@@ -12,7 +12,7 @@ interface ContentProps {
   scan: ScanResult | null; // null while a large clip's scan is pending: no chips yet
   wrap: boolean;
   litKey: string | null;
-  onHover: (key: string | null) => void;
+  onHover?: (key: string | null) => void;
 }
 
 /**
@@ -40,10 +40,9 @@ export function Content({ text, language, scan, wrap, litKey, onHover }: Content
 
   // Reset scroll when the clip changes
   useEffect(() => {
-    if (paneRef.current) {
-      paneRef.current.scrollTop = 0;
-      paneRef.current.scrollLeft = 0;
-    }
+    const pane = paneRef.current!; // mounted before any effect runs
+    pane.scrollTop = 0;
+    pane.scrollLeft = 0;
   }, [text]);
 
   return (

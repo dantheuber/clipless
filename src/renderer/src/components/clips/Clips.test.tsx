@@ -24,7 +24,14 @@ const { virtual, state } = vi.hoisted(() => ({
 vi.mock('@tanstack/react-virtual', async () => {
   const React = await import('react');
   return {
-    useVirtualizer: ({ count }: { count: number }) => {
+    useVirtualizer: (opts: {
+      count: number;
+      getScrollElement: () => Element | null;
+      estimateSize: (i: number) => number;
+    }) => {
+      const { count } = opts;
+      opts.getScrollElement();
+      opts.estimateSize(0);
       // A scroll re-renders the list, as the real virtualiser does through its scroll listener
       const [start, setStart] = React.useState(virtual.start);
       return {
@@ -141,6 +148,7 @@ describe('Clips keyboard', () => {
     await nextFrame();
     expect(screen.getByTestId('row-0')).toHaveFocus();
     fireEvent.keyDown(screen.getByTestId('row-0'), { key: 'ArrowUp' });
+    fireEvent.keyDown(screen.getByTestId('row-0'), { key: 'a' });
     expect(virtual.scrollToIndex).toHaveBeenCalledTimes(2);
   });
 
@@ -155,6 +163,8 @@ describe('Clips keyboard', () => {
     fireEvent.keyDown(screen.getByTestId('row-2'), { key: 'ArrowDown' });
     expect(input).toHaveFocus();
     input.remove();
+    // the bar is open but its input is not in the document: nothing to focus
+    fireEvent.keyDown(screen.getByTestId('row-2'), { key: 'ArrowDown' });
     cleanup();
     state.isSearchVisible = false;
     render(<Clips />);

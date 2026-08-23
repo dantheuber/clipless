@@ -14,7 +14,6 @@ export function SourceView({ clip, wrap }: { clip: ClipItem; wrap: boolean }) {
       scan={EMPTY_SCAN}
       wrap={wrap}
       litKey={null}
-      onHover={() => {}}
     />
   );
 }

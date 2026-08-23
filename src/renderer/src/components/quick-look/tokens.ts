@@ -1,5 +1,5 @@
 import { refractor } from 'refractor/core';
-import type { Root, RootContent } from 'hast';
+import type { Element, Root, RootContent } from 'hast';
 import javascript from 'refractor/javascript';
 import typescript from 'refractor/typescript';
 import python from 'refractor/python';
@@ -67,13 +67,15 @@ export function tokenizeLine(line: string, language: string | null): Run[] {
   if (line.length === 0) return [];
   if (!language || !refractor.registered(language)) return [{ text: line, classes: [] }];
   const runs: Run[] = [];
+  // refractor's tree holds text nodes and elements with a className list; nothing else
   const walk = (nodes: RootContent[], inherited: string[]) => {
     for (const node of nodes) {
       if (node.type === 'text') {
-        if (node.value.length > 0) runs.push({ text: node.value, classes: inherited });
-      } else if (node.type === 'element') {
-        const classes = (node.properties?.className as string[] | undefined) ?? [];
-        walk(node.children, [...inherited, ...classes.filter((cls) => cls !== 'token')]);
+        runs.push({ text: node.value, classes: inherited });
+      } else {
+        const element = node as Element;
+        const classes = element.properties.className as string[];
+        walk(element.children, [...inherited, ...classes.filter((cls) => cls !== 'token')]);
       }
     }
   };

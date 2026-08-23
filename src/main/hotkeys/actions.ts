@@ -45,7 +45,7 @@ export class HotkeyActions {
         return;
       }
 
-      this.showWindow();
+      this.showWindow(this.mainWindow);
     } catch (error) {
       console.error('Error toggling window visibility:', error);
     }
@@ -54,14 +54,13 @@ export class HotkeyActions {
   /**
    * Show and focus the main window, restoring it if minimised
    */
-  private showWindow(): void {
-    if (!this.mainWindow) return;
-    if (this.mainWindow.isMinimized()) {
-      this.mainWindow.restore();
+  private showWindow(window: BrowserWindow): void {
+    if (window.isMinimized()) {
+      window.restore();
     }
 
-    this.mainWindow.show();
-    this.mainWindow.focus();
+    window.show();
+    window.focus();
 
     // On macOS, we need to bring the app to front
     if (process.platform === 'darwin') {
@@ -193,7 +192,7 @@ export class HotkeyActions {
 
     try {
       const pending = await checkClipboardNow();
-      this.showWindow();
+      this.showWindow(this.mainWindow);
       this.mainWindow.webContents.send('open-quick-look', { pending });
     } catch (error) {
       console.error('Error opening quick look:', error);

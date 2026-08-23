@@ -51,8 +51,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         return 'exclamation-triangle';
       case 'info':
         return 'info-circle';
-      default:
-        return 'question-circle';
     }
   };
 

@@ -176,6 +176,8 @@ describe('ClipContextMenu', () => {
   it('closes on Escape and on a click outside, not on a click inside', () => {
     const onClose = open(1);
     fireEvent.click(screen.getByTestId('clip-context-menu'));
+    fireEvent.mouseDown(screen.getByTestId('clip-context-menu'));
+    fireEvent.keyDown(document, { key: 'a' });
     expect(onClose).not.toHaveBeenCalled();
     fireEvent.mouseDown(document.body);
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -188,6 +190,9 @@ describe('ClipContextMenu', () => {
     const element = menu.getByTestId('clip-context-menu');
     expect(parseInt(element.style.left)).toBeLessThan(5000);
     expect(parseInt(element.style.top)).toBeLessThan(5000);
+    cleanup();
+    const low = render(<ClipContextMenu index={1} x={5000} y={10} onClose={vi.fn()} />);
+    expect(low.getByTestId('clip-context-menu').style.top).toBe('10px');
   });
 
   it('templatePreview collapses whitespace and trims to one line', () => {

@@ -197,6 +197,19 @@ describe('useTemplatePills', () => {
     expect(window.api.setClipboardText).toHaveBeenCalledWith('Block 1.1.1.1 now, see row one');
   });
 
+  it('an inert pill has a no-op activate', () => {
+    let pills: ReturnType<typeof useTemplatePills>['pills'] = [];
+    function Inert() {
+      pills = useTemplatePills({ matches: [], groups: [], errors: [], large: false }).pills;
+      return null;
+    }
+    render(<Inert />);
+    const inert = pills.find((p) => p.state === 'inert');
+    expect(inert).toBeDefined();
+    inert!.activate();
+    expect(state.setPins).not.toHaveBeenCalled();
+  });
+
   it('usedValues says first of N only beyond one pin', () => {
     expect(
       usedValues({ kind: 'ready', values: { ip: '1', email: 'e' }, counts: { ip: 3, email: 1 } })

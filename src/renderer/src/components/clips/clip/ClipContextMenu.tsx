@@ -102,30 +102,25 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
 
   // Position the menu to stay within viewport
   useEffect(() => {
-    if (menuRef.current) {
-      const menu = menuRef.current;
-      const rect = menu.getBoundingClientRect();
-      const viewport = {
-        width: window.innerWidth,
-        height: window.innerHeight,
-      };
+    const menu = menuRef.current!; // mounted before any effect runs
+    const rect = menu.getBoundingClientRect();
+    const viewport = { width: window.innerWidth, height: window.innerHeight };
 
-      let adjustedX = x;
-      let adjustedY = y;
+    let adjustedX = x;
+    let adjustedY = y;
 
-      // Adjust X position if menu would go off-screen
-      if (x + rect.width > viewport.width) {
-        adjustedX = viewport.width - rect.width - 10;
-      }
-
-      // Adjust Y position if menu would go off-screen
-      if (y + rect.height > viewport.height) {
-        adjustedY = viewport.height - rect.height - 10;
-      }
-
-      menu.style.left = `${Math.max(10, adjustedX)}px`;
-      menu.style.top = `${Math.max(10, adjustedY)}px`;
+    // Adjust X position if menu would go off-screen
+    if (x + rect.width > viewport.width) {
+      adjustedX = viewport.width - rect.width - 10;
     }
+
+    // Adjust Y position if menu would go off-screen
+    if (y + rect.height > viewport.height) {
+      adjustedY = viewport.height - rect.height - 10;
+    }
+
+    menu.style.left = `${Math.max(10, adjustedX)}px`;
+    menu.style.top = `${Math.max(10, adjustedY)}px`;
   }, [x, y]);
 
   const handleCopyClick = async () => {

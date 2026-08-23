@@ -134,11 +134,13 @@ describe('SearchBar', () => {
     expect(state.requestRowFocus).toHaveBeenCalledWith(1);
   });
 
-  it('does nothing on Down when nothing is visible', () => {
+  it('does nothing on Down when nothing is visible, or on other keys', () => {
     state.filteredClips = [];
     render(<SearchBar />);
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'ArrowDown' });
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'a' });
     expect(state.requestRowFocus).not.toHaveBeenCalled();
+    expect(state.hideSearch).not.toHaveBeenCalled();
   });
 
   it('typing sets the term and the clear button empties it', () => {

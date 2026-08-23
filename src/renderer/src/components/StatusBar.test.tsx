@@ -101,6 +101,14 @@ describe('StatusBar', () => {
     expect(window.api.openSettings).toHaveBeenCalled();
   });
 
+  it('does nothing when the preload has no openSettings', () => {
+    const saved = window.api.openSettings;
+    Object.defineProperty(window.api, 'openSettings', { value: undefined, writable: true });
+    render(<StatusBar />);
+    fireEvent.click(screen.getByTitle('Open settings'));
+    Object.defineProperty(window.api, 'openSettings', { value: saved, writable: true });
+  });
+
   it('logs when opening settings fails', async () => {
     api().openSettings.mockRejectedValueOnce(new Error('no'));
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

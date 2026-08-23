@@ -36,12 +36,9 @@ export function ImageView({ clip, onInfo }: ImageViewProps) {
         src={src}
         alt="Clip image"
         onLoad={(event) => {
+          // The thumbnail's size is not the image's; report once the full image is in
           const img = event.currentTarget;
-          if (
-            img.src === src && img.naturalWidth > 0 && clip.imageId
-              ? src !== clip.thumbnailDataUrl
-              : true
-          ) {
+          if (src !== clip.thumbnailDataUrl) {
             onInfo({ width: img.naturalWidth, height: img.naturalHeight });
           }
         }}

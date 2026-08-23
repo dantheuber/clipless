@@ -143,10 +143,8 @@ export function QuickLook() {
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (event.key === 'Tab') {
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      const focusable = [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE)];
-      if (focusable.length === 0) return;
+      // The close button is always there, so the list is never empty
+      const focusable = [...event.currentTarget.querySelectorAll<HTMLElement>(FOCUSABLE)];
       event.preventDefault();
       const at = focusable.indexOf(document.activeElement as HTMLElement);
       const next = event.shiftKey
@@ -177,8 +175,8 @@ export function QuickLook() {
       startEdit();
     } else if (event.key === 'c') {
       copy();
-    } else if (event.key === 'w') {
-      if (clip.type !== 'image') toggleWrap();
+    } else if (event.key === 'w' && clip.type !== 'image') {
+      toggleWrap();
     } else if (event.key === 't') {
       copyFirstReady();
     }

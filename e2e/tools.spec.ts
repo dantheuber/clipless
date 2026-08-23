@@ -7,7 +7,11 @@ const appPath = resolve(__dirname, '../out/main/index.js');
 const UNIQUE = Date.now().toString(36);
 
 async function launchApp() {
-  const app = await electron.launch({ args: [appPath] });
+  // Linux only: Playwright's basic password store leaves safeStorage without encryption
+  const app = await electron.launch({
+    args: [appPath],
+    env: { ...process.env, CLIPLESS_PLAINTEXT_STORAGE: '1' },
+  });
   const window = await app.firstWindow();
   await window.waitForSelector('#root > *');
   return { app, window };
@@ -255,107 +259,88 @@ test.describe('Settings — Templates CRUD', () => {
   });
 });
 
-test.describe('Tools Launcher — Pattern Scanning', () => {
+test.describe('Quick look — pattern scanning', () => {
   let app: ElectronApplication;
+  let window: Page;
+  const text = `Contact us at test-${UNIQUE}@example.com for info`;
 
   test.beforeAll(async () => {
     const result = await launchApp();
     app = result.app;
-    await cleanupAllData(result.window);
+    window = result.window;
+    await cleanupAllData(window);
 
     // Seed search term, tool, and template
-    await result.window.evaluate(async () => {
+    await window.evaluate(async () => {
       const api = (window as any).api;
       await api.searchTermsCreate('Email Pattern', '(?<email>[\\w.+-]+@[\\w-]+\\.[\\w.]+)');
       await api.quickToolsCreate('Email Lookup', 'https://example.com/search?q={email}', ['email']);
       await api.templatesCreate('Email Template', 'Contact: {email}');
     });
+
+    await app.evaluate(async ({ clipboard }, t) => {
+      clipboard.writeText(t);
+    }, text);
+    await window.waitForTimeout(1000);
   });
 
   test.afterAll(async () => {
     await app.close();
   });
 
-  test('tools launcher shows patterns, tools, and templates for matching text', async () => {
-    const mainWindow = await app.firstWindow();
+  test('the row shows a chip, pinning it opens the tray with the tool and the template', async () => {
+    const row = window.locator('[data-testid="clip-row"]', { hasText: 'Contact us at' }).first();
+    const chip = row.locator(`[data-key="email|test-${UNIQUE}@example.com"]`);
+    await expect(chip).toBeVisible({ timeout: 10000 });
 
-    // Open tools launcher with text containing an email
-    await mainWindow.evaluate(async () => {
-      const api = (window as any).api;
-      await api.openToolsLauncher('Contact us at test@example.com for info');
-    });
-
-    const launcher = await findWindowByUrl(app, 'tools-launcher');
-    await launcher.waitForSelector('#root > *');
-
-    // Wait for scanning to complete
-    await launcher.waitForSelector('text=test@example.com', { timeout: 10000 });
-
-    // Verify pattern found
-    await expect(launcher.locator('text=test@example.com')).toBeVisible();
-
-    // Wait for content to fully load
-    await launcher.waitForTimeout(2000);
-
-    // Check if tools section is expanded; if not, expand it
-    const toolsVisible = await launcher
-      .locator('text=Email Lookup')
-      .isVisible()
-      .catch(() => false);
-    if (!toolsVisible) {
-      // Click "Available Tools" to expand
-      await launcher.locator('text=Available Tools').click();
-    }
-    await expect(launcher.locator('text=Email Lookup')).toBeVisible({ timeout: 5000 });
-
-    // Check if templates section is expanded; if not, expand it
-    const templateVisible = await launcher
-      .getByText('Email Template')
-      .isVisible()
-      .catch(() => false);
-    if (!templateVisible) {
-      await launcher.locator('span:has-text("Matched Templates")').click();
-    }
-    await expect(launcher.getByText('Email Template')).toBeVisible({ timeout: 5000 });
+    await chip.click();
+    const tray = window.getByTestId('tray');
+    await expect(tray).toBeVisible();
+    await expect(tray.getByTestId('tray-group-email')).toContainText('Email Lookup');
+    await expect(tray.getByTestId('open-all')).toHaveText('Open all (1 tab)');
+    await expect(tray.getByTestId('template-pills')).toContainText('Email Template');
+    await expect(tray.locator('[data-state="ready"]')).toHaveCount(1);
   });
 });
 
-test.describe('Tools Launcher — Clip Templates', () => {
+test.describe('Quick look — clip templates', () => {
   let app: ElectronApplication;
+  let window: Page;
 
   test.beforeAll(async () => {
     const result = await launchApp();
     app = result.app;
-    await cleanupAllData(result.window);
+    window = result.window;
+    await cleanupAllData(window);
 
     // Seed a positional-only template
-    await result.window.evaluate(async () => {
+    await window.evaluate(async () => {
       const api = (window as any).api;
       await api.templatesCreate('Positional Template', 'First: {c1}, Second: {c2}');
     });
+
+    await app.evaluate(async ({ clipboard }, t) => {
+      clipboard.writeText(t);
+    }, `clip-template-row-${UNIQUE}`);
+    await window.waitForTimeout(1000);
   });
 
   test.afterAll(async () => {
     await app.close();
   });
 
-  test('tools launcher shows clip templates', async () => {
-    const mainWindow = await app.firstWindow();
-
-    // Open tools launcher
-    await mainWindow.evaluate(async () => {
-      const api = (window as any).api;
-      await api.openToolsLauncher('Some clipboard text');
-    });
-
-    const launcher = await findWindowByUrl(app, 'tools-launcher');
-    await launcher.waitForSelector('#root > *');
-
-    // Wait for content to load
-    await launcher.waitForTimeout(2000);
-
-    // Verify clip template section appears
-    await expect(launcher.locator('text=Clip Templates')).toBeVisible({ timeout: 10000 });
-    await expect(launcher.locator('text=Positional Template').first()).toBeVisible();
+  test('the context menu lists the clip template with a preview from row 1', async () => {
+    const row = window
+      .locator('[data-testid="clip-row"]', { hasText: `clip-template-row-${UNIQUE}` })
+      .first();
+    await row.click({ button: 'right' });
+    const parent = window.getByTestId('menu-fill-clip-template');
+    await expect(parent).toBeVisible({ timeout: 3000 });
+    await parent.hover();
+    const submenu = window.getByTestId('clip-template-submenu');
+    await expect(submenu).toBeVisible();
+    await expect(submenu).toContainText('Positional Template');
+    await expect(submenu).toContainText(`First: clip-template-row-${UNIQUE}`);
+    await window.keyboard.press('Escape');
   });
 });
