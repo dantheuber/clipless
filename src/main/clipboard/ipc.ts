@@ -66,12 +66,34 @@ import type {
   QuickTool,
   PatternMatch,
   QuickClipsConfig,
+  QuickClipsImportMode,
+  GroupColours,
 } from '../../shared/types';
 import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
+import { storage } from '../storage';
 import { sanitizeHtml } from './sanitize-html';
 
 let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
+
+/**
+ * Tell every window a search term, tool, template or group colour changed, so the clips
+ * window's scan cache can clear. Wraps a handler so the broadcast follows its write.
+ */
+function broadcastConfigChanged(): void {
+  for (const window of BrowserWindow.getAllWindows()) {
+    if (!window.isDestroyed()) {
+      window.webContents.send('quick-clips-config-changed');
+    }
+  }
+}
+
+function thenBroadcast<T>(work: () => Promise<T>): Promise<T> {
+  return work().then((result) => {
+    broadcastConfigChanged();
+    return result;
+  });
+}
 
 // Setup all clipboard-related IPC handlers
 export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
@@ -155,14 +177,16 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   // Template management handlers
   ipcMain.handle('templates-get-all', async () => getAllTemplates());
   ipcMain.handle('templates-create', async (_event, name: string, content: string) =>
-    createTemplate(name, content)
+    thenBroadcast(() => createTemplate(name, content))
   );
   ipcMain.handle('templates-update', async (_event, id: string, updates: Partial<Template>) =>
-    updateTemplate(id, updates)
+    thenBroadcast(() => updateTemplate(id, updates))
   );
-  ipcMain.handle('templates-delete', async (_event, id: string) => deleteTemplate(id));
+  ipcMain.handle('templates-delete', async (_event, id: string) =>
+    thenBroadcast(() => deleteTemplate(id))
+  );
   ipcMain.handle('templates-reorder', async (_event, templates: Template[]) =>
-    reorderTemplates(templates)
+    thenBroadcast(() => reorderTemplates(templates))
   );
   ipcMain.handle(
     'templates-generate-text',
@@ -184,12 +208,14 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   // Search terms IPC handlers
   ipcMain.handle('search-terms-get-all', async () => getAllSearchTerms());
   ipcMain.handle('search-terms-create', async (_event, name: string, pattern: string) =>
-    createSearchTerm(name, pattern)
+    thenBroadcast(() => createSearchTerm(name, pattern))
   );
   ipcMain.handle('search-terms-update', async (_event, id: string, updates: Partial<SearchTerm>) =>
-    updateSearchTerm(id, updates)
+    thenBroadcast(() => updateSearchTerm(id, updates))
   );
-  ipcMain.handle('search-terms-delete', async (_event, id: string) => deleteSearchTerm(id));
+  ipcMain.handle('search-terms-delete', async (_event, id: string) =>
+    thenBroadcast(() => deleteSearchTerm(id))
+  );
   ipcMain.handle('search-terms-reorder', async (_event, searchTerms: SearchTerm[]) =>
     reorderSearchTerms(searchTerms)
   );
@@ -202,12 +228,14 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle(
     'quick-tools-create',
     async (_event, name: string, url: string, captureGroups: string[]) =>
-      createQuickTool(name, url, captureGroups)
+      thenBroadcast(() => createQuickTool(name, url, captureGroups))
   );
   ipcMain.handle('quick-tools-update', async (_event, id: string, updates: Partial<QuickTool>) =>
-    updateQuickTool(id, updates)
+    thenBroadcast(() => updateQuickTool(id, updates))
   );
-  ipcMain.handle('quick-tools-delete', async (_event, id: string) => deleteQuickTool(id));
+  ipcMain.handle('quick-tools-delete', async (_event, id: string) =>
+    thenBroadcast(() => deleteQuickTool(id))
+  );
   ipcMain.handle('quick-tools-reorder', async (_event, tools: QuickTool[]) =>
     reorderQuickTools(tools)
   );
@@ -225,8 +253,16 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       openToolsForMatches(matches, toolIds)
   );
   ipcMain.handle('quick-clips-export-config', async () => exportQuickClipsConfig());
-  ipcMain.handle('quick-clips-import-config', async (_event, config: QuickClipsConfig) =>
-    importQuickClipsConfig(config)
+  ipcMain.handle(
+    'quick-clips-import-config',
+    async (_event, args: { config: QuickClipsConfig; mode?: QuickClipsImportMode }) =>
+      thenBroadcast(() => importQuickClipsConfig(args.config, args.mode ?? 'merge'))
+  );
+
+  // Group colours: a slot index per capture group, stored beside the search terms
+  ipcMain.handle('group-colours-get', async () => storage.getGroupColours());
+  ipcMain.handle('group-colours-set', async (_event, groupColours: GroupColours) =>
+    thenBroadcast(() => storage.setGroupColours(groupColours))
   );
 
   // Mark IPC handlers as registered

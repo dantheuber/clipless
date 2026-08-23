@@ -13,6 +13,7 @@ vi.mock('../storage', () => ({
     getSearchTerms: vi.fn(),
     getQuickTools: vi.fn(),
     getTemplates: vi.fn(),
+    getGroupColours: vi.fn(),
     importQuickClipsConfig: vi.fn(),
   },
 }));
@@ -196,269 +197,67 @@ describe('openToolsForMatches', () => {
     vi.clearAllMocks();
   });
 
-  it('opens URL with token replaced by capture value', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Search',
-        url: 'https://google.com/search?q={email}',
-        captureGroups: ['email'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    expect(mockOpenExternal).toHaveBeenCalledWith('https://google.com/search?q=test%40example.com');
+  const tool = (url: string, captureGroups: string[]) => ({
+    id: 't1',
+    name: 'Tool',
+    url,
+    captureGroups,
+    createdAt: 0,
+    updatedAt: 0,
+    order: 0,
   });
 
-  it('skips tool when no matching captures exist', async () => {
+  it('opens every URL buildToolUrls produces for the first applicable match', async () => {
     mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Search',
-        url: 'https://example.com/{phone}',
-        captureGroups: ['phone'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
+      tool('https://example.com/search?q={email|phone}', ['email', 'phone']),
     ]);
 
-    const matches = [
-      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
-    ];
-    await openToolsForMatches(matches, ['t1']);
+    await openToolsForMatches(
+      [
+        { searchTermId: '1', searchTermName: 'Other', captures: { ip: '1.1.1.1' } },
+        {
+          searchTermId: '2',
+          searchTermName: 'Contact',
+          captures: { email: 'test@example.com', phone: '555-1234' },
+        },
+        { searchTermId: '3', searchTermName: 'Later', captures: { email: 'later@example.com' } },
+      ],
+      ['t1']
+    );
 
+    expect(mockOpenExternal.mock.calls.map((c) => c[0])).toEqual([
+      'https://example.com/search?q=test%40example.com',
+      'https://example.com/search?q=555-1234',
+    ]);
+  });
+
+  it('skips a tool when no match holds any of its groups', async () => {
+    mockedStorage.getQuickTools.mockResolvedValue([tool('https://example.com/{phone}', ['phone'])]);
+    await openToolsForMatches(
+      [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'a@b.co' } }],
+      ['t1']
+    );
+    expect(mockOpenExternal).not.toHaveBeenCalled();
+  });
+
+  it('skips a tool whose tokens the match cannot all fill', async () => {
+    mockedStorage.getQuickTools.mockResolvedValue([
+      tool('https://example.com/{email}/{missing}', ['email', 'missing']),
+    ]);
+    await openToolsForMatches(
+      [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'a@b.co', other: '' } }],
+      ['t1']
+    );
     expect(mockOpenExternal).not.toHaveBeenCalled();
   });
 
   it('skips unknown tool ids', async () => {
     mockedStorage.getQuickTools.mockResolvedValue([]);
-
-    const matches = [
-      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
-    ];
-    await openToolsForMatches(matches, ['unknown']);
-
-    expect(mockOpenExternal).not.toHaveBeenCalled();
-  });
-
-  it('opens URL as-is when no tokens in URL', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Static',
-        url: 'https://example.com/page',
-        captureGroups: ['email'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    expect(mockOpenExternal).toHaveBeenCalledWith('https://example.com/page');
-  });
-
-  it('uses URL capture directly when tool URL is just a {url} token', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Open URL',
-        url: '{url}',
-        captureGroups: ['url'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      { searchTermId: '1', searchTermName: 'URL', captures: { url: 'https://detected.com' } },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    expect(mockOpenExternal).toHaveBeenCalledWith('https://detected.com');
-  });
-
-  it('generates combinations for multiple tokens', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Multi',
-        url: 'https://example.com/{name}/{email}',
-        captureGroups: ['name', 'email'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      {
-        searchTermId: '1',
-        searchTermName: 'Contact',
-        captures: { name: 'John', email: 'john@test.com' },
-      },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    expect(mockOpenExternal).toHaveBeenCalledWith('https://example.com/John/john%40test.com');
-  });
-
-  it('skips URL generation when token has no matching capture values', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Search',
-        url: 'https://example.com/{missing}',
-        captureGroups: ['missing'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      { searchTermId: '1', searchTermName: 'Email', captures: { email: 'test@example.com' } },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    expect(mockOpenExternal).not.toHaveBeenCalled();
-  });
-
-  it('handles pipe-separated capture groups in tokens', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Search',
-        url: 'https://example.com/search?q={email|phone}',
-        captureGroups: ['email', 'phone'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      {
-        searchTermId: '1',
-        searchTermName: 'Contact',
-        captures: { email: 'test@example.com', phone: '555-1234' },
-      },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    // Should open URLs for each matching capture value
-    expect(mockOpenExternal).toHaveBeenCalled();
-  });
-
-  it('generates all combinations for multi-value multi-token URLs', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Multi',
-        url: 'https://example.com/{a|b}/{c|d}',
-        captureGroups: ['a', 'b', 'c', 'd'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      {
-        searchTermId: '1',
-        searchTermName: 'Test',
-        captures: { a: 'v1', b: 'v2', c: 'v3', d: 'v4' },
-      },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    // With {a|b} having values [v1,v2] and {c|d} having [v3,v4], should get 4 combinations
-    expect(mockOpenExternal).toHaveBeenCalledTimes(4);
-  });
-
-  it('does not encode URL-type capture groups in non-direct URLs', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'URL redirect',
-        url: 'https://redirect.com?target={url}',
-        captureGroups: ['url'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      {
-        searchTermId: '1',
-        searchTermName: 'URL',
-        captures: { url: 'https://example.com/path?q=1' },
-      },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    // URL captures should not be encoded when in a compound URL
-    expect(mockOpenExternal).toHaveBeenCalledWith(
-      'https://redirect.com?target=https://example.com/path?q=1'
+    await openToolsForMatches(
+      [{ searchTermId: '1', searchTermName: 'Email', captures: { email: 'a@b.co' } }],
+      ['unknown']
     );
-  });
-
-  it('handles falsy capture value for a group', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Search',
-        url: 'https://example.com/{email}',
-        captureGroups: ['email'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [{ searchTermId: '1', searchTermName: 'Email', captures: { email: '' } }];
-    await openToolsForMatches(matches, ['t1']);
-
     expect(mockOpenExternal).not.toHaveBeenCalled();
-  });
-
-  it('handles URL capture group in multi-token URL', async () => {
-    mockedStorage.getQuickTools.mockResolvedValue([
-      {
-        id: 't1',
-        name: 'Multi',
-        url: 'https://proxy.com/{url}/{name}',
-        captureGroups: ['url', 'name'],
-        createdAt: 0,
-        updatedAt: 0,
-        order: 0,
-      },
-    ]);
-
-    const matches = [
-      {
-        searchTermId: '1',
-        searchTermName: 'Test',
-        captures: { url: 'https://example.com', name: 'test' },
-      },
-    ];
-    await openToolsForMatches(matches, ['t1']);
-
-    expect(mockOpenExternal).toHaveBeenCalledWith('https://proxy.com/https://example.com/test');
   });
 
   it('throws when storage fails', async () => {
@@ -483,6 +282,7 @@ describe('exportQuickClipsConfig', () => {
     mockedStorage.getQuickTools.mockResolvedValue([{ id: '2' }] as any);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     mockedStorage.getTemplates.mockResolvedValue([{ id: '3' }] as any);
+    mockedStorage.getGroupColours.mockResolvedValue({ ip: 4 });
 
     const result = await exportQuickClipsConfig();
 
@@ -490,7 +290,8 @@ describe('exportQuickClipsConfig', () => {
       searchTerms: [{ id: '1' }],
       tools: [{ id: '2' }],
       templates: [{ id: '3' }],
-      version: '1.0.0',
+      groupColours: { ip: 4 },
+      version: '2.0.0',
     });
   });
 
@@ -509,7 +310,9 @@ describe('importQuickClipsConfig', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config = { searchTerms: [], tools: [], templates: [] } as any;
     await importQuickClipsConfig(config);
-    expect(mockedStorage.importQuickClipsConfig).toHaveBeenCalledWith(config);
+    expect(mockedStorage.importQuickClipsConfig).toHaveBeenCalledWith(config, 'merge');
+    await importQuickClipsConfig(config, 'replace');
+    expect(mockedStorage.importQuickClipsConfig).toHaveBeenCalledWith(config, 'replace');
   });
 
   it('throws when storage fails', async () => {

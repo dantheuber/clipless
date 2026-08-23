@@ -11,6 +11,8 @@ import type {
   QuickTool,
   PatternMatch,
   QuickClipsConfig,
+  QuickClipsImportMode,
+  GroupColours,
   UpdateState,
 } from '../shared/types';
 
@@ -137,9 +139,20 @@ const api = {
     electronAPI.ipcRenderer.invoke('quick-clips-scan-text', text),
   quickClipsOpenTools: (matches: PatternMatch[], toolIds: string[]) =>
     electronAPI.ipcRenderer.invoke('quick-clips-open-tools', matches, toolIds),
-  quickClipsExportConfig: () => electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
-  quickClipsImportConfig: (config: QuickClipsConfig) =>
-    electronAPI.ipcRenderer.invoke('quick-clips-import-config', config),
+  quickClipsExportConfig: (): Promise<QuickClipsConfig> =>
+    electronAPI.ipcRenderer.invoke('quick-clips-export-config'),
+  quickClipsImportConfig: (config: QuickClipsConfig, mode: QuickClipsImportMode = 'merge') =>
+    electronAPI.ipcRenderer.invoke('quick-clips-import-config', { config, mode }),
+  onQuickClipsConfigChanged: (callback: () => void) => {
+    const listener = () => callback();
+    electronAPI.ipcRenderer.on('quick-clips-config-changed', listener);
+    return () => electronAPI.ipcRenderer.removeListener('quick-clips-config-changed', listener);
+  },
+
+  // Group colours
+  groupColoursGet: (): Promise<GroupColours> => electronAPI.ipcRenderer.invoke('group-colours-get'),
+  groupColoursSet: (groupColours: GroupColours): Promise<GroupColours> =>
+    electronAPI.ipcRenderer.invoke('group-colours-set', groupColours),
   // Tools Launcher Window APIs
   openToolsLauncher: (clipContent: string) =>
     electronAPI.ipcRenderer.invoke('open-tools-launcher', clipContent),

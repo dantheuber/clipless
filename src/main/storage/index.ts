@@ -11,6 +11,8 @@ import type {
   SearchTerm,
   QuickTool,
   QuickClipsConfig,
+  QuickClipsImportMode,
+  GroupColours,
   TemplatesData,
   StorageMeta,
 } from '../../shared/types';
@@ -28,6 +30,8 @@ import {
 } from './file-operations';
 import { convertToStoredClips, getClipStats } from './clips';
 import { normalizeSettings, mergeSettings } from './settings';
+import { SaveQueue } from './save-queue';
+import { pruneGroupColours, mergeGroupColours } from './group-colours';
 import {
   createTemplateObject,
   updateTemplateObject,
@@ -75,8 +79,8 @@ class SecureStorage {
   private templatesData: TemplatesData = { ...DEFAULT_TEMPLATES_DATA };
   private meta: StorageMeta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
 
-  // Per-domain save queuing
-  private savePromises: Map<string, Promise<void>> = new Map();
+  // One write at a time per domain file; a save arriving mid-write waits and then writes
+  private saveQueue = new SaveQueue();
 
   private onBackgroundLoadComplete?: () => void;
 
@@ -181,6 +185,7 @@ class SecureStorage {
           templates: validated.templates,
           searchTerms: validated.searchTerms,
           quickTools: validated.quickTools,
+          ...(validated.groupColours && { groupColours: validated.groupColours }),
         };
       }
     } catch (error) {
@@ -243,27 +248,22 @@ class SecureStorage {
   }
 
   /**
-   * Save a specific domain file with queuing to prevent concurrent writes
+   * Save a specific domain file. Writes to one file are serialised and the newest state
+   * always reaches disk (see SaveQueue).
    */
   private async saveDomain(key: string, data: unknown, filePath: string): Promise<void> {
     if (!this.isInitialized) {
       throw new Error('Storage not initialized');
     }
 
-    const existing = this.savePromises.get(key);
-    if (existing) {
-      await existing;
-      return;
-    }
+    await this.saveQueue.run(key, () => saveEncryptedJson(data, filePath));
+  }
 
-    const promise = saveEncryptedJson(data, filePath);
-    this.savePromises.set(key, promise);
-
-    try {
-      await promise;
-    } finally {
-      this.savePromises.delete(key);
-    }
+  /**
+   * Resolve once every pending write has reached disk. Call before a restart.
+   */
+  async flush(): Promise<void> {
+    await this.saveQueue.idle();
   }
 
   /**
@@ -284,6 +284,11 @@ class SecureStorage {
    * Save templates domain (templates + search terms + quick tools)
    */
   private async saveTemplatesData(): Promise<void> {
+    // A colour whose group appears in no term, tool or template is dropped on save (14.4)
+    const pruned = pruneGroupColours(this.templatesData.groupColours, this.templatesData);
+    if (pruned !== this.templatesData.groupColours) {
+      this.templatesData = { ...this.templatesData, groupColours: pruned };
+    }
     await this.saveDomain('templates', this.templatesData, this.templatesPath);
   }
 
@@ -676,17 +681,50 @@ class SecureStorage {
     await this.saveTemplatesData();
   }
 
+  // ===== GROUP COLOURS =====
+
   /**
-   * Import configuration data in batch (more efficient than individual imports)
+   * Capture group name to colour bucket slot. Lives beside the search terms in templates.enc.
    */
-  async importQuickClipsConfig(config: QuickClipsConfig): Promise<void> {
+  async getGroupColours(): Promise<GroupColours> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return { ...(this.templatesData.groupColours ?? {}) };
+  }
+
+  async setGroupColours(groupColours: GroupColours): Promise<GroupColours> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    this.templatesData = { ...this.templatesData, groupColours: { ...groupColours } };
+    await this.saveTemplatesData();
+    return { ...(this.templatesData.groupColours ?? {}) };
+  }
+
+  /**
+   * Import a Quick Clips config. merge appends the file's terms, tools and templates and
+   * keeps existing colours, adding missing ones; replace takes the file's lists and map.
+   */
+  async importQuickClipsConfig(
+    config: QuickClipsConfig,
+    mode: QuickClipsImportMode = 'merge'
+  ): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
     const { searchTerms, quickTools } = processQuickClipsConfig(config);
 
-    let hasChanges = false;
+    let hasChanges = mode === 'replace';
+
+    if (mode === 'replace') {
+      this.templatesData = {
+        templates: [],
+        searchTerms: [],
+        quickTools: [],
+      };
+    }
 
     // Add search terms
     if (searchTerms.length > 0) {
@@ -726,6 +764,16 @@ class SecureStorage {
           this.templatesData.templates.push(newTemplate);
         }
       });
+      hasChanges = true;
+    }
+
+    const groupColours = mergeGroupColours(
+      this.templatesData.groupColours,
+      config.groupColours,
+      mode
+    );
+    if (JSON.stringify(groupColours) !== JSON.stringify(this.templatesData.groupColours ?? {})) {
+      this.templatesData = { ...this.templatesData, groupColours };
       hasChanges = true;
     }
 
@@ -801,6 +849,7 @@ class SecureStorage {
       templates: this.templatesData.templates,
       searchTerms: this.templatesData.searchTerms,
       quickTools: this.templatesData.quickTools,
+      ...(this.templatesData.groupColours && { groupColours: this.templatesData.groupColours }),
       version: this.meta.version,
     };
     return JSON.stringify(data, null, 2);
@@ -825,6 +874,7 @@ class SecureStorage {
         templates: migrated.templates,
         searchTerms: migrated.searchTerms,
         quickTools: migrated.quickTools,
+        ...(migrated.groupColours && { groupColours: migrated.groupColours }),
       };
       this.meta = {
         version: migrated.version,

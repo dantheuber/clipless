@@ -1,5 +1,11 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
-import type { HotkeySettings, UpdateState } from '../shared/types';
+import type {
+  GroupColours,
+  HotkeySettings,
+  QuickClipsConfig,
+  QuickClipsImportMode,
+  UpdateState,
+} from '../shared/types';
 
 declare global {
   interface Window {
@@ -81,8 +87,15 @@ declare global {
       // Quick Clips - Scanning APIs
       quickClipsScanText: (text: string) => Promise<any[]>;
       quickClipsOpenTools: (matches: any[], toolIds: string[]) => Promise<void>;
-      quickClipsExportConfig: () => Promise<any>;
-      quickClipsImportConfig: (config: any) => Promise<void>;
+      quickClipsExportConfig: () => Promise<QuickClipsConfig>;
+      quickClipsImportConfig: (
+        config: QuickClipsConfig,
+        mode?: QuickClipsImportMode
+      ) => Promise<void>;
+      onQuickClipsConfigChanged: (callback: () => void) => () => void;
+      // Group colours
+      groupColoursGet: () => Promise<GroupColours>;
+      groupColoursSet: (groupColours: GroupColours) => Promise<GroupColours>;
       // Tools Launcher Window APIs
       openToolsLauncher: (clipContent: string) => Promise<void>;
       closeToolsLauncher: () => Promise<void>;

@@ -332,7 +332,7 @@ export function ToolsManager(): React.JSX.Element {
     try {
       const text = await file.text();
       const config = JSON.parse(text);
-      await window.api.quickClipsImportConfig(config);
+      await window.api.quickClipsImportConfig(config, 'merge');
 
       // Reload data
       await loadSearchTerms();
