@@ -5,20 +5,22 @@ tags:
   - quick-clips
   - regex
   - patterns
-timestamp: 2026-08-22T19:47:34.181Z
+  - scanning
+timestamp: 2026-08-23T02:06:48.936Z
 ---
 
-Quick Clips is the pattern-extraction feature that makes Clipless "read" clips. Scanning happens in the main process: `scanTextForPatterns` in `src/main/clipboard/quick-clips.ts`, with the renderer hook `usePatternDetection` and the `QuickClipsScanner` UI on top.
+Quick Clips is the pattern-extraction feature that makes Clipless "read" clips. Since step 1 of the quick look plan (branch `t3code/explore-tool-launcher-ux`, 2026-08-23) scanning is one pure function, `scanText(text, terms)` in `src/shared/scan.ts`, and it runs in the renderer with no IPC.
 
 How it works (verified in source):
 
-- **Search terms** are regex patterns (stored in `templates.enc` via [Secure Storage](/systems/secure-storage.md)), each with an enabled flag and ordering. Users manage them in Settings -> Quick Clips -> Search Terms.
-- `scanTextForPatterns` runs each enabled pattern with the `g` flag and collects **named capture groups only**. IMPORTANT: a match with no named capture groups is discarded -- a search term regex MUST use `(?<name>...)` groups to produce any results. Capture group names are the token vocabulary shared with [Tools Launcher](/systems/tools-launcher.md) URLs and [Templates](/systems/templates.md).
-- A bad regex in one search term is caught and logged; other patterns still run.
-- `BUILTIN_PATTERNS` (emails, IPs, URLs, phone numbers, etc.) is a library defined in the renderer settings components -- users add built-ins as search terms from the settings UI; they are not implicitly always-on in the scanner.
-- When a clip matches, a scanner icon appears on it; opening it shows every extracted value, individually selectable.
-- Domain/URL detection is TLD-aware: `src/renderer/src/utils/tlds.ts` maintains TLD lists (gTLDs, ccTLDs, special-use) used by the domain pattern.
+- **Search terms** are regex patterns (stored in `templates.enc` via [Secure Storage](/systems/secure-storage.md)), each with an `enabled` flag and ordering. Users manage them in Settings.
+- `scanText` compiles each pattern once with flags `gd` (`hasIndices`), so every named group carries `[start, end]` and chips know where to sit. It collects **named capture groups only**: a match with no named groups produces nothing, so a search term MUST use `(?<name>...)` groups. Group names are the token vocabulary shared with tool URLs and [Templates](/systems/templates.md). Disabled terms are skipped; a pattern that does not compile is skipped and reported in `ScanResult.errors`; an empty match advances `lastIndex` so a pattern that can match the empty string cannot loop. Matches are sorted by start, `groups` in order of first appearance, and overlapping matches from different terms are all kept.
+- The clips window holds a `ScanIndexProvider` (`src/renderer/src/providers/scan.tsx`): terms load once over `search-terms-get-all`, a `Map<clipId, { contentKey, result }>` caches one scan per clip and re-scans only when the clip's text changes, and the whole cache clears when the main process broadcasts `quick-clips-config-changed` after any search term, tool, template or `groupColours` write. Nothing is scanned until the terms have loaded. Clips above 256 KB of text are scanned in an idle callback; `getScan` returns null until then.
+- What is scanned is `clipText(clip)` (`providers/clips/utils.ts`): the extracted `text` for html and rtf clips (produced in the main process at capture, see [clipboard monitoring](/systems/clipboard-monitoring.md)), `title + '\n' + url` for bookmarks, the content otherwise, nothing for images.
+- `BUILTIN_PATTERNS` is one library in `src/shared/builtinPatterns.ts` (eight entries, group names `ip`, `email`, `domain`, `url`, `phone`, `mac`, `guid`, `ipv6`). It never runs on its own; adding an entry copies it in as a search term. Terms a user added from the old library keep their old group names (`ipAddress`, ...) because their tools reference them. The TLD list behind the domain pattern is `src/shared/tlds.ts`.
+- `groupColours` (group name to colour bucket slot 0 to 11, never a hex) lives beside the search terms in `templates.enc`; the bucket and the resolver (override, then named default, then lowest free slot) are in `src/shared/groupColours.ts`. Save drops an entry whose group appears nowhere (`src/main/storage/group-colours.ts`).
+- Tool fan-out is `buildToolUrls` in `src/shared/tools.ts`; readiness wording is `src/shared/readiness.ts`.
 
-Quick Clips configs (search terms + tools) are exportable/importable for team sharing.
+Still present until later steps: the main-process `scanTextForPatterns` (`src/main/clipboard/quick-clips.ts`) behind `quick-clips-scan-text`, used only by the settings Test Patterns tab (goes in step 3), and `openToolsForMatches` for the [Tools Launcher](/systems/tools-launcher.md) window (goes in step 2), which now delegates to `buildToolUrls`.
 
-> Status (2026-08-22): the settings UI for search terms, tools and templates is slated for a rebuild as a master-detail inspector with per-group colours. See [Settings for search terms, tools and templates: master-detail inspector](../decisions/settings-for-search-terms-tools-and-templates-master-detail-inspector.md) and `docs/specs/quick-look-redesign.md` section 14. Note for that work: `BUILTIN_PATTERNS` currently exists in three divergent copies (`QuickClipsManager.tsx`, `ToolsManager.tsx`, `SearchTermsSection.tsx`); only the last is used, and `QuickClipsManager.tsx` is dead code. The `enabled` flag is honoured by the scanner but nothing in the current UI sets it.
+Quick Clips configs (search terms, tools, templates, `groupColours`) export as version `2.0.0` and import with a mode, `merge` or `replace`. See [Settings for search terms, tools and templates](../decisions/settings-for-search-terms-tools-and-templates-master-detail-inspector.md) and `docs/specs/quick-look-redesign.md` sections 14 and 17.
