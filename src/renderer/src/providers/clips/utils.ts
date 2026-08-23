@@ -122,3 +122,40 @@ export const updateClipsLength = (clips: ClipItem[], maxClips: number): ClipItem
 
   return result;
 };
+
+/**
+ * Shrink the list to a new limit keeping locked clips (spec 15.5): the oldest unlocked
+ * clips go first, and locks are re-indexed to the clips they were on. Only when the locked
+ * clips alone exceed the limit are the oldest of those dropped too. Padding is as
+ * updateClipsLength.
+ */
+export const shrinkClips = (
+  clips: ClipItem[],
+  locked: Record<number, boolean>,
+  maxClips: number
+): { clips: ClipItem[]; locked: Record<number, boolean> } => {
+  const kept: { clip: ClipItem; locked: boolean }[] = clips.map((clip, index) => ({
+    clip,
+    locked: locked[index] === true,
+  }));
+  let excess = kept.length - maxClips;
+  for (let index = kept.length - 1; index >= 0 && excess > 0; index--) {
+    if (!kept[index].locked) {
+      kept.splice(index, 1);
+      excess--;
+    }
+  }
+  if (excess > 0) kept.splice(maxClips);
+
+  const nextLocked: Record<number, boolean> = {};
+  kept.forEach((entry, index) => {
+    if (entry.locked && index > 0) nextLocked[index] = true;
+  });
+  return {
+    clips: updateClipsLength(
+      kept.map((entry) => entry.clip),
+      maxClips
+    ),
+    locked: nextLocked,
+  };
+};

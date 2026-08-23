@@ -58,6 +58,36 @@
   --shadow: rgba(0, 0, 0, 0.6);
   --copied: #22c55e;
 
+  /* settings window: rail, panels, widgets (spec 15.2, one set for both themes) */
+  --nav-bg: #1a1a1a;
+  --nav-on-bg: #2b2b2b;
+  --pnl-bg: #2e2e2e;
+  --pnl-bd: #3b3b3b;
+  --line3: #333333;
+  --btn-bg: #2a2a2a;
+  --btn-bd: #555555;
+  --btn-hover-bd: #888888;
+  --ghost-hover: #333333;
+  --danger-bd: #7f1d1d;
+  --danger-bg: #3b1111;
+  --err-text: #fca5a5;
+  --warn-text: #fcd34d;
+  --input-bg: #141414;
+  --input-bd: #444444;
+  --toggle-bg: #444444;
+  --toggle-knob: #bbbbbb;
+  --kbd-bg: #2e2e2e;
+  --kbd-bd: #555555;
+  --kbd-hover-bd: #999999;
+  --list-bg: #222222;
+  --list-hover: #2a2a2a;
+  --sel-bg: #2c3a4e;
+  --modal-bg: #1b1b1b;
+  --modal-bd: #5a5a5a;
+  --pv-bg: #1b1b1b;
+  --orphan: #777777;
+  --clip-dot-bd: #666666;
+
   /* syntax token colours for the reader and the editor overlay */
   --tk-key: #7fdbca;
   --tk-str: #ecc48d;
@@ -121,6 +151,35 @@ body.light {
   --dimmer: rgba(0, 0, 0, 0.35);
   --shadow: rgba(0, 0, 0, 0.25);
   --copied: #15803d;
+
+  --nav-bg: #efefef;
+  --nav-on-bg: #e4e4e4;
+  --pnl-bg: #e2e2e2;
+  --pnl-bd: #dadada;
+  --line3: #dfdfdf;
+  --btn-bg: #e5e5e5;
+  --btn-bd: #cacaca;
+  --btn-hover-bd: #717171;
+  --ghost-hover: #dfdfdf;
+  --danger-bd: #efc1c1;
+  --danger-bg: #f6e2e2;
+  --err-text: #b20606;
+  --warn-text: #b58b03;
+  --input-bg: #f3f3f3;
+  --input-bd: #d5d5d5;
+  --toggle-bg: #d5d5d5;
+  --toggle-knob: #414141;
+  --kbd-bg: #e2e2e2;
+  --kbd-bd: #cacaca;
+  --kbd-hover-bd: #616161;
+  --list-bg: #eaeaea;
+  --list-hover: #e5e5e5;
+  --sel-bg: #d8dfe9;
+  --modal-bg: #eeeeee;
+  --modal-bd: #c7c7c7;
+  --pv-bg: #eeeeee;
+  --orphan: #b5b5b5;
+  --clip-dot-bd: #c0c0c0;
 
   --tk-key: #288f7c;
   --tk-str: #9d661a;

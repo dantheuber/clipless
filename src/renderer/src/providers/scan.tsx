@@ -44,9 +44,13 @@ interface ScanEntry {
 }
 
 export interface ScanIndex {
+  /** False until the first load answers; the Tools tab shows one loading state on it */
+  loaded: boolean;
   terms: SearchTerm[];
   tools: QuickTool[];
   templates: Template[];
+  /** The stored overrides, slot per group; the Bucket shows and edits them (spec 14.4) */
+  groupColours: GroupColours;
   /** The scan for a clip, or null while a large clip's scan is still pending. */
   getScan: (clip: ClipItem) => ScanResult | null;
   /** The colour bucket slot a capture group renders in (spec 17.2). */
@@ -174,9 +178,11 @@ export function ScanIndexProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo(
     () => ({
+      loaded: config !== null,
       terms: config?.terms ?? [],
       tools: config?.tools ?? [],
       templates: config?.templates ?? [],
+      groupColours: config?.groupColours ?? {},
       getScan,
       slotFor,
       version,

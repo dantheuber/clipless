@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { ClipItem } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
-import { updateClipsLength } from './utils';
+import { shrinkClips, updateClipsLength } from './utils';
 import { UserSettings, StoredClip } from '../../../../shared/types';
 
 /**
@@ -91,6 +91,10 @@ export const useClipsStorage = (
     });
   }, [loadStoredData]);
 
+  // The latest list and locks, for the settings listener below
+  const latest = useRef({ clips, lockedClips });
+  latest.current = { clips, lockedClips };
+
   // Listen for settings updates from other windows (like settings window)
   useEffect(() => {
     if (!window.api?.onSettingsUpdated) return;
@@ -98,22 +102,13 @@ export const useClipsStorage = (
     const handleSettingsUpdate = (updatedSettings: UserSettings) => {
       console.log('Received settings update from other window:', updatedSettings);
       if (updatedSettings && typeof updatedSettings.maxClips === 'number') {
-        setMaxClips(updatedSettings.maxClips);
+        const max = updatedSettings.maxClips;
+        setMaxClips(max);
 
-        // Update clips array to match new max clips limit
-        setClips((prevClips) => updateClipsLength(prevClips, updatedSettings.maxClips));
-
-        // Update locked clips to remove any locks beyond the new maxClips limit
-        setLockedClips((prevLocked) => {
-          const newLocked: Record<number, boolean> = {};
-          Object.keys(prevLocked).forEach((key) => {
-            const index = parseInt(key);
-            if (index < updatedSettings.maxClips) {
-              newLocked[index] = prevLocked[index];
-            }
-          });
-          return newLocked;
-        });
+        // A lower limit drops the oldest unlocked clips first; locked clips stay (15.5)
+        const shrunk = shrinkClips(latest.current.clips, latest.current.lockedClips, max);
+        setClips(shrunk.clips);
+        setLockedClips(shrunk.locked);
       }
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };

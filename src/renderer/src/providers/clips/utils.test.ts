@@ -8,6 +8,7 @@ import {
   createImageClip,
   createBookmarkClip,
   clipText,
+  shrinkClips,
   updateClipsLength,
 } from './utils';
 
@@ -121,5 +122,28 @@ describe('updateClipsLength', () => {
     const result = updateClipsLength(clips, 1);
     expect(result).toEqual(clips);
     expect(result).not.toBe(clips);
+  });
+});
+
+describe('shrinkClips', () => {
+  const clips = ['a', 'b', 'c', 'd', 'e'].map((c) => createTextClip(c));
+
+  it('drops the oldest unlocked clips first and keeps the locks on their clips', () => {
+    const result = shrinkClips(clips, { 1: true, 4: true }, 3);
+    expect(result.clips.map((c) => c.content)).toEqual(['a', 'b', 'e']);
+    expect(result.locked).toEqual({ 1: true, 2: true });
+  });
+
+  it('drops the oldest locked clips only when the locked ones alone exceed the limit', () => {
+    const result = shrinkClips(clips, { 1: true, 2: true, 3: true, 4: true }, 2);
+    expect(result.clips.map((c) => c.content)).toEqual(['b', 'c']);
+    expect(result.locked).toEqual({ 1: true });
+  });
+
+  it('pads when the list is shorter than the limit and never locks row 0', () => {
+    const result = shrinkClips(clips.slice(0, 2), { 0: true, 1: true }, 4);
+    expect(result.clips).toHaveLength(4);
+    expect(result.clips[3].content).toBe('');
+    expect(result.locked).toEqual({ 1: true });
   });
 });
