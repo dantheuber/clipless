@@ -1,13 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockOpenExternal } = vi.hoisted(() => ({
-  mockOpenExternal: vi.fn().mockResolvedValue(undefined),
-}));
-
-vi.mock('electron', () => ({
-  shell: { openExternal: mockOpenExternal },
-}));
-
 vi.mock('../storage', () => ({
   storage: {
     getSearchTerms: vi.fn(),
@@ -18,7 +10,7 @@ vi.mock('../storage', () => ({
   },
 }));
 
-import { exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips';
+import { exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips-config';
 import { storage } from '../storage';
 const mockedStorage = vi.mocked(storage);
 

@@ -37,7 +37,7 @@ import {
   deleteSearchTerm,
 } from './search-terms';
 import { getAllQuickTools, createQuickTool, updateQuickTool, deleteQuickTool } from './quick-tools';
-import { exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips';
+import { exportQuickClipsConfig, importQuickClipsConfig } from './quick-clips-config';
 import { openExternalUrls } from './open-external';
 import type {
   ClipItem,
