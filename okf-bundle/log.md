@@ -1,6 +1,22 @@
 # Update Log
 
 ## 2026-08-23
+* Add text extraction and image metadata at capture, checkClipboardNow; relative links
+* Drop the removed clips.tsx wrapper; add pins, quick look state, scan index and the redesigned clip components
+* Add clip ids, groupColours, toolsSampleText and the storageVersion caveat; relative links
+* Two windows since the launcher was removed; shared scan, tools and templates modules; relative links
+* Folded into decisions/settings-window-redesign
+* Folded into decisions/settings-window-redesign
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/quick-look-engineering-calls
+* Folded into decisions/tools-launcher-window-replaced-by-quick-look-and-pin-tray
+* Folded into decisions/quick-look-engineering-calls
+* Merge the engineering decision and the four step-call records into one concept of what was chosen and why
+* Merge the Tools tab and settings shell decisions into one implemented decision
+* Consolidate the quick look product decision and the outliers review into one implemented decision
+* Migration to OKF 0.2 (okf-mcp migrate): timestamp-to-generated (28 files)
 * **Update**: step 4 decision records the CI fixes after the stack collapsed into PR #146 (setContentSize, the context menu click-away, the extraction bound, the 1.9.0 bump).
 * **Decision**: step 4 calls recorded; the launcher window is deleted and the four-PR quick look stack is ready to merge top down.
 * **Update**: `systems/tools-launcher` now records that step 4 deleted the window and points to what replaced it.

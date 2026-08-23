@@ -5,10 +5,12 @@ tags:
   - testing
   - playwright
   - clipboard
-timestamp: 2026-07-10T00:55:35.489Z
+generated:
+  by: human:dantheuber
+  at: 2026-07-10T00:55:35.489Z
 ---
 
-Playwright e2e tests (`npx playwright test`) launch the real Electron app, and because [clipboard monitoring](/systems/clipboard-monitoring.md) polls the actual OS clipboard, the tests **read from and write to the developer's real clipboard**.
+Playwright e2e tests (`npx playwright test`) launch the real Electron app, and because [clipboard monitoring](../systems/clipboard-monitoring.md) polls the actual OS clipboard, the tests **read from and write to the developer's real clipboard**.
 
 Practical rules:
 

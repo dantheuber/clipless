@@ -7,7 +7,9 @@ tags:
   - playwright
   - electron
   - linux
-timestamp: 2026-08-23T05:47:18.714Z
+generated:
+  by: human:dantheuber
+  at: 2026-08-23T05:47:18.714Z
 ---
 
 Observed 2026-08-23 on Ubuntu (GNOME, Wayland) while verifying quick look step 1, and reproduced against the pre-change commit `427af1e` with the same errors.

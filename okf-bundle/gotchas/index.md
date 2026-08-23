@@ -7,3 +7,4 @@
 * [E2E on Linux: Playwright forces the basic password store; set CLIPLESS_PLAINTEXT_STORAGE=1](e2e-on-linux-playwright-forces-the-basic-password-store.md)
 * [E2E Tests Touch the Real System Clipboard](e2e-tests-touch-system-clipboard.md)
 * [macOS Builds Are Unsigned](macos-unsigned-builds.md)
+* [Windows startup notification on login-item rewrite](windows-startup-notification-on-login-item-rewrite.md)

@@ -5,7 +5,9 @@ tags:
   - testing
   - vitest
   - coverage
-timestamp: 2026-08-23T02:51:49.217Z
+generated:
+  by: human:dantheuber
+  at: 2026-08-23T02:51:49.217Z
 ---
 
 `npx vitest run --coverage` reports 100% on this repo, but `vitest.config.ts` sets no `coverage.all`, so the report only counts files some test imports. `src/main/storage/index.ts`, the IPC registration files (`src/main/ipc/index.ts`, `src/main/clipboard/ipc.ts`) and `src/preload/index.ts` have no tests and never appear in the table. The bar in [E2E Tests Touch the Real System Clipboard](e2e-tests-touch-system-clipboard.md) is therefore "every file a test imports stays at 100%", including new files with tests and old files that gain a test.

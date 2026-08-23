@@ -5,7 +5,9 @@ tags:
   - windows
   - autostart
   - electron
-timestamp: 2026-08-10T17:52:07.756Z
+generated:
+  by: human:dantheuber
+  at: 2026-08-10T17:52:07.756Z
 ---
 
 Windows 11 shows a "this app is set to run when you sign in" toast whenever a

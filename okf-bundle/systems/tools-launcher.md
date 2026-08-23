@@ -6,11 +6,13 @@ tags:
   - launcher
   - window
   - history
-timestamp: 2026-08-23T07:14:26.635Z
+generated:
+  by: human:dantheuber
+  at: 2026-08-23T07:14:26.635Z
 status: deprecated
 ---
 
-The Tools Launcher window no longer exists. Step 4 of `docs/specs/implementation-plan.md` deleted it on 2026-08-23 (branch `t3code/quick-look-step-4`): `tools-launcher.html`, `tools-launcher-main.tsx`, `ToolsLauncher.tsx`, `QuickClipsScanner.tsx` with its CSS and selection helpers, `assets/base.css`, the `tools-launcher` build input, `createToolsLauncherWindow` and `getToolsLauncherWindow` in `src/main/window/creation.ts`, the `open-tools-launcher`, `close-tools-launcher` and `tools-launcher-ready` IPC handlers, the preload methods `openToolsLauncher`, `closeToolsLauncher`, `toolsLauncherReady`, `onToolsLauncherInitialize` and `removeAllListeners`, the `PatternMatch` type and the `faWrench` icon. The app has two renderer entry points, `main.tsx` and `settings-main.tsx`.
+The Tools Launcher window no longer exists. The quick look redesign (1.9.0, 2026-08-23, PR #146) deleted it: `tools-launcher.html`, `tools-launcher-main.tsx`, `ToolsLauncher.tsx`, `QuickClipsScanner.tsx` with its CSS and selection helpers, `assets/base.css`, the `tools-launcher` build input, `createToolsLauncherWindow` and `getToolsLauncherWindow` in `src/main/window/creation.ts`, the `open-tools-launcher`, `close-tools-launcher` and `tools-launcher-ready` IPC handlers, the preload methods `openToolsLauncher`, `closeToolsLauncher`, `toolsLauncherReady`, `onToolsLauncherInitialize` and `removeAllListeners`, the `PatternMatch` type and the `faWrench` icon. The app has two renderer entry points, `main.tsx` and `settings-main.tsx`.
 
 What replaced it, all inside the main window:
 
