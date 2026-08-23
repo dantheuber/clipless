@@ -36,6 +36,8 @@ const createMockApi = () => ({
   getAutoStartState: vi.fn().mockResolvedValue(null),
   onSettingsUpdated: vi.fn().mockReturnValue(() => {}),
   quickClipsScanText: vi.fn().mockResolvedValue([]),
+  searchTermsGetAll: vi.fn().mockResolvedValue([]),
+  onQuickClipsConfigChanged: vi.fn().mockReturnValue(() => {}),
   onToggleSearch: vi.fn().mockReturnValue(() => {}),
   getUpdateState: vi.fn().mockResolvedValue({ status: 'idle' }),
   onUpdateState: vi.fn().mockReturnValue(() => {}),

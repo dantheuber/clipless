@@ -1,57 +1,22 @@
-import { useState, useEffect } from 'react';
-import { PatternMatch } from '../../../shared/types';
+import type { ClipItem, ScanResult } from '../../../shared/types';
+import { useScanIndex } from '../providers/scan';
 
 /**
- * Hook to detect patterns in clip content using Quick Clips search terms
+ * A clip's scan from the shared index. A thin wrapper so ClipWrapper keeps its badge with
+ * no IPC. getScan is a cache lookup, and the provider re-renders its consumers when a
+ * deferred scan lands or the terms change, so there is nothing to memoise here. loading is
+ * true only while a large clip's deferred scan is pending.
  */
-export function usePatternDetection(content: string) {
-  const [hasPatterns, setHasPatterns] = useState(false);
-  const [patterns, setPatterns] = useState<PatternMatch[]>([]);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    if (!content || content.trim().length === 0) {
-      setHasPatterns(false);
-      setPatterns([]);
-      return;
-    }
-
-    const detectPatterns = async () => {
-      setLoading(true);
-      try {
-        const matches = await window.api.quickClipsScanText(content);
-
-        if (!isCancelled) {
-          setPatterns(matches);
-          setHasPatterns(matches.length > 0);
-        }
-      } catch (error) {
-        console.error('Failed to scan for patterns:', error);
-        if (!isCancelled) {
-          setPatterns([]);
-          setHasPatterns(false);
-        }
-      } finally {
-        if (!isCancelled) {
-          setLoading(false);
-        }
-      }
-    };
-
-    // Debounce pattern detection to avoid excessive API calls
-    const timeoutId = setTimeout(detectPatterns, 300);
-
-    return () => {
-      isCancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [content]);
-
+export function usePatternDetection(clip: ClipItem): {
+  hasPatterns: boolean;
+  scan: ScanResult | null;
+  loading: boolean;
+} {
+  const { getScan } = useScanIndex();
+  const scan = getScan(clip);
   return {
-    hasPatterns,
-    patterns,
-    loading,
+    hasPatterns: scan !== null && scan.matches.length > 0,
+    scan,
+    loading: scan === null,
   };
 }

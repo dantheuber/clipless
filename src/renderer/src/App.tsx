@@ -1,5 +1,6 @@
 import { Clips } from './components/clips/Clips';
 import { ClipsProvider } from './providers/clips';
+import { ScanIndexProvider } from './providers/scan';
 import { ThemeProvider, useTheme } from './providers/theme';
 import { LanguageDetectionProvider } from './providers/languageDetection';
 import { StatusBar } from './components/StatusBar';
@@ -15,14 +16,16 @@ function AppContent(): React.JSX.Element {
     <div className={classNames(styles.app, { [styles.light]: isLight })}>
       {/* <UpdaterControl /> */}
       <LanguageDetectionProvider>
-        <ClipsProvider>
-          <div className={styles.mainContent}>
-            <Clips />
-          </div>
-          <SearchBar />
-          <UpdateBanner />
-          <StatusBar />
-        </ClipsProvider>
+        <ScanIndexProvider>
+          <ClipsProvider>
+            <div className={styles.mainContent}>
+              <Clips />
+            </div>
+            <SearchBar />
+            <UpdateBanner />
+            <StatusBar />
+          </ClipsProvider>
+        </ScanIndexProvider>
       </LanguageDetectionProvider>
       {/* <Versions></Versions> */}
     </div>

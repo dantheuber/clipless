@@ -83,6 +83,16 @@ describe('SaveQueue', () => {
     await expect(queue.run('clips', () => Promise.reject(new Error('no')))).rejects.toThrow('no');
   });
 
+  it('idle resolves even when the write it waited on fails', async () => {
+    const queue = new SaveQueue();
+    const failing = deferred();
+    const p = queue.run('clips', () => failing.promise);
+    p.catch(() => {});
+    const idle = queue.idle('clips');
+    failing.reject(new Error('disk full'));
+    await expect(idle).resolves.toBeUndefined();
+  });
+
   it('idle resolves once every write for a key, or every key, has finished', async () => {
     const queue = new SaveQueue();
     const first = deferred();

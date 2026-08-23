@@ -29,7 +29,7 @@ export const ClipWrapper = memo(function ClipWrapper({
 }: ClipProps): React.JSX.Element {
   const { copyClipToClipboard, updateClip } = useClipsActions();
   const { isLight } = useTheme();
-  const { hasPatterns } = usePatternDetection(clip.content);
+  const { hasPatterns } = usePatternDetection(clip);
   const { contextMenu, openContextMenu, closeContextMenu } = useContextMenu();
   const [isExpanded, setIsExpanded] = useState(false);
 
