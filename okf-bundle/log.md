@@ -1,6 +1,7 @@
 # Update Log
 
 ## 2026-08-23
+* **Update**: step 4 decision records the CI fixes after the stack collapsed into PR #146 (setContentSize, the context menu click-away, the extraction bound, the 1.9.0 bump).
 * **Decision**: step 4 calls recorded; the launcher window is deleted and the four-PR quick look stack is ready to merge top down.
 * **Update**: `systems/tools-launcher` now records that step 4 deleted the window and points to what replaced it.
 * **Update**: templates are made in the settings Tools tab's inspector since step 3

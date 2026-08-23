@@ -8,7 +8,7 @@ tags:
   - testing
   - screenshots
   - docs
-timestamp: 2026-08-23T07:35:20.134Z
+timestamp: 2026-08-23T08:34:34.259Z
 status: stable
 ---
 
@@ -23,3 +23,10 @@ Step 4 of `docs/specs/implementation-plan.md` (remove the launcher window) shipp
 ## Verification
 
 On 2026-08-23: 904 unit tests in 83 files, 100% statements, branches, functions and lines on every file a test imports; lint 0 errors (37 pre-existing warnings, 39 at step 3's tip); typecheck clean; `npx electron-vite build` emits `index.html` and `settings.html` only; the Playwright suite 36 of 36 on Linux with the wrapper recipe (35 existing, 1 new in `e2e/app-launch.spec.ts`), green on the third full run after two runs hit the focus race above; `npm run screenshots` 2 of 2. Spec 13's first bullet, "No Tools Launcher window exists", is met: no file under `src` names the window except the settings migration for the old `openToolsLauncher` hotkey key.
+
+The stack was then collapsed into PR #146 against `main` (the step 1 branch fast-forwarded to the step 4 tip; #148 and #149 closed, #147 auto-marked merged into the step 1 branch). CI on Windows found three things the Linux runs had not:
+
+- `e2e/settings.spec.ts` sized the settings window with `setSize`, which on Windows includes the 16 px frame, so `innerWidth` read 884 for 900. `setContentSize` gives the same `innerWidth` on every platform.
+- `e2e/context-menu.spec.ts` clicked the body at (5, 5) to close the menu; in the redesigned window that is row 1's number cell, which copies the clip and toasts, and two cases later the toast was still visible and `getByTestId('toast')` matched two elements. The case clicks the status bar now and the copy case filters its toast by text.
+- `extract-html.test.ts` asserted a 1 MB extraction under 250 ms; a runner took 253 ms under coverage. The bound is 2 s, enough to catch a quadratic regression.
+- `validate-pr` refuses a `package.json` version that is already tagged; `main` was at the released 1.8.10, so the PR bumps to 1.9.0.
