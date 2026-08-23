@@ -43,11 +43,13 @@ async function openSettings(app: ElectronApplication, mainWindow: Page, tab: str
   throw new Error('settings window did not open');
 }
 
+// Sizes the web contents, not the outer window: on Windows setSize includes the frame, so
+// innerWidth would come back 16px short and the viewport media queries would not fire.
 async function setSettingsSize(app: ElectronApplication, width: number, height: number): Promise<void> {
   await app.evaluate(
     ({ BrowserWindow }, size) => {
       const win = BrowserWindow.getAllWindows().find((w) => w.webContents.getURL().includes('settings.html'));
-      win?.setSize(size.width, size.height);
+      win?.setContentSize(size.width, size.height);
     },
     { width, height }
   );
