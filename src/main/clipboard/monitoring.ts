@@ -3,12 +3,15 @@ import { join } from 'path';
 import { getCurrentClipboardData } from './data';
 import { saveImage } from '../storage/image-store';
 import { generateId } from '../storage/search-terms';
+import { htmlToText } from './extract-html';
+import { rtfToText } from './extract-rtf';
 
 // Clipboard monitoring state
 let lastClipboardContent = '';
 let lastClipboardType = '';
 let clipboardCheckInterval: NodeJS.Timeout | null = null;
 let skipNextImageChange = false;
+let monitoredWindow: BrowserWindow | null = null;
 
 function getDataPath(): string {
   return join(app.getPath('userData'), 'clipless-data');
@@ -33,8 +36,11 @@ export function setSkipNextImageChange(): void {
   skipNextImageChange = true;
 }
 
-// Clipboard change detection function
-export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<void> => {
+/**
+ * Run the poll body once. Returns true when a change was sent to the renderer. The quick
+ * look hotkey calls this so a fresh copy reaches the renderer before the reader opens.
+ */
+export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<boolean> => {
   const currentClipData = getCurrentClipboardData();
 
   // Check if clipboard content has changed
@@ -49,10 +55,17 @@ export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<
     // For images, check skip flag (set when copying image clip back to clipboard)
     if (currentClipData.type === 'image' && skipNextImageChange) {
       skipNextImageChange = false;
-      return;
+      return false;
     }
 
     let clipToSend: Record<string, unknown> = currentClipData;
+
+    // For html and rtf, extract the text here so the renderer never parses markup
+    if (currentClipData.type === 'html') {
+      clipToSend = { ...currentClipData, text: htmlToText(currentClipData.content) };
+    } else if (currentClipData.type === 'rtf') {
+      clipToSend = { ...currentClipData, text: rtfToText(currentClipData.content) };
+    }
 
     // For images, save to image store and send thumbnail instead of full data URL
     if (currentClipData.type === 'image') {
@@ -76,15 +89,25 @@ export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<
     // Send clipboard change to renderer (renderer will handle duplicate detection)
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('clipboard-changed', clipToSend);
+      return true;
     }
   }
+  return false;
 };
+
+/**
+ * Check the clipboard now, outside the poll, against the window being monitored.
+ */
+export function checkClipboardNow(): Promise<boolean> {
+  return checkClipboard(monitoredWindow);
+}
 
 // Start clipboard monitoring
 export function startClipboardMonitoring(mainWindow: BrowserWindow | null): boolean {
   if (clipboardCheckInterval) {
     clearInterval(clipboardCheckInterval);
   }
+  monitoredWindow = mainWindow;
   clipboardCheckInterval = setInterval(() => checkClipboard(mainWindow), 250); // Check every 250ms
   return true;
 }

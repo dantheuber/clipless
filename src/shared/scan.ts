@@ -29,7 +29,7 @@ function compile(pattern: string): RegExp | Error {
   try {
     result = new RegExp(pattern, 'gd');
   } catch (error) {
-    result = error instanceof Error ? error : new Error(String(error));
+    result = error as Error; // the RegExp constructor throws SyntaxError
   }
   compiled.set(pattern, result);
   return result;

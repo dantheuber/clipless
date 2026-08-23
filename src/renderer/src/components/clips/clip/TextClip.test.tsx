@@ -81,29 +81,38 @@ describe('TextClip', () => {
   });
 
   it('renders text content in display mode', () => {
-    render(<TextClip clip={{ type: 'text', content: 'Hello World' }} onUpdate={vi.fn()} />);
+    render(
+      <TextClip clip={{ id: 'c1', type: 'text', content: 'Hello World' }} onUpdate={vi.fn()} />
+    );
     expect(screen.getByText('Hello World')).toBeInTheDocument();
   });
 
   it('renders (empty) for empty content', () => {
-    render(<TextClip clip={{ type: 'text', content: '' }} onUpdate={vi.fn()} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: '' }} onUpdate={vi.fn()} />);
     expect(screen.getByText('(empty)')).toBeInTheDocument();
   });
 
   it('does not enter edit mode for empty content', () => {
-    render(<TextClip clip={{ type: 'text', content: '' }} onUpdate={vi.fn()} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: '' }} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByText('(empty)'));
     // Should still show (empty), not a textarea
     expect(screen.getByText('(empty)')).toBeInTheDocument();
   });
 
   it('collapses multiline text to single line in display mode', () => {
-    render(<TextClip clip={{ type: 'text', content: 'line1\nline2\nline3' }} onUpdate={vi.fn()} />);
+    render(
+      <TextClip
+        clip={{ id: 'c1', type: 'text', content: 'line1\nline2\nline3' }}
+        onUpdate={vi.fn()}
+      />
+    );
     expect(screen.getByText('line1 line2 line3')).toBeInTheDocument();
   });
 
   it('enters edit mode on click and shows textarea', () => {
-    render(<TextClip clip={{ type: 'text', content: 'Hello World' }} onUpdate={vi.fn()} />);
+    render(
+      <TextClip clip={{ id: 'c1', type: 'text', content: 'Hello World' }} onUpdate={vi.fn()} />
+    );
     fireEvent.click(screen.getByText('Hello World'));
     expect(screen.getByRole('textbox')).toBeInTheDocument();
   });
@@ -112,7 +121,7 @@ describe('TextClip', () => {
     const onEditingChange = vi.fn();
     render(
       <TextClip
-        clip={{ type: 'text', content: 'Hello World' }}
+        clip={{ id: 'c1', type: 'text', content: 'Hello World' }}
         onUpdate={vi.fn()}
         onEditingChange={onEditingChange}
       />
@@ -126,7 +135,7 @@ describe('TextClip', () => {
 
   it('calls onUpdate with debounce on text change', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     const textarea = screen.getByRole('textbox');
@@ -144,7 +153,7 @@ describe('TextClip', () => {
 
   it('clears previous debounce when typing rapidly', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     const textarea = screen.getByRole('textbox');
@@ -169,7 +178,7 @@ describe('TextClip', () => {
 
   it('does not call onUpdate when value unchanged', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     const textarea = screen.getByRole('textbox');
@@ -183,7 +192,7 @@ describe('TextClip', () => {
 
   it('calls onUpdate immediately on blur with pending changes', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     const textarea = screen.getByRole('textbox');
@@ -195,7 +204,7 @@ describe('TextClip', () => {
 
   it('handles Enter key to finish editing', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     const textarea = screen.getByRole('textbox');
@@ -210,7 +219,7 @@ describe('TextClip', () => {
     const onEditingChange = vi.fn();
     render(
       <TextClip
-        clip={{ type: 'text', content: 'Hello' }}
+        clip={{ id: 'c1', type: 'text', content: 'Hello' }}
         onUpdate={onUpdate}
         onEditingChange={onEditingChange}
       />
@@ -234,7 +243,13 @@ describe('TextClip', () => {
     mockIsCodeDetectionEnabled = true;
     render(
       <TextClip
-        clip={{ type: 'text', content: 'const x = 1;', isCode: true, language: 'javascript' }}
+        clip={{
+          id: 'c1',
+          type: 'text',
+          content: 'const x = 1;',
+          isCode: true,
+          language: 'javascript',
+        }}
         onUpdate={vi.fn()}
       />
     );
@@ -254,7 +269,13 @@ describe('TextClip', () => {
     mockIsCodeDetectionEnabled = true;
     render(
       <TextClip
-        clip={{ type: 'text', content: 'const x = 1;', isCode: true, language: 'javascript' }}
+        clip={{
+          id: 'c1',
+          type: 'text',
+          content: 'const x = 1;',
+          isCode: true,
+          language: 'javascript',
+        }}
         onUpdate={vi.fn()}
       />
     );
@@ -277,7 +298,7 @@ describe('TextClip', () => {
   it('auto-resizes plain textarea for multiline content without syntax highlighting', () => {
     mockIsCodeDetectionEnabled = false;
     const content = 'line1\nline2';
-    render(<TextClip clip={{ type: 'text', content }} onUpdate={vi.fn()} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content }} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByText('line1 line2'));
 
     const textarea = screen.getByRole('textbox');
@@ -293,7 +314,13 @@ describe('TextClip', () => {
     const multilineContent = 'const x = 1;\nconst y = 2;';
     render(
       <TextClip
-        clip={{ type: 'text', content: multilineContent, isCode: true, language: 'javascript' }}
+        clip={{
+          id: 'c1',
+          type: 'text',
+          content: multilineContent,
+          isCode: true,
+          language: 'javascript',
+        }}
         onUpdate={vi.fn()}
       />
     );
@@ -323,7 +350,13 @@ describe('TextClip', () => {
     mockIsCodeDetectionEnabled = false;
     render(
       <TextClip
-        clip={{ type: 'text', content: 'const x = 1;', isCode: true, language: 'javascript' }}
+        clip={{
+          id: 'c1',
+          type: 'text',
+          content: 'const x = 1;',
+          isCode: true,
+          language: 'javascript',
+        }}
         onUpdate={vi.fn()}
       />
     );
@@ -334,13 +367,13 @@ describe('TextClip', () => {
   });
 
   it('shows whitespace-only content as (empty)', () => {
-    render(<TextClip clip={{ type: 'text', content: '   ' }} onUpdate={vi.fn()} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: '   ' }} onUpdate={vi.fn()} />);
     expect(screen.getByText('(empty)')).toBeInTheDocument();
   });
 
   it('does not call onUpdate on blur when no pending changes', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     // Blur immediately without changing anything
@@ -351,7 +384,7 @@ describe('TextClip', () => {
 
   it('does not call onUpdate on blur when pending change matches original', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     const textarea = screen.getByRole('textbox');
@@ -366,7 +399,7 @@ describe('TextClip', () => {
 
   it('handles Escape without onEditingChange callback', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' });
@@ -377,7 +410,7 @@ describe('TextClip', () => {
 
   it('ignores non-special keys in keyDown handler', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'a' });
@@ -388,7 +421,7 @@ describe('TextClip', () => {
   });
 
   it('allows Shift+Enter without exiting edit mode', () => {
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByText('Hello'));
 
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter', shiftKey: true });
@@ -399,7 +432,7 @@ describe('TextClip', () => {
 
   it('handles Escape without pending debounce', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
 
     // Press Escape without typing anything (no debounce pending)
@@ -417,12 +450,12 @@ describe('TextClip', () => {
     });
 
     it('applies light class in display mode', () => {
-      render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
+      render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
       expect(screen.getByText('Hello').className).toContain('light');
     });
 
     it('applies light class in plain edit mode', () => {
-      render(<TextClip clip={{ type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
+      render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
       fireEvent.click(screen.getByText('Hello'));
       expect(screen.getByRole('textbox').className).toContain('light');
     });
@@ -432,7 +465,13 @@ describe('TextClip', () => {
       mockIsCodeDetectionEnabled = true;
       render(
         <TextClip
-          clip={{ type: 'text', content: 'const x = 1;', isCode: true, language: 'javascript' }}
+          clip={{
+            id: 'c1',
+            type: 'text',
+            content: 'const x = 1;',
+            isCode: true,
+            language: 'javascript',
+          }}
           onUpdate={vi.fn()}
         />
       );
@@ -448,7 +487,7 @@ describe('TextClip', () => {
     });
 
     it('applies light class to empty content display', () => {
-      render(<TextClip clip={{ type: 'text', content: '' }} onUpdate={vi.fn()} />);
+      render(<TextClip clip={{ id: 'c1', type: 'text', content: '' }} onUpdate={vi.fn()} />);
       const el = screen.getByText('(empty)');
       expect(el.className).toContain('light');
       expect(el.className).toContain('emptyText');

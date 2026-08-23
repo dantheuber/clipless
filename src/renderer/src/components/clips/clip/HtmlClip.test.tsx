@@ -12,7 +12,7 @@ vi.mock('./Clip.module.css', () => ({
 
 describe('HtmlClip', () => {
   it('renders HTML label and content', () => {
-    render(<HtmlClip clip={{ type: 'html', content: '<p>Hello</p>' }} />);
+    render(<HtmlClip clip={{ id: 'c1', type: 'html', content: '<p>Hello</p>' }} />);
     expect(screen.getByText('HTML:')).toBeInTheDocument();
     expect(screen.getByText('<p>Hello</p>')).toBeInTheDocument();
   });

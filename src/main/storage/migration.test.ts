@@ -19,7 +19,7 @@ vi.mock('fs', () => ({
   },
 }));
 
-import { migrateData, migrateLegacyStorage } from './migration';
+import { migrateData, migrateLegacyStorage, backfillClip } from './migration';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { safeStorage } from 'electron';
@@ -41,6 +41,69 @@ describe('migrateData', () => {
     const result = migrateData(data);
     expect(result.clips).toHaveLength(1);
     expect(result.clips[0].clip.content).toBe('hello');
+  });
+
+  it('backfills an id on clips stored without one', () => {
+    const data = {
+      clips: [
+        { clip: { type: 'text', content: 'a' }, isLocked: false, timestamp: 1 },
+        { clip: { type: 'text', content: 'b' }, isLocked: false, timestamp: 2 },
+      ],
+    };
+    const result = migrateData(data);
+    const ids = result.clips.map((c) => c.clip.id);
+    expect(ids.every((id) => /^[0-9a-f-]{36}$/.test(id))).toBe(true);
+    expect(new Set(ids).size).toBe(2);
+    expect(result.clips[0].isLocked).toBe(false);
+  });
+
+  it('keeps an existing id and unknown keys', () => {
+    const data = {
+      clips: [
+        {
+          clip: { id: 'keep-me', type: 'text', content: 'a', extra: 'kept' },
+          isLocked: true,
+          timestamp: 1,
+        },
+      ],
+    };
+    const result = migrateData(data);
+    expect(result.clips[0].clip.id).toBe('keep-me');
+    expect((result.clips[0].clip as unknown as Record<string, unknown>).extra).toBe('kept');
+    expect(result.clips[0]).toBe(data.clips[0]);
+  });
+
+  it('backfills extracted text on html and rtf clips and leaves other types alone', () => {
+    const data = {
+      clips: [
+        {
+          clip: { id: 'h', type: 'html', content: '<p>Hi &amp; bye</p>' },
+          isLocked: false,
+          timestamp: 1,
+        },
+        {
+          clip: { id: 'r', type: 'rtf', content: "{\\rtf1 caf\\'e9}" },
+          isLocked: false,
+          timestamp: 1,
+        },
+        { clip: { id: 't', type: 'text', content: '<p>raw</p>' }, isLocked: false, timestamp: 1 },
+      ],
+    };
+    const result = migrateData(data);
+    expect(result.clips[0].clip.text).toBe('Hi & bye');
+    expect(result.clips[1].clip.text).toBe('café');
+    expect(result.clips[2].clip).not.toHaveProperty('text');
+  });
+
+  it('keeps existing extracted text', () => {
+    const clip = { id: 'h', type: 'html' as const, content: '<p>x</p>', text: 'already' };
+    expect(backfillClip(clip)).toBe(clip);
+  });
+
+  it('keeps a valid groupColours map and drops bad entries', () => {
+    const result = migrateData({ groupColours: { ip: 3, email: 12, bad: 'x', neg: -1 } });
+    expect(result.groupColours).toEqual({ ip: 3 });
+    expect(migrateData({}).groupColours).toBeUndefined();
   });
 
   it('filters out invalid clips', () => {
@@ -270,7 +333,7 @@ describe('migrateLegacyStorage', () => {
     if (metaCall) {
       const metaData = JSON.parse(metaCall[1] as string);
       expect(metaData.version).toBe('1.5.0');
-      expect(metaData.storageVersion).toBe(1);
+      expect(metaData.storageVersion).toBe(2);
     }
   });
 });

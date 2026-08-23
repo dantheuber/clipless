@@ -12,6 +12,7 @@ export type ClipType = 'text' | 'html' | 'image' | 'rtf' | 'bookmark';
  * Represents a single clipboard item with its content and type
  */
 export interface ClipItem {
+  id: string; // assigned by the renderer's clip creators; backfilled by migrateData on load
   type: ClipType;
   content: string;
   title?: string; // for bookmark type

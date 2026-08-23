@@ -64,7 +64,8 @@ export const useClips = (): ClipsContextType => {
 export function ClipsProvider({ children }: { children: React.ReactNode }) {
   // the array of clip values
   const [clips, setClips] = useState<ClipItem[]>(updateClipsLength([], DEFAULT_MAX_CLIPS));
-  const [clipCopyIndex, setClipCopyIndex] = useState<number | null>(null);
+  // the clip whose content was last copied back to the clipboard; follows the clip by id
+  const [clipCopyId, setClipCopyId] = useState<string | null>(null);
   // the maximum number of clips to store
   const [maxClips, setMaxClips] = useState<number>(DEFAULT_MAX_CLIPS);
 
@@ -115,7 +116,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     isClipLocked,
     isDuplicateOfMostRecent,
     clipboardUpdated,
-  } = useClipState(clips, setClips, maxClips, lockedClips, setLockedClips, setClipCopyIndex);
+  } = useClipState(clips, setClips, maxClips, lockedClips, setLockedClips);
 
   // Use clipboard operations hook
   const { readCurrentClipboard, copyClipToClipboard } = useClipboardOperations(
@@ -123,7 +124,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     isDuplicateOfMostRecent,
     clipboardUpdated,
     getClip,
-    setClipCopyIndex,
+    setClipCopyId,
     setIsHotkeyOperation,
     setLastCopiedContent,
     clipsRef,
@@ -217,14 +218,14 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
 
   const metaValue = useMemo(
     () => ({
-      clipCopyIndex,
+      clipCopyId,
       maxClips,
       setMaxClips,
       setSearchTerm,
       isSearchVisible,
       setIsSearchVisible,
     }),
-    [clipCopyIndex, maxClips, setMaxClips, setSearchTerm, isSearchVisible, setIsSearchVisible]
+    [clipCopyId, maxClips, setMaxClips, setSearchTerm, isSearchVisible, setIsSearchVisible]
   );
 
   return (

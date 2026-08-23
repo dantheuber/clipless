@@ -2,16 +2,43 @@ import { promises as fs } from 'fs';
 import { join } from 'path';
 import type {
   AppData,
+  ClipItem,
+  GroupColours,
   StoredClip,
   Template,
   SearchTerm,
   QuickTool,
   StorageMeta,
 } from '../../shared/types';
+import { randomUUID } from 'crypto';
 import { DEFAULT_DATA, DEFAULT_SETTINGS } from './defaults';
 import { saveEncryptedJson, loadEncryptedJson, saveJsonFile } from './file-operations';
+import { isSlotIndex } from '../../shared/groupColours';
+import { htmlToText } from '../clipboard/extract-html';
+import { rtfToText } from '../clipboard/extract-rtf';
 
-const CURRENT_STORAGE_VERSION = 1;
+/**
+ * Bumped to 2 when clips gained id and text and templates.enc gained groupColours. Nothing
+ * branches on it yet; it is here so the next change has a number to branch on.
+ */
+export const CURRENT_STORAGE_VERSION = 2;
+
+/**
+ * Fill in what a clip saved by an older build lacks: an id (identity for the reader, the
+ * copied marker and pins) and, for html and rtf, the extracted text the row and the scanner
+ * read. Clips that already have them are returned as they are; unknown keys are kept.
+ */
+export function backfillClip(clip: ClipItem): ClipItem {
+  let result = clip;
+  if (typeof result.id !== 'string' || result.id.length === 0) {
+    result = { ...result, id: randomUUID() };
+  }
+  if (typeof result.text !== 'string' && (result.type === 'html' || result.type === 'rtf')) {
+    const text = result.type === 'html' ? htmlToText(result.content) : rtfToText(result.content);
+    result = { ...result, text };
+  }
+  return result;
+}
 
 /**
  * Migrate data from older versions (validates and normalizes an AppData blob)
@@ -27,20 +54,25 @@ export function migrateData(data: unknown): AppData {
 
   const dataObj = data as Record<string, unknown>;
 
-  // Copy over valid clips
+  // Copy over valid clips, backfilling id and text
   if (dataObj.clips && Array.isArray(dataObj.clips)) {
-    migratedData.clips = dataObj.clips.filter(
-      (item: unknown): item is StoredClip =>
-        item !== null &&
-        typeof item === 'object' &&
-        'clip' in item &&
-        item.clip !== null &&
-        typeof item.clip === 'object' &&
-        'type' in item.clip &&
-        typeof item.clip.type === 'string' &&
-        'content' in item.clip &&
-        typeof item.clip.content === 'string'
-    );
+    migratedData.clips = dataObj.clips
+      .filter(
+        (item: unknown): item is StoredClip =>
+          item !== null &&
+          typeof item === 'object' &&
+          'clip' in item &&
+          item.clip !== null &&
+          typeof item.clip === 'object' &&
+          'type' in item.clip &&
+          typeof item.clip.type === 'string' &&
+          'content' in item.clip &&
+          typeof item.clip.content === 'string'
+      )
+      .map((item) => {
+        const clip = backfillClip(item.clip);
+        return clip === item.clip ? item : { ...item, clip };
+      });
   }
 
   // Copy over valid settings
@@ -118,6 +150,15 @@ export function migrateData(data: unknown): AppData {
     );
   }
 
+  // Copy over valid group colours: a slot index per group, nothing else
+  if (dataObj.groupColours && typeof dataObj.groupColours === 'object') {
+    const groupColours: GroupColours = {};
+    for (const [group, slot] of Object.entries(dataObj.groupColours as Record<string, unknown>)) {
+      if (isSlotIndex(slot)) groupColours[group] = slot;
+    }
+    migratedData.groupColours = groupColours;
+  }
+
   // Preserve version
   if (dataObj.version && typeof dataObj.version === 'string') {
     migratedData.version = dataObj.version;
@@ -170,6 +211,7 @@ export async function migrateLegacyStorage(dataPath: string): Promise<boolean> {
       templates: data.templates,
       searchTerms: data.searchTerms,
       quickTools: data.quickTools,
+      groupColours: data.groupColours,
     },
     templatesPath
   );

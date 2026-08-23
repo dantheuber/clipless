@@ -8,7 +8,7 @@ import styles from './Clips.module.css';
 
 export function Clips(): React.JSX.Element {
   const { clips, filteredClips, searchTerm } = useClipsData();
-  const { clipCopyIndex } = useClipsMeta();
+  const { clipCopyId } = useClipsMeta();
   const { isLight } = useTheme();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -58,7 +58,7 @@ export function Clips(): React.JSX.Element {
                 <Clip
                   clip={clip}
                   index={index}
-                  isCurrentCopiedClip={clipCopyIndex === index}
+                  isCurrentCopiedClip={clipCopyId === clip.id}
                   isEvenRow={virtualRow.index % 2 === 1}
                 />
               </div>

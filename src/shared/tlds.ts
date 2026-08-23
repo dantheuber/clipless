@@ -1332,13 +1332,3 @@ export const ALL_TLDS = [
 
 // Create a regex pattern for all TLDs
 export const TLD_PATTERN = `(?:${ALL_TLDS.join('|')})`;
-
-// Function to get all TLDs (for reference)
-export function getAllTLDs(): string[] {
-  return ALL_TLDS;
-}
-
-// Function to check if a TLD is valid
-export function isValidTLD(tld: string): boolean {
-  return ALL_TLDS.includes(tld.toLowerCase());
-}

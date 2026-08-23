@@ -16,7 +16,7 @@ export const useClipboardOperations = (
   isDuplicateOfMostRecent: (newClip: ClipItem) => boolean,
   clipboardUpdated: (newClip: ClipItem) => void,
   getClip: (index: number) => ClipItem,
-  setClipCopyIndex: React.Dispatch<React.SetStateAction<number | null>>,
+  setClipCopyId: React.Dispatch<React.SetStateAction<string | null>>,
   setIsHotkeyOperation: React.Dispatch<React.SetStateAction<boolean>>,
   setLastCopiedContent: React.Dispatch<React.SetStateAction<ClipboardState | null>>,
   clipsRef: React.MutableRefObject<ClipItem[]>,
@@ -56,10 +56,10 @@ export const useClipboardOperations = (
           newClip = createTextClipWithDetection(clipData.content);
           break;
         case 'rtf':
-          newClip = createRtfClip(clipData.content);
+          newClip = createRtfClip(clipData.content, (clipData as ClipItem).text);
           break;
         case 'html':
-          newClip = createHtmlClip(clipData.content);
+          newClip = createHtmlClip(clipData.content, (clipData as ClipItem).text);
           break;
         case 'image':
           newClip = createImageClip(
@@ -98,12 +98,12 @@ export const useClipboardOperations = (
   const copyClipToClipboard = useCallback(
     async (index: number): Promise<void> => {
       if (!window.api) return;
-      setClipCopyIndex(index);
 
       // Set flag to prevent clipboard monitoring from adding this as a new clip
       setIsHotkeyOperation(true);
 
       const clip = getClip(index);
+      setClipCopyId(clip?.id ?? null);
       if (!clip?.content) {
         console.warn('No clip content to copy at index:', index);
         setIsHotkeyOperation(false);
@@ -197,7 +197,7 @@ export const useClipboardOperations = (
         }
       }
     },
-    [getClip, setClipCopyIndex, setLastCopiedContent, setIsHotkeyOperation]
+    [getClip, setClipCopyId, setLastCopiedContent, setIsHotkeyOperation]
   );
 
   // Guard to ensure readCurrentClipboard only runs on initial mount
@@ -211,11 +211,10 @@ export const useClipboardOperations = (
           // Set up hotkey clip copied listener - this needs to happen before clipboard monitoring
           window.api.onHotkeyClipCopied((clipIndex: number) => {
             console.log('🔥 Hotkey copied clip at index:', clipIndex);
-            console.log('🔥 Setting clipCopyIndex to:', clipIndex);
-            setClipCopyIndex(clipIndex);
 
-            // Use the ref to get the current clips state
+            // The hotkey path sends an index; the marker follows the clip by id from here
             const currentClips = clipsRef.current;
+            setClipCopyId(currentClips[clipIndex]?.id ?? null);
             if (currentClips[clipIndex]) {
               setLastCopiedContent({
                 content: currentClips[clipIndex].content,
@@ -293,10 +292,10 @@ export const useClipboardOperations = (
                 newClip = createTextClipWithDetection(clipData.content);
                 break;
               case 'rtf':
-                newClip = createRtfClip(clipData.content);
+                newClip = createRtfClip(clipData.content, (clipData as ClipItem).text);
                 break;
               case 'html':
-                newClip = createHtmlClip(clipData.content);
+                newClip = createHtmlClip(clipData.content, (clipData as ClipItem).text);
                 break;
               case 'image':
                 newClip = createImageClip(
@@ -346,7 +345,7 @@ export const useClipboardOperations = (
     readCurrentClipboard,
     isDuplicateOfMostRecent,
     createTextClipWithDetection,
-    setClipCopyIndex,
+    setClipCopyId,
     setLastCopiedContent,
     setIsHotkeyOperation,
     clipsRef,

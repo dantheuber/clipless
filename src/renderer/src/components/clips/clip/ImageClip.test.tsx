@@ -31,30 +31,38 @@ describe('ImageClip', () => {
   });
 
   it('renders image with correct src', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
     expect(img).toHaveAttribute('src', 'data:image/png;base64,abc123');
   });
 
   it('displays image format', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const pngElements = screen.getAllByText(/PNG/);
     expect(pngElements.length).toBeGreaterThan(0);
   });
 
   it('displays approximate file size', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const kbElements = screen.getAllByText(/KB/);
     expect(kbElements.length).toBeGreaterThan(0);
   });
 
   it('displays Unknown format for non-data-url content', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'not-a-data-url' }} />);
+    render(<ImageClip clip={{ id: 'c1', type: 'image', content: 'not-a-data-url' }} />);
     expect(screen.getByText(/Unknown format/)).toBeInTheDocument();
   });
 
   it('shows popover on mouse enter and hides on mouse leave', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -85,7 +93,9 @@ describe('ImageClip', () => {
   });
 
   it('positions popover to the left when right edge exceeded', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -106,7 +116,9 @@ describe('ImageClip', () => {
   });
 
   it('clamps popover to top edge', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -127,7 +139,9 @@ describe('ImageClip', () => {
   });
 
   it('clamps popover to bottom edge', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -148,7 +162,9 @@ describe('ImageClip', () => {
   });
 
   it('clamps popover to left edge when positioned left goes negative', () => {
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     img.getBoundingClientRect = vi.fn().mockReturnValue({
@@ -170,7 +186,9 @@ describe('ImageClip', () => {
 
   it('handles image error and shows fallback text', () => {
     themeState.isLight = false;
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     fireEvent.error(img);
@@ -182,7 +200,9 @@ describe('ImageClip', () => {
 
   it('uses light theme color in error fallback', () => {
     themeState.isLight = true;
-    render(<ImageClip clip={{ type: 'image', content: 'data:image/png;base64,abc123' }} />);
+    render(
+      <ImageClip clip={{ id: 'c1', type: 'image', content: 'data:image/png;base64,abc123' }} />
+    );
     const img = screen.getAllByRole('img')[0];
 
     fireEvent.error(img);
@@ -195,6 +215,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/png;base64,fullcontent',
           thumbnailDataUrl: 'data:image/png;base64,thumbnail',
@@ -213,6 +234,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/png;base64,fallback',
           thumbnailDataUrl: 'data:image/png;base64,thumb',
@@ -254,6 +276,7 @@ describe('ImageClip', () => {
     window.api = { getFullImage: mockGetFullImage } as unknown as typeof window.api;
 
     const clip = {
+      id: 'c1',
       type: 'image' as const,
       content: 'data:image/png;base64,fallback',
       thumbnailDataUrl: 'data:image/png;base64,thumb',
@@ -311,6 +334,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/png;base64,fallback',
           thumbnailDataUrl: 'data:image/png;base64,thumb',
@@ -353,6 +377,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/png;base64,fallback',
           imageId: 'img-err',
@@ -393,6 +418,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/png;base64,fallback',
           thumbnailDataUrl: 'data:image/png;base64,thumb',
@@ -431,6 +457,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/jpeg;base64,abc123',
         }}
@@ -444,6 +471,7 @@ describe('ImageClip', () => {
     render(
       <ImageClip
         clip={{
+          id: 'c1',
           type: 'image',
           content: 'data:image/jpeg;base64,fullcontent',
           thumbnailDataUrl: 'data:image/webp;base64,thumb',

@@ -87,11 +87,9 @@ function lowestFreeSlot(used: Set<number>): number {
   if (used.size >= GROUP_COLOUR_SLOT_COUNT) {
     used.clear();
   }
-  for (let slot = 0; slot < GROUP_COLOUR_SLOT_COUNT; slot++) {
-    if (!used.has(slot)) return slot;
-  }
-  /* istanbul ignore next -- unreachable: the set was just emptied if full */
-  return 0;
+  let slot = 0;
+  while (used.has(slot)) slot++;
+  return slot;
 }
 
 /**

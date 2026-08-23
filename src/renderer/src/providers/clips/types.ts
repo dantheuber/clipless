@@ -1,23 +1,7 @@
 import React from 'react';
+import type { ClipItem } from '../../../../shared/types';
 
-/**
- * Supported clipboard types based on Electron's clipboard API
- */
-export type ClipType = 'text' | 'html' | 'image' | 'rtf' | 'bookmark';
-
-/**
- * Represents a single clipboard item with its content and type
- */
-export interface ClipItem {
-  type: ClipType;
-  content: string;
-  title?: string; // for bookmark type
-  url?: string; // for bookmark type
-  language?: string; // detected programming language
-  isCode?: boolean; // whether the content appears to be code
-  imageId?: string; // UUID for image clips stored as separate files
-  thumbnailDataUrl?: string; // 200px-wide thumbnail data URL for image clips
-}
+export type { ClipItem, ClipType } from '../../../../shared/types';
 
 /**
  * Read-only clip data for rendering
@@ -47,7 +31,7 @@ export type ClipsActionsContextType = {
  * UI state and setters
  */
 export type ClipsMetaContextType = {
-  clipCopyIndex: number | null;
+  clipCopyId: string | null; // the clip whose content was last copied back; follows the clip
   maxClips: number;
   setMaxClips: React.Dispatch<React.SetStateAction<number>>;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;

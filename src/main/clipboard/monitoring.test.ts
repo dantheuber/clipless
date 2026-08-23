@@ -28,6 +28,7 @@ import {
   startClipboardMonitoring,
   stopClipboardMonitoring,
   setSkipNextImageChange,
+  checkClipboardNow,
 } from './monitoring';
 
 function createMockWindow(destroyed = false): {
@@ -119,6 +120,61 @@ describe('monitoring', () => {
       expect(mockWindow.webContents.send).not.toHaveBeenCalled();
     });
 
+    it('returns whether a change was sent', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'r1' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(false);
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'r2' });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'r3' });
+      await expect(checkClipboard(null)).resolves.toBe(false);
+    });
+
+    it('extracts text for html clips before sending', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'pre-html' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'html',
+        content: '<p>Hi &amp; <b>bye</b></p><script>alert(1)</script>',
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await checkClipboard(mockWindow as any);
+
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
+        type: 'html',
+        content: '<p>Hi &amp; <b>bye</b></p><script>alert(1)</script>',
+        text: 'Hi & bye',
+      });
+    });
+
+    it('extracts text for rtf clips before sending', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'pre-rtf' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'rtf',
+        content: "{\\rtf1 caf\\'e9\\par done}",
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await checkClipboard(mockWindow as any);
+
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
+        type: 'rtf',
+        content: "{\\rtf1 caf\\'e9\\par done}",
+        text: 'café\ndone',
+      });
+    });
+
     it('detects change when type changes but content is the same', async () => {
       vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'data' });
       const mockWindow = createMockWindow();
@@ -132,6 +188,7 @@ describe('monitoring', () => {
       expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
         type: 'html',
         content: 'data',
+        text: 'data',
       });
     });
 
@@ -398,6 +455,26 @@ describe('monitoring', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = startClipboardMonitoring(mockWindow as any);
       expect(result).toBe(true);
+    });
+  });
+
+  describe('checkClipboardNow', () => {
+    it('checks against the monitored window and reports a change', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'now-base' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      startClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'now-new' });
+      await expect(checkClipboardNow()).resolves.toBe(true);
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('clipboard-changed', {
+        type: 'text',
+        content: 'now-new',
+      });
+
+      await expect(checkClipboardNow()).resolves.toBe(false);
     });
   });
 

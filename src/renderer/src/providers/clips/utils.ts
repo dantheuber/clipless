@@ -1,10 +1,22 @@
-import { ClipItem } from './types';
+import type { ClipItem } from '../../../../shared/types';
 import { detectLanguage, isCode } from '../../utils/languageDetection';
 
 /**
- * Creates an empty clip item with default text type
+ * Identity for a clip. The reader, the copied marker and pin pruning follow a clip by id
+ * while rows shift; index identity cannot do that. Clips loaded without one get an id in
+ * the main process (migrateData).
+ */
+export const newClipId = (): string => {
+  const c = globalThis.crypto;
+  if (c && typeof c.randomUUID === 'function') return c.randomUUID();
+  return `clip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+};
+
+/**
+ * Creates an empty clip item with default text type. Every row has an id, even an empty one.
  */
 export const createEmptyClip = (): ClipItem => ({
+  id: newClipId(),
   type: 'text',
   content: '',
 });
@@ -22,6 +34,7 @@ export const createTextClip = (content: string, enableDetection: boolean = true)
   }
 
   return {
+    id: newClipId(),
     type: 'text',
     content,
     ...(language && { language }),
@@ -29,9 +42,15 @@ export const createTextClip = (content: string, enableDetection: boolean = true)
   };
 };
 
-export const createHtmlClip = (content: string): ClipItem => ({
+/**
+ * HTML and RTF clips carry the text the main process extracted at capture; the row and the
+ * scanner read it instead of the markup.
+ */
+export const createHtmlClip = (content: string, text?: string): ClipItem => ({
+  id: newClipId(),
   type: 'html',
   content,
+  ...(text !== undefined && { text }),
 });
 
 export const createImageClip = (
@@ -39,23 +58,45 @@ export const createImageClip = (
   imageId?: string,
   thumbnailDataUrl?: string
 ): ClipItem => ({
+  id: newClipId(),
   type: 'image',
   content,
   ...(imageId && { imageId }),
   ...(thumbnailDataUrl && { thumbnailDataUrl }),
 });
 
-export const createRtfClip = (content: string): ClipItem => ({
+export const createRtfClip = (content: string, text?: string): ClipItem => ({
+  id: newClipId(),
   type: 'rtf',
   content,
+  ...(text !== undefined && { text }),
 });
 
 export const createBookmarkClip = (title: string, url: string): ClipItem => ({
+  id: newClipId(),
   type: 'bookmark',
   content: url,
   title,
   url,
 });
+
+/**
+ * The text a clip is scanned and searched by: the extracted text for html and rtf, title
+ * and URL for a bookmark, the content otherwise. Images have no text.
+ */
+export const clipText = (clip: ClipItem): string => {
+  switch (clip.type) {
+    case 'html':
+    case 'rtf':
+      return clip.text ?? clip.content;
+    case 'bookmark':
+      return `${clip.title ?? ''}\n${clip.url ?? clip.content}`;
+    case 'image':
+      return '';
+    default:
+      return clip.content;
+  }
+};
 
 /**
  * Updates the length of the clips array to ensure it has the set maximum number of clips.

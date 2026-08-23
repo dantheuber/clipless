@@ -14,7 +14,13 @@ describe('BookmarkClip', () => {
   it('renders bookmark label with title and url', () => {
     const { container } = render(
       <BookmarkClip
-        clip={{ type: 'bookmark', content: '', title: 'Example', url: 'https://example.com' }}
+        clip={{
+          id: 'c1',
+          type: 'bookmark',
+          content: '',
+          title: 'Example',
+          url: 'https://example.com',
+        }}
       />
     );
     expect(screen.getByText('Bookmark:')).toBeInTheDocument();
@@ -24,7 +30,9 @@ describe('BookmarkClip', () => {
 
   it('renders Untitled for missing title', () => {
     const { container } = render(
-      <BookmarkClip clip={{ type: 'bookmark', content: '', url: 'https://example.com' }} />
+      <BookmarkClip
+        clip={{ id: 'c1', type: 'bookmark', content: '', url: 'https://example.com' }}
+      />
     );
     expect(container.textContent).toContain('Untitled');
   });
