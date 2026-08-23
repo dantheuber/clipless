@@ -33,8 +33,8 @@ import {
   updateTemplateObject,
   sortTemplatesByOrder,
   reorderTemplatesArray,
-  generateTextFromTemplate,
 } from './templates';
+import { generateTextFromTemplate } from '../../shared/templates';
 import {
   generateId,
   createSearchTermObject,

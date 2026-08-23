@@ -20,6 +20,7 @@ export interface ClipItem {
   isCode?: boolean; // whether the content appears to be code
   imageId?: string; // UUID for image clips stored as separate files
   thumbnailDataUrl?: string; // 200px-wide thumbnail data URL for image clips
+  text?: string; // extracted text for html and rtf clips; the scanner reads this, not the markup
 }
 
 /**
@@ -72,6 +73,7 @@ export interface UserSettings {
   rememberWindowPosition?: boolean;
   showNotifications?: boolean;
   automaticUpdates?: boolean;
+  toolsSampleText?: string; // settings Tools tab sample; absent means "use the newest clip"
 }
 
 /**
@@ -83,16 +85,23 @@ export interface AppData {
   templates: Template[];
   searchTerms: SearchTerm[];
   quickTools: QuickTool[];
+  groupColours?: GroupColours;
   version: string;
 }
 
 /**
- * Domain-specific storage for templates, search terms, and quick tools
+ * Capture group name to colour bucket slot (0 to 11). Never a hex value.
+ */
+export type GroupColours = Record<string, number>;
+
+/**
+ * Domain-specific storage for templates, search terms, quick tools and group colours
  */
 export interface TemplatesData {
   templates: Template[];
   searchTerms: SearchTerm[];
   quickTools: QuickTool[];
+  groupColours?: GroupColours;
 }
 
 /**
@@ -143,22 +152,6 @@ export interface Template {
 }
 
 /**
- * Template management operations
- */
-export interface TemplateOperations {
-  create: (name: string, content: string) => Promise<Template>;
-  update: (id: string, updates: Partial<Template>) => Promise<Template>;
-  delete: (id: string) => Promise<void>;
-  reorder: (templates: Template[]) => Promise<void>;
-  getAll: () => Promise<Template[]>;
-  generateText: (
-    templateId: string,
-    clipContents: string[],
-    captures?: Record<string, string>
-  ) => Promise<string>;
-}
-
-/**
  * Search term for extracting data from clipboard content
  */
 export interface SearchTerm {
@@ -194,48 +187,59 @@ export interface PatternMatch {
 }
 
 /**
- * Quick Clips configuration export/import format
+ * Quick Clips configuration export/import format.
+ * Version 2.0.0 adds groupColours; a version 1 file imports with none.
  */
 export interface QuickClipsConfig {
   searchTerms: SearchTerm[];
   tools: QuickTool[];
   templates?: Template[];
+  groupColours?: GroupColours;
   version: string;
 }
 
 /**
- * Search term management operations
+ * How an imported Quick Clips config meets the existing one.
+ * merge keeps existing colours and adds missing ones; replace takes the file's map.
  */
-export interface SearchTermOperations {
-  create: (name: string, pattern: string) => Promise<SearchTerm>;
-  update: (id: string, updates: Partial<SearchTerm>) => Promise<SearchTerm>;
-  delete: (id: string) => Promise<void>;
-  reorder: (searchTerms: SearchTerm[]) => Promise<void>;
-  getAll: () => Promise<SearchTerm[]>;
-  test: (pattern: string, testText: string) => Promise<PatternMatch[]>;
+export type QuickClipsImportMode = 'merge' | 'replace';
+
+/**
+ * One occurrence of a capture group value in a clip, with its position in the scanned text
+ */
+export interface Match {
+  group: string;
+  value: string;
+  start: number;
+  end: number;
+  termId: string;
 }
 
 /**
- * Quick tool management operations
+ * Result of scanning one text with the enabled search terms
  */
-export interface QuickToolOperations {
-  create: (name: string, url: string, captureGroups: string[]) => Promise<QuickTool>;
-  update: (id: string, updates: Partial<QuickTool>) => Promise<QuickTool>;
-  delete: (id: string) => Promise<void>;
-  reorder: (tools: QuickTool[]) => Promise<void>;
-  getAll: () => Promise<QuickTool[]>;
-  validateUrl: (
-    url: string,
-    captureGroups: string[]
-  ) => Promise<{ isValid: boolean; errors: string[] }>;
+export interface ScanResult {
+  matches: Match[]; // sorted by start
+  groups: string[]; // in order of first appearance
+  errors: { termId: string; message: string }[]; // patterns that did not compile, skipped
+  large: boolean; // text is above the on-demand scan threshold
 }
 
 /**
- * Quick Clips scanning operations
+ * Auto-updater state held by the main process and pushed to every window
  */
-export interface QuickClipsOperations {
-  scanText: (text: string) => Promise<PatternMatch[]>;
-  openTools: (matches: PatternMatch[], toolIds: string[]) => Promise<void>;
-  exportConfig: () => Promise<QuickClipsConfig>;
-  importConfig: (config: QuickClipsConfig) => Promise<void>;
+export type UpdateStatus =
+  | 'idle'
+  | 'checking'
+  | 'available'
+  | 'downloading'
+  | 'downloaded'
+  | 'upToDate'
+  | 'error';
+
+export interface UpdateState {
+  status: UpdateStatus;
+  version?: string;
+  progress?: number; // 0 to 100 while downloading
+  message?: string; // set when status is error
 }

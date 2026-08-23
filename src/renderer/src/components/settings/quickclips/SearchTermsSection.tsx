@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { SearchTerm } from '../../../../../shared/types';
 import { useTheme } from '../../../providers/theme';
 import { InfoTooltip } from './InfoTooltip';
-import { TLD_PATTERN } from '../../../utils/tlds';
+import { TLD_PATTERN } from '../../../../../shared/tlds';
 import styles from '../QuickClipsManager.module.css';
 
 // Built-in common patterns
