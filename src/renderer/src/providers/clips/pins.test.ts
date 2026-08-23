@@ -9,6 +9,7 @@ import {
   parsePinKey,
   pinsByGroup,
   prunePins,
+  scanKeys,
   setPins,
   sortedPins,
   togglePins,
@@ -23,6 +24,26 @@ const clip = (id: string, content: string, extra: Partial<ClipItem> = {}): ClipI
 
 const keysOf = (entries: [string, string[]][]): Map<string, Set<string>> =>
   new Map(entries.map(([id, keys]) => [id, new Set(keys)]));
+
+describe('scanKeys', () => {
+  it('lists each group|value once in order of first appearance, and nothing for a pending scan', () => {
+    const m = (group: string, value: string, start: number) => ({
+      group,
+      value,
+      start,
+      end: start + value.length,
+      termId: 't',
+    });
+    const scan = {
+      matches: [m('ip', '1.1.1.1', 0), m('email', 'a@b.co', 10), m('ip', '1.1.1.1', 30)],
+      groups: ['ip', 'email'],
+      errors: [],
+      large: false,
+    };
+    expect(scanKeys(scan)).toEqual(['ip|1.1.1.1', 'email|a@b.co']);
+    expect(scanKeys(null)).toEqual([]);
+  });
+});
 
 describe('pin writers', () => {
   it('parses a key at the first pipe only', () => {
@@ -218,6 +239,8 @@ describe('droppedNotice', () => {
         { key: 'email|a@b.co', group: 'email', value: 'a@b.co', reason: 'after the edit' },
         { key: 'ticket|INC-1', group: 'ticket', value: 'INC-1', reason: 'deleted with clip 4' },
       ])
-    ).toBe('Dropped 1.1.1.1 (ip), a@b.co (email) after the edit; INC-1 (ticket) deleted with clip 4');
+    ).toBe(
+      'Dropped 1.1.1.1 (ip), a@b.co (email) after the edit; INC-1 (ticket) deleted with clip 4'
+    );
   });
 });

@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, nativeImage } from 'electron';
 import { join } from 'path';
 import { getCurrentClipboardData } from './data';
 import { saveImage } from '../storage/image-store';
@@ -15,6 +15,21 @@ let monitoredWindow: BrowserWindow | null = null;
 
 function getDataPath(): string {
   return join(app.getPath('userData'), 'clipless-data');
+}
+
+/**
+ * Pixel size and byte size of a captured image, recorded with the clip so the row and the
+ * reader can say "1280 x 720, 412 KB" without loading the full image (spec 16 rule 6).
+ */
+export function imageMetadata(dataUrl: string): {
+  imageWidth: number;
+  imageHeight: number;
+  imageBytes: number;
+} {
+  const { width, height } = nativeImage.createFromDataURL(dataUrl).getSize();
+  const comma = dataUrl.indexOf(',');
+  const payload = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+  return { imageWidth: width, imageHeight: height, imageBytes: Math.round(payload.length * 0.75) };
 }
 
 // Initialize clipboard monitoring
@@ -78,6 +93,7 @@ export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<
           content: imageId,
           imageId,
           thumbnailDataUrl,
+          ...imageMetadata(currentClipData.content),
         };
       } catch (error) {
         console.error('Failed to save image to image store:', error);

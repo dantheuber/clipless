@@ -1,0 +1,83 @@
+.editor {
+  position: relative;
+  width: 100%;
+  font-family: var(--mono);
+  font-size: inherit;
+  line-height: 1.5;
+}
+
+.editor.reader {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  margin: 6px 8px 8px;
+}
+
+.textarea {
+  display: block;
+  width: 100%;
+  background: var(--ed-bg);
+  border: 1px solid var(--ql-bd);
+  border-radius: 4px;
+  color: var(--text);
+  caret-color: var(--text);
+  font: inherit;
+  line-height: inherit;
+  padding: 2px 6px;
+  outline: none;
+  resize: none;
+  min-height: 1.5em;
+  white-space: pre;
+  overflow: auto;
+  box-sizing: border-box;
+}
+
+.editor.row .textarea {
+  white-space: pre-wrap;
+}
+
+.editor.reader .textarea {
+  flex: 1;
+  min-height: 0;
+  padding: 6px 8px;
+}
+
+.textarea:focus {
+  border-color: var(--accent);
+}
+
+.highlighted .textarea {
+  color: transparent;
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 2px 6px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: var(--ed-bg);
+  color: var(--text);
+  font: inherit;
+  line-height: inherit;
+  white-space: pre;
+  overflow: hidden;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.editor.row .overlay {
+  white-space: pre-wrap;
+}
+
+.editor.reader .overlay {
+  padding: 6px 8px;
+}
+
+.line {
+  min-height: 1.5em;
+}

@@ -5,6 +5,9 @@ vi.mock('electron', () => ({
     getPath: vi.fn().mockReturnValue('/mock/userData'),
   },
   BrowserWindow: vi.fn(),
+  nativeImage: {
+    createFromDataURL: vi.fn().mockReturnValue({ getSize: () => ({ width: 640, height: 480 }) }),
+  },
 }));
 
 vi.mock('./data', () => ({
@@ -29,6 +32,7 @@ import {
   stopClipboardMonitoring,
   setSkipNextImageChange,
   checkClipboardNow,
+  imageMetadata,
 } from './monitoring';
 
 function createMockWindow(destroyed = false): {
@@ -219,7 +223,14 @@ describe('monitoring', () => {
         content: 'img-uuid-123',
         imageId: 'img-uuid-123',
         thumbnailDataUrl: 'data:image/png;base64,thumbnail',
+        imageWidth: 640,
+        imageHeight: 480,
+        imageBytes: 6, // "fulldata" is 8 base64 characters
       });
+    });
+
+    it('imageMetadata measures a data URL without a comma as all payload', () => {
+      expect(imageMetadata('abcd')).toEqual({ imageWidth: 640, imageHeight: 480, imageBytes: 3 });
     });
 
     it('skips image when skipNextImageChange flag is set', async () => {
@@ -273,6 +284,9 @@ describe('monitoring', () => {
         content: 'img-2',
         imageId: 'img-2',
         thumbnailDataUrl: 'data:image/png;base64,thumb2',
+        imageWidth: 640,
+        imageHeight: 480,
+        imageBytes: 5,
       });
     });
 

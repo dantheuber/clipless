@@ -1,11 +1,11 @@
 import classNames from 'classnames';
-import { memo, useState } from 'react';
-import { ClipItem, useClipsActions } from '../../../providers/clips';
-import { useTheme } from '../../../providers/theme';
-import { usePatternDetection } from '../../../hooks/usePatternDetection';
+import { memo, useState, type CSSProperties } from 'react';
+import { ClipItem, useClipsActions, useClipsPins, useQuickLook } from '../../../providers/clips';
+import { hasContent } from '../../../providers/clips/quickLook';
+import { scanKeys } from '../../../providers/clips/pins';
+import { useScanIndex, EMPTY_SCAN } from '../../../providers/scan';
 import { useContextMenu } from '../../../hooks/useContextMenu';
 import styles from './Clip.module.css';
-import { ClipOptions } from './ClipOptions';
 import { ClipContextMenu } from './ClipContextMenu';
 import { TextClip } from './TextClip';
 import { HtmlClip } from './HtmlClip';
@@ -17,21 +17,43 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 interface ClipProps {
   clip: ClipItem;
   index: number;
+  /** Position in the visible list, for keyboard focus */
+  visibleIndex: number;
   isCurrentCopiedClip: boolean;
   isEvenRow?: boolean;
+  searchTerm?: string;
 }
 
+const isTypingTarget = (target: EventTarget | null): boolean =>
+  target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement;
+
+/**
+ * One row (spec 4): number cell, the one-line content with chips, and at the right edge
+ * one dot per capture group, the lock glyph, and an eye on hover or focus. Rows take
+ * keyboard focus: Space opens quick look, Enter edits (or opens the reader for a non-text
+ * clip), p pins every chip in the row.
+ */
 export const ClipWrapper = memo(function ClipWrapper({
   clip,
   index,
+  visibleIndex,
   isCurrentCopiedClip,
   isEvenRow,
+  searchTerm,
 }: ClipProps): React.JSX.Element {
-  const { copyClipToClipboard, updateClip } = useClipsActions();
-  const { isLight } = useTheme();
-  const { hasPatterns } = usePatternDetection(clip);
+  const { copyClipToClipboard, updateClip, isClipLocked } = useClipsActions();
+  const { togglePins } = useClipsPins();
+  const { quickLook, openQuickLook } = useQuickLook();
+  const { getScan, slotFor } = useScanIndex();
   const { contextMenu, openContextMenu, closeContextMenu } = useContextMenu();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [editSeq, setEditSeq] = useState(0);
+
+  const scan = clip.type === 'image' ? EMPTY_SCAN : getScan(clip);
+  const keys = scanKeys(scan);
+  const content = hasContent(clip);
+  const isOpen = quickLook.openClipId === clip.id;
+  const locked = isClipLocked(index);
 
   const handleRowNumberClick = async () => {
     await copyClipToClipboard(index);
@@ -49,20 +71,51 @@ export const ClipWrapper = memo(function ClipWrapper({
     openContextMenu(event, index);
   };
 
+  const open = () => {
+    if (content) openQuickLook(clip.id, index);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (isTypingTarget(event.target)) return;
+    if (event.key === ' ') {
+      event.preventDefault();
+      open();
+    } else if (event.key === 'Enter') {
+      event.preventDefault();
+      if (clip.type === 'text') {
+        if (content) setEditSeq((s) => s + 1);
+      } else {
+        open();
+      }
+    } else if (event.key === 'p' && !event.ctrlKey && !event.metaKey && !event.altKey) {
+      if (keys.length > 0) {
+        event.preventDefault();
+        togglePins(keys);
+      }
+    }
+  };
+
   const renderClipContent = () => {
     switch (clip.type) {
       case 'html':
-        return <HtmlClip clip={clip} />;
+        return <HtmlClip clip={clip} scan={scan} searchTerm={searchTerm} />;
       case 'image':
         return <ImageClip clip={clip} />;
       case 'rtf':
-        return <RtfClip clip={clip} />;
+        return <RtfClip clip={clip} scan={scan} searchTerm={searchTerm} />;
       case 'bookmark':
-        return <BookmarkClip clip={clip} />;
+        return <BookmarkClip clip={clip} scan={scan} searchTerm={searchTerm} />;
       case 'text':
       default:
         return (
-          <TextClip clip={clip} onUpdate={handleUpdateClip} onEditingChange={handleEditingChange} />
+          <TextClip
+            clip={clip}
+            scan={scan}
+            searchTerm={searchTerm}
+            onUpdate={handleUpdateClip}
+            onEditingChange={handleEditingChange}
+            editSeq={editSeq}
+          />
         );
     }
   };
@@ -70,41 +123,70 @@ export const ClipWrapper = memo(function ClipWrapper({
   return (
     <div className={classNames(styles.clip, { [styles.evenRow]: isEvenRow })}>
       <div
-        className={classNames(
-          styles.clipRow,
-          { [styles.light]: isLight },
-          { [styles.expanded]: isExpanded }
-        )}
+        className={classNames(styles.clipRow, {
+          [styles.expanded]: isExpanded,
+          [styles.selected]: isOpen,
+        })}
         onContextMenu={handleContextMenu}
+        onKeyDown={handleKeyDown}
+        tabIndex={0}
+        role="row"
+        aria-label={`Clip ${index + 1}`}
+        data-row-index={visibleIndex}
+        data-clip-index={index}
+        data-testid="clip-row"
       >
         <div
-          className={classNames(
-            styles.rowNumber,
-            { [styles.light]: isLight },
-            {
-              [styles.currentCopiedClip]: isCurrentCopiedClip,
-            }
-          )}
+          className={classNames(styles.rowNumber, {
+            [styles.currentCopiedClip]: isCurrentCopiedClip,
+          })}
           onClick={handleRowNumberClick}
           title="Click to copy this clip to clipboard"
+          data-testid="row-number"
         >
           {isCurrentCopiedClip ? <FontAwesomeIcon icon="clipboard-check" /> : index + 1}
         </div>
 
         {/* Content area */}
-        <div className={classNames(styles.contentArea, { [styles.light]: isLight })}>
-          {hasPatterns && (
-            <div
-              className={classNames(styles.patternIndicator, { [styles.light]: isLight })}
-              title="Patterns detected"
-            >
-              <FontAwesomeIcon icon="search" />
-            </div>
-          )}
-          {renderClipContent()}
-        </div>
+        <div className={styles.contentArea}>{renderClipContent()}</div>
 
-        <ClipOptions index={index} hasPatterns={hasPatterns} clipContent={clip.content} />
+        {/* Right edge: dots, lock, eye (spec 4) */}
+        <div className={styles.rightEdge}>
+          {scan && scan.groups.length > 0 && (
+            <span className={styles.dots} data-testid="group-dots">
+              {scan.groups.map((group) => (
+                <i
+                  key={group}
+                  className={styles.dot}
+                  style={{ '--gc': `var(--slot-${slotFor(group)})` } as CSSProperties}
+                  title={group}
+                  data-group={group}
+                />
+              ))}
+            </span>
+          )}
+          {content && (
+            <button
+              type="button"
+              className={classNames(styles.eye, { [styles.eyeOn]: isOpen })}
+              onClick={(event) => {
+                event.stopPropagation();
+                open();
+              }}
+              title="Quick look (Space)"
+              aria-label="Quick look"
+              tabIndex={-1}
+              data-testid="eye"
+            >
+              <FontAwesomeIcon icon="eye" />
+            </button>
+          )}
+          {locked && (
+            <span className={styles.lock} title="Locked" data-testid="lock-glyph">
+              <FontAwesomeIcon icon="lock" />
+            </span>
+          )}
+        </div>
       </div>
 
       {/* Context Menu */}
@@ -114,7 +196,6 @@ export const ClipWrapper = memo(function ClipWrapper({
           x={contextMenu.x}
           y={contextMenu.y}
           onClose={closeContextMenu}
-          hasPatterns={hasPatterns}
         />
       )}
     </div>

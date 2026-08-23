@@ -1,496 +1,207 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import type { ScanResult } from '../../../../../shared/types';
 import { TextClip } from './TextClip';
 
 let mockIsCodeDetectionEnabled = false;
 
-const { mockThemeState } = vi.hoisted(() => ({
-  mockThemeState: { isLight: false },
-}));
-
-// Mock providers
-vi.mock('../../../providers/theme', () => ({
-  useTheme: () => ({
-    isLight: mockThemeState.isLight,
-    isDark: !mockThemeState.isLight,
-    theme: mockThemeState.isLight ? 'light' : 'dark',
-    effectiveTheme: mockThemeState.isLight ? 'light' : 'dark',
-    setTheme: vi.fn(),
-  }),
-}));
-
 vi.mock('../../../providers/languageDetection', () => ({
   useLanguageDetection: () => ({
     isCodeDetectionEnabled: mockIsCodeDetectionEnabled,
-    settings: { codeDetectionEnabled: mockIsCodeDetectionEnabled },
-    updateSettings: vi.fn(),
-    detectTextLanguage: vi.fn(),
   }),
 }));
 
-vi.mock('../../../utils/languageDetection', () => ({
-  mapToSyntaxHighlighterLanguage: vi.fn().mockReturnValue('javascript'),
+const { pinsState } = vi.hoisted(() => ({
+  pinsState: { pinned: new Set<string>(), togglePins: vi.fn() },
 }));
 
-vi.mock('./SyntaxHighlightedCode', async () => {
-  const React = await vi.importActual<typeof import('react')>('react');
-  const MockSyntaxHighlightedCode = React.forwardRef<HTMLTextAreaElement, Record<string, unknown>>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ({ editValue, onChange, onBlur, onKeyDown, isLight }: any, ref) => (
-      <div data-testid="syntax-highlighter" className="textEditorWrapper">
-        <div className="syntaxHighlightContainer">
-          <textarea
-            ref={ref}
-            value={editValue}
-            onChange={onChange}
-            onBlur={onBlur}
-            onKeyDown={onKeyDown}
-            className={isLight ? 'light' : ''}
-            style={{ caretColor: isLight ? '#000' : '#fff' }}
-          />
-        </div>
-      </div>
-    )
-  );
-  MockSyntaxHighlightedCode.displayName = 'MockSyntaxHighlightedCode';
-  return { default: MockSyntaxHighlightedCode };
+vi.mock('../../../providers/clips', () => ({
+  useClipsPins: () => ({
+    isPinned: (key: string) => pinsState.pinned.has(key),
+    togglePins: pinsState.togglePins,
+  }),
+}));
+
+vi.mock('../../../providers/scan', () => ({
+  useScanIndex: () => ({ slotFor: () => 0 }),
+}));
+
+const clip = (content: string, extra = {}) => ({
+  id: 'c1',
+  type: 'text' as const,
+  content,
+  ...extra,
 });
 
-vi.mock('./Clip.module.css', () => ({
-  default: {
-    editableText: 'editableText',
-    light: 'light',
-    emptyText: 'emptyText',
-    textEditorWrapper: 'textEditorWrapper',
-    textEditor: 'textEditor',
-    syntaxHighlightContainer: 'syntaxHighlightContainer',
-    syntaxOverlay: 'syntaxOverlay',
-  },
-}));
+const scanOf = (text: string, group: string, value: string): ScanResult => {
+  const start = text.indexOf(value);
+  return {
+    matches: [{ group, value, start, end: start + value.length, termId: 't' }],
+    groups: [group],
+    errors: [],
+    large: false,
+  };
+};
 
-describe('TextClip', () => {
-  beforeEach(() => {
-    vi.useFakeTimers();
-    mockIsCodeDetectionEnabled = false;
-    mockThemeState.isLight = false;
-  });
+beforeEach(() => {
+  mockIsCodeDetectionEnabled = false;
+  pinsState.togglePins.mockClear();
+});
 
-  afterEach(() => {
-    cleanup();
-    vi.useRealTimers();
-  });
+afterEach(cleanup);
 
-  it('renders text content in display mode', () => {
-    render(
-      <TextClip clip={{ id: 'c1', type: 'text', content: 'Hello World' }} onUpdate={vi.fn()} />
-    );
+describe('TextClip display', () => {
+  it('renders the text and (empty) for an empty clip, which cannot be edited', () => {
+    render(<TextClip clip={clip('Hello World')} scan={null} onUpdate={vi.fn()} />);
     expect(screen.getByText('Hello World')).toBeInTheDocument();
-  });
-
-  it('renders (empty) for empty content', () => {
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: '' }} onUpdate={vi.fn()} />);
-    expect(screen.getByText('(empty)')).toBeInTheDocument();
-  });
-
-  it('does not enter edit mode for empty content', () => {
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: '' }} onUpdate={vi.fn()} />);
+    cleanup();
+    render(<TextClip clip={clip('')} scan={null} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByText('(empty)'));
-    // Should still show (empty), not a textarea
-    expect(screen.getByText('(empty)')).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 
-  it('collapses multiline text to single line in display mode', () => {
+  it('keeps multi-line text in one line element (whitespace collapses in CSS)', () => {
+    render(<TextClip clip={clip('line1\nline2')} scan={null} onUpdate={vi.fn()} />);
+    expect(screen.getByTestId('clip-line').textContent).toBe('line1\nline2');
+  });
+
+  it('shows a language tag for code and a chip for every match', () => {
+    const text = 'ssh admin@10.0.0.1';
     render(
       <TextClip
-        clip={{ id: 'c1', type: 'text', content: 'line1\nline2\nline3' }}
+        clip={clip(text, { isCode: true, language: 'bash' })}
+        scan={scanOf(text, 'ip', '10.0.0.1')}
         onUpdate={vi.fn()}
       />
     );
-    expect(screen.getByText('line1 line2 line3')).toBeInTheDocument();
+    expect(screen.getByText('bash')).toBeInTheDocument();
+    const chip = screen.getByText('10.0.0.1').closest('[data-key]');
+    expect(chip).toHaveAttribute('data-key', 'ip|10.0.0.1');
   });
 
-  it('enters edit mode on click and shows textarea', () => {
+  it('clicking a chip pins and never enters edit', () => {
+    const text = 'host 10.0.0.1';
+    render(<TextClip clip={clip(text)} scan={scanOf(text, 'ip', '10.0.0.1')} onUpdate={vi.fn()} />);
+    fireEvent.click(screen.getByText('10.0.0.1'));
+    expect(pinsState.togglePins).toHaveBeenCalledWith(['ip|10.0.0.1']);
+    expect(screen.queryByRole('textbox')).toBeNull();
+  });
+
+  it('marks search hits without making them chips', () => {
     render(
-      <TextClip clip={{ id: 'c1', type: 'text', content: 'Hello World' }} onUpdate={vi.fn()} />
+      <TextClip clip={clip('alpha beta alpha')} scan={null} searchTerm="ALPHA" onUpdate={vi.fn()} />
     );
-    fireEvent.click(screen.getByText('Hello World'));
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    const marks = screen.getAllByText('alpha', { selector: 'mark' });
+    expect(marks).toHaveLength(2);
+    expect(document.querySelector('[data-key]')).toBeNull();
   });
+});
 
-  it('calls onEditingChange when entering and leaving edit mode', () => {
+describe('TextClip editing', () => {
+  it('clicking plain text enters edit with the content and no chips', () => {
+    const text = 'host 10.0.0.1';
     const onEditingChange = vi.fn();
     render(
       <TextClip
-        clip={{ id: 'c1', type: 'text', content: 'Hello World' }}
+        clip={clip(text)}
+        scan={scanOf(text, 'ip', '10.0.0.1')}
         onUpdate={vi.fn()}
         onEditingChange={onEditingChange}
       />
     );
-    fireEvent.click(screen.getByText('Hello World'));
+    fireEvent.click(screen.getByText('host', { exact: false }));
+    const textarea = screen.getByRole('textbox') as HTMLTextAreaElement;
+    expect(textarea.value).toBe(text);
+    expect(document.querySelector('[data-key]')).toBeNull();
     expect(onEditingChange).toHaveBeenCalledWith(true);
-
-    fireEvent.blur(screen.getByRole('textbox'));
-    expect(onEditingChange).toHaveBeenCalledWith(false);
   });
 
-  it('calls onUpdate with debounce on text change', () => {
+  it('does not save while typing; Enter commits the change', () => {
     const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+    render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);
     fireEvent.click(screen.getByText('Hello'));
-
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: 'Hello World' } });
-
-    // Not called immediately
     expect(onUpdate).not.toHaveBeenCalled();
-
-    // Called after debounce
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
+    fireEvent.keyDown(textarea, { key: 'Enter' });
     expect(onUpdate).toHaveBeenCalledWith('Hello World');
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 
-  it('clears previous debounce when typing rapidly', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    const textarea = screen.getByRole('textbox');
-    fireEvent.change(textarea, { target: { value: 'First' } });
-
-    // Advance partially
-    act(() => {
-      vi.advanceTimersByTime(200);
-    });
-
-    // Type again before debounce fires - this triggers clearTimeout branch
-    fireEvent.change(textarea, { target: { value: 'Second' } });
-
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-
-    // Should only get the last value
-    expect(onUpdate).toHaveBeenCalledTimes(1);
-    expect(onUpdate).toHaveBeenCalledWith('Second');
-  });
-
-  it('does not call onUpdate when value unchanged', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    const textarea = screen.getByRole('textbox');
-    fireEvent.change(textarea, { target: { value: 'Hello' } });
-
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-    expect(onUpdate).not.toHaveBeenCalled();
-  });
-
-  it('calls onUpdate immediately on blur with pending changes', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    const textarea = screen.getByRole('textbox');
-    fireEvent.change(textarea, { target: { value: 'Changed' } });
-    fireEvent.blur(textarea);
-
-    expect(onUpdate).toHaveBeenCalledWith('Changed');
-  });
-
-  it('handles Enter key to finish editing', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    const textarea = screen.getByRole('textbox');
-    fireEvent.change(textarea, { target: { value: 'Changed' } });
-    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: false });
-
-    expect(onUpdate).toHaveBeenCalledWith('Changed');
-  });
-
-  it('handles Escape key to cancel editing', () => {
+  it('Shift+Enter keeps editing; blur commits', () => {
     const onUpdate = vi.fn();
     const onEditingChange = vi.fn();
     render(
       <TextClip
-        clip={{ id: 'c1', type: 'text', content: 'Hello' }}
+        clip={clip('Hello')}
+        scan={null}
         onUpdate={onUpdate}
         onEditingChange={onEditingChange}
       />
     );
     fireEvent.click(screen.getByText('Hello'));
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: 'Hello\nthere' } });
+    fireEvent.keyDown(textarea, { key: 'Enter', shiftKey: true });
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    fireEvent.blur(textarea);
+    expect(onUpdate).toHaveBeenCalledWith('Hello\nthere');
+    expect(onEditingChange).toHaveBeenLastCalledWith(false);
+  });
 
+  it('does not call onUpdate when the value is unchanged', () => {
+    const onUpdate = vi.fn();
+    render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);
+    fireEvent.click(screen.getByText('Hello'));
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' });
+    expect(onUpdate).not.toHaveBeenCalled();
+  });
+
+  it('Esc restores the pre-edit content and saves nothing', () => {
+    const onUpdate = vi.fn();
+    render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);
+    fireEvent.click(screen.getByText('Hello'));
     const textarea = screen.getByRole('textbox');
     fireEvent.change(textarea, { target: { value: 'Changed' } });
     fireEvent.keyDown(textarea, { key: 'Escape' });
-
-    // Should not call onUpdate (cancelled)
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
     expect(onUpdate).not.toHaveBeenCalled();
-    expect(onEditingChange).toHaveBeenCalledWith(false);
-  });
-
-  it('renders syntax highlighter when code detection enabled and clip has language', async () => {
-    vi.useRealTimers();
-    mockIsCodeDetectionEnabled = true;
-    render(
-      <TextClip
-        clip={{
-          id: 'c1',
-          type: 'text',
-          content: 'const x = 1;',
-          isCode: true,
-          language: 'javascript',
-        }}
-        onUpdate={vi.fn()}
-      />
-    );
-
-    // Trigger edit mode
-    await act(async () => {
-      fireEvent.click(screen.getByText('const x = 1;'));
-    });
-
-    // Wait for lazy component to resolve
-    expect(await screen.findByTestId('syntax-highlighter')).toBeInTheDocument();
-    vi.useFakeTimers();
-  });
-
-  it('updates syntax container height on text change', async () => {
-    vi.useRealTimers();
-    mockIsCodeDetectionEnabled = true;
-    render(
-      <TextClip
-        clip={{
-          id: 'c1',
-          type: 'text',
-          content: 'const x = 1;',
-          isCode: true,
-          language: 'javascript',
-        }}
-        onUpdate={vi.fn()}
-      />
-    );
-    fireEvent.click(screen.getByText('const x = 1;'));
-
-    // Wait for lazy component to resolve
-    await screen.findByTestId('syntax-highlighter');
-
-    const textarea = screen.getByRole('textbox');
-
-    // Change to multiline content to trigger auto-resize with syntax container
-    await act(async () => {
-      fireEvent.change(textarea, { target: { value: 'const x = 2;\nconst y = 3;' } });
-    });
-
-    expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
-    vi.useFakeTimers();
-  });
-
-  it('auto-resizes plain textarea for multiline content without syntax highlighting', () => {
-    mockIsCodeDetectionEnabled = false;
-    const content = 'line1\nline2';
-    render(<TextClip clip={{ id: 'c1', type: 'text', content }} onUpdate={vi.fn()} />);
-    fireEvent.click(screen.getByText('line1 line2'));
-
-    const textarea = screen.getByRole('textbox');
-    // Change to different multiline content to trigger auto-resize in plain textarea path
-    fireEvent.change(textarea, { target: { value: 'line1\nline2\nline3' } });
-
-    expect(textarea).toBeInTheDocument();
-  });
-
-  it('auto-resizes syntax container for multiline content on edit entry', async () => {
-    vi.useRealTimers();
-    mockIsCodeDetectionEnabled = true;
-    const multilineContent = 'const x = 1;\nconst y = 2;';
-    render(
-      <TextClip
-        clip={{
-          id: 'c1',
-          type: 'text',
-          content: multilineContent,
-          isCode: true,
-          language: 'javascript',
-        }}
-        onUpdate={vi.fn()}
-      />
-    );
-
-    // Enter edit mode with multiline content
-    await act(async () => {
-      fireEvent.click(screen.getByText('const x = 1; const y = 2;'));
-    });
-
-    // Wait for lazy component to resolve
-    await screen.findByTestId('syntax-highlighter');
-
-    // The textarea ref should be set and the multiline auto-resize should run
-    const textarea = screen.getByRole('textbox');
-    expect(textarea).toBeInTheDocument();
-
-    // Trigger a re-render to ensure effect runs with ref attached
-    await act(async () => {
-      fireEvent.change(textarea, { target: { value: 'const x = 1;\nconst y = 2;\nconst z = 3;' } });
-    });
-
-    expect(screen.getByTestId('syntax-highlighter')).toBeInTheDocument();
-    vi.useFakeTimers();
-  });
-
-  it('renders plain textarea when code detection disabled', () => {
-    mockIsCodeDetectionEnabled = false;
-    render(
-      <TextClip
-        clip={{
-          id: 'c1',
-          type: 'text',
-          content: 'const x = 1;',
-          isCode: true,
-          language: 'javascript',
-        }}
-        onUpdate={vi.fn()}
-      />
-    );
-    fireEvent.click(screen.getByText('const x = 1;'));
-
-    expect(screen.queryByTestId('syntax-highlighter')).not.toBeInTheDocument();
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-  });
-
-  it('shows whitespace-only content as (empty)', () => {
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: '   ' }} onUpdate={vi.fn()} />);
-    expect(screen.getByText('(empty)')).toBeInTheDocument();
-  });
-
-  it('does not call onUpdate on blur when no pending changes', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    // Blur immediately without changing anything
-    fireEvent.blur(screen.getByRole('textbox'));
-
-    expect(onUpdate).not.toHaveBeenCalled();
-  });
-
-  it('does not call onUpdate on blur when pending change matches original', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    const textarea = screen.getByRole('textbox');
-    // Change then change back to original
-    fireEvent.change(textarea, { target: { value: 'Changed' } });
-    fireEvent.change(textarea, { target: { value: 'Hello' } });
-    // Blur with a pending debounce but editValue === clip.content
-    fireEvent.blur(textarea);
-
-    expect(onUpdate).not.toHaveBeenCalled();
-  });
-
-  it('handles Escape without onEditingChange callback', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' });
-
-    // Should not throw, just exit edit mode
     expect(screen.getByText('Hello')).toBeInTheDocument();
   });
 
-  it('ignores non-special keys in keyDown handler', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
+  it('Esc in the editor does not reach an outer Esc handler', () => {
+    const outer = vi.fn();
+    render(
+      <div onKeyDown={outer}>
+        <TextClip clip={clip('Hello')} scan={null} onUpdate={vi.fn()} />
+      </div>
+    );
     fireEvent.click(screen.getByText('Hello'));
-
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'a' });
-
-    // Should still be in edit mode, no update called
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-    expect(onUpdate).not.toHaveBeenCalled();
-  });
-
-  it('allows Shift+Enter without exiting edit mode', () => {
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter', shiftKey: true });
-
-    // Should still be in edit mode
-    expect(screen.getByRole('textbox')).toBeInTheDocument();
-  });
-
-  it('handles Escape without pending debounce', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-
-    // Press Escape without typing anything (no debounce pending)
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' });
-
-    act(() => {
-      vi.advanceTimersByTime(500);
-    });
-    expect(onUpdate).not.toHaveBeenCalled();
+    expect(outer).not.toHaveBeenCalled();
   });
 
-  describe('light theme', () => {
-    beforeEach(() => {
-      mockThemeState.isLight = true;
-    });
+  it('enters edit from the keyboard when editSeq changes', () => {
+    const { rerender } = render(
+      <TextClip clip={clip('Hello')} scan={null} onUpdate={vi.fn()} editSeq={0} />
+    );
+    expect(screen.queryByRole('textbox')).toBeNull();
+    rerender(<TextClip clip={clip('Hello')} scan={null} onUpdate={vi.fn()} editSeq={1} />);
+    expect(screen.getByRole('textbox')).toBeInTheDocument();
+    // a second bump while already editing changes nothing
+    rerender(<TextClip clip={clip('Hello')} scan={null} onUpdate={vi.fn()} editSeq={2} />);
+    expect(screen.getAllByRole('textbox')).toHaveLength(1);
+  });
 
-    it('applies light class in display mode', () => {
-      render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
-      expect(screen.getByText('Hello').className).toContain('light');
-    });
-
-    it('applies light class in plain edit mode', () => {
-      render(<TextClip clip={{ id: 'c1', type: 'text', content: 'Hello' }} onUpdate={vi.fn()} />);
-      fireEvent.click(screen.getByText('Hello'));
-      expect(screen.getByRole('textbox').className).toContain('light');
-    });
-
-    it('applies light styles in syntax-highlighted edit mode', async () => {
-      vi.useRealTimers();
-      mockIsCodeDetectionEnabled = true;
-      render(
-        <TextClip
-          clip={{
-            id: 'c1',
-            type: 'text',
-            content: 'const x = 1;',
-            isCode: true,
-            language: 'javascript',
-          }}
-          onUpdate={vi.fn()}
-        />
-      );
-      fireEvent.click(screen.getByText('const x = 1;'));
-
-      // Wait for lazy component to resolve
-      await screen.findByTestId('syntax-highlighter');
-
-      const textarea = screen.getByRole('textbox');
-      expect(textarea.className).toContain('light');
-      expect(textarea.style.caretColor).toBe('#000');
-      vi.useFakeTimers();
-    });
-
-    it('applies light class to empty content display', () => {
-      render(<TextClip clip={{ id: 'c1', type: 'text', content: '' }} onUpdate={vi.fn()} />);
-      const el = screen.getByText('(empty)');
-      expect(el.className).toContain('light');
-      expect(el.className).toContain('emptyText');
-    });
+  it('uses the syntax overlay for code when detection is on, and not when it is off', () => {
+    mockIsCodeDetectionEnabled = true;
+    const code = clip('{"a": 1}', { isCode: true, language: 'json' });
+    const { container } = render(<TextClip clip={code} scan={null} onUpdate={vi.fn()} />);
+    fireEvent.click(screen.getByText('{"a": 1}'));
+    expect(container.querySelector('pre')).not.toBeNull();
+    cleanup();
+    mockIsCodeDetectionEnabled = false;
+    const again = render(<TextClip clip={code} scan={null} onUpdate={vi.fn()} />);
+    fireEvent.click(screen.getByText('{"a": 1}'));
+    expect(again.container.querySelector('pre')).toBeNull();
   });
 });

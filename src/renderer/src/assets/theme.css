@@ -1,0 +1,181 @@
+/*
+ * The one variable set for both windows (spec 17.8). Dark values on :root, light values on
+ * body.light, which providers/theme.tsx sets. --slot-0 to --slot-11 are set by the same
+ * provider from GROUP_COLOUR_SLOTS; chips, dots, swatches and pills reference var(--slot-N)
+ * and never a hex. Components read these and nothing else for colour.
+ */
+:root {
+  --app-bg: #262626;
+  --panel: #1e1e1e;
+  --row-a: #2e2e2e;
+  --row-b: #383838;
+  --row-hover: #424242;
+  --num-bg: #222222;
+  --bar-bg: #1e1e1e;
+  --line: #2a2a2a;
+  --line2: #3a3a3a;
+  --text: #eeeeee;
+  --muted: #a3a3a3;
+  --dim: #6b6b6b;
+  --accent: #3b82f6;
+  --accent-soft: rgba(59, 130, 246, 0.16);
+  --green: #10b981;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+  --sans: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Ubuntu, sans-serif;
+
+  --ql-bg: #1b1b1b;
+  --ql-line: #333333;
+  --ql-bd: #5a5a5a;
+  --ed-bg: #1c1c1c;
+  --chip-bg: rgba(255, 255, 255, 0.06);
+  --chip-bd: #666666;
+  --tray-bg: #1a2230;
+  --tray-val-bg: #2c3a4e;
+  --tray-val-bd: #3f5474;
+  --tray-sep: #34425a;
+  --pill-bg: #2a2a2a;
+  --pill-bd: #555555;
+  --hover: #3a3a3a;
+  --ib-hover: #555555;
+  --toast-bg: #111111;
+  --cm-bg: #1c1c1c;
+  --lock: #ffc107;
+  --lang-bg: #1e1e1e;
+  --lang-bd: #4a4a4a;
+  --tpl-bd: #6b5d2a;
+  --tpl-bg: #2a2616;
+  --tpl-fg: #fde68a;
+  --tpl-hover: #3a3420;
+  --mark: rgba(250, 204, 21, 0.32);
+  --ln: #555555;
+  --ln-has: #8a8a8a;
+  --checker: #2a2a2a;
+  --checker2: #333333;
+  --search-in: #1a1a1a;
+  --dimmer: rgba(0, 0, 0, 0.6);
+  --shadow: rgba(0, 0, 0, 0.6);
+  --copied: #22c55e;
+
+  /* syntax token colours for the reader and the editor overlay */
+  --tk-key: #7fdbca;
+  --tk-str: #ecc48d;
+  --tk-num: #f78c6c;
+  --tk-pun: #89ddff;
+  --tk-cmd: #82aaff;
+  --tk-flag: #c792ea;
+  --tk-kw: #c792ea;
+  --tk-fn: #82aaff;
+  --tk-cm: #676e95;
+}
+
+body.light {
+  --app-bg: #f4f4f4;
+  --panel: #ffffff;
+  --row-a: #fbfbfb;
+  --row-b: #f1f1f1;
+  --row-hover: #e4e4e4;
+  --num-bg: #e9e9e9;
+  --bar-bg: #ececec;
+  --line: #d4d4d4;
+  --line2: #c4c4c4;
+  --text: #161616;
+  --muted: #555555;
+  --dim: #8a8a8a;
+  --accent: #0848b0;
+  --accent-soft: rgba(59, 130, 246, 0.16);
+  --green: #047857;
+  --amber: #b45309;
+  --red: #b91c1c;
+
+  --ql-bg: #ffffff;
+  --ql-line: #dddddd;
+  --ql-bd: #b5b5b5;
+  --ed-bg: #fafafa;
+  --chip-bg: rgba(0, 0, 0, 0.04);
+  --chip-bd: #999999;
+  --tray-bg: #e8eef8;
+  --tray-val-bg: #dbe5f5;
+  --tray-val-bd: #9fb6d9;
+  --tray-sep: #b7c6e0;
+  --pill-bg: #ffffff;
+  --pill-bd: #bbbbbb;
+  --hover: #dddddd;
+  --ib-hover: #cccccc;
+  --toast-bg: #ffffff;
+  --cm-bg: #ffffff;
+  --lock: #b45309;
+  --lang-bg: #ffffff;
+  --lang-bd: #bbbbbb;
+  --tpl-bd: #b89a2a;
+  --tpl-bg: #fff7d6;
+  --tpl-fg: #7a5a00;
+  --tpl-hover: #ffefb0;
+  --mark: rgba(250, 204, 21, 0.55);
+  --ln: #b0b0b0;
+  --ln-has: #6f6f6f;
+  --checker: #e6e6e6;
+  --checker2: #f5f5f5;
+  --search-in: #ffffff;
+  --dimmer: rgba(0, 0, 0, 0.35);
+  --shadow: rgba(0, 0, 0, 0.25);
+  --copied: #15803d;
+
+  --tk-key: #288f7c;
+  --tk-str: #9d661a;
+  --tk-num: #ae2f09;
+  --tk-pun: #0083b8;
+  --tk-cmd: #003bb8;
+  --tk-flag: #691e9a;
+  --tk-kw: #691e9a;
+  --tk-fn: #003bb8;
+  --tk-cm: #676e95;
+}
+
+/* Prism token classes, mapped onto the token variables above */
+.tok-keyword,
+.tok-atrule,
+.tok-important {
+  color: var(--tk-kw);
+}
+.tok-string,
+.tok-char,
+.tok-attr-value,
+.tok-regex,
+.tok-url {
+  color: var(--tk-str);
+}
+.tok-number,
+.tok-boolean,
+.tok-constant,
+.tok-symbol {
+  color: var(--tk-num);
+}
+.tok-punctuation,
+.tok-operator {
+  color: var(--tk-pun);
+}
+.tok-property,
+.tok-tag,
+.tok-selector,
+.tok-attr-name,
+.tok-variable {
+  color: var(--tk-key);
+}
+.tok-function,
+.tok-class-name,
+.tok-builtin {
+  color: var(--tk-fn);
+}
+.tok-parameter,
+.tok-option {
+  color: var(--tk-flag);
+}
+.tok-comment,
+.tok-prolog,
+.tok-doctype,
+.tok-cdata {
+  color: var(--tk-cm);
+  font-style: italic;
+}

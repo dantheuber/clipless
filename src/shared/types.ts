@@ -21,6 +21,9 @@ export interface ClipItem {
   isCode?: boolean; // whether the content appears to be code
   imageId?: string; // UUID for image clips stored as separate files
   thumbnailDataUrl?: string; // 200px-wide thumbnail data URL for image clips
+  imageWidth?: number; // pixel size recorded at capture; older image clips have none
+  imageHeight?: number;
+  imageBytes?: number; // size of the stored image; older image clips estimate from the thumbnail
   text?: string; // extracted text for html and rtf clips; the scanner reads this, not the markup
 }
 

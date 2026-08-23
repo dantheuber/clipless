@@ -51,7 +51,9 @@ describe('quick look state', () => {
     expect(hasContent(clip('a', '  \n'))).toBe(false);
     expect(hasContent(clip('i', '', { type: 'image' }))).toBe(false);
     expect(hasContent(clip('i', 'img-id', { type: 'image', imageId: 'img-id' }))).toBe(true);
-    expect(hasContent(clip('b', '', { type: 'bookmark', title: 'T', url: 'https://x' }))).toBe(true);
+    expect(hasContent(clip('b', '', { type: 'bookmark', title: 'T', url: 'https://x' }))).toBe(
+      true
+    );
   });
 });
 

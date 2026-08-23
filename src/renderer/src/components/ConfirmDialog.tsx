@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useTheme } from '../providers/theme';
@@ -27,6 +27,20 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 }) => {
   const { isLight } = useTheme();
 
+  // The dialog owns Esc while open: it is the innermost level of the Esc stack, so the
+  // key never reaches the reader, the search bar or a row editor behind it.
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.stopImmediatePropagation();
+      event.preventDefault();
+      onCancel();
+    };
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   const getIcon = () => {
@@ -50,7 +64,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
   return (
     <div className={styles.backdrop} onClick={handleBackdropClick}>
-      <div className={classNames(styles.dialog, { [styles.light]: isLight })}>
+      <div
+        className={classNames(styles.dialog, { [styles.light]: isLight })}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+      >
         <div className={styles.header}>
           <div className={classNames(styles.iconContainer, styles[type])}>
             <FontAwesomeIcon icon={getIcon()} className={styles.icon} />

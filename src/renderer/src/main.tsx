@@ -1,4 +1,5 @@
 import './assets/main.css';
+import './assets/theme.css';
 import './fontawesome';
 
 import { StrictMode } from 'react';

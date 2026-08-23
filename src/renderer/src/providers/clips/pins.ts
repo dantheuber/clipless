@@ -1,5 +1,6 @@
-import type { ClipItem } from '../../../../shared/types';
+import type { ClipItem, ScanResult } from '../../../../shared/types';
 import type { PinsByGroup } from '../../../../shared/tools';
+import { pinKey } from '../../../../shared/readiness';
 import { clipText } from './utils';
 
 /**
@@ -20,6 +21,20 @@ export interface Pin {
 export type PinMap = ReadonlyMap<string, Pin>;
 
 export const EMPTY_PINS: PinMap = new Map();
+
+/**
+ * The distinct pin keys a scan produces, in order of first appearance. "p" on a row or in
+ * the reader toggles these as one.
+ */
+export function scanKeys(scan: ScanResult | null): string[] {
+  if (!scan) return [];
+  const keys: string[] = [];
+  for (const match of scan.matches) {
+    const key = pinKey(match.group, match.value);
+    if (!keys.includes(key)) keys.push(key);
+  }
+  return keys;
+}
 
 /**
  * Split a key back into its group and value. The value may itself contain a pipe, so the

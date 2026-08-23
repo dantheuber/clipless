@@ -92,12 +92,13 @@ export const useClipboardOperations = (
   }, [clipboardUpdated, isDuplicateOfMostRecent, createTextClipWithDetection]);
 
   /**
-   * Copy a clip's content to the system clipboard
+   * Copy a clip's content to the system clipboard. Returns true when something was written,
+   * so the caller can toast; the OS notification is for hotkey copies only (spec 17.7).
    * @param index the index of the clip to copy
    */
   const copyClipToClipboard = useCallback(
-    async (index: number): Promise<void> => {
-      if (!window.api) return;
+    async (index: number): Promise<boolean> => {
+      if (!window.api) return false;
 
       // Set flag to prevent clipboard monitoring from adding this as a new clip
       setIsHotkeyOperation(true);
@@ -107,7 +108,7 @@ export const useClipboardOperations = (
       if (!clip?.content) {
         console.warn('No clip content to copy at index:', index);
         setIsHotkeyOperation(false);
-        return;
+        return false;
       }
 
       // Store the content that we're about to copy to prevent re-adding it
@@ -171,9 +172,6 @@ export const useClipboardOperations = (
             console.log('Copied unknown type as text to clipboard');
         }
 
-        // Notify with clip index
-        window.api.notifyClipCopied(index);
-
         // Clear the flag after a short delay
         setTimeout(() => {
           setIsHotkeyOperation(false);
@@ -184,6 +182,7 @@ export const useClipboardOperations = (
           setLastCopiedContent(null);
           console.log('Cleared lastCopiedContent after timeout (manual copy)');
         }, 3000);
+        return true;
       } catch (error) {
         console.error('Failed to copy clip to clipboard:', error);
         setIsHotkeyOperation(false);
@@ -192,8 +191,10 @@ export const useClipboardOperations = (
         try {
           await window.api.setClipboardText(clip.content);
           console.log('Fallback: copied as text to clipboard');
+          return true;
         } catch (fallbackError) {
           console.error('Fallback copy also failed:', fallbackError);
+          return false;
         }
       }
     },

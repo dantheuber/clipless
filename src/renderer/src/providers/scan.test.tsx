@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, act } from '@testing-library/react';
 import type { ClipItem, SearchTerm } from '../../../shared/types';
 import * as scanModule from '../../../shared/scan';
-import { ScanIndexProvider, useScanIndex, SCAN_CACHE_LIMIT, EMPTY_SCAN } from './scan';
-import { usePatternDetection } from '../hooks/usePatternDetection';
+import { ScanIndexProvider, useScanIndex, SCAN_CACHE_LIMIT, EMPTY_SCAN, knownGroups } from './scan';
 
 vi.mock('../../../shared/scan', async (importOriginal) => {
   const actual = await importOriginal<typeof scanModule>();
@@ -31,10 +30,15 @@ const clip = (id: string, content: string, extra: Partial<ClipItem> = {}): ClipI
 });
 
 function Row({ clip: c }: { clip: ClipItem }) {
-  const { hasPatterns, loading, scan } = usePatternDetection(c);
+  const { getScan } = useScanIndex();
+  const scan = getScan(c);
   return (
     <div data-testid={`row-${c.id}`}>
-      {loading ? 'loading' : hasPatterns ? `chips:${scan?.matches.length}` : 'none'}
+      {scan === null
+        ? 'loading'
+        : scan.matches.length > 0
+          ? `chips:${scan.matches.length}`
+          : 'none'}
     </div>
   );
 }
@@ -46,6 +50,9 @@ const flush = () => act(async () => {});
 beforeEach(() => {
   vi.clearAllMocks();
   api().searchTermsGetAll.mockResolvedValue([ipTerm]);
+  api().quickToolsGetAll.mockResolvedValue([]);
+  api().templatesGetAll.mockResolvedValue([]);
+  api().groupColoursGet.mockResolvedValue({});
   api().onQuickClipsConfigChanged.mockImplementation((cb: () => void) => {
     configChanged = cb;
     return () => {};
@@ -183,6 +190,72 @@ describe('ScanIndexProvider', () => {
     expect(screen.getByTestId('row-a')).toHaveTextContent('none');
   });
 
+  it('exposes the tools, templates and a slot per capture group', async () => {
+    const tool = { id: 't', name: 'T', url: 'https://x/{ip}', captureGroups: ['ip'] };
+    const template = { id: 'p', name: 'P', content: '{ip}' };
+    api().quickToolsGetAll.mockResolvedValue([tool]);
+    api().templatesGetAll.mockResolvedValue([template]);
+    api().searchTermsGetAll.mockResolvedValue([
+      ipTerm,
+      { ...ipTerm, id: 'x', pattern: '(?<xyz>x+)(?<ip>y)' },
+    ]);
+    api().groupColoursGet.mockResolvedValue({ xyz: 7 });
+    let index: ReturnType<typeof useScanIndex> | null = null;
+    function Probe() {
+      index = useScanIndex();
+      return null;
+    }
+    render(
+      <ScanIndexProvider>
+        <Probe />
+      </ScanIndexProvider>
+    );
+    await flush();
+    expect(index!.tools).toEqual([tool]);
+    expect(index!.templates).toEqual([template]);
+    expect(index!.terms).toHaveLength(2);
+    expect(index!.slotFor('ip')).toBe(0); // the named default
+    expect(index!.slotFor('xyz')).toBe(7); // the stored override
+    // a group no term produces is slotted as if appended to the known list
+    expect(index!.slotFor('unknown')).toBe(1);
+    expect(knownGroups([{ pattern: '(?<a>1)(?<b>2)' }, { pattern: '(?<b>3)' }])).toEqual([
+      'a',
+      'b',
+    ]);
+  });
+
+  it('slots every group from the defaults before any config has loaded', () => {
+    api().searchTermsGetAll.mockReturnValue(new Promise(() => {}));
+    let index: ReturnType<typeof useScanIndex> | null = null;
+    function Probe() {
+      index = useScanIndex();
+      return null;
+    }
+    render(
+      <ScanIndexProvider>
+        <Probe />
+      </ScanIndexProvider>
+    );
+    expect(index!.slotFor('email')).toBe(1);
+    expect(index!.tools).toEqual([]);
+  });
+
+  it('treats a missing colour map as empty', async () => {
+    api().groupColoursGet.mockResolvedValue(undefined);
+    let index: ReturnType<typeof useScanIndex> | null = null;
+    function Probe() {
+      index = useScanIndex();
+      return null;
+    }
+    render(
+      <ScanIndexProvider>
+        <Probe />
+      </ScanIndexProvider>
+    );
+    await flush();
+    expect(index!.slotFor('ticket')).toBe(2);
+  });
+
   it('logs and keeps going when the terms fail to load', async () => {
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     api().searchTermsGetAll.mockRejectedValue(new Error('ipc down'));
@@ -193,7 +266,7 @@ describe('ScanIndexProvider', () => {
     );
     await flush();
     expect(errSpy).toHaveBeenCalledWith(
-      'Failed to load search terms for scanning:',
+      'Failed to load the Quick Clips config for scanning:',
       expect.any(Error)
     );
     expect(screen.getByTestId('row-a')).toHaveTextContent('none');

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, act, cleanup } from '@testing-library/react';
-import { ThemeProvider, useTheme } from './theme';
+import { ThemeProvider, useTheme, applySlotVariables } from './theme';
+import { GROUP_COLOUR_SLOTS } from '../../../shared/groupColours';
 
 // Test component that displays theme info
 function ThemeDisplay() {
@@ -320,5 +321,18 @@ describe('ThemeProvider', () => {
 
     // Should not throw
     expect(screen.getByTestId('theme').textContent).toBe('system');
+  });
+});
+
+describe('applySlotVariables', () => {
+  it('sets every slot variable from the pair that matches the theme', () => {
+    applySlotVariables('dark');
+    const root = document.documentElement.style;
+    GROUP_COLOUR_SLOTS.forEach((slot, i) => {
+      expect(root.getPropertyValue(`--slot-${i}`)).toBe(slot.dark);
+    });
+    applySlotVariables('light');
+    expect(root.getPropertyValue('--slot-0')).toBe(GROUP_COLOUR_SLOTS[0].light);
+    expect(root.getPropertyValue('--slot-11')).toBe(GROUP_COLOUR_SLOTS[11].light);
   });
 });

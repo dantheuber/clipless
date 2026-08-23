@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import classNames from 'classnames';
 import { PatternMatch, QuickTool, Template } from '../../../../shared/types';
+import { generateTextFromTemplate } from '../../../../shared/templates';
+import { buildToolUrls } from '../../../../shared/tools';
 import { useTheme } from '../../providers/theme';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import styles from './QuickClipsScanner.module.css';
@@ -356,11 +358,8 @@ export function QuickClipsScanner({
       const storedClips = await window.api.storageGetClips();
       const clipContents = storedClips.map((c) => c.clip?.content || '');
 
-      const generatedText = await window.api.templatesGenerateText(
-        template.id,
-        clipContents,
-        selectedCaptures
-      );
+      // The engine is shared code now; templates-generate-text is gone (spec 17.6)
+      const generatedText = generateTextFromTemplate(template, clipContents, selectedCaptures);
       await window.api.setClipboardText(generatedText);
       handleClose();
     } catch (error) {
@@ -382,13 +381,15 @@ export function QuickClipsScanner({
           selectedCaptures[item.groupName] = item.value;
         });
 
-      const combinedMatch: PatternMatch = {
-        searchTermId: 'combined',
-        searchTermName: 'Combined Selection',
-        captures: selectedCaptures,
-      };
-
-      await window.api.quickClipsOpenTools([combinedMatch], Array.from(selectedTools));
+      // quick-clips-open-tools is gone (spec 17.6); the tray's fan-out and scheme check apply
+      const pins: Record<string, string[]> = {};
+      for (const [group, value] of Object.entries(selectedCaptures)) pins[group] = [value];
+      const urls: string[] = [];
+      for (const tool of availableTools) {
+        if (!selectedTools.has(tool.id)) continue;
+        for (const url of buildToolUrls(tool, pins)) if (!urls.includes(url)) urls.push(url);
+      }
+      await window.api.openExternalUrls(urls);
       handleClose();
     } catch (error) {
       console.error('Failed to open tools:', error);
