@@ -4,13 +4,20 @@
   align-items: center;
   cursor: pointer;
   flex: none;
+  position: relative;
 }
 
+/* The real checkbox sits over the track, invisible but the size of it, so a click lands
+   on the control itself and accessibility tools see a switch where the switch is */
 .input {
   position: absolute;
+  inset: 0;
   opacity: 0;
-  width: 0;
-  height: 0;
+  width: 28px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  z-index: 1;
 }
 
 .track {

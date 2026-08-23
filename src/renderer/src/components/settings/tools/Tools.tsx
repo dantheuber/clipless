@@ -61,10 +61,15 @@ function ToolsBody() {
   const selected = view.mode === 'item' ? view.sel : null;
   const current = selected ? itemOf(config, selected.kind, selected.id) : undefined;
 
-  // An item deleted elsewhere (or by an import) drops the selection back to the overview
+  // After a reload, a selected item that is gone (deleted elsewhere, replaced by an import)
+  // drops back to the overview. A just-saved item is selected before the reload that
+  // carries it lands, so the check runs on the reload, never on the selection.
   useEffect(() => {
-    if (view.mode === 'item' && data.loaded && !current) setView({ mode: 'overview' });
-  }, [view, current, data.loaded]);
+    if (view.mode === 'item' && !itemOf(config, view.sel.kind, view.sel.id)) {
+      setView({ mode: 'overview' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.version]);
 
   const select = (sel: Selection, how: 'click' | 'keyboard') =>
     navigate(() => {

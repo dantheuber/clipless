@@ -27,6 +27,8 @@ export interface ToolsData {
   resetSample: () => Promise<void>;
   scan: ScanResult;
   values: Record<string, string[]>;
+  /** Bumps on every config load, so a selection can be checked after a reload */
+  version: number;
 }
 
 export const ToolsDataContext = createContext<ToolsData | null>(null);
@@ -103,8 +105,10 @@ export function useToolsDataValue(): ToolsData {
       resetSample,
       scan,
       values,
+      version: index.version,
     }),
     [
+      index.version,
       index.loaded,
       index.groupColours,
       index.slotFor,

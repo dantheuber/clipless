@@ -69,8 +69,8 @@ async function openSettingsToolsTab(app: ElectronApplication, mainWindow: Page):
   if (!settingsPage) throw new Error('Could not open settings window');
 
   await settingsPage.waitForSelector('#root > *');
-  // Wait for the tools tab content to load
-  await settingsPage.waitForSelector('button:has-text("Search Terms")', { timeout: 10000 });
+  // The Tools tab is a list pane and an inspector (spec 14.3)
+  await settingsPage.waitForSelector('[data-testid="list-pane"]', { timeout: 10000 });
   return settingsPage;
 }
 
@@ -86,21 +86,11 @@ async function cleanupAllData(window: Page): Promise<void> {
   });
 }
 
-/** Click Delete on a card item and confirm in the dialog */
-async function deleteItemByName(page: Page, name: string): Promise<void> {
-  // Click Delete button in the item header
-  const itemHeader = page.locator(`h4:has-text("${name}")`).locator('..');
-  await itemHeader.locator('button:has-text("Delete")').click();
-
-  // Wait for and click the confirm dialog's Delete button
-  const confirmBtn = page.locator('button:has-text("Delete")').last();
-  await confirmBtn.waitFor({ state: 'visible', timeout: 3000 });
-  await confirmBtn.click();
-}
-
-test.describe('Settings — Search Terms CRUD', () => {
+test.describe('Settings — Tools tab', () => {
   let app: ElectronApplication;
   let settings: Page;
+  const email = `test-${UNIQUE}@example.com`;
+  const toolName = `Lookup-${UNIQUE}`;
 
   test.beforeAll(async () => {
     const result = await launchApp();
@@ -110,152 +100,59 @@ test.describe('Settings — Search Terms CRUD', () => {
   });
 
   test.afterAll(async () => {
+    // The sample text persists as a setting; put it back to the newest clip
+    const reset = settings.getByTestId('sample').getByText('reset');
+    if (await reset.count()) await reset.click();
     await app.close();
   });
 
-  test('create, edit, and delete a search term', async () => {
-    const name = `ST-${UNIQUE}`;
-    const nameUpdated = `ST-Upd-${UNIQUE}`;
+  test('create a search term from the library and see chips against the sample before Save', async () => {
+    await settings.getByTestId('new-term').click();
+    await expect(settings.getByTestId('start-from')).toBeVisible();
+    await settings.getByTestId('library-email').click();
+    await expect(settings.getByTestId('term-name')).toHaveValue('Email Address');
 
-    // Navigate to Search Terms sub-tab
-    await settings.click('button:has-text("Search Terms")');
+    const sample = settings.getByTestId('sample-text');
+    await sample.fill(`Contact ${email} for info`);
+    const chip = settings.getByTestId('chips-preview').locator(`[data-group="email"]`);
+    await expect(chip).toHaveText(email);
+    // nothing is stored before Save
+    const stored = await settings.evaluate(async () => ((await (window as any).api.searchTermsGetAll()) as unknown[]).length);
+    expect(stored).toBe(0);
 
-    // Create
-    await settings.click('button:has-text("Create Search Term")');
-    await settings.fill('input[placeholder="Search term name"]', name);
-    await settings.fill(
-      'textarea[placeholder*="Regular expression"]',
-      '(?<email>[\\w.+-]+@[\\w-]+\\.[\\w.]+)'
-    );
-    await settings.click('button:has-text("Save")');
-
-    // Verify appears
-    await expect(settings.locator('h4', { hasText: name })).toBeVisible();
-
-    // Edit
-    const header = settings.locator(`h4:has-text("${name}")`).locator('..');
-    await header.locator('button:has-text("Edit")').click();
-    await settings.fill('input[placeholder="Search term name"]', nameUpdated);
-    await settings.click('button:has-text("Save")');
-
-    await expect(settings.locator('h4', { hasText: nameUpdated })).toBeVisible();
-
-    // Delete with confirm
-    await deleteItemByName(settings, nameUpdated);
-    await expect(settings.locator('h4', { hasText: nameUpdated })).toBeHidden({ timeout: 5000 });
-  });
-});
-
-test.describe('Settings — Quick Tools CRUD', () => {
-  let app: ElectronApplication;
-  let settings: Page;
-
-  test.beforeAll(async () => {
-    const result = await launchApp();
-    app = result.app;
-    await cleanupAllData(result.window);
-
-    // Seed a search term so capture groups exist
-    await result.window.evaluate(async () => {
-      const api = (window as any).api;
-      await api.searchTermsCreate('Email Finder', '(?<email>[\\w.+-]+@[\\w-]+\\.[\\w.]+)');
-    });
-
-    settings = await openSettingsToolsTab(app, result.window);
+    await settings.getByTestId('term-save').click();
+    await expect(settings.getByTestId('inspector-title')).toHaveText('Email Address');
+    await expect(settings.locator('[data-testid^="row-term-"]')).toHaveCount(1);
+    await expect(settings.locator('[data-testid^="row-term-"]').first()).toHaveAttribute('data-dot', 'ok');
   });
 
-  test.afterAll(async () => {
-    await app.close();
+  test('make a tool with a picked token and see the tab count', async () => {
+    await settings.getByTestId('new-tool').click();
+    await settings.getByTestId('tool-name').fill(toolName);
+    const url = settings.getByTestId('tool-url');
+    await url.fill('https://example.com/search?q=');
+    await url.press('End');
+    await settings.getByTestId('token-picker').locator('[data-group="email"]').click();
+    await expect(url).toHaveValue('https://example.com/search?q={email}');
+    await expect(settings.getByTestId('readiness')).toContainText('ready on the sample');
+    await expect(settings.getByTestId('tool-preview-caption')).toHaveText('Would open 1 tab from the sample');
+    await expect(settings.getByTestId('tool-editor')).toContainText(`https://example.com/search?q=${encodeURIComponent(email)}`);
+
+    await settings.getByTestId('tool-save').click();
+    await expect(settings.getByTestId('inspector-title')).toHaveText(toolName);
+    await expect(settings.locator('[data-testid^="row-tool-"]').first()).toHaveAttribute('data-dot', 'ok');
   });
 
-  test('create, edit, and delete a quick tool', async () => {
-    const name = `QT-${UNIQUE}`;
-
-    // Navigate to Tools sub-tab (not the top-level "Tools" tab which is already active)
-    // The second "Tools" button is the sub-tab
-    await settings.locator('button:has-text("Tools")').nth(1).click();
-
-    // Create
-    await settings.click('button:has-text("Create Tool")');
-    await settings.fill('input[placeholder="Tool name"]', name);
-    await settings.fill('input[type="url"]', 'https://example.com/search?q={email}');
-    await settings.click('button:has-text("Save")');
-
-    // Verify appears
-    await expect(settings.locator('h4', { hasText: name })).toBeVisible();
-
-    // Edit
-    const header = settings.locator(`h4:has-text("${name}")`).locator('..');
-    await header.locator('button:has-text("Edit")').click();
-    await settings.fill('input[type="url"]', 'https://example.com/lookup?email={email}');
-    await settings.click('button:has-text("Save")');
-
-    await expect(settings.locator('h4', { hasText: name })).toBeVisible();
-
-    // Delete with confirm
-    await deleteItemByName(settings, name);
-    await expect(settings.locator('h4', { hasText: name })).toBeHidden({ timeout: 5000 });
-  });
-});
-
-test.describe('Settings — Templates CRUD', () => {
-  let app: ElectronApplication;
-  let settings: Page;
-
-  test.beforeAll(async () => {
-    const result = await launchApp();
-    app = result.app;
-    await cleanupAllData(result.window);
-    settings = await openSettingsToolsTab(app, result.window);
-  });
-
-  test.afterAll(async () => {
-    await app.close();
-  });
-
-  test('create, edit, and delete a template', async () => {
-    const name = `TPL-${UNIQUE}`;
-    const nameUpdated = `TPL-Upd-${UNIQUE}`;
-
-    // Navigate to Templates sub-tab
-    await settings.click('button:has-text("Templates")');
-
-    // Create
-    await settings.click('button:has-text("Create Template")');
-    await settings.fill('input[placeholder="Template name"]', name);
-    await settings.fill(
-      'textarea[placeholder*="Template content"]',
-      'Hello {c1}, your email is {email}'
-    );
-    await settings.click('button:has-text("Save")');
-
-    // Verify appears (templates use h3, not h4)
-    await expect(settings.locator('h3', { hasText: name })).toBeVisible();
-
-    // Expand the template to reveal Edit/Delete buttons
-    await settings.locator('h3', { hasText: name }).click();
-    await expect(settings.locator('button:has-text("Edit")')).toBeVisible({ timeout: 3000 });
-
-    // Edit
-    await settings.locator('button:has-text("Edit")').click();
-    await settings.fill('input[placeholder="Template name"]', nameUpdated);
-    await settings.click('button:has-text("Save")');
-
-    await expect(settings.locator('h3', { hasText: nameUpdated })).toBeVisible();
-
-    // After save from edit, template should still be expanded (expandedId set by handleStartEdit)
-    // Delete button should be visible
-    await expect(settings.locator('button:has-text("Delete")')).toBeVisible({ timeout: 3000 });
-
-    // Delete — click Delete in the template actions
-    await settings.locator('button:has-text("Delete")').click();
-
-    // Confirm in the delete dialog
-    const confirmBtn = settings.locator('button:has-text("Delete")').last();
-    await confirmBtn.waitFor({ state: 'visible', timeout: 3000 });
-    await confirmBtn.click();
-
-    await expect(settings.locator('h3', { hasText: nameUpdated })).toBeHidden({ timeout: 5000 });
+  test('delete asks once and names the dependents', async () => {
+    await settings.locator('[data-testid^="row-term-"]').first().click();
+    await settings.getByTestId('delete').click();
+    const dialog = settings.getByRole('dialog');
+    await expect(dialog).toContainText('Delete Email Address?');
+    await expect(dialog).toContainText(toolName);
+    await dialog.getByRole('button', { name: 'Delete' }).click();
+    await expect(settings.locator('[data-testid^="row-term-"]')).toHaveCount(0);
+    // the tool now needs a group nothing produces
+    await expect(settings.locator('[data-testid^="row-tool-"]').first()).toHaveAttribute('data-dot', 'orph');
   });
 });
 
