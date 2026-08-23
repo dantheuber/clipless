@@ -9,8 +9,8 @@ export interface ToolToken {
 }
 
 /**
- * Pinned values per group, in pin order. The tray passes the pins; the launcher passes
- * the captures of one match.
+ * Pinned values per group, in pin order. The tray passes the pins; a pattern match passes
+ * its captures.
  */
 export type PinsByGroup = Record<string, readonly string[]>;
 

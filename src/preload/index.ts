@@ -140,18 +140,10 @@ const api = {
   groupColoursGet: (): Promise<GroupColours> => electronAPI.ipcRenderer.invoke('group-colours-get'),
   groupColoursSet: (groupColours: GroupColours): Promise<GroupColours> =>
     electronAPI.ipcRenderer.invoke('group-colours-set', groupColours),
-  // Tools Launcher Window APIs
-  openToolsLauncher: (clipContent: string) =>
-    electronAPI.ipcRenderer.invoke('open-tools-launcher', clipContent),
-  closeToolsLauncher: () => electronAPI.ipcRenderer.invoke('close-tools-launcher'),
-  toolsLauncherReady: () => electronAPI.ipcRenderer.invoke('tools-launcher-ready'),
-  onToolsLauncherInitialize: (callback: (clipContent: string) => void) =>
-    subscribe('tools-launcher-initialize', (clipContent: string) => callback(clipContent)),
   onToggleSearch: (callback: () => void) => subscribe('toggle-search', () => callback()),
   // The quick look hotkey; pending says a clipboard change is on its way (spec 17.3)
   onOpenQuickLook: (callback: (payload: { pending: boolean }) => void) =>
     subscribe('open-quick-look', (payload: { pending: boolean }) => callback(payload)),
-  removeAllListeners: (channel: string) => electronAPI.ipcRenderer.removeAllListeners(channel),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -82,14 +82,8 @@ declare global {
       // Group colours
       groupColoursGet: () => Promise<GroupColours>;
       groupColoursSet: (groupColours: GroupColours) => Promise<GroupColours>;
-      // Tools Launcher Window APIs
-      openToolsLauncher: (clipContent: string) => Promise<void>;
-      closeToolsLauncher: () => Promise<void>;
-      toolsLauncherReady: () => Promise<void>;
-      onToolsLauncherInitialize: (callback: (clipContent: string) => void) => () => void;
       onToggleSearch: (callback: () => void) => () => void;
       onOpenQuickLook: (callback: (payload: { pending: boolean }) => void) => () => void;
-      removeAllListeners?: (channel: string) => void;
     };
   }
 }

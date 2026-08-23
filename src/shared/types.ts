@@ -182,16 +182,6 @@ export interface QuickTool {
 }
 
 /**
- * Result of pattern matching on clipboard content. Only the launcher window still reads
- * it; it goes with that window in step 4.
- */
-export interface PatternMatch {
-  searchTermId: string;
-  searchTermName: string;
-  captures: Record<string, string>; // capture group name -> extracted value
-}
-
-/**
  * Quick Clips configuration export/import format.
  * Version 2.0.0 adds groupColours; a version 1 file imports with none.
  */

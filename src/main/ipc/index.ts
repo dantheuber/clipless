@@ -4,13 +4,7 @@ import { is } from '@electron-toolkit/utils';
 import { storage } from '../storage';
 import { DEFAULT_HOTKEY_SETTINGS } from '../storage/defaults';
 import { hotkeyManager } from '../hotkeys';
-import {
-  getMainWindow,
-  getSettingsWindow,
-  createSettingsWindow,
-  createToolsLauncherWindow,
-  getToolsLauncherWindow,
-} from '../window/creation';
+import { getMainWindow, getSettingsWindow, createSettingsWindow } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
 import { applyWindowBackgroundTheme } from '../window/background';
 import {
@@ -89,23 +83,6 @@ export function setupMainIPC(): void {
 
   // The one copy of the hotkey defaults; the settings window reads them from here
   ipcMain.handle('hotkeys-get-defaults', () => DEFAULT_HOTKEY_SETTINGS);
-
-  // Tools Launcher window IPC handlers
-  ipcMain.handle('open-tools-launcher', (_event, clipContent: string) => {
-    createToolsLauncherWindow(clipContent);
-  });
-
-  ipcMain.handle('close-tools-launcher', () => {
-    const toolsLauncherWindow = getToolsLauncherWindow();
-    if (toolsLauncherWindow) {
-      toolsLauncherWindow.close();
-    }
-  });
-
-  ipcMain.handle('tools-launcher-ready', () => {
-    // This is called when the tools launcher window is ready to receive data
-    // The actual data sending is handled in the window creation
-  });
 
   // Auto-updater IPC handlers. The electron-updater events move the state; the
   // handlers only cover what the events cannot see (a timeout, a dev build).
