@@ -1,6 +1,13 @@
 # Update Log
 
 ## 2026-08-23
+* **Update**: templates are made in the settings Tools tab's inspector since step 3
+* **Ship**: quick look step 3, the settings window (shell, General, Hotkeys, Tools), on branch `t3code/quick-look-step-3` as PR #148 stacked on #147; 915 unit tests at 100%, 35 of 35 e2e on Linux. Step 4 (delete the launcher window) is next.
+* **Update**: templates are edited in the settings Tools tab since step 3
+* **Update**: the Test Patterns tab and the main-process scan are gone; settings previews use the shared scan (step 3)
+* **Update**: under the x11 wrapper the work area is 0 x 0 and windows open at their minimum size
+* **Update**: registration results per accelerator and the settings Hotkeys tab of step 3
+* **Add**: the calls step 3 of the quick look plan (the settings window, PR #148) made inside the spec's room
 * **Ship**: quick look step 2 (the clips window) landed on `t3code/explore-tool-launcher-ux`: chips, pins, the tray, the reader, the search bar and status bar, the sandboxed rendered view; the launcher window is unreachable and goes in step 4; step 3 (settings window) is next.
 * **Update**: step 2 decision records the verification run
 * **Decision**: the calls made while building quick look step 2 (the clips window)
