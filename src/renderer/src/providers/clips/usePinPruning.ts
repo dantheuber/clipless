@@ -13,7 +13,7 @@ export function usePinPruning(
   clips: readonly ClipItem[],
   getScan: (clip: ClipItem) => ScanResult | null,
   scanVersion: number,
-  pinsRef: React.MutableRefObject<PinMap>,
+  pins: PinMap,
   onPrune: (pins: PinMap, notice: string) => void
 ): void {
   const prevClipsRef = useRef<readonly ClipItem[]>(clips);
@@ -22,6 +22,13 @@ export function usePinPruning(
   onPruneRef.current = onPrune;
 
   useEffect(() => {
+    if (pins.size === 0) {
+      // There is nothing to validate. Still advance the baseline so a pin added later
+      // cannot make an old clips change look like the reason it disappeared.
+      prevClipsRef.current = clips;
+      keysByClipRef.current = new Map();
+      return;
+    }
     const present = new Set<string>();
     const byClip = new Map<string, Set<string>>();
     for (const clip of clips) {
@@ -31,17 +38,11 @@ export function usePinPruning(
       byClip.set(clip.id, keys);
       for (const key of keys) present.add(key);
     }
-    const result = prunePins(
-      pinsRef.current,
-      present,
-      prevClipsRef.current,
-      clips,
-      keysByClipRef.current
-    );
+    const result = prunePins(pins, present, prevClipsRef.current, clips, keysByClipRef.current);
     prevClipsRef.current = clips;
     keysByClipRef.current = byClip;
     if (result.dropped.length > 0) {
       onPruneRef.current(result.pins, droppedNotice(result.dropped) as string);
     }
-  }, [clips, getScan, scanVersion, pinsRef]);
+  }, [clips, getScan, scanVersion, pins]);
 }

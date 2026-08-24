@@ -214,6 +214,22 @@
   grid-template-columns: 40px 1fr;
 }
 
+.virtualLines {
+  position: relative;
+  min-width: 100%;
+}
+
+.virtualLine {
+  position: absolute;
+  left: 0;
+  width: max-content;
+  min-width: 100%;
+}
+
+.pane.wrap .virtualLine {
+  width: 100%;
+}
+
 .gutter {
   color: var(--ln);
   text-align: right;

@@ -1,5 +1,4 @@
 import type { ClipItem } from '../../../../shared/types';
-import { clipText } from './utils';
 
 /**
  * The reader's state (spec 17.1). It tracks a clip by id, not an index: when a clip lands
@@ -47,7 +46,13 @@ export function closeState(state: QuickLookState): QuickLookState {
 }
 
 export function hasContent(clip: ClipItem): boolean {
-  return clip.type === 'image' ? clip.content.length > 0 : clipText(clip).trim().length > 0;
+  if (clip.type === 'image') return clip.content.length > 0;
+  if (clip.type === 'bookmark') {
+    return /\S/u.test(clip.title ?? '') || /\S/u.test(clip.url ?? clip.content);
+  }
+  return /\S/u.test(
+    clip.type === 'html' || clip.type === 'rtf' ? (clip.text ?? clip.content) : clip.content
+  );
 }
 
 /**
@@ -65,20 +70,73 @@ export interface QuickLookPosition {
   label: string; // "5 / 6", "2 / 5 filtered", "hidden by filter"
 }
 
+export interface QuickLookNavigation {
+  readonly rowById: ReadonlyMap<string, number>;
+  readonly stepById: ReadonlyMap<string, number>;
+  readonly steps: readonly { id: string; originalIndex: number }[];
+}
+
+/** Build once when the clip/filter data changes; opening and walking then only query it. */
+export function createQuickLookNavigation(
+  clips: readonly ClipItem[],
+  visible: readonly VisibleClip[]
+): QuickLookNavigation {
+  const rowById = new Map<string, number>();
+  for (let i = 0; i < clips.length; i++) rowById.set(clips[i].id, i);
+
+  const stepById = new Map<string, number>();
+  const steps: { id: string; originalIndex: number }[] = [];
+  for (const { clip, originalIndex } of visible) {
+    if (!hasContent(clip)) continue;
+    stepById.set(clip.id, steps.length);
+    steps.push({ id: clip.id, originalIndex });
+  }
+  return { rowById, stepById, steps };
+}
+
+export function positionFromNavigation(
+  navigation: QuickLookNavigation,
+  openClipId: string,
+  filtering: boolean
+): QuickLookPosition {
+  const index = navigation.rowById.get(openClipId) ?? -1;
+  const visibleIndex = navigation.stepById.get(openClipId) ?? -1;
+  const hidden = index >= 0 && visibleIndex < 0;
+  const label = hidden
+    ? 'hidden by filter'
+    : `${visibleIndex + 1} / ${navigation.steps.length}${filtering ? ' filtered' : ''}`;
+  return { index, visibleIndex, visibleCount: navigation.steps.length, hidden, label };
+}
+
 export function quickLookPosition(
   clips: readonly ClipItem[],
   visible: readonly VisibleClip[],
   openClipId: string,
   filtering: boolean
 ): QuickLookPosition {
-  const index = clips.findIndex((clip) => clip.id === openClipId);
-  const steps = walkable(visible);
-  const visibleIndex = steps.findIndex(({ clip }) => clip.id === openClipId);
-  const hidden = index >= 0 && visibleIndex < 0;
-  const label = hidden
-    ? 'hidden by filter'
-    : `${visibleIndex + 1} / ${steps.length}${filtering ? ' filtered' : ''}`;
-  return { index, visibleIndex, visibleCount: steps.length, hidden, label };
+  return positionFromNavigation(createQuickLookNavigation(clips, visible), openClipId, filtering);
+}
+
+export function targetFromNavigation(
+  navigation: QuickLookNavigation,
+  openClipId: string,
+  direction: -1 | 1
+): string | null {
+  const at = navigation.stepById.get(openClipId);
+  if (at !== undefined) return navigation.steps[at + direction]?.id ?? null;
+
+  const row = navigation.rowById.get(openClipId);
+  if (row === undefined) return null;
+  let low = 0;
+  let high = navigation.steps.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (navigation.steps[middle].originalIndex < row) low = middle + 1;
+    else high = middle;
+  }
+  return direction === 1
+    ? (navigation.steps[low]?.id ?? null)
+    : (navigation.steps[low - 1]?.id ?? null);
 }
 
 /**
@@ -91,16 +149,5 @@ export function walkTarget(
   openClipId: string,
   direction: -1 | 1
 ): string | null {
-  const steps = walkable(visible);
-  const at = steps.findIndex(({ clip }) => clip.id === openClipId);
-  if (at >= 0) {
-    return steps[at + direction]?.clip.id ?? null;
-  }
-  const row = clips.findIndex((clip) => clip.id === openClipId);
-  if (row < 0) return null;
-  const nearest =
-    direction === 1
-      ? steps.find((s) => s.originalIndex > row)
-      : [...steps].reverse().find((s) => s.originalIndex < row);
-  return nearest?.clip.id ?? null;
+  return targetFromNavigation(createQuickLookNavigation(clips, visible), openClipId, direction);
 }

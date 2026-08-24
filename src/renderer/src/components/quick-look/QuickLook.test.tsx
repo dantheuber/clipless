@@ -4,6 +4,28 @@ import type { ClipItem, ScanResult } from '../../../../shared/types';
 import type { QuickLookState } from '../../providers/clips/quickLook';
 import { QuickLook, textMeta } from './QuickLook';
 
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: (options: {
+    count: number;
+    getScrollElement: () => Element | null;
+    estimateSize: () => number;
+  }) => {
+    options.getScrollElement();
+    const size = options.estimateSize();
+    return {
+      getTotalSize: () => options.count * size,
+      getVirtualItems: () =>
+        Array.from({ length: Math.min(12, options.count) }, (_, index) => ({
+          key: index,
+          index,
+          start: index * size,
+        })),
+      measureElement: () => {},
+      scrollToIndex: vi.fn(),
+    };
+  },
+}));
+
 const { state } = vi.hoisted(() => ({
   state: {
     quickLook: {
@@ -49,7 +71,9 @@ const ipScan = (text: string): ScanResult => {
 
 vi.mock('../../providers/clips', async () => {
   const utils = await import('../../providers/clips/utils');
-  const { quickLookPosition } = await import('../../providers/clips/quickLook');
+  const { createQuickLookNavigation, quickLookPosition, targetFromNavigation } = await import(
+    '../../providers/clips/quickLook'
+  );
   const visible = () => state.clips.map((clip, originalIndex) => ({ clip, originalIndex }));
   return {
     clipText: utils.clipText,
@@ -60,6 +84,14 @@ vi.mock('../../providers/clips', async () => {
         state.quickLook.openClipId === null
           ? null
           : quickLookPosition(state.clips, visible(), state.quickLook.openClipId, false),
+      walkTargets: (() => {
+        if (state.quickLook.openClipId === null) return { up: null, down: null };
+        const navigation = createQuickLookNavigation(state.clips, visible());
+        return {
+          up: targetFromNavigation(navigation, state.quickLook.openClipId, -1),
+          down: targetFromNavigation(navigation, state.quickLook.openClipId, 1),
+        };
+      })(),
       closeQuickLook: state.closeQuickLook,
       walkQuickLook: state.walkQuickLook,
       setView: state.setView,
@@ -414,9 +446,7 @@ describe('QuickLook', () => {
     openOn('b');
     render(<QuickLook />);
     expect(screen.getByTestId('ql-header')).toHaveTextContent('link');
-    expect(
-      screen.getByTestId('ql-content').querySelectorAll('[data-testid="ql-content"] > div')
-    ).toHaveLength(2);
+    expect(screen.getByTestId('ql-content').querySelectorAll('[data-index]')).toHaveLength(2);
     expect(screen.getByTestId('ql-side')).toHaveTextContent('No search terms match this clip.');
   });
 
@@ -549,5 +579,16 @@ describe('QuickLook', () => {
     expect(textMeta('')).toBe('0 lines · 0 B');
     expect(textMeta('a')).toBe('1 line · 1 B');
     expect(textMeta('é\nb')).toBe('2 lines · 4 B');
+    expect(textMeta('😀')).toBe('1 line · 4 B');
+  });
+
+  it('renders bounded line work for a very large multiline code clip', () => {
+    const content = Array.from({ length: 10_000 }, (_, i) => `const value${i} = ${i};`).join('\n');
+    state.clips = [{ id: 'large', type: 'text', content, isCode: true, language: 'javascript' }];
+    openOn('large');
+    render(<QuickLook />);
+    expect(screen.getByTestId('ql-header')).toHaveTextContent('10000 lines');
+    expect(screen.getByTestId('ql-content').querySelectorAll('[data-index]')).toHaveLength(12);
+    expect(screen.getByTestId('ql-content').querySelector('[data-index="9999"]')).toBeNull();
   });
 });

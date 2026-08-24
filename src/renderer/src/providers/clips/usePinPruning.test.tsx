@@ -21,22 +21,51 @@ function Probe({
   clips,
   getScan,
   version,
-  pinsRef,
+  pins,
   onPrune,
 }: {
   clips: ClipItem[];
   getScan: (c: ClipItem) => ScanResult | null;
   version: number;
-  pinsRef: React.MutableRefObject<PinMap>;
+  pins: PinMap;
   onPrune: (pins: PinMap, notice: string) => void;
 }) {
-  usePinPruning(clips, getScan, version, pinsRef, onPrune);
+  usePinPruning(clips, getScan, version, pins, onPrune);
   return null;
 }
 
 afterEach(cleanup);
 
 describe('usePinPruning', () => {
+  it('does not scan clips while there are no pins and keeps the later edit reason correct', () => {
+    const getScan = vi.fn((c: ClipItem) => ipScan(c.content));
+    const onPrune = vi.fn();
+    const empty = EMPTY_PINS;
+    const original = [clip('a', 'host 1.1.1.1')];
+    const current = [clip('a', 'host 1.1.1.1 updated')];
+    const { rerender } = render(
+      <Probe clips={original} getScan={getScan} version={0} pins={empty} onPrune={onPrune} />
+    );
+    rerender(
+      <Probe clips={current} getScan={getScan} version={0} pins={empty} onPrune={onPrune} />
+    );
+    expect(getScan).not.toHaveBeenCalled();
+
+    const pins = setPins(empty, ['ip|1.1.1.1'], true, 0);
+    rerender(<Probe clips={current} getScan={getScan} version={0} pins={pins} onPrune={onPrune} />);
+    expect(getScan).toHaveBeenCalledTimes(1);
+    rerender(
+      <Probe
+        clips={[clip('a', 'host updated')]}
+        getScan={getScan}
+        version={0}
+        pins={pins}
+        onPrune={onPrune}
+      />
+    );
+    expect(onPrune.mock.calls[0][1]).toBe('Dropped 1.1.1.1 (ip) after the edit');
+  });
+
   it('drops a pin after an edit removes its value and names the reason', () => {
     const pinsRef = { current: setPins(EMPTY_PINS, ['ip|1.1.1.1'], true, 0) };
     const onPrune = vi.fn();
@@ -46,7 +75,7 @@ describe('usePinPruning', () => {
         clips={[clip('a', 'host 1.1.1.1')]}
         getScan={getScan}
         version={0}
-        pinsRef={pinsRef}
+        pins={pinsRef.current}
         onPrune={onPrune}
       />
     );
@@ -56,7 +85,7 @@ describe('usePinPruning', () => {
         clips={[clip('a', 'host gone')]}
         getScan={getScan}
         version={0}
-        pinsRef={pinsRef}
+        pins={pinsRef.current}
         onPrune={onPrune}
       />
     );
@@ -73,12 +102,12 @@ describe('usePinPruning', () => {
     const getScan = (c: ClipItem) => (pending ? null : ipScan(c.content));
     const clips = [clip('a', 'nothing here')];
     const { rerender } = render(
-      <Probe clips={clips} getScan={getScan} version={0} pinsRef={pinsRef} onPrune={onPrune} />
+      <Probe clips={clips} getScan={getScan} version={0} pins={pinsRef.current} onPrune={onPrune} />
     );
     expect(onPrune).not.toHaveBeenCalled();
     pending = false;
     rerender(
-      <Probe clips={clips} getScan={getScan} version={1} pinsRef={pinsRef} onPrune={onPrune} />
+      <Probe clips={clips} getScan={getScan} version={1} pins={pinsRef.current} onPrune={onPrune} />
     );
     expect(onPrune).toHaveBeenCalledTimes(1);
     expect(onPrune.mock.calls[0][1]).toBe('Dropped 1.1.1.1 (ip) after the search terms changed');
@@ -93,7 +122,7 @@ describe('usePinPruning', () => {
         clips={[clip('a', '1.1.1.1')]}
         getScan={getScan}
         version={0}
-        pinsRef={pinsRef}
+        pins={pinsRef.current}
         onPrune={onPrune}
       />
     );
@@ -102,7 +131,7 @@ describe('usePinPruning', () => {
         clips={[clip('n', 'new'), clip('a', '1.1.1.1')]}
         getScan={getScan}
         version={0}
-        pinsRef={pinsRef}
+        pins={pinsRef.current}
         onPrune={onPrune}
       />
     );

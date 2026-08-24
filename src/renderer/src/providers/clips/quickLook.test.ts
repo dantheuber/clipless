@@ -1,11 +1,14 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import type { ClipItem } from '../../../../shared/types';
 import {
   INITIAL_QUICK_LOOK,
   closeState,
+  createQuickLookNavigation,
   hasContent,
   openOn,
   quickLookPosition,
+  positionFromNavigation,
+  targetFromNavigation,
   walkTarget,
   walkable,
   type VisibleClip,
@@ -48,12 +51,15 @@ describe('quick look state', () => {
   });
 
   it('treats whitespace-only text and empty images as having no content', () => {
+    const trim = vi.spyOn(String.prototype, 'trim');
     expect(hasContent(clip('a', '  \n'))).toBe(false);
     expect(hasContent(clip('i', '', { type: 'image' }))).toBe(false);
     expect(hasContent(clip('i', 'img-id', { type: 'image', imageId: 'img-id' }))).toBe(true);
     expect(hasContent(clip('b', '', { type: 'bookmark', title: 'T', url: 'https://x' }))).toBe(
       true
     );
+    expect(trim).not.toHaveBeenCalled();
+    trim.mockRestore();
   });
 });
 
@@ -125,5 +131,29 @@ describe('walkTarget', () => {
     expect(walkTarget(clips, all(clips), 'zzz', 1)).toBeNull();
     const onlyLast = all(clips).filter(({ clip: c }) => c.id === 'd');
     expect(walkTarget(clips, onlyLast, 'a', -1)).toBeNull();
+  });
+});
+
+describe('shared navigation model', () => {
+  it('derives content once, then answers position and both neighbours without rereading clips', () => {
+    let reads = 0;
+    const clips = Array.from({ length: 10_000 }, (_, i) => {
+      const item = { id: `c${i}`, type: 'text' as const } as ClipItem;
+      Object.defineProperty(item, 'content', {
+        enumerable: true,
+        get: () => {
+          reads++;
+          return i % 10 === 0 ? '' : `clip ${i}`;
+        },
+      });
+      return item;
+    });
+    const navigation = createQuickLookNavigation(clips, all(clips));
+    expect(reads).toBe(clips.length);
+    reads = 0;
+    expect(positionFromNavigation(navigation, 'c5001', false).label).toBe('4501 / 9000');
+    expect(targetFromNavigation(navigation, 'c5001', -1)).toBe('c4999');
+    expect(targetFromNavigation(navigation, 'c5001', 1)).toBe('c5002');
+    expect(reads).toBe(0);
   });
 });

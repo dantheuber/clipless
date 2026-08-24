@@ -43,10 +43,11 @@ import {
   type QuickLookView,
   type VisibleClip,
   closeState,
+  createQuickLookNavigation,
   hasContent,
   openOn,
-  quickLookPosition,
-  walkTarget,
+  positionFromNavigation,
+  targetFromNavigation,
 } from './quickLook';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -139,12 +140,10 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
   const clipsRef = useRef(clips);
   const isHotkeyOperationRef = useRef(isHotkeyOperation);
   const lastCopiedContentRef = useRef(lastCopiedContent);
-  const pinsRef = useRef(pins);
 
   clipsRef.current = clips;
   isHotkeyOperationRef.current = isHotkeyOperation;
   lastCopiedContentRef.current = lastCopiedContent;
-  pinsRef.current = pins;
 
   // Use language detection settings from the context
   const { isCodeDetectionEnabled } = useLanguageDetection();
@@ -281,23 +280,38 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     setPinMap(pruned);
     setDroppedNotice(notice);
   }, []);
-  usePinPruning(clips, getScan, scanVersion, pinsRef, onPrune);
+  usePinPruning(clips, getScan, scanVersion, pins, onPrune);
   const dismissDroppedNotice = useCallback(() => setDroppedNotice(null), []);
 
   // The reader (spec 17.1): tracks a clip by id
-  const openClip = useMemo(
-    () =>
-      quickLook.openClipId === null
-        ? null
-        : (clips.find((clip) => clip.id === quickLook.openClipId) ?? null),
-    [clips, quickLook.openClipId]
+  const quickLookNavigation = useMemo(
+    () => createQuickLookNavigation(clips, filteredClips),
+    [clips, filteredClips]
   );
+  const openClip = useMemo(() => {
+    if (quickLook.openClipId === null) return null;
+    const row = quickLookNavigation.rowById.get(quickLook.openClipId);
+    return row === undefined ? null : clips[row];
+  }, [clips, quickLook.openClipId, quickLookNavigation]);
   const position = useMemo(
     () =>
       quickLook.openClipId === null
         ? null
-        : quickLookPosition(clips, filteredClips, quickLook.openClipId, isFiltering),
-    [clips, filteredClips, quickLook.openClipId, isFiltering]
+        : positionFromNavigation(quickLookNavigation, quickLook.openClipId, isFiltering),
+    [quickLookNavigation, quickLook.openClipId, isFiltering]
+  );
+  const walkTargets = useMemo(
+    () => ({
+      up:
+        quickLook.openClipId === null
+          ? null
+          : targetFromNavigation(quickLookNavigation, quickLook.openClipId, -1),
+      down:
+        quickLook.openClipId === null
+          ? null
+          : targetFromNavigation(quickLookNavigation, quickLook.openClipId, 1),
+    }),
+    [quickLookNavigation, quickLook.openClipId]
   );
 
   const requestRowFocus = useCallback((index: number) => {
@@ -315,10 +329,10 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
   const walkQuickLook = useCallback(
     (direction: -1 | 1) => {
       if (quickLook.openClipId === null) return;
-      const target = walkTarget(clips, filteredClips, quickLook.openClipId, direction);
+      const target = direction === -1 ? walkTargets.up : walkTargets.down;
       if (target !== null) setQuickLook((current) => openOn(current, target));
     },
-    [clips, filteredClips, quickLook.openClipId]
+    [quickLook.openClipId, walkTargets]
   );
   const setView = useCallback((view: QuickLookView) => {
     setQuickLook((current) => ({ ...current, view }));
@@ -431,6 +445,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       quickLook,
       openClip,
       position,
+      walkTargets,
       openQuickLook,
       closeQuickLook,
       walkQuickLook,
@@ -445,6 +460,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       quickLook,
       openClip,
       position,
+      walkTargets,
       openQuickLook,
       closeQuickLook,
       walkQuickLook,

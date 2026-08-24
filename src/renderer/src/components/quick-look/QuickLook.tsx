@@ -1,14 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
-import {
-  clipText,
-  useClipsActions,
-  useClipsData,
-  useClipsPins,
-  useQuickLook,
-} from '../../providers/clips';
+import { clipText, useClipsActions, useClipsPins, useQuickLook } from '../../providers/clips';
 import { scanKeys } from '../../providers/clips/pins';
-import { walkTarget } from '../../providers/clips/quickLook';
 import { EMPTY_SCAN, useScanIndex } from '../../providers/scan';
 import { useLanguageDetection } from '../../providers/languageDetection';
 import { NARROW_WINDOW, SHORT_WINDOW, useMediaQuery } from '../../hooks/useMediaQuery';
@@ -35,8 +28,21 @@ const isTypingTarget = (target: EventTarget | null): boolean =>
 
 /** "7 lines · 128 B" */
 export function textMeta(text: string): string {
-  const lines = text.length === 0 ? 0 : text.split('\n').length;
-  const bytes = new TextEncoder().encode(text).length;
+  let lines = text.length === 0 ? 0 : 1;
+  let bytes = 0;
+  for (let i = 0; i < text.length; i++) {
+    const code = text.charCodeAt(i);
+    if (code === 10) lines++;
+    if (code < 0x80) bytes++;
+    else if (code < 0x800) bytes += 2;
+    else if (code >= 0xd800 && code <= 0xdbff && i + 1 < text.length) {
+      const next = text.charCodeAt(i + 1);
+      if (next >= 0xdc00 && next <= 0xdfff) {
+        bytes += 4;
+        i++;
+      } else bytes += 3;
+    } else bytes += 3;
+  }
   return `${lines} ${lines === 1 ? 'line' : 'lines'} · ${formatBytes(bytes)}`;
 }
 
@@ -51,13 +57,13 @@ export function QuickLook() {
     quickLook,
     openClip,
     position,
+    walkTargets,
     closeQuickLook,
     walkQuickLook,
     setView,
     setEditing,
     toggleWrap,
   } = useQuickLook();
-  const { clips, filteredClips } = useClipsData();
   const { updateClip, copyClipToClipboard } = useClipsActions();
   const { isPinned, togglePins, pins } = useClipsPins();
   const { getScan } = useScanIndex();
@@ -182,8 +188,8 @@ export function QuickLook() {
     }
   };
 
-  const canWalkUp = walkTarget(clips, filteredClips, clip.id, -1) !== null;
-  const canWalkDown = walkTarget(clips, filteredClips, clip.id, 1) !== null;
+  const canWalkUp = walkTargets.up !== null;
+  const canWalkDown = walkTargets.down !== null;
 
   const renderBody = () => {
     if (editing) {
