@@ -6,6 +6,7 @@ import {
   FRAME_HEAD,
   frameDocument,
   frameTextColour,
+  frameThumbColour,
 } from './RenderedView';
 
 const HOSTILE =
@@ -123,5 +124,15 @@ describe('RenderedView', () => {
     document.body.style.setProperty('--text', '#abcdef');
     expect(frameTextColour()).toBe('#abcdef');
     document.body.style.removeProperty('--text');
+  });
+
+  it('gives the frame a scrollbar in the theme colour', () => {
+    const doc = frameDocument('<p>hi</p>', '#123456', '#654321');
+    expect(doc).toContain('::-webkit-scrollbar-thumb{background:#654321');
+    expect(doc).toContain('::-webkit-scrollbar-button{display:none}');
+    expect(frameThumbColour()).toBe('#4d4d4d'); // jsdom has no --sb-thumb variable
+    document.body.style.setProperty('--sb-thumb', '#101010');
+    expect(frameThumbColour()).toBe('#101010');
+    document.body.style.removeProperty('--sb-thumb');
   });
 });
