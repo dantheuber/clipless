@@ -61,6 +61,19 @@ describe('quick look state', () => {
     expect(trim).not.toHaveBeenCalled();
     trim.mockRestore();
   });
+
+  it('uses bookmark URL/content fallbacks and extracted rich-text content', () => {
+    expect(hasContent(clip('url', '', { type: 'bookmark', title: ' ', url: 'https://x' }))).toBe(
+      true
+    );
+    expect(hasContent(clip('fallback', 'https://x', { type: 'bookmark' }))).toBe(true);
+    expect(hasContent(clip('empty-bookmark', ' ', { type: 'bookmark' }))).toBe(false);
+    expect(hasContent(clip('html', '<b>markup only</b>', { type: 'html', text: ' ' }))).toBe(false);
+    expect(hasContent(clip('legacy-html', '<b>readable fallback</b>', { type: 'html' }))).toBe(true);
+    expect(hasContent(clip('rtf', '{\\rtf1 markup only}', { type: 'rtf', text: 'readable' }))).toBe(
+      true
+    );
+  });
 });
 
 describe('quickLookPosition', () => {
@@ -131,6 +144,8 @@ describe('walkTarget', () => {
     expect(walkTarget(clips, all(clips), 'zzz', 1)).toBeNull();
     const onlyLast = all(clips).filter(({ clip: c }) => c.id === 'd');
     expect(walkTarget(clips, onlyLast, 'a', -1)).toBeNull();
+    const onlyFirst = all(clips).filter(({ clip: c }) => c.id === 'a');
+    expect(walkTarget(clips, onlyFirst, 'd', 1)).toBeNull();
   });
 });
 

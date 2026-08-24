@@ -340,6 +340,20 @@ describe('QuickLook', () => {
     expect(lit[0].className).not.toContain('lit');
   });
 
+  it('clears a stale highlighted value when updated scan data no longer contains it', () => {
+    const { rerender } = render(<QuickLook />);
+    const sideChip = screen
+      .getByTestId('ql-group-ip')
+      .querySelector('[data-key="ip|1.1.1.1"]') as HTMLElement;
+    fireEvent.mouseEnter(sideChip);
+
+    state.pendingScan = true;
+    rerender(<QuickLook />);
+
+    expect(screen.getByTestId('ql-side')).toHaveTextContent('Scanning this clip');
+    expect(screen.getByTestId('ql-content').querySelectorAll('.lit')).toHaveLength(0);
+  });
+
   it('e enters edit with the editor at reader size; Enter commits and Esc leaves edit only', () => {
     const { rerender } = render(<QuickLook />);
     fireEvent.keyDown(screen.getByTestId('quick-look'), { key: 'e' });
@@ -580,6 +594,7 @@ describe('QuickLook', () => {
     expect(textMeta('a')).toBe('1 line · 1 B');
     expect(textMeta('é\nb')).toBe('2 lines · 4 B');
     expect(textMeta('😀')).toBe('1 line · 4 B');
+    expect(textMeta('\ud800€')).toBe('1 line · 6 B');
   });
 
   it('renders bounded line work for a very large multiline code clip', () => {

@@ -142,6 +142,14 @@ describe('virtual line index', () => {
       { start: 7, text: 'ef', matches: [last] },
     ]);
   });
+
+  it('ignores scanner matches that cover only a line break', () => {
+    const newline = m('x', '\n', 2);
+    const index = indexLines('ab\ncd', [newline]);
+
+    expect(indexedLine('ab\ncd', index, 0).matches).toEqual([]);
+    expect(indexedLine('ab\ncd', index, 1).matches).toEqual([]);
+  });
 });
 
 describe('prismLanguage', () => {
