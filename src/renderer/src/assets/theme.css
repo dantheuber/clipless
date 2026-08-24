@@ -88,6 +88,11 @@
   --orphan: #777777;
   --clip-dot-bd: #666666;
 
+  /* scrollbars (spec 17.8): a thumb over a transparent track, no arrow buttons */
+  --sb-thumb: #4d4d4d;
+  --sb-thumb-hover: #616161;
+  --sb-thumb-active: #767676;
+
   /* syntax token colours for the reader and the editor overlay */
   --tk-key: #7fdbca;
   --tk-str: #ecc48d;
@@ -181,6 +186,10 @@ body.light {
   --orphan: #b5b5b5;
   --clip-dot-bd: #c0c0c0;
 
+  --sb-thumb: #b4b4b4;
+  --sb-thumb-hover: #a0a0a0;
+  --sb-thumb-active: #868686;
+
   --tk-key: #288f7c;
   --tk-str: #9d661a;
   --tk-num: #ae2f09;
@@ -190,6 +199,55 @@ body.light {
   --tk-kw: #691e9a;
   --tk-fn: #003bb8;
   --tk-cm: #676e95;
+}
+
+/*
+ * Scrollbars in both windows. The default Chromium scrollbar is a light track with arrow
+ * buttons and looks pasted in over either theme, so every scrolling element gets a rounded
+ * thumb in the theme's colours over a transparent track. color-scheme keeps anything the
+ * browser still draws itself (form controls, the caret) on the same side of the theme.
+ * .clipsContainer opts out and hides its scrollbar entirely.
+ */
+:root {
+  color-scheme: dark;
+}
+
+body.light {
+  color-scheme: light;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--sb-thumb);
+  background-clip: padding-box;
+  border: 3px solid transparent;
+  border-radius: 999px;
+  min-height: 28px;
+  min-width: 28px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sb-thumb-hover);
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--sb-thumb-active);
+  background-clip: padding-box;
+}
+
+/* the stepper arrows at the ends of the bar */
+::-webkit-scrollbar-button {
+  display: none;
 }
 
 /* Prism token classes, mapped onto the token variables above */

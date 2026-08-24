@@ -1,6 +1,7 @@
 # Update Log
 
 ## 2026-08-23
+* Record how themed scrollbars work and where the iframe copy lives
 * Add text extraction and image metadata at capture, checkClipboardNow; relative links
 * Drop the removed clips.tsx wrapper; add pins, quick look state, scan index and the redesigned clip components
 * Add clip ids, groupColours, toolsSampleText and the storageVersion caveat; relative links
