@@ -74,6 +74,7 @@ export type ClipsQuickLookContextType = {
   /** The open clip, or null when the reader is closed */
   openClip: ClipItem | null;
   position: QuickLookPosition | null;
+  walkTargets: { up: string | null; down: string | null };
   openQuickLook: (clipId: string, returnFocusIndex: number | null) => void;
   closeQuickLook: () => void;
   /** Up (-1) or Down (1) to the neighbouring clip with content; no-op at the ends */

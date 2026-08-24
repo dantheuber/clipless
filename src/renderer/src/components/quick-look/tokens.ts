@@ -59,6 +59,57 @@ export interface Line {
   matches: Match[]; // the non-overlapping matches on this line
 }
 
+export interface LineIndex {
+  starts: number[];
+  matchesByLine: ReadonlyMap<number, Match[]>;
+}
+
+const lineForOffset = (starts: readonly number[], offset: number): number => {
+  let low = 0;
+  let high = starts.length;
+  while (low < high) {
+    const middle = (low + high) >>> 1;
+    if (starts[middle] <= offset) low = middle + 1;
+    else high = middle;
+  }
+  return Math.max(0, low - 1);
+};
+
+/** Index line boundaries without allocating a string for every line. */
+export function indexLines(text: string, matches: readonly Match[]): LineIndex {
+  const starts = [0];
+  for (let i = 0; i < text.length; i++) if (text.charCodeAt(i) === 10) starts.push(i + 1);
+
+  const matchesByLine = new Map<number, Match[]>();
+  let lastEnd = -1;
+  for (const match of matches) {
+    if (match.start < lastEnd) continue;
+    lastEnd = match.end;
+    const first = lineForOffset(starts, Math.min(match.start, text.length));
+    const last = lineForOffset(starts, Math.max(0, Math.min(match.end - 1, text.length)));
+    for (let line = first; line <= last; line++) {
+      const start = starts[line];
+      const next = starts[line + 1] ?? text.length;
+      let end = line + 1 < starts.length ? next - 1 : next;
+      if (end > start && text.charCodeAt(end - 1) === 13) end--;
+      if (match.start < end && match.end > start) {
+        const onLine = matchesByLine.get(line) ?? [];
+        onLine.push(match);
+        matchesByLine.set(line, onLine);
+      }
+    }
+  }
+  return { starts, matchesByLine };
+}
+
+export function indexedLine(text: string, index: LineIndex, line: number): Line {
+  const start = index.starts[line];
+  const next = index.starts[line + 1] ?? text.length;
+  let end = line + 1 < index.starts.length ? next - 1 : next;
+  if (end > start && text.charCodeAt(end - 1) === 13) end--;
+  return { start, text: text.slice(start, end), matches: index.matchesByLine.get(line) ?? [] };
+}
+
 /**
  * Prism's token tree for one line, flattened to runs. An unknown language gives one plain
  * run, so the content pane renders the same way for prose.

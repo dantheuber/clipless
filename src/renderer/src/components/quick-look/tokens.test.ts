@@ -2,6 +2,8 @@ import { describe, it, expect } from 'vitest';
 import type { Match } from '../../../../shared/types';
 import {
   groupByMatch,
+  indexedLine,
+  indexLines,
   prismLanguage,
   segmentLine,
   splitLines,
@@ -123,6 +125,30 @@ describe('splitLines', () => {
     const edge = splitLines('ab\ncd', [m('x', 'b\n', 1)]);
     expect(edge[0].matches).toHaveLength(1);
     expect(edge[1].matches).toHaveLength(0);
+  });
+});
+
+describe('virtual line index', () => {
+  it('preserves CRLF offsets, overlap handling, and matches spanning line breaks', () => {
+    const text = 'ab\r\ncd\nef';
+    const crossing = m('x', 'b\r\nc', 1);
+    const overlapping = m('y', 'c', 4);
+    const last = m('z', 'ef', 7);
+    const index = indexLines(text, [crossing, overlapping, last]);
+    expect(index.starts).toEqual([0, 4, 7]);
+    expect(index.starts.map((_, line) => indexedLine(text, index, line))).toEqual([
+      { start: 0, text: 'ab', matches: [crossing] },
+      { start: 4, text: 'cd', matches: [crossing] },
+      { start: 7, text: 'ef', matches: [last] },
+    ]);
+  });
+
+  it('ignores scanner matches that cover only a line break', () => {
+    const newline = m('x', '\n', 2);
+    const index = indexLines('ab\ncd', [newline]);
+
+    expect(indexedLine('ab\ncd', index, 0).matches).toEqual([]);
+    expect(indexedLine('ab\ncd', index, 1).matches).toEqual([]);
   });
 });
 
