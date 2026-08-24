@@ -1,5 +1,8 @@
 # Update Log
 
+## 2026-08-24
+* Record the prose-as-python false positive and the showLanguageLabel mitigation
+
 ## 2026-08-23
 * Record how themed scrollbars work and where the iframe copy lives
 * Add text extraction and image metadata at capture, checkClipboardNow; relative links

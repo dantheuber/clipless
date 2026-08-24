@@ -22,6 +22,7 @@ const stored: UserSettings = {
   rememberWindowPosition: true,
   showNotifications: false,
   codeDetectionEnabled: true,
+  showLanguageLabel: true,
   automaticUpdates: true,
 };
 
@@ -95,6 +96,27 @@ describe('General', () => {
     (window.api as unknown as { platform: string }).platform = 'linux';
     await mount();
     expect(screen.queryByTestId('row-autoStart')).toBeNull();
+  });
+
+  it('dims the language label row while code detection is off', async () => {
+    await mount();
+    expect(screen.getByTestId('toggle-showLanguageLabel')).not.toBeDisabled();
+
+    fireEvent.click(screen.getByTestId('toggle-codeDetectionEnabled'));
+    await flush();
+    expect(api().settingsChanged).toHaveBeenCalledWith(
+      expect.objectContaining({ codeDetectionEnabled: false })
+    );
+    expect(screen.getByTestId('toggle-showLanguageLabel')).toBeDisabled();
+  });
+
+  it('writes the language label setting through its toggle', async () => {
+    await mount();
+    fireEvent.click(screen.getByTestId('toggle-showLanguageLabel'));
+    await flush();
+    expect(api().settingsChanged).toHaveBeenCalledWith(
+      expect.objectContaining({ showLanguageLabel: false })
+    );
   });
 
   it('changes the theme through the select', async () => {

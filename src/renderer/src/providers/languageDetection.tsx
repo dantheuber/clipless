@@ -7,6 +7,7 @@ import { detectLanguage, isCode, mapToSyntaxHighlighterLanguage } from '../utils
 
 export interface LanguageDetectionSettings {
   codeDetectionEnabled: boolean;
+  showLanguageLabel: boolean;
 }
 
 export interface DetectedLanguageInfo {
@@ -23,10 +24,13 @@ export interface LanguageDetectionContextType {
   // Language detection functions
   detectTextLanguage: (text: string) => DetectedLanguageInfo;
   isCodeDetectionEnabled: boolean;
+  /** Row tag on code clips; false while code detection is off. */
+  isLanguageLabelEnabled: boolean;
 }
 
 const defaultSettings: LanguageDetectionSettings = {
   codeDetectionEnabled: true,
+  showLanguageLabel: true,
 };
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -35,6 +39,7 @@ export const LanguageDetectionContext = createContext<LanguageDetectionContextTy
   updateSettings: () => {},
   detectTextLanguage: () => ({ language: null, isCode: false, syntaxHighlighterLanguage: 'text' }),
   isCodeDetectionEnabled: true,
+  isLanguageLabelEnabled: true,
 });
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -60,6 +65,8 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
             ...prevSettings,
             codeDetectionEnabled:
               storedSettings.codeDetectionEnabled ?? defaultSettings.codeDetectionEnabled,
+            showLanguageLabel:
+              storedSettings.showLanguageLabel ?? defaultSettings.showLanguageLabel,
           }));
         }
       } catch (error) {
@@ -85,6 +92,7 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
         const updatedSettings = {
           ...currentSettings,
           codeDetectionEnabled: settings.codeDetectionEnabled,
+          showLanguageLabel: settings.showLanguageLabel,
         };
         await window.api.storageSaveSettings(updatedSettings);
       } catch (error) {
@@ -102,13 +110,17 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
     if (!window.api?.onSettingsUpdated) return;
 
     const handleSettingsUpdate = (updatedSettings: Partial<LanguageDetectionSettings>) => {
-      if (updatedSettings && typeof updatedSettings.codeDetectionEnabled === 'boolean') {
-        const enabled = updatedSettings.codeDetectionEnabled;
-        setSettings((prevSettings) => ({
-          ...prevSettings,
-          codeDetectionEnabled: enabled,
-        }));
-      }
+      if (!updatedSettings) return;
+      setSettings((prevSettings) => {
+        const next = { ...prevSettings };
+        if (typeof updatedSettings.codeDetectionEnabled === 'boolean') {
+          next.codeDetectionEnabled = updatedSettings.codeDetectionEnabled;
+        }
+        if (typeof updatedSettings.showLanguageLabel === 'boolean') {
+          next.showLanguageLabel = updatedSettings.showLanguageLabel;
+        }
+        return next;
+      });
     };
 
     return window.api.onSettingsUpdated(handleSettingsUpdate);
@@ -160,6 +172,7 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
       updateSettings,
       detectTextLanguage,
       isCodeDetectionEnabled: settings.codeDetectionEnabled,
+      isLanguageLabelEnabled: settings.codeDetectionEnabled && settings.showLanguageLabel,
     }),
     [settings, updateSettings, detectTextLanguage]
   );

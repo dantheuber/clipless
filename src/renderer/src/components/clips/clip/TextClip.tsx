@@ -31,7 +31,7 @@ export const TextClip = ({
   onEditingChange,
   editSeq = 0,
 }: TextClipProps) => {
-  const { isCodeDetectionEnabled } = useLanguageDetection();
+  const { isCodeDetectionEnabled, isLanguageLabelEnabled } = useLanguageDetection();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const isEmpty = clip.content.trim() === '';
@@ -77,7 +77,7 @@ export const TextClip = ({
     );
   }
 
-  const language = clip.isCode && clip.language ? clip.language : null;
+  const language = isLanguageLabelEnabled && clip.isCode && clip.language ? clip.language : null;
 
   return (
     <span

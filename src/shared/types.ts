@@ -70,6 +70,7 @@ export interface UserSettings {
   hotkeys?: HotkeySettings;
   theme?: 'light' | 'dark' | 'system';
   codeDetectionEnabled?: boolean;
+  showLanguageLabel?: boolean; // row tag on code clips; only read while code detection is on
   windowTransparency?: number; // 0-100, 0 = fully opaque, 100 = fully transparent
   transparencyEnabled?: boolean;
   opaqueWhenFocused?: boolean;
