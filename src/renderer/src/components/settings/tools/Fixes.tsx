@@ -11,11 +11,6 @@ export interface FixActions {
   newTermFor: (group: string) => void;
 }
 
-/**
- * The fix buttons beside an orphan or disabled token (spec 14.4): enable the disabled
- * producer; add the library pattern that produces the group, if one exists; a new search
- * term prefilled with the group.
- */
 export function Fixes({
   config,
   group,

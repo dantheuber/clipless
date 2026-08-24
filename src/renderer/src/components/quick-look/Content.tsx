@@ -9,17 +9,12 @@ import styles from './QuickLook.module.css';
 interface ContentProps {
   text: string;
   language: string | null;
-  scan: ScanResult | null; // null while a large clip's scan is pending: no chips yet
+  scan: ScanResult | null;
   wrap: boolean;
   litKey: string | null;
   onHover?: (key: string | null) => void;
 }
 
-/**
- * The reader's content pane (spec 5): one grid row per line with a sticky gutter, syntax
- * colouring for code, a chip on every match, lines with a match faintly tinted. Hovering a
- * side column value outlines its occurrences and scrolls the first into view.
- */
 export function Content({ text, language, scan, wrap, litKey, onHover }: ContentProps) {
   const paneRef = useRef<HTMLDivElement>(null);
 
@@ -38,9 +33,8 @@ export function Content({ text, language, scan, wrap, litKey, onHover }: Content
     }
   }, [litKey]);
 
-  // Reset scroll when the clip changes
   useEffect(() => {
-    const pane = paneRef.current!; // mounted before any effect runs
+    const pane = paneRef.current!;
     pane.scrollTop = 0;
     pane.scrollLeft = 0;
   }, [text]);

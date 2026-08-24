@@ -1,33 +1,21 @@
 import type { Match, ScanResult } from './types';
 
-/**
- * Clips with more text than this are scanned on demand, off the first paint (spec 17.3).
- */
-export const LARGE_CLIP_THRESHOLD = 256 * 1024;
+export const LARGE_CLIP_THRESHOLD = 256 * 1024; // above this, scanning happens on demand, off the first paint (spec 17.3)
 
-/**
- * What scanText needs from a search term. SearchTerm satisfies it; the settings editor passes
- * the one pattern under edit.
- */
 export interface ScanTerm {
   id: string;
   pattern: string;
   enabled?: boolean;
 }
 
-/**
- * One compiled RegExp per pattern string. Flags gd: hasIndices gives every named group its
- * [start, end] so chips know where to sit. A pattern that does not compile is cached as its
- * Error so it is reported once per scan and never retried.
- */
-const compiled = new Map<string, RegExp | Error>();
+const compiled = new Map<string, RegExp | Error>(); // failed compiles cached as their Error: reported once, never retried
 
 function compile(pattern: string): RegExp | Error {
   const cached = compiled.get(pattern);
   if (cached) return cached;
   let result: RegExp | Error;
   try {
-    result = new RegExp(pattern, 'gd');
+    result = new RegExp(pattern, 'gd'); // d: hasIndices gives every named group its [start, end]
   } catch (error) {
     result = error as Error; // the RegExp constructor throws SyntaxError
   }
@@ -39,15 +27,6 @@ export function isLargeText(text: string): boolean {
   return text.length > LARGE_CLIP_THRESHOLD;
 }
 
-/**
- * Scan one text with the enabled search terms. Pure and synchronous; the same call feeds the
- * row chips, the reader, the tray and the settings previews, so they cannot disagree.
- *
- * Matches are sorted by start; groups are listed in order of first appearance. Overlapping
- * matches from different terms are all kept. A group that matched the empty string produces
- * no match. Disabled terms and patterns that fail to compile are skipped; the latter are
- * reported in errors.
- */
 export function scanText(text: string, terms: readonly ScanTerm[]): ScanResult {
   const matches: Match[] = [];
   const errors: ScanResult['errors'] = [];
@@ -64,8 +43,7 @@ export function scanText(text: string, terms: readonly ScanTerm[]): ScanResult {
     let m: RegExpExecArray | null;
     while ((m = regex.exec(text)) !== null) {
       if (m[0] === '') {
-        // A pattern that can match nothing would otherwise never advance.
-        regex.lastIndex++;
+        regex.lastIndex++; // an empty match would otherwise never advance
       }
       const groupIndices = m.indices?.groups;
       if (!groupIndices) continue;
@@ -88,10 +66,6 @@ export function scanText(text: string, terms: readonly ScanTerm[]): ScanResult {
   return { matches, groups, errors, large: isLargeText(text) };
 }
 
-/**
- * Pinned-style lookup of the scan: every distinct value per group, in order of first
- * appearance. The tray and readiness code read this shape.
- */
 export function valuesByGroup(scan: ScanResult): Record<string, string[]> {
   const result: Record<string, string[]> = {};
   for (const match of scan.matches) {

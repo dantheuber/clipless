@@ -6,28 +6,23 @@ import { clipText } from '../../../providers/clips/utils';
 import { useSettingsStore } from '../general/useSetting';
 import type { ToolsConfig } from './model';
 
-/**
- * One data source for the Tools tab (spec 14.3): the search terms, tools, templates and
- * colours the scan provider already holds, the sample text, and the sample's scan.
- * Everything the list pane, the overview, Uses and the editors show derives from this.
- */
 export interface ToolsData {
   loaded: boolean;
   config: ToolsConfig;
   groupColours: GroupColours;
   slotFor: (group: string) => number;
-  /** The text every preview runs against */
+
   sample: string;
-  /** True while the sample is the newest clip rather than a saved text */
+
   sampleIsClip: boolean;
   setSample: (text: string) => void;
-  /** Persist the sample as the toolsSampleText setting; empty text clears it */
+
   saveSample: () => Promise<void>;
-  /** Back to the newest clip */
+
   resetSample: () => Promise<void>;
   scan: ScanResult;
   values: Record<string, string[]>;
-  /** Bumps on every config load, so a selection can be checked after a reload */
+
   version: number;
 }
 
@@ -39,7 +34,6 @@ export function useToolsData(): ToolsData {
   return ctx;
 }
 
-/** The text of the newest non-empty clip, or an empty string. */
 export function newestClipText(clips: readonly StoredClip[]): string {
   for (const stored of clips) {
     const text = stored?.clip ? clipText(stored.clip) : '';

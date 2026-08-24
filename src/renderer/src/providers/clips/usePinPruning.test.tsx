@@ -34,32 +34,24 @@ function Probe({
   return null;
 }
 
+type ProbeProps = React.ComponentProps<typeof Probe>;
+const pruningProbe = (props: ProbeProps) => <Probe {...props} />;
+
+function pruningSetup() {
+  const pinsRef = { current: setPins(EMPTY_PINS, ['ip|1.1.1.1'], true, 0) };
+  const onPrune = vi.fn();
+  const getScan = (item: ClipItem) => ipScan(item.content);
+  return { onPrune, props: { getScan, version: 0, pinsRef, onPrune } };
+}
+
 afterEach(cleanup);
 
 describe('usePinPruning', () => {
   it('drops a pin after an edit removes its value and names the reason', () => {
-    const pinsRef = { current: setPins(EMPTY_PINS, ['ip|1.1.1.1'], true, 0) };
-    const onPrune = vi.fn();
-    const getScan = (c: ClipItem) => ipScan(c.content);
-    const { rerender } = render(
-      <Probe
-        clips={[clip('a', 'host 1.1.1.1')]}
-        getScan={getScan}
-        version={0}
-        pinsRef={pinsRef}
-        onPrune={onPrune}
-      />
-    );
+    const { onPrune, props } = pruningSetup();
+    const { rerender } = render(pruningProbe({ ...props, clips: [clip('a', 'host 1.1.1.1')] }));
     expect(onPrune).not.toHaveBeenCalled();
-    rerender(
-      <Probe
-        clips={[clip('a', 'host gone')]}
-        getScan={getScan}
-        version={0}
-        pinsRef={pinsRef}
-        onPrune={onPrune}
-      />
-    );
+    rerender(pruningProbe({ ...props, clips: [clip('a', 'host gone')] }));
     expect(onPrune).toHaveBeenCalledTimes(1);
     const [pins, notice] = onPrune.mock.calls[0];
     expect(pins.size).toBe(0);
@@ -85,27 +77,9 @@ describe('usePinPruning', () => {
   });
 
   it('does not fire when every pin is still present', () => {
-    const pinsRef = { current: setPins(EMPTY_PINS, ['ip|1.1.1.1'], true, 0) };
-    const onPrune = vi.fn();
-    const getScan = (c: ClipItem) => ipScan(c.content);
-    const { rerender } = render(
-      <Probe
-        clips={[clip('a', '1.1.1.1')]}
-        getScan={getScan}
-        version={0}
-        pinsRef={pinsRef}
-        onPrune={onPrune}
-      />
-    );
-    rerender(
-      <Probe
-        clips={[clip('n', 'new'), clip('a', '1.1.1.1')]}
-        getScan={getScan}
-        version={0}
-        pinsRef={pinsRef}
-        onPrune={onPrune}
-      />
-    );
+    const { onPrune, props } = pruningSetup();
+    const { rerender } = render(pruningProbe({ ...props, clips: [clip('a', '1.1.1.1')] }));
+    rerender(pruningProbe({ ...props, clips: [clip('n', 'new'), clip('a', '1.1.1.1')] }));
     expect(onPrune).not.toHaveBeenCalled();
   });
 });

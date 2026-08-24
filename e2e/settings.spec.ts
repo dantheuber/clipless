@@ -1,17 +1,9 @@
 import { test, expect, _electron as electron, ElectronApplication, Page } from '@playwright/test';
 import { resolve } from 'path';
 
-/**
- * The settings window after step 3 of the quick look plan: one shell with a left rail, the
- * General grid, the Hotkeys table with the keycaps as the recorder. Hotkey recording is
- * not driven to acceptance: accepting registers a real global shortcut on this machine, so
- * the case records, sees the conflict line and presses Esc.
- */
-
 const appPath = resolve(__dirname, '../out/main/index.js');
 
 async function launchApp(): Promise<{ app: ElectronApplication; window: Page }> {
-  // Linux only: Playwright's basic password store leaves safeStorage without encryption
   const app = await electron.launch({
     args: [appPath],
     env: { ...process.env, CLIPLESS_PLAINTEXT_STORAGE: '1' },
@@ -43,8 +35,6 @@ async function openSettings(app: ElectronApplication, mainWindow: Page, tab: str
   throw new Error('settings window did not open');
 }
 
-// Sizes the web contents, not the outer window: on Windows setSize includes the frame, so
-// innerWidth would come back 16px short and the viewport media queries would not fire.
 async function setSettingsSize(app: ElectronApplication, width: number, height: number): Promise<void> {
   await app.evaluate(
     ({ BrowserWindow }, size) => {
@@ -87,8 +77,6 @@ test.describe('Settings window', () => {
     });
     expect(size.min).toEqual([720, 440]);
     expect(size.resizable).toBe(true);
-    // Under Playwright's x11 wrapper the work area reports 0 x 0 and Electron opens every
-    // window at its minimum, so the default size is set here rather than trusted
     await setSettingsSize(app, 900, 600);
     await expect.poll(() => settings.evaluate(() => window.innerWidth)).toBe(900);
     for (const name of ['application', 'window', 'storage', 'updates', 'about']) {

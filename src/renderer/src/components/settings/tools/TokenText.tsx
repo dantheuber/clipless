@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import type { SearchTerm } from '../../../../../shared/types';
 import { useScanIndex } from '../../../providers/scan';
-import { groupStyle } from './GroupPill';
+import { groupStyle } from './groupStyle';
 import { groupState } from './model';
 import type { Segment } from './resolve';
 import styles from './Tools.module.css';
@@ -12,11 +12,6 @@ interface TokenTextProps {
   className?: string;
 }
 
-/**
- * A URL or template with its tokens shown: a resolved value in the group's colour, a token
- * with no sample value as a dashed token, an orphan token wavy red (spec 14.4), a
- * positional token grey.
- */
 export function TokenText({ segments, terms, className }: TokenTextProps) {
   const { slotFor } = useScanIndex();
   return (

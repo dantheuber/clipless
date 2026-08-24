@@ -1,16 +1,8 @@
 import type { ReactNode } from 'react';
 import type { Match, ScanResult } from '../../../../../shared/types';
 
-/**
- * Pure helpers over a scan for anything that draws chips: the clip rows, the reader and
- * the settings previews. Kept apart from the row components so the settings window can
- * import them without pulling in the clips provider.
- */
+export const ROW_TEXT_LIMIT = 2000;
 
-/**
- * Mark every case-insensitive occurrence of the term in a plain piece of text. Hits are a
- * mark, never a chip; chips stay chips.
- */
 export function markHits(text: string, term: string, keyPrefix: string): ReactNode[] {
   const needle = term.trim().toLowerCase();
   if (!needle) return [text];
@@ -29,10 +21,6 @@ export function markHits(text: string, term: string, keyPrefix: string): ReactNo
   return pieces;
 }
 
-/**
- * The non-overlapping matches that start before the limit; the earlier of two overlapping
- * matches wins (spec 17.3).
- */
 export function visibleMatches(scan: ScanResult | null, limit: number): Match[] {
   if (!scan) return [];
   const kept: Match[] = [];

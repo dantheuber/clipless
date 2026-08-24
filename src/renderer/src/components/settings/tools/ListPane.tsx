@@ -2,7 +2,7 @@ import classNames from 'classnames';
 import { useState, type KeyboardEvent } from 'react';
 import type { QuickTool, SearchTerm, Template } from '../../../../../shared/types';
 import { Dot } from '../shell/Dot';
-import { groupStyle } from './GroupPill';
+import { groupStyle } from './groupStyle';
 import { ExportImport } from './ExportImport';
 import { DOT_TITLE, groupState, listDot, rowGroups, type ToolsKind } from './model';
 import { useToolsData } from './useToolsData';
@@ -29,12 +29,6 @@ const SECTIONS: { kind: ToolsKind; label: string }[] = [
   { kind: 'template', label: 'Templates' },
 ];
 
-/**
- * The list pane (spec 14.3): three collapsible sections with a count and a +, one row per
- * item with a health dot, the name and the group swatches. Footer: export and import.
- * Keyboard (14.5): Up and Down move the selection, Enter opens Edit, Space toggles a
- * term, Delete asks to delete.
- */
 export function ListPane({
   selected,
   onSelect,

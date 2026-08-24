@@ -2,18 +2,12 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useClipsData, useClipsMeta, useQuickLook } from '../../providers/clips';
 import { Clip } from './clip';
-import { SEARCH_INPUT_ID } from '../SearchBar';
+import { SEARCH_INPUT_ID } from '../searchInput';
 import styles from './Clips.module.css';
 
 const isTypingTarget = (target: EventTarget | null): boolean =>
   target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement;
 
-/**
- * The list. Rows are keyboard focusable: Up and Down move focus, / opens search, and Down
- * past the last row returns to the search input when the bar is open (spec 16 rule 2).
- * The list is virtualised, so focusing a row the reader returns to means scrolling it into
- * view first and focusing on the next frame (spec 17.1).
- */
 export function Clips(): React.JSX.Element {
   const { filteredClips, searchTerm, isFiltering, pinnedOnly } = useClipsData();
   const { clipCopyId, isSearchVisible, setIsSearchVisible } = useClipsMeta();
@@ -44,7 +38,6 @@ export function Clips(): React.JSX.Element {
     [items.length, virtualizer]
   );
 
-  // Focus return from the reader (and the search bar's hand-off) name a real row index
   const lastFocusSeq = useRef(0);
   useEffect(() => {
     if (!focusRequest || focusRequest.seq === lastFocusSeq.current) return;

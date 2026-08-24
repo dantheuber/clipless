@@ -3,10 +3,6 @@ import { allGroups, groupState } from './model';
 import { useToolsData } from './useToolsData';
 import styles from './Tools.module.css';
 
-/**
- * The token picker (spec 14.4): groups that have a producer; groups whose only producers
- * are disabled are dimmed. The pipe form is parsed but never offered.
- */
 export function TokenPicker({ onInsert }: { onInsert: (token: string) => void }) {
   const { config } = useToolsData();
   const groups = allGroups(config).filter((g) => groupState(config.terms, g) !== 'orphan');
@@ -27,17 +23,4 @@ export function TokenPicker({ onInsert }: { onInsert: (token: string) => void })
       ))}
     </div>
   );
-}
-
-/**
- * Insert text at the caret of an input and put the caret after it.
- */
-export function insertAtCaret(
-  input: HTMLInputElement | HTMLTextAreaElement | null,
-  value: string,
-  token: string
-): { value: string; caret: number } {
-  const start = input?.selectionStart ?? value.length;
-  const end = input?.selectionEnd ?? value.length;
-  return { value: value.slice(0, start) + token + value.slice(end), caret: start + token.length };
 }

@@ -1,4 +1,3 @@
-/* One modal for every confirmation, both windows, both themes through theme.css */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -81,13 +80,7 @@
 }
 
 .button {
-  padding: 3px 10px;
-  border-radius: 5px;
-  border: 1px solid var(--btn-bd);
-  background: var(--btn-bg);
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
+  composes: base from './CompactPrimaryButton.module.css';
   cursor: pointer;
 }
 

@@ -27,8 +27,7 @@ export const importQuickClipsConfig = async (
   mode: QuickClipsImportMode = 'merge'
 ) => {
   try {
-    // Use the new batch import method to avoid race conditions
-    await storage.importQuickClipsConfig(config, mode);
+    await storage.importQuickClipsConfig(config, mode); // batch import to avoid race conditions
   } catch (error) {
     console.error('Failed to import quick clips config:', error);
     throw error;

@@ -1,39 +1,4 @@
-/**
- * Language detection ut  {
-    name: 'typescript',
-    extensions: ['.ts', '.tsx'],
-    keywords: ['interface', 'type', 'enum', 'namespace', 'declare', 'readonly', 'private', 'public', 'protected', 'const', 'let'],
-    patterns: [
-      /interface\s+\w+/,
-      /type\s+\w+\s*=/,
-      /:\s*(string|number|boolean|void|any|unknown|object)/,
-      /enum\s+\w+/,
-      /<.*>/,
-      /React\.FC/,
-      /useState|useEffect|useCallback/,
-      /\w+\s*:\s*\w+\s*=>/,        // Arrow function with type annotation
-      /=>\s*\{/,                   // Arrow function body
-      /const\s+\w+\s*:\s*\w+/,     // Typed constants
-      /\w+\.\w+\s*\(/,             // Method calls like setThemeState()
-      /\(\w+:\s*\w+\)/,            // Function parameters with types
-      /\w+Settings/,               // Common TS naming patterns
-      /update\w+\(/,               // Update function patterns
-      /const\s+\w+\s*=\s*\(/,      // const functionName = (
-      /if\s*\(\w+\.\w+\)/,         // if (object.property)
-      /\w+\.\w+\);/,               // method calls with semicolon
-    ],
-    priority: 8  // Increased priority for better detection
-  },snippets
- */
-
-interface LanguagePattern {
-  name: string;
-  extensions: string[];
-  keywords: string[];
-  keywordRegexes: RegExp[];
-  patterns: RegExp[];
-  priority: number; // Higher priority wins in case of conflicts
-}
+import { LANGUAGE_PATTERNS } from './languagePatterns';
 
 const MAX_TEXT_LENGTH = 10000;
 const CACHE_MAX_SIZE = 200;
@@ -43,19 +8,16 @@ interface DetectionResult {
   isCodeResult: boolean;
 }
 
-function makeFingerprint(text: string): string {
-  const head = text.slice(0, 200);
-  const tail = text.slice(-100);
-  return `${head}|${text.length}|${tail}`;
-}
-
 const detectionCache = new Map<string, DetectionResult>();
 
+function fingerprint(text: string): string {
+  return `${text.slice(0, 200)}|${text.length}|${text.slice(-100)}`;
+}
+
 function getCached(text: string): DetectionResult | undefined {
-  const key = makeFingerprint(text);
+  const key = fingerprint(text);
   const result = detectionCache.get(key);
   if (result !== undefined) {
-    // Move to end for LRU ordering
     detectionCache.delete(key);
     detectionCache.set(key, result);
   }
@@ -63,9 +25,8 @@ function getCached(text: string): DetectionResult | undefined {
 }
 
 function setCached(text: string, result: DetectionResult): void {
-  const key = makeFingerprint(text);
+  const key = fingerprint(text);
   if (detectionCache.size >= CACHE_MAX_SIZE) {
-    // Evict oldest entry (first key)
     const firstKey = detectionCache.keys().next().value!;
     detectionCache.delete(firstKey);
   }
@@ -80,574 +41,132 @@ export function getDetectionCacheSize(): number {
   return detectionCache.size;
 }
 
-function compileKeywordRegexes(keywords: string[]): RegExp[] {
-  return keywords.map((kw) => new RegExp(`\\b${kw.toLowerCase()}\\b`, 'g'));
-}
-
-const jsKeywords = [
-  'function',
-  'const',
-  'let',
-  'var',
-  'class',
-  'extends',
-  'import',
-  'export',
-  'async',
-  'await',
-  'console.log',
-  'if',
-  'else',
-];
-const tsKeywords = [
-  'interface',
-  'type',
-  'enum',
-  'const',
-  'namespace',
-  'declare',
-  'readonly',
-  'private',
-  'public',
-  'protected',
-];
-const pyKeywords = [
-  'def',
-  'class',
-  'import',
-  'from',
-  'if',
-  'elif',
-  'else',
-  'for',
-  'while',
-  'try',
-  'except',
-  'finally',
-  'with',
-  'as',
-  'lambda',
-];
-const javaKeywords = [
-  'public',
-  'private',
-  'protected',
-  'static',
-  'final',
-  'abstract',
-  'class',
-  'interface',
-  'extends',
-  'implements',
-  'package',
-];
-const csharpKeywords = [
-  'using',
-  'namespace',
-  'class',
-  'interface',
-  'struct',
-  'enum',
-  'public',
-  'private',
-  'protected',
-  'internal',
-  'static',
-  'readonly',
-];
-const cppKeywords = [
-  '#include',
-  'using',
-  'namespace',
-  'class',
-  'struct',
-  'template',
-  'typename',
-  'public',
-  'private',
-  'protected',
-];
-const cKeywords = [
-  '#include',
-  '#define',
-  'int',
-  'char',
-  'float',
-  'double',
-  'void',
-  'struct',
-  'typedef',
-  'static',
-  'extern',
-];
-const htmlKeywords = ['<!DOCTYPE', '<html', '<head', '<body', '<div', '<span', '<p', '<a', '<img'];
-const cssKeywords = [
-  'color',
-  'background',
-  'margin',
-  'padding',
-  'border',
-  'font',
-  'display',
-  'position',
-  'width',
-  'height',
-];
-const sqlKeywords = [
-  'SELECT',
-  'FROM',
-  'WHERE',
-  'INSERT',
-  'UPDATE',
-  'DELETE',
-  'CREATE',
-  'DROP',
-  'ALTER',
-  'TABLE',
-  'INDEX',
-];
-const bashKeywords = [
-  '#!/bin/bash',
-  '#!/bin/sh',
-  'echo',
-  'cd',
-  'ls',
-  'grep',
-  'awk',
-  'sed',
-  'chmod',
-  'chown',
-];
-const psKeywords = ['Get-', 'Set-', 'New-', 'Remove-', '$_', 'ForEach-Object', 'Where-Object'];
-
-const LANGUAGE_PATTERNS: LanguagePattern[] = [
-  {
-    name: 'javascript',
-    extensions: ['.js', '.jsx', '.mjs'],
-    keywords: jsKeywords,
-    keywordRegexes: compileKeywordRegexes(jsKeywords),
-    patterns: [
-      /console\.log\s*\(/,
-      /function\s+\w+\s*\(/,
-      /=>\s*[{(]/,
-      /require\s*\(\s*['"`]/,
-      /import\s+.*\s+from\s+['"`]/,
-      /export\s+(default\s+)?/,
-      /\.addEventListener\s*\(/,
-      /document\.(getElementById|querySelector)/,
-      /const\s+\w+\s*=/,
-      /let\s+\w+\s*=/,
-      /var\s+\w+\s*=/,
-      /\w+\.\w+\s*\(/, // Method calls
-      /if\s*\(/, // Conditionals
-      /\{\s*\w+/, // Object literals
-    ],
-    priority: 6, // Increased priority
-  },
-  {
-    name: 'typescript',
-    extensions: ['.ts', '.tsx'],
-    keywords: tsKeywords,
-    keywordRegexes: compileKeywordRegexes(tsKeywords),
-    patterns: [
-      /interface\s+\w+/,
-      /type\s+\w+\s*=/,
-      /:\s*(string|number|boolean|void|any|unknown)/,
-      /enum\s+\w+/,
-      /<.*>/,
-      /React\.FC/,
-      /useState|useEffect|useCallback/,
-    ],
-    priority: 7,
-  },
-  {
-    name: 'python',
-    extensions: ['.py', '.pyw'],
-    keywords: pyKeywords,
-    keywordRegexes: compileKeywordRegexes(pyKeywords),
-    patterns: [
-      /def\s+\w+\s*\(/,
-      /class\s+\w+.*:/,
-      /if\s+__name__\s*==\s*['"]__main__['"]/,
-      /import\s+\w+/,
-      /from\s+\w+\s+import/,
-      /print\s*\(/,
-      /range\s*\(/,
-      /len\s*\(/,
-    ],
-    priority: 6,
-  },
-  {
-    name: 'java',
-    extensions: ['.java'],
-    keywords: javaKeywords,
-    keywordRegexes: compileKeywordRegexes(javaKeywords),
-    patterns: [
-      /public\s+static\s+void\s+main/,
-      /public\s+class\s+\w+/,
-      /System\.out\.println/,
-      /package\s+[\w.]+;/,
-      /import\s+[\w.]+;/,
-      /@Override/,
-      /new\s+\w+\s*\(/,
-    ],
-    priority: 6,
-  },
-  {
-    name: 'csharp',
-    extensions: ['.cs'],
-    keywords: csharpKeywords,
-    keywordRegexes: compileKeywordRegexes(csharpKeywords),
-    patterns: [
-      /using\s+System/,
-      /namespace\s+\w+/,
-      /public\s+class\s+\w+/,
-      /Console\.WriteLine/,
-      /string\[\]\s+args/,
-      /\[.*Attribute.*\]/,
-      /var\s+\w+\s*=/,
-    ],
-    priority: 6,
-  },
-  {
-    name: 'cpp',
-    extensions: ['.cpp', '.cc', '.cxx', '.c++'],
-    keywords: cppKeywords,
-    keywordRegexes: compileKeywordRegexes(cppKeywords),
-    patterns: [
-      /#include\s*<.*>/,
-      /std::/,
-      /cout\s*<<|cin\s*>>/,
-      /using\s+namespace\s+std/,
-      /template\s*<.*>/,
-      /class\s+\w+.*{/,
-      /int\s+main\s*\(/,
-    ],
-    priority: 6,
-  },
-  {
-    name: 'c',
-    extensions: ['.c', '.h'],
-    keywords: cKeywords,
-    keywordRegexes: compileKeywordRegexes(cKeywords),
-    patterns: [
-      /#include\s*<stdio\.h>/,
-      /#include\s*<stdlib\.h>/,
-      /printf\s*\(/,
-      /scanf\s*\(/,
-      /malloc\s*\(/,
-      /free\s*\(/,
-      /int\s+main\s*\(/,
-    ],
-    priority: 5,
-  },
-  {
-    name: 'html',
-    extensions: ['.html', '.htm'],
-    keywords: htmlKeywords,
-    keywordRegexes: compileKeywordRegexes(htmlKeywords),
-    patterns: [
-      /<!DOCTYPE\s+html>/i,
-      /<html.*>/,
-      /<\/?\w+.*>/,
-      /<\w+\s+.*=.*>/,
-      /<script.*>/,
-      /<style.*>/,
-    ],
-    priority: 8,
-  },
-  {
-    name: 'css',
-    extensions: ['.css'],
-    keywords: cssKeywords,
-    keywordRegexes: compileKeywordRegexes(cssKeywords),
-    patterns: [
-      /\w+\s*:\s*[^;]+;/,
-      /\.\w+\s*{/,
-      /#\w+\s*{/,
-      /@media.*{/,
-      /@import/,
-      /rgb\s*\(/,
-      /rgba\s*\(/,
-      /:\s*hover/,
-    ],
-    priority: 7,
-  },
-  {
-    name: 'json',
-    extensions: ['.json'],
-    keywords: [],
-    keywordRegexes: [],
-    patterns: [
-      /^\s*\{[\s\S]*\}\s*$/,
-      /^\s*\[[\s\S]*\]\s*$/,
-      /"[^"]*"\s*:\s*"[^"]*"/,
-      /"[^"]*"\s*:\s*\d+/,
-      /"[^"]*"\s*:\s*(true|false|null)/,
-    ],
-    priority: 9,
-  },
-  {
-    name: 'xml',
-    extensions: ['.xml', '.xsd', '.xsl'],
-    keywords: ['<?xml', '</', '<!--'],
-    keywordRegexes: compileKeywordRegexes(['<?xml', '</', '<!--']),
-    patterns: [/<\?xml.*\?>/, /<\/?\w+.*>/, /<!--.*-->/, /<\w+\s+.*=.*\/>/],
-    priority: 7,
-  },
-  {
-    name: 'sql',
-    extensions: ['.sql'],
-    keywords: sqlKeywords,
-    keywordRegexes: compileKeywordRegexes(sqlKeywords),
-    patterns: [
-      /SELECT\s+.*\s+FROM/i,
-      /INSERT\s+INTO/i,
-      /UPDATE\s+.*\s+SET/i,
-      /DELETE\s+FROM/i,
-      /CREATE\s+TABLE/i,
-      /DROP\s+TABLE/i,
-      /ALTER\s+TABLE/i,
-    ],
-    priority: 8,
-  },
-  {
-    name: 'bash',
-    extensions: ['.sh', '.bash'],
-    keywords: bashKeywords,
-    keywordRegexes: compileKeywordRegexes(bashKeywords),
-    patterns: [/^#!/, /\$\w+/, /echo\s+/, /\|\s*grep/, /\|\s*awk/, /chmod\s+/, /cd\s+/],
-    priority: 6,
-  },
-  {
-    name: 'powershell',
-    extensions: ['.ps1'],
-    keywords: psKeywords,
-    keywordRegexes: compileKeywordRegexes(psKeywords),
-    patterns: [
-      /Get-\w+/,
-      /Set-\w+/,
-      /New-\w+/,
-      /\$\w+/,
-      /\|\s*ForEach-Object/,
-      /\|\s*Where-Object/,
-      /Write-Host/,
-    ],
-    priority: 6,
-  },
-];
-
-/**
- * Detects the programming language of a text snippet
- * @param text The text to analyze
- * @returns The detected language name or null if no language detected
- */
 function detectLanguageInternal(text: string): string | null {
-  if (!text || text.trim().length < 5) {
-    return null;
-  }
-
+  if (!text || text.trim().length < 5) return null;
   const scores: Record<string, number> = {};
-
-  LANGUAGE_PATTERNS.forEach((lang) => {
-    scores[lang.name] = 0;
-  });
-
   const lowerText = text.toLowerCase();
 
-  LANGUAGE_PATTERNS.forEach((lang) => {
+  for (const language of LANGUAGE_PATTERNS) {
     let score = 0;
-
-    // Check for keywords using pre-compiled regexes
-    lang.keywordRegexes.forEach((regex) => {
+    for (const regex of language.keywordRegexes) {
       regex.lastIndex = 0;
       const matches = lowerText.match(regex);
-      if (matches) {
-        score += matches.length * 2;
-      }
-    });
-
-    // Check for patterns
-    lang.patterns.forEach((pattern) => {
+      if (matches) score += matches.length * 2;
+    }
+    for (const pattern of language.patterns) {
       const matches = text.match(pattern);
-      if (matches) {
-        score += matches.length * 3;
-      }
-    });
-
-    // Bonus for file extension mentions
-    lang.extensions.forEach((ext) => {
-      if (lowerText.includes(ext)) {
-        score += 5;
-      }
-    });
-
-    score *= lang.priority;
-    scores[lang.name] = score;
-  });
+      if (matches) score += matches.length * 3;
+    }
+    for (const extension of language.extensions) {
+      if (lowerText.includes(extension)) score += 5;
+    }
+    scores[language.name] = score * language.priority;
+  }
 
   let maxScore = 0;
   let detectedLanguage: string | null = null;
-
-  Object.entries(scores).forEach(([lang, score]) => {
+  for (const [language, score] of Object.entries(scores)) {
     if (score > maxScore && score > 6) {
       maxScore = score;
-      detectedLanguage = lang;
+      detectedLanguage = language;
     }
-  });
-
+  }
   return detectedLanguage;
 }
 
 export function detectLanguage(text: string): string | null {
-  if (!text || text.trim().length < 5) {
-    return null;
-  }
-
-  if (text.length > MAX_TEXT_LENGTH) {
-    return null;
-  }
-
+  if (!text || text.trim().length < 5 || text.length > MAX_TEXT_LENGTH) return null;
   const cached = getCached(text);
-  if (cached !== undefined) {
-    return cached.language;
-  }
-
+  if (cached !== undefined) return cached.language;
   const language = detectLanguageInternal(text);
-  const isCodeResult = isCodeInternal(text);
-  setCached(text, { language, isCodeResult });
-
+  setCached(text, { language, isCodeResult: isCodeInternal(text) });
   return language;
 }
 
-/**
- * Checks if text appears to be code (any programming language)
- * @param text The text to analyze
- * @returns true if the text appears to be code
- */
 export function isCode(text: string): boolean {
-  if (!text || text.trim().length < 3) {
-    return false;
-  }
-
-  if (text.length > MAX_TEXT_LENGTH) {
-    return false; // Too long — skip detection for performance
-  }
-
+  if (!text || text.trim().length < 3 || text.length > MAX_TEXT_LENGTH) return false;
   const cached = getCached(text);
-  if (cached !== undefined) {
-    return cached.isCodeResult;
-  }
-
-  const result = isCodeInternal(text);
-  // Also run detectLanguage to populate a full cache entry
-  const language = detectLanguageInternal(text);
-  setCached(text, { language, isCodeResult: result });
-  return result;
+  if (cached !== undefined) return cached.isCodeResult;
+  const isCodeResult = isCodeInternal(text);
+  setCached(text, { language: detectLanguageInternal(text), isCodeResult });
+  return isCodeResult;
 }
+
+const CODE_INDICATORS = [
+  /[{}();]/g,
+  /\w+\s*=\s*\w+/g,
+  /\w+\s*:\s*\w+/g,
+  /=>\s*[{(]/g,
+  /function\s*\(/g,
+  /if\s*\(/g,
+  /for\s*\(/g,
+  /while\s*\(/g,
+  /class\s+\w+/g,
+  /interface\s+\w+/g,
+  /type\s+\w+\s*=/g,
+  /import\s+/g,
+  /export\s+/g,
+  /include\s*</g,
+  /console\./g,
+  /\$\w+/g,
+  /<\/?\w+.*>/g,
+  /\w+\s*:\s*[^;]+;/g,
+  /SELECT\s+.*\s+FROM/gi,
+  /const\s+\w+/g,
+  /let\s+\w+/g,
+  /var\s+\w+/g,
+  /\.\w+\(/g,
+  /new\s+\w+/g,
+  /\w+\[\w*\]/g,
+];
+
+const STRONG_CODE_INDICATORS = [
+  /const\s+\w+\s*=\s*\(/,
+  /\w+\s*:\s*\w+\s*\)\s*=>/,
+  /if\s*\(\s*\w+\.\w+/,
+  /\w+\.\w+\(/,
+  /setThemeState|updateEffectiveTheme/,
+  /updatedSettings\.\w+/,
+  /\}\s*;?\s*$/,
+  /\w+Settings\s*:\s*\w+/,
+  /=>\s*\{/,
+  /\w+\s*:\s*\w+\s*\)\s*=>/,
+];
 
 function isCodeInternal(text: string): boolean {
-  // Check for strong code indicators first
-  if (hasStrongCodeIndicators(text)) {
-    return true;
-  }
-
-  // Enhanced code indicators with more patterns
-  const codeIndicators = [
-    /[{}();]/g, // Brackets, parentheses, semicolons
-    /\w+\s*=\s*\w+/g, // Assignments
-    /\w+\s*:\s*\w+/g, // Type annotations, object properties
-    /=>\s*[{(]/g, // Arrow functions
-    /function\s*\(/g, // Function declarations
-    /if\s*\(/g, // Conditional statements
-    /for\s*\(/g, // Loops
-    /while\s*\(/g, // While loops
-    /class\s+\w+/g, // Class declarations
-    /interface\s+\w+/g, // Interface declarations
-    /type\s+\w+\s*=/g, // Type definitions
-    /import\s+/g, // Import statements
-    /export\s+/g, // Export statements
-    /include\s*</g, // Include statements
-    /console\./g, // Console methods
-    /\$\w+/g, // Variables (shell, PHP, etc.)
-    /<\/?\w+.*>/g, // HTML/XML tags
-    /\w+\s*:\s*[^;]+;/g, // CSS properties
-    /SELECT\s+.*\s+FROM/gi, // SQL queries
-    /const\s+\w+/g, // const declarations
-    /let\s+\w+/g, // let declarations
-    /var\s+\w+/g, // var declarations
-    /\.\w+\(/g, // Method calls
-    /new\s+\w+/g, // Object instantiation
-    /\w+\[\w*\]/g, // Array/object access
-  ];
-
+  if (STRONG_CODE_INDICATORS.some((pattern) => pattern.test(text))) return true;
   let indicatorCount = 0;
   let totalMatches = 0;
-
-  codeIndicators.forEach((pattern) => {
+  for (const pattern of CODE_INDICATORS) {
     const matches = text.match(pattern);
     if (matches) {
-      indicatorCount += 1;
+      indicatorCount++;
       totalMatches += matches.length;
     }
-  });
-
-  // More lenient detection for small snippets
-  const textLength = text.trim().length;
-
-  if (textLength < 20) {
-    // Very small snippets: need at least 1 strong indicator
-    return indicatorCount >= 1 && totalMatches >= 1;
-  } else if (textLength < 50) {
-    // Small snippets: need at least 2 indicators
-    return indicatorCount >= 2 || totalMatches >= 3;
-  } else {
-    // Larger snippets: use original threshold
-    return indicatorCount >= 3 || totalMatches >= 4;
   }
+  const textLength = text.trim().length;
+  if (textLength < 20) return indicatorCount >= 1 && totalMatches >= 1;
+  if (textLength < 50) return indicatorCount >= 2 || totalMatches >= 3;
+  return indicatorCount >= 3 || totalMatches >= 4;
 }
 
-/**
- * Enhanced code detection that specifically looks for common code patterns
- * This supplements the main isCode function for better small snippet detection
- */
-function hasStrongCodeIndicators(text: string): boolean {
-  const strongIndicators = [
-    /const\s+\w+\s*=\s*\(/, // const handleX = (
-    /\w+\s*:\s*\w+\s*\)\s*=>/, // parameter: Type) =>
-    /if\s*\(\s*\w+\.\w+/, // if (object.property
-    /\w+\.\w+\(/, // method calls
-    /setThemeState|updateEffectiveTheme/, // Specific React/state patterns
-    /updatedSettings\.\w+/, // Object property access
-    /\}\s*;?\s*$/, // Code block ending
-    /\w+Settings\s*:\s*\w+/, // Settings type patterns
-    /=>\s*\{/, // Arrow function with block
-    /\w+\s*:\s*\w+\s*\)\s*=>/, // Typed parameters in arrow functions
-  ];
+const HIGHLIGHTER_LANGUAGES: Record<string, string> = {
+  javascript: 'javascript',
+  typescript: 'typescript',
+  python: 'python',
+  java: 'java',
+  csharp: 'csharp',
+  cpp: 'cpp',
+  c: 'c',
+  html: 'markup',
+  css: 'css',
+  json: 'json',
+  xml: 'xml',
+  sql: 'sql',
+  bash: 'bash',
+  powershell: 'powershell',
+};
 
-  return strongIndicators.some((pattern) => pattern.test(text));
-}
-
-/**
- * Maps detected language names to react-syntax-highlighter language identifiers
- */
 export function mapToSyntaxHighlighterLanguage(detectedLanguage: string): string {
-  const languageMap: Record<string, string> = {
-    javascript: 'javascript',
-    typescript: 'typescript',
-    python: 'python',
-    java: 'java',
-    csharp: 'csharp',
-    cpp: 'cpp',
-    c: 'c',
-    html: 'markup',
-    css: 'css',
-    json: 'json',
-    xml: 'xml',
-    sql: 'sql',
-    bash: 'bash',
-    powershell: 'powershell',
-  };
-
-  return languageMap[detectedLanguage] || 'text';
+  return HIGHLIGHTER_LANGUAGES[detectedLanguage] || 'text';
 }

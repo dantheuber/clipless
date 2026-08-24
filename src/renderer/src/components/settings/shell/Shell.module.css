@@ -1,9 +1,3 @@
-/*
- * The settings window shell (spec 15.2): a left rail with the three tabs and the version at
- * its foot, and a pane with a title bar, the tab's content and a one-line footer. The rail,
- * title bar and footer never move; the content scrolls inside the pane.
- */
-
 :global(html),
 :global(body),
 :global(#root) {

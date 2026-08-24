@@ -1,0 +1,16 @@
+.tag {
+  font-family: var(--sans);
+  font-size: 10px;
+  color: var(--muted);
+  background: var(--lang-bg);
+  border: 1px solid var(--lang-bd);
+  border-radius: 3px;
+  padding: 0 5px;
+  line-height: 16px;
+  display: inline-block;
+}
+
+.row {
+  margin-right: 8px;
+  vertical-align: middle;
+}

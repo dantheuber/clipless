@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { QuickTool, SearchTerm, Template } from '../../../../../shared/types';
 import { GroupPill } from './GroupPill';
-import { Bucket } from './Bucket';
+import { ColourBucket, type ColourBucketTarget } from './ColourBucket';
 import { ValueChip } from './ValueChip';
 import { Readiness } from './Readiness';
 import { Consumers, ItemChip, Producers } from './UsesList';
@@ -30,27 +30,18 @@ interface UsesProps {
   onPickColour: (group: string, slot: number | null) => void;
 }
 
-/**
- * Uses (spec 14.3): for a search term, each group it produces with its sample values and
- * who uses it; for a tool or template, the readiness line, then each token it needs with
- * its producers and, when no enabled producer exists, the fix buttons.
- */
 export function Uses({ kind, item, onGo, fixes, onPickColour }: UsesProps) {
   const { config, values, scan, slotFor, groupColours } = useToolsData();
-  const [bucket, setBucket] = useState<{ group: string; anchor: HTMLElement } | null>(null);
+  const [bucket, setBucket] = useState<ColourBucketTarget | null>(null);
   const open = (group: string, anchor: HTMLElement) => setBucket({ group, anchor });
 
-  const bucketNode = bucket && (
-    <Bucket
-      group={bucket.group}
-      others={allGroups(config).filter((g) => g !== bucket.group)}
+  const bucketNode = (
+    <ColourBucket
+      target={bucket}
+      groups={allGroups(config)}
       slotFor={slotFor}
       groupColours={groupColours}
-      anchor={bucket.anchor}
-      onPick={(slot) => {
-        onPickColour(bucket.group, slot);
-        setBucket(null);
-      }}
+      onPickColour={onPickColour}
       onClose={() => setBucket(null)}
     />
   );

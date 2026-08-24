@@ -1,7 +1,6 @@
 import { storage } from '../storage';
 import type { Template } from '../../shared/types';
 
-// Template management functions
 export const getAllTemplates = async () => {
   try {
     return await storage.getTemplates();
@@ -43,19 +42,6 @@ export const reorderTemplates = async (templates: Template[]) => {
     await storage.reorderTemplates(templates);
   } catch (error) {
     console.error('Failed to reorder templates:', error);
-    throw error;
-  }
-};
-
-export const generateTextFromTemplate = async (
-  templateId: string,
-  clipContents: string[],
-  captures?: Record<string, string>
-) => {
-  try {
-    return await storage.generateTextFromTemplate(templateId, clipContents, captures);
-  } catch (error) {
-    console.error('Failed to generate text from template:', error);
     throw error;
   }
 };

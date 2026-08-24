@@ -4,11 +4,12 @@ import type { IconProp } from '@fortawesome/fontawesome-svg-core';
 import type { ClipType } from '../../../../shared/types';
 import type { QuickLookView } from '../../providers/clips/quickLook';
 import styles from './QuickLook.module.css';
+import { ClipTag } from '../clips/clip/ClipTag';
 
-export interface HeaderModel {
+interface HeaderModel {
   clipNumber: number;
-  tag: string | null; // language or type tag
-  meta: string; // "7 lines · 128 B"
+  tag: string | null;
+  meta: string;
   positionLabel: string;
   clipType: ClipType;
   view: QuickLookView;
@@ -59,11 +60,6 @@ function IconButton({ icon, title, on, disabled, label, onClick, testId }: Butto
   );
 }
 
-/**
- * The reader header (spec 5): previous and next, clip number, tag, line count and size,
- * position, the view switch for html and rtf, then pin all with its count, copy, edit,
- * wrap and close. Under 480px the size text drops (CSS) and every button stays.
- */
 export function Header({
   model,
   onWalk,
@@ -104,7 +100,7 @@ export function Header({
         Clip {model.clipNumber}
       </span>
       <span className={styles.meta}>
-        {model.tag && <span className={styles.lang}>{model.tag}</span>}
+        {model.tag && <ClipTag>{model.tag}</ClipTag>}
         <span className={styles.metaText}>{model.meta}</span>
       </span>
       <span className={styles.pos} data-testid="ql-position">

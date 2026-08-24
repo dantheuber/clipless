@@ -1,23 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('electron', () => ({
-  safeStorage: {
-    isEncryptionAvailable: vi.fn().mockReturnValue(true),
-    encryptString: vi.fn((str: string) => Buffer.from(str)),
-    decryptString: vi.fn((buf: Buffer) => buf.toString()),
-  },
-}));
-
-vi.mock('fs', () => ({
-  promises: {
-    writeFile: vi.fn().mockResolvedValue(undefined),
-    readFile: vi.fn(),
-    rename: vi.fn().mockResolvedValue(undefined),
-    unlink: vi.fn().mockResolvedValue(undefined),
-    access: vi.fn().mockResolvedValue(undefined),
-    mkdir: vi.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock('electron', () => import('../__mocks__/electron.js'));
+vi.mock('fs', () => import('./fs-test-mock.js'));
 
 import {
   saveEncryptedJson,
@@ -31,6 +15,11 @@ import {
 } from './file-operations';
 import { safeStorage } from 'electron';
 import { promises as fs } from 'fs';
+
+async function expectMissingFile(load: () => Promise<unknown>): Promise<void> {
+  vi.mocked(fs.access).mockRejectedValueOnce(Object.assign(new Error(), { code: 'ENOENT' }));
+  await expect(load()).rejects.toThrow('FILE_NOT_FOUND');
+}
 
 describe('saveEncryptedJson', () => {
   beforeEach(() => {
@@ -78,9 +67,7 @@ describe('loadEncryptedJson', () => {
   });
 
   it('throws FILE_NOT_FOUND for missing file', async () => {
-    vi.mocked(fs.access).mockRejectedValueOnce(Object.assign(new Error(), { code: 'ENOENT' }));
-
-    await expect(loadEncryptedJson('/path/data.enc')).rejects.toThrow('FILE_NOT_FOUND');
+    await expectMissingFile(() => loadEncryptedJson('/path/data.enc'));
   });
 
   it('throws original error for non-ENOENT errors', async () => {
@@ -171,8 +158,7 @@ describe('loadEncryptedBuffer', () => {
   });
 
   it('throws FILE_NOT_FOUND for missing file', async () => {
-    vi.mocked(fs.access).mockRejectedValueOnce(Object.assign(new Error(), { code: 'ENOENT' }));
-    await expect(loadEncryptedBuffer('/path/image.enc')).rejects.toThrow('FILE_NOT_FOUND');
+    await expectMissingFile(() => loadEncryptedBuffer('/path/image.enc'));
   });
 
   it('throws original error for non-ENOENT errors', async () => {

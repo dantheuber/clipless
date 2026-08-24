@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import type { ScanResult } from '../../../../../shared/types';
 import { TextClip } from './TextClip';
+import { clip, scanOf } from './clipTestFixtures';
+import { startEditing } from './textClipTestHarness';
 
 let mockIsCodeDetectionEnabled = false;
 let mockIsLanguageLabelEnabled = false;
@@ -13,42 +14,20 @@ vi.mock('../../../providers/languageDetection', () => ({
   }),
 }));
 
-const { pinsState } = vi.hoisted(() => ({
-  pinsState: { pinned: new Set<string>(), togglePins: vi.fn() },
-}));
+const togglePins = vi.hoisted(() => vi.fn());
 
-vi.mock('../../../providers/clips', () => ({
-  useClipsPins: () => ({
-    isPinned: (key: string) => pinsState.pinned.has(key),
-    togglePins: pinsState.togglePins,
-  }),
-}));
+vi.mock('../../../providers/clips', async () =>
+  (await import('./clipTestFixtures')).unpinnedClipHooks(togglePins)
+);
 
 vi.mock('../../../providers/scan', () => ({
   useScanIndex: () => ({ slotFor: () => 0 }),
 }));
 
-const clip = (content: string, extra = {}) => ({
-  id: 'c1',
-  type: 'text' as const,
-  content,
-  ...extra,
-});
-
-const scanOf = (text: string, group: string, value: string): ScanResult => {
-  const start = text.indexOf(value);
-  return {
-    matches: [{ group, value, start, end: start + value.length, termId: 't' }],
-    groups: [group],
-    errors: [],
-    large: false,
-  };
-};
-
 beforeEach(() => {
   mockIsCodeDetectionEnabled = false;
   mockIsLanguageLabelEnabled = false;
-  pinsState.togglePins.mockClear();
+  togglePins.mockClear();
 });
 
 afterEach(cleanup);
@@ -101,7 +80,7 @@ describe('TextClip display', () => {
     const text = 'host 10.0.0.1';
     render(<TextClip clip={clip(text)} scan={scanOf(text, 'ip', '10.0.0.1')} onUpdate={vi.fn()} />);
     fireEvent.click(screen.getByText('10.0.0.1'));
-    expect(pinsState.togglePins).toHaveBeenCalledWith(['ip|10.0.0.1']);
+    expect(togglePins).toHaveBeenCalledWith(['ip|10.0.0.1']);
     expect(screen.queryByRole('textbox')).toBeNull();
   });
 
@@ -135,10 +114,7 @@ describe('TextClip editing', () => {
   });
 
   it('does not save while typing; Enter commits the change', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-    const textarea = screen.getByRole('textbox');
+    const { onUpdate, textarea } = startEditing();
     fireEvent.change(textarea, { target: { value: 'Hello World' } });
     expect(onUpdate).not.toHaveBeenCalled();
     fireEvent.keyDown(textarea, { key: 'Enter' });
@@ -168,18 +144,13 @@ describe('TextClip editing', () => {
   });
 
   it('does not call onUpdate when the value is unchanged', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
+    const { onUpdate } = startEditing();
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' });
     expect(onUpdate).not.toHaveBeenCalled();
   });
 
   it('Esc restores the pre-edit content and saves nothing', () => {
-    const onUpdate = vi.fn();
-    render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);
-    fireEvent.click(screen.getByText('Hello'));
-    const textarea = screen.getByRole('textbox');
+    const { onUpdate, textarea } = startEditing();
     fireEvent.change(textarea, { target: { value: 'Changed' } });
     fireEvent.keyDown(textarea, { key: 'Escape' });
     expect(onUpdate).not.toHaveBeenCalled();
@@ -205,7 +176,6 @@ describe('TextClip editing', () => {
     expect(screen.queryByRole('textbox')).toBeNull();
     rerender(<TextClip clip={clip('Hello')} scan={null} onUpdate={vi.fn()} editSeq={1} />);
     expect(screen.getByRole('textbox')).toBeInTheDocument();
-    // a second bump while already editing changes nothing
     rerender(<TextClip clip={clip('Hello')} scan={null} onUpdate={vi.fn()} editSeq={2} />);
     expect(screen.getAllByRole('textbox')).toHaveLength(1);
   });

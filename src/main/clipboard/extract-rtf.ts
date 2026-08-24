@@ -1,61 +1,4 @@
-/**
- * Plain text of an RTF clip. A hand-written tokenizer rather than an npm RTF library (the
- * ones on npm are unmaintained stream parsers). It tracks group depth, skips destination
- * groups, maps \par and \line to newline and \tab to tab, decodes \'hh through the
- * document code page and \uN to a code point honouring \ucN skip counts, and drops every
- * other control word. Same call sites as htmlToText.
- */
-
-const SKIPPED_DESTINATIONS = new Set([
-  'fonttbl',
-  'colortbl',
-  'stylesheet',
-  'info',
-  'pict',
-  'header',
-  'footer',
-  'headerl',
-  'headerr',
-  'headerf',
-  'footerl',
-  'footerr',
-  'footerf',
-  'xmlnstbl',
-  'listtable',
-  'listoverridetable',
-  'rsidtbl',
-  'generator',
-  'themedata',
-  'colorschememapping',
-  'latentstyles',
-  'datastore',
-  'fldinst',
-  'object',
-  'filetbl',
-  'revtbl',
-]);
-
-const CODE_PAGE_LABELS: Record<number, string> = {
-  437: 'ibm437',
-  850: 'ibm850',
-  866: 'ibm866',
-  874: 'windows-874',
-  932: 'shift_jis',
-  936: 'gbk',
-  949: 'euc-kr',
-  950: 'big5',
-  1250: 'windows-1250',
-  1251: 'windows-1251',
-  1252: 'windows-1252',
-  1253: 'windows-1253',
-  1254: 'windows-1254',
-  1255: 'windows-1255',
-  1256: 'windows-1256',
-  1257: 'windows-1257',
-  1258: 'windows-1258',
-  10000: 'macintosh',
-  65001: 'utf-8',
-};
+import { CODE_PAGE_LABELS, SKIPPED_DESTINATIONS } from './rtf-constants';
 
 interface GroupState {
   skip: boolean;
@@ -72,7 +15,7 @@ function decoderFor(codePage: number): TextDecoder {
 }
 
 export function rtfToText(rtf: string): string {
-  const out: string[] = [];
+  const out: string[] = []; // a hand-written tokenizer: the RTF parsers on npm are unmaintained
   const stack: GroupState[] = [];
   let state: GroupState = { skip: false, uc: 1 };
   let decoder = decoderFor(1252);
@@ -101,9 +44,8 @@ export function rtfToText(rtf: string): string {
       stack.push(state);
       state = { ...state };
       i++;
-      // {\*\dest ...} is a destination a reader may ignore: skip the whole group
       if (rtf[i] === '\\' && rtf[i + 1] === '*') {
-        state.skip = true;
+        state.skip = true; // {\*\dest ...} is a destination a reader may ignore: skip the whole group
         i += 2;
       }
       continue;
@@ -124,9 +66,8 @@ export function rtfToText(rtf: string): string {
         continue;
       }
 
-      // \'hh: one byte in the document code page
       if (next === "'") {
-        const hex = rtf.slice(i + 2, i + 4);
+        const hex = rtf.slice(i + 2, i + 4); // \'hh: one byte in the document code page
         i += 4;
         if (skipChars > 0) {
           skipChars--;
@@ -136,7 +77,6 @@ export function rtfToText(rtf: string): string {
         continue;
       }
 
-      // Control symbols: escaped braces and backslash, non-breaking space and hyphen
       if (next === '{' || next === '}' || next === '\\') {
         emit(next);
         i += 2;
@@ -158,10 +98,8 @@ export function rtfToText(rtf: string): string {
         continue;
       }
 
-      // Control word: letters, optional signed number, optional one space delimiter
-      const match = /^\\([a-zA-Z]+)(-?\d+)? ?/.exec(rtf.slice(i, i + 40));
+      const match = /^\\([a-zA-Z]+)(-?\d+)? ?/.exec(rtf.slice(i, i + 40)); // control word: letters, optional signed number, optional one space delimiter
       if (!match) {
-        // Any other control symbol: drop it
         i += 2;
         continue;
       }
@@ -226,17 +164,14 @@ export function rtfToText(rtf: string): string {
           }
           break;
         case 'bin':
-          // Binary data follows; skip it byte for byte
-          if (param !== undefined && param > 0) i += param;
+          if (param !== undefined && param > 0) i += param; // binary data follows; skip it byte for byte
           break;
         default:
-          // Formatting and every other control word carry no text
-          break;
+          break; // formatting and every other control word carry no text
       }
       continue;
     }
 
-    // Plain character
     if (ch === '\r' || ch === '\n') {
       i++;
       continue;

@@ -1,22 +1,16 @@
 import { clipboard, nativeImage } from 'electron';
 
-// Cached image fingerprint to avoid expensive toDataURL on every poll
-let lastImageFingerprint = '';
+let lastImageFingerprint = ''; // toDataURL is expensive; cache its result keyed by a cheap fingerprint
 let lastImageDataUrl = '';
 
 function getImageFingerprint(image: Electron.NativeImage): string {
   const size = image.getSize();
   const bitmap = image.toBitmap();
-  // Use dimensions + bitmap byte length + first 64 bytes as a fast fingerprint
   const sample = bitmap.subarray(0, 64).toString('base64');
   return `${size.width}x${size.height}:${bitmap.length}:${sample}`;
 }
 
-// Helper function to determine the current clipboard type and content
 export const getCurrentClipboardData = (): { type: string; content: string } | null => {
-  // Priority: text > rtf > image > html > bookmark
-  // Image is checked before HTML because some apps (e.g. Discord) put both
-  // an <img> HTML tag and the actual image binary on the clipboard.
   const text = clipboard.readText();
   if (text?.trim()) {
     return { type: 'text', content: text };
@@ -27,11 +21,10 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
     return { type: 'rtf', content: rtf };
   }
 
-  const image = clipboard.readImage();
+  const image = clipboard.readImage(); // checked before HTML: some apps (e.g. Discord) put both an <img> tag and the image binary on the clipboard
   if (!image.isEmpty()) {
     const fingerprint = getImageFingerprint(image);
     if (fingerprint !== lastImageFingerprint) {
-      // Image changed — do the expensive toDataURL conversion
       lastImageFingerprint = fingerprint;
       lastImageDataUrl = image.toDataURL();
     }
@@ -49,7 +42,7 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
       return { type: 'bookmark', content: JSON.stringify(bookmark) };
     }
   } catch {
-    // Bookmark not available on all platforms
+    // ignore
   }
 
   return null;
@@ -60,7 +53,6 @@ export function clearImageCache(): void {
   lastImageDataUrl = '';
 }
 
-// Clipboard read operations
 export const getClipboardText = (): string => clipboard.readText();
 export const getClipboardHTML = (): string => clipboard.readHTML();
 export const getClipboardRTF = (): string => clipboard.readRTF();
@@ -81,7 +73,6 @@ export const getClipboardBookmark = (): { title: string; url: string } | null =>
   }
 };
 
-// Clipboard write operations
 export const setClipboardText = (text: string): void => {
   clipboard.writeText(text);
 };
@@ -96,7 +87,6 @@ export const setClipboardRTF = (rtf: string): void => {
 
 export const setClipboardImage = (imageData: string): void => {
   try {
-    // Convert base64 data URL to NativeImage
     const image = nativeImage.createFromDataURL(imageData);
     clipboard.writeImage(image);
   } catch (error) {
@@ -112,7 +102,6 @@ export const setClipboardBookmark = (bookmarkData: {
   url?: string;
 }): void => {
   try {
-    // Write both text and HTML formats for maximum compatibility
     clipboard.write({
       text: bookmarkData.text,
       html: bookmarkData.html,

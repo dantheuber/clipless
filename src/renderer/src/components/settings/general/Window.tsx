@@ -3,11 +3,6 @@ import { Panel, Row, ToggleRow } from './Row';
 import { useSetting } from './useSetting';
 import w from '../shell/widgets.module.css';
 
-/**
- * Window (spec 15.4): Always on top, Remember position, Transparency, Transparency level
- * (writes on release, the percent follows the slider live), Opaque when focused. The last
- * two are dimmed, not hidden, while Transparency is off.
- */
 export function Window() {
   const transparency = useSetting('transparencyEnabled');
   const level = useSetting('windowTransparency');

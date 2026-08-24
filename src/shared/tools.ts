@@ -1,25 +1,12 @@
-/**
- * Tool URL tokens and fan-out. The tray, the reader's Launch button and the settings
- * "Would open N tabs" preview all call buildToolUrls, so they cannot disagree on the count.
- */
-
 export interface ToolToken {
   token: string; // the literal token as it appears in the URL, e.g. "{email|domain}"
   groups: string[]; // its alternatives, e.g. ["email", "domain"]
 }
 
-/**
- * Pinned values per group, in pin order. The tray passes the pins; a pattern match passes
- * its captures.
- */
 export type PinsByGroup = Record<string, readonly string[]>;
 
 const TOKEN_REGEX = /\{([^}]+)\}/g;
 
-/**
- * Every distinct token in a tool URL, in order of first appearance. The pipe form
- * {a|b} is parsed for compatibility with existing configs (spec 14.8).
- */
 export function toolTokens(url: string): ToolToken[] {
   const tokens: ToolToken[] = [];
   for (const match of url.matchAll(TOKEN_REGEX)) {
@@ -38,10 +25,6 @@ interface TokenValue {
   group: string;
 }
 
-/**
- * The values a token can take: every pinned value across its alternatives, in alternative
- * order then pin order, each value once.
- */
 function tokenValues(token: ToolToken, pins: PinsByGroup): TokenValue[] {
   const values: TokenValue[] = [];
   for (const group of token.groups) {
@@ -52,20 +35,10 @@ function tokenValues(token: ToolToken, pins: PinsByGroup): TokenValue[] {
   return values;
 }
 
-/**
- * A tool is offered only when every token has a value (spec 8). A pipe token is ready when
- * any one alternative has a value (spec 14.8).
- */
 export function toolReady(tool: { url: string }, pins: PinsByGroup): boolean {
   return toolTokens(tool.url).every((token) => tokenValues(token, pins).length > 0);
 }
 
-/**
- * Every URL the tool would open: the Cartesian product of the token values, each value
- * encoded with encodeURIComponent except values from the url group, which are substituted
- * as they are. De-duplicated, in product order. A URL with no tokens opens once; a tool that
- * is not ready opens nothing.
- */
 export function buildToolUrls(tool: { url: string }, pins: PinsByGroup): string[] {
   const tokens = toolTokens(tool.url);
   if (tokens.length === 0) return [tool.url];

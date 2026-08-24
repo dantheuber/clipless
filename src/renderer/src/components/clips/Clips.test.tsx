@@ -2,11 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
 import { Clips } from './Clips';
 
-/**
- * A stand-in for the virtualiser: it renders a window of ten rows starting at the index
- * scrollToIndex was last called with, which is what a real virtualised list does to a
- * row far from the viewport.
- */
 const { virtual, state } = vi.hoisted(() => ({
   virtual: { start: 0, scrollToIndex: vi.fn() },
   state: {
@@ -32,7 +27,6 @@ vi.mock('@tanstack/react-virtual', async () => {
       const { count } = opts;
       opts.getScrollElement();
       opts.estimateSize(0);
-      // A scroll re-renders the list, as the real virtualiser does through its scroll listener
       const [start, setStart] = React.useState(virtual.start);
       return {
         getTotalSize: () => count * 40,
@@ -74,8 +68,6 @@ vi.mock('./clip', () => ({
     </div>
   ),
 }));
-
-vi.mock('../SearchBar', () => ({ SEARCH_INPUT_ID: 'clip-search-input' }));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -163,7 +155,6 @@ describe('Clips keyboard', () => {
     fireEvent.keyDown(screen.getByTestId('row-2'), { key: 'ArrowDown' });
     expect(input).toHaveFocus();
     input.remove();
-    // the bar is open but its input is not in the document: nothing to focus
     fireEvent.keyDown(screen.getByTestId('row-2'), { key: 'ArrowDown' });
     cleanup();
     state.isSearchVisible = false;

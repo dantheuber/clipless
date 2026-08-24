@@ -4,7 +4,7 @@ import type { ScanResult } from '../../../../../shared/types';
 import { ScanIndexContext, type ScanIndex } from '../../../providers/scan';
 import { ChipsPreview } from './ValueChip';
 import { TokenText } from './TokenText';
-import { insertAtCaret } from './TokenPicker';
+import { insertAtCaret } from './caret';
 import { trapTab } from './editorHost';
 import { tokenise } from './resolve';
 

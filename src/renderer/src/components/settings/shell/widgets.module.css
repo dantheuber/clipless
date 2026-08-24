@@ -1,19 +1,8 @@
-/*
- * The shared widgets of the settings window (spec 15.2): buttons, links, inputs, toggles,
- * keycaps, dots and section headings, drawn from the one variable set in theme.css.
- */
-
 .btn {
+  composes: base from '../../CompactPrimaryButton.module.css';
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 3px 10px;
-  border-radius: 5px;
-  border: 1px solid var(--btn-bd);
-  background: var(--btn-bg);
-  color: var(--text);
-  font: inherit;
-  font-size: 12px;
   line-height: 18px;
   cursor: pointer;
   user-select: none;

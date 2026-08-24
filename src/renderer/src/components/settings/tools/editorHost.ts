@@ -1,9 +1,5 @@
 import { createContext, useContext } from 'react';
 
-/**
- * What an open editor tells the Tools root: whether it is dirty (so leaving asks once) and
- * how to save (so Ctrl+S works from anywhere in the tab).
- */
 export interface EditorHost {
   setDirty: (dirty: boolean) => void;
   setSaver: (save: (() => void) | null) => void;
@@ -18,9 +14,6 @@ export function useEditorHost(): EditorHost {
   return useContext(EditorHostContext);
 }
 
-/**
- * Keep Tab inside the editor (spec 14.5): cycle its focusable controls.
- */
 export function trapTab(event: React.KeyboardEvent<HTMLElement>): void {
   if (event.key !== 'Tab') return;
   const root = event.currentTarget;

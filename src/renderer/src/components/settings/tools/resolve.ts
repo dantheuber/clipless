@@ -1,13 +1,5 @@
 import { toolTokens } from '../../../../../shared/tools';
 
-/**
- * Previews with values coloured by group (spec 14.3): every URL a tool would open from the
- * sample, and the text a template would generate. The fan-out here mirrors buildToolUrls
- * step for step (token order, alternative order, value order, de-duplicated) so the list
- * and the tab count from buildToolUrls agree; resolve.test.ts checks them against each
- * other.
- */
-
 export type Segment =
   | { kind: 'text'; text: string }
   | { kind: 'value'; group: string; value: string }
@@ -16,10 +8,6 @@ export type Segment =
 const TOKEN = /\{([^}]+)\}/g;
 const POSITIONAL = /^c\d+$/;
 
-/**
- * Split a URL or template into literal text and tokens. Template tokens never carry
- * alternatives but the pipe form is parsed anyway so a stray one still shows as a token.
- */
 export function tokenise(text: string): Segment[] {
   const segments: Segment[] = [];
   let cursor = 0;
@@ -42,7 +30,7 @@ export function tokenise(text: string): Segment[] {
   return segments;
 }
 
-export interface Pick {
+interface Pick {
   group: string;
   value: string;
 }
@@ -66,10 +54,6 @@ function substitute(url: string, picks: ReadonlyMap<string, Pick>): string {
   return out;
 }
 
-/**
- * Every resolved URL as segments, in the order buildToolUrls opens them. Empty when a
- * token has no value in the sample; one entry when the URL has no tokens.
- */
 export function resolveToolUrls(
   url: string,
   values: Record<string, readonly string[]>
@@ -113,10 +97,6 @@ export function resolveToolUrls(
   return result;
 }
 
-/**
- * A template with the first sample value per named token filled in. Positional tokens and
- * tokens without a value stay tokens.
- */
 export function resolveTemplate(
   content: string,
   values: Record<string, readonly string[]>

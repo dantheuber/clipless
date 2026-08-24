@@ -1,16 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { ClipItem, ClipboardState } from './types';
-import {
-  createTextClip,
-  createHtmlClip,
-  createImageClip,
-  createRtfClip,
-  createBookmarkClip,
-} from './utils';
-
-/**
- * Hook for managing clipboard operations and monitoring
- */
+import * as clipboardClip from './clipboardClip';
 export const useClipboardOperations = (
   isCodeDetectionEnabled: boolean,
   isDuplicateOfMostRecent: (newClip: ClipItem) => boolean,
@@ -23,63 +13,11 @@ export const useClipboardOperations = (
   isHotkeyOperationRef: React.MutableRefObject<boolean>,
   lastCopiedContentRef: React.MutableRefObject<ClipboardState | null>
 ) => {
-  /**
-   * Create a text clip with language detection based on current settings
-   */
-  const createTextClipWithDetection = useCallback(
-    (content: string): ClipItem => {
-      return createTextClip(content, isCodeDetectionEnabled);
-    },
-    [isCodeDetectionEnabled]
-  );
-
-  /**
-   * Manually read the current clipboard content and add it to clips
-   */
   const readCurrentClipboard = useCallback(async (): Promise<void> => {
     if (!window.api) return;
 
     try {
-      // Use the new prioritized clipboard data getter
-      const clipData = await window.api.getCurrentClipboardData();
-
-      if (!clipData) {
-        console.log('No clipboard content available');
-        return;
-      }
-
-      let newClip: ClipItem | null = null;
-
-      // Convert clipboard data to ClipItem based on type
-      switch (clipData.type) {
-        case 'text':
-          newClip = createTextClipWithDetection(clipData.content);
-          break;
-        case 'rtf':
-          newClip = createRtfClip(clipData.content, (clipData as ClipItem).text);
-          break;
-        case 'html':
-          newClip = createHtmlClip(clipData.content, (clipData as ClipItem).text);
-          break;
-        case 'image':
-          newClip = createImageClip(
-            clipData.content,
-            (clipData as ClipItem).imageId,
-            (clipData as ClipItem).thumbnailDataUrl
-          );
-          break;
-        case 'bookmark':
-          try {
-            const bookmarkData = JSON.parse(clipData.content);
-            newClip = createBookmarkClip(bookmarkData.title || 'Bookmark', bookmarkData.url);
-          } catch (error) {
-            console.error('Failed to parse bookmark data:', error);
-            newClip = createTextClipWithDetection(clipData.content);
-          }
-          break;
-        default:
-          newClip = createTextClipWithDetection(clipData.content);
-      }
+      const newClip = await clipboardClip.readCurrentClipboardClip(isCodeDetectionEnabled);
 
       if (newClip && !isDuplicateOfMostRecent(newClip)) {
         clipboardUpdated(newClip);
@@ -89,18 +27,12 @@ export const useClipboardOperations = (
     } catch (error) {
       console.error('Failed to read clipboard:', error);
     }
-  }, [clipboardUpdated, isDuplicateOfMostRecent, createTextClipWithDetection]);
+  }, [clipboardUpdated, isCodeDetectionEnabled, isDuplicateOfMostRecent]);
 
-  /**
-   * Copy a clip's content to the system clipboard. Returns true when something was written,
-   * so the caller can toast; the OS notification is for hotkey copies only (spec 17.7).
-   * @param index the index of the clip to copy
-   */
   const copyClipToClipboard = useCallback(
     async (index: number): Promise<boolean> => {
       if (!window.api) return false;
 
-      // Set flag to prevent clipboard monitoring from adding this as a new clip
       setIsHotkeyOperation(true);
 
       const clip = getClip(index);
@@ -111,7 +43,6 @@ export const useClipboardOperations = (
         return false;
       }
 
-      // Store the content that we're about to copy to prevent re-adding it
       setLastCopiedContent({
         content: clip.content,
         type: clip.type,
@@ -122,62 +53,12 @@ export const useClipboardOperations = (
       );
 
       try {
-        // Copy the clip content with the appropriate format based on its type
-        switch (clip.type) {
-          case 'text':
-            await window.api.setClipboardText(clip.content);
-            console.log('Copied text to clipboard');
-            break;
+        await clipboardClip.writeClipToSystemClipboard(clip);
 
-          case 'html':
-            await window.api.setClipboardHTML(clip.content);
-            console.log('Copied HTML to clipboard');
-            break;
-
-          case 'rtf':
-            await window.api.setClipboardRTF(clip.content);
-            console.log('Copied RTF to clipboard');
-            break;
-
-          case 'image': {
-            // For image clips with imageId, load full image from storage first
-            let imageData = clip.content;
-            if (clip.imageId && window.api.getFullImage) {
-              const fullImage = await window.api.getFullImage(clip.imageId);
-              if (fullImage) {
-                imageData = fullImage;
-              }
-            }
-            await window.api.setClipboardImage(imageData);
-            console.log('Copied image to clipboard');
-            break;
-          }
-
-          case 'bookmark': {
-            // For bookmarks, we'll write both text (URL) and HTML (formatted link)
-            const bookmarkData = {
-              text: clip.url || clip.content,
-              html: `<a href="${clip.url || clip.content}">${clip.title || clip.url || clip.content}</a>`,
-              title: clip.title,
-              url: clip.url || clip.content,
-            };
-            await window.api.setClipboardBookmark(bookmarkData);
-            console.log('Copied bookmark to clipboard:', clip.title, clip.url);
-            break;
-          }
-
-          default:
-            // Fallback to text for unknown types
-            await window.api.setClipboardText(clip.content);
-            console.log('Copied unknown type as text to clipboard');
-        }
-
-        // Clear the flag after a short delay
         setTimeout(() => {
           setIsHotkeyOperation(false);
         }, 1000);
 
-        // Clear lastCopiedContent after 3 seconds to avoid blocking future legitimate clips
         setTimeout(() => {
           setLastCopiedContent(null);
           console.log('Cleared lastCopiedContent after timeout (manual copy)');
@@ -187,7 +68,6 @@ export const useClipboardOperations = (
         console.error('Failed to copy clip to clipboard:', error);
         setIsHotkeyOperation(false);
 
-        // Fallback: try to copy as plain text if the specific format failed
         try {
           await window.api.setClipboardText(clip.content);
           console.log('Fallback: copied as text to clipboard');
@@ -201,20 +81,16 @@ export const useClipboardOperations = (
     [getClip, setClipCopyId, setLastCopiedContent, setIsHotkeyOperation]
   );
 
-  // Guard to ensure readCurrentClipboard only runs on initial mount
   const hasReadInitialClipboard = useRef(false);
 
-  // Start clipboard monitoring when component mounts
   useEffect(() => {
     const unsubscribers: (() => void)[] = [];
     const startMonitoring = async () => {
       if (window.api) {
         try {
-          // Set up hotkey clip copied listener - this needs to happen before clipboard monitoring
           const offHotkey = window.api.onHotkeyClipCopied((clipIndex: number) => {
             console.log('🔥 Hotkey copied clip at index:', clipIndex);
 
-            // The hotkey path sends an index; the marker follows the clip by id from here
             const currentClips = clipsRef.current;
             setClipCopyId(currentClips[clipIndex]?.id ?? null);
             if (currentClips[clipIndex]) {
@@ -227,7 +103,6 @@ export const useClipboardOperations = (
                 currentClips[clipIndex].content.substring(0, 50)
               );
 
-              // Clear lastCopiedContent after 3 seconds to avoid blocking future legitimate clips
               setTimeout(() => {
                 setLastCopiedContent(null);
                 console.log('Cleared lastCopiedContent after timeout');
@@ -236,24 +111,20 @@ export const useClipboardOperations = (
               console.warn('No clip found at index', clipIndex, 'in current clips array');
             }
 
-            // Set flag to ignore clipboard changes briefly (backup mechanism)
             setIsHotkeyOperation(true);
             setTimeout(() => {
               setIsHotkeyOperation(false);
-            }, 1000); // Ignore clipboard changes for 1 second after hotkey operation
+            }, 1000);
           });
           unsubscribers.push(offHotkey);
 
-          // Read current clipboard content only on initial mount (not on effect re-runs)
           if (!hasReadInitialClipboard.current) {
             hasReadInitialClipboard.current = true;
             await readCurrentClipboard();
           }
 
-          // Then start monitoring for changes
           await window.api.startClipboardMonitoring();
 
-          // Set up clipboard change listener
           const offClipboard = window.api.onClipboardChanged((clipData) => {
             const currentIsHotkeyOperation = isHotkeyOperationRef.current;
             const currentLastCopiedContent = lastCopiedContentRef.current;
@@ -267,60 +138,26 @@ export const useClipboardOperations = (
             console.log('📋 Current isHotkeyOperation:', currentIsHotkeyOperation);
             console.log('📋 Current lastCopiedContent:', currentLastCopiedContent);
 
-            // Enhanced duplicate detection for hotkey operations using lastCopiedContent
-            if (
-              currentLastCopiedContent &&
-              currentLastCopiedContent.content === clipData.content &&
-              currentLastCopiedContent.type === clipData.type
-            ) {
+            if (clipboardClip.matchesClipboardState(clipData, currentLastCopiedContent)) {
               console.log(
                 '❌ Clipboard update matches last copied content, not adding:',
                 clipData.content.substring(0, 50)
               );
-              // Clear the lastCopiedContent after matching to avoid blocking future legitimate clips
               setLastCopiedContent(null);
-              return; // Skip adding if it's the same as the last copied content
+              return;
             }
 
-            // Skip processing if this is likely from a hotkey operation
             if (currentIsHotkeyOperation) {
               console.log('⏭️ Skipping clipboard change during hotkey operation');
               return;
             }
 
-            let newClip: ClipItem;
             console.log('Clipboard change detected:', clipData);
-            switch (clipData.type) {
-              case 'text':
-                newClip = createTextClipWithDetection(clipData.content);
-                break;
-              case 'rtf':
-                newClip = createRtfClip(clipData.content, (clipData as ClipItem).text);
-                break;
-              case 'html':
-                newClip = createHtmlClip(clipData.content, (clipData as ClipItem).text);
-                break;
-              case 'image':
-                newClip = createImageClip(
-                  clipData.content,
-                  (clipData as ClipItem).imageId,
-                  (clipData as ClipItem).thumbnailDataUrl
-                );
-                break;
-              case 'bookmark':
-                try {
-                  const bookmarkData = JSON.parse(clipData.content);
-                  newClip = createBookmarkClip(bookmarkData.title || 'Bookmark', bookmarkData.url);
-                } catch (error) {
-                  console.error('Failed to parse bookmark data:', error);
-                  newClip = createTextClipWithDetection(clipData.content);
-                }
-                break;
-              default:
-                newClip = createTextClipWithDetection(clipData.content);
-            }
+            const newClip = clipboardClip.createClipFromClipboardData(
+              clipData,
+              isCodeDetectionEnabled
+            );
 
-            // Only trigger clipboard updated if it's not a duplicate
             if (!isDuplicateOfMostRecent(newClip)) {
               clipboardUpdated(newClip);
             } else {
@@ -336,7 +173,6 @@ export const useClipboardOperations = (
 
     startMonitoring();
 
-    // Cleanup function to stop monitoring when component unmounts
     return () => {
       if (window.api) {
         window.api.stopClipboardMonitoring();
@@ -347,7 +183,7 @@ export const useClipboardOperations = (
     clipboardUpdated,
     readCurrentClipboard,
     isDuplicateOfMostRecent,
-    createTextClipWithDetection,
+    isCodeDetectionEnabled,
     setClipCopyId,
     setLastCopiedContent,
     setIsHotkeyOperation,

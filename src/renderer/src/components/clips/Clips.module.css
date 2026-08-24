@@ -4,7 +4,7 @@
   min-width: 0;
   overflow-y: auto;
   background: var(--app-bg);
-  /* Hide scrollbar but keep scroll functionality */
+
   -ms-overflow-style: none;
   scrollbar-width: none;
 }

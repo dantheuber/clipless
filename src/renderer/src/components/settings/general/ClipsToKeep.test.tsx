@@ -1,8 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { ClipsToKeep, clipsToKeepLoss, parseClipsToKeep } from './ClipsToKeep';
+import { ClipsToKeep } from './ClipsToKeep';
+import { clipsToKeepLoss, parseClipsToKeep } from './clipsToKeep';
 import { SettingsProvider } from './SettingsProvider';
-import { StatsProvider } from './stats';
+import { StatsProvider } from './StatsProvider';
 
 const api = () => window.api as unknown as Record<string, ReturnType<typeof vi.fn>>;
 const flush = () => act(async () => {});

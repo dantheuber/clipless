@@ -4,37 +4,10 @@ import { ConfirmDialog } from '../../ConfirmDialog';
 import { useStats } from './stats';
 import { useSetting } from './useSetting';
 import { Row } from './Row';
+import { CLIPS_MAX, CLIPS_MIN, clipsToKeepLoss, parseClipsToKeep } from './clipsToKeep';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
-export const CLIPS_MIN = 15;
-export const CLIPS_MAX = 100;
-
-/** The number, or null when the text is not a whole number in range. */
-export function parseClipsToKeep(text: string): number | null {
-  if (!/^\d+$/.test(text.trim())) return null;
-  const value = Number(text);
-  return value >= CLIPS_MIN && value <= CLIPS_MAX ? value : null;
-}
-
-/**
- * What a lower limit deletes (spec 15.5): the oldest unlocked clips first; locked clips
- * stay unless they alone exceed the new limit.
- */
-export function clipsToKeepLoss(
-  count: number,
-  locked: number,
-  limit: number
-): { unlocked: number; locked: number } {
-  const excess = Math.max(0, count - limit);
-  const unlocked = Math.min(excess, Math.max(0, count - locked));
-  return { unlocked, locked: excess - unlocked };
-}
-
-/**
- * Clips to keep (15 to 100). Commits on Enter or blur, never on a timer; out of range shows
- * "15 to 100" and does not apply; below the current count it asks once with the numbers.
- */
 export function ClipsToKeep() {
   const { value, set, status } = useSetting('maxClips');
   const { stats } = useStats();

@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { IconProp } from '@fortawesome/fontawesome-svg-core';
 import classNames from 'classnames';
 import { clipText, useClipsActions, useClipsData, useQuickLook } from '../../../providers/clips';
 import { hasContent } from '../../../providers/clips/quickLook';
 import { useScanIndex } from '../../../providers/scan';
-import { useToast } from '../../Toast';
+import { useToast } from '../../useToast';
 import { extractTemplateTokens, generateTextFromTemplate } from '../../../../../shared/templates';
+import { ROW_ONE_REASON, templatePreview } from './menuText';
+import { ContextMenuItem } from './ContextMenuItem';
 import styles from './ClipContextMenu.module.css';
 
 interface ClipContextMenuProps {
@@ -17,45 +18,6 @@ interface ClipContextMenuProps {
   onClose: () => void;
 }
 
-export const ROW_ONE_REASON = 'row 1 is the live clipboard';
-export const PREVIEW_LENGTH = 46;
-
-/** A positional template's preview, filled from rows 1, 2, 3 (spec 16 rule 10) */
-export function templatePreview(text: string): string {
-  const oneLine = text.replace(/\s+/g, ' ').trim();
-  return oneLine.length > PREVIEW_LENGTH ? `${oneLine.slice(0, PREVIEW_LENGTH)}…` : oneLine;
-}
-
-interface ItemProps {
-  icon: IconProp;
-  label: string;
-  disabled?: boolean;
-  reason?: string;
-  className?: string;
-  onClick: () => void;
-}
-
-function Item({ icon, label, disabled, reason, className, onClick }: ItemProps) {
-  return (
-    <div
-      role="menuitem"
-      aria-disabled={disabled ? 'true' : undefined}
-      className={classNames(styles.menuItem, className, { [styles.disabled]: disabled })}
-      onClick={disabled ? undefined : onClick}
-      data-testid={`menu-${label.toLowerCase().replace(/\s+/g, '-')}`}
-    >
-      <FontAwesomeIcon icon={icon} className={styles.menuIcon} />
-      <span>{label}</span>
-      {disabled && reason && <span className={styles.reason}>{reason}</span>}
-    </div>
-  );
-}
-
-/**
- * Right-click on a row (spec 4, 16 rules 9 and 10): Copy, Quick look, Fill clip template,
- * Lock, Delete. Row 1 cannot be locked or deleted and the items say why. Disabled items
- * carry aria-disabled and no handler.
- */
 export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) {
   const { isClipLocked, toggleClipLock, emptyClip, getClip, copyClipToClipboard } =
     useClipsActions();
@@ -76,7 +38,6 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
   );
   const rowTexts = useMemo(() => clips.map((c) => clipText(c)), [clips]);
 
-  // Handle clicks outside menu
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -100,21 +61,18 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
     };
   }, [onClose]);
 
-  // Position the menu to stay within viewport
   useEffect(() => {
-    const menu = menuRef.current!; // mounted before any effect runs
+    const menu = menuRef.current!;
     const rect = menu.getBoundingClientRect();
     const viewport = { width: window.innerWidth, height: window.innerHeight };
 
     let adjustedX = x;
     let adjustedY = y;
 
-    // Adjust X position if menu would go off-screen
     if (x + rect.width > viewport.width) {
       adjustedX = viewport.width - rect.width - 10;
     }
 
-    // Adjust Y position if menu would go off-screen
     if (y + rect.height > viewport.height) {
       adjustedY = viewport.height - rect.height - 10;
     }
@@ -165,8 +123,8 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
       role="menu"
       data-testid="clip-context-menu"
     >
-      <Item icon="copy" label="Copy" disabled={empty} onClick={handleCopyClick} />
-      <Item icon="eye" label="Quick look" disabled={empty} onClick={handleQuickLook} />
+      <ContextMenuItem icon="copy" label="Copy" disabled={empty} onClick={handleCopyClick} />
+      <ContextMenuItem icon="eye" label="Quick look" disabled={empty} onClick={handleQuickLook} />
 
       <div
         role="menuitem"
@@ -213,7 +171,7 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
 
       <div className={styles.separator} />
 
-      <Item
+      <ContextMenuItem
         icon={isClipLocked(index) ? 'lock-open' : 'lock'}
         label={isClipLocked(index) ? 'Unlock' : 'Lock'}
         disabled={isFirstClip || empty}
@@ -221,7 +179,7 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
         className={styles.warning}
         onClick={handleLockClick}
       />
-      <Item
+      <ContextMenuItem
         icon="trash"
         label="Delete"
         disabled={isFirstClip || empty}

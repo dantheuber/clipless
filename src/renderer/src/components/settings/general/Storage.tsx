@@ -7,11 +7,6 @@ import { formatBytes } from './backup';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
-/**
- * Storage (spec 15.4): the clip count large, "of N clips" where N is Clips to keep, a
- * refresh link at the right, a full-width usage bar (amber from 90%), then the locked
- * count and the size on disk on one line.
- */
 export function Storage() {
   const { stats, refresh } = useStats();
   const { settings } = useSettingsStore();

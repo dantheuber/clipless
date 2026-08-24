@@ -23,7 +23,6 @@ test.describe('Context Menu', () => {
     app = result.app;
     window = result.window;
 
-    // Add two clips: clipA first, then clipB (clipB will be index 0, clipA index 1)
     await app.evaluate(async ({ clipboard }, t) => {
       clipboard.writeText(t);
     }, clipA);
@@ -34,7 +33,6 @@ test.describe('Context Menu', () => {
     }, clipB);
     await window.waitForTimeout(1000);
 
-    // Verify both clips appear
     await expect(window.locator(`text=${clipA}`).first()).toBeVisible({ timeout: 5000 });
     await expect(window.locator(`text=${clipB}`).first()).toBeVisible({ timeout: 5000 });
   });
@@ -44,7 +42,6 @@ test.describe('Context Menu', () => {
   });
 
   test('right-click on a non-first clip shows Copy, Quick look, Fill clip template, Lock and Delete', async () => {
-    // clipA is at index 1 (non-first) — right-click it
     await window.locator(`text=${clipA}`).first().click({ button: 'right' });
 
     const menu = window.getByTestId('clip-context-menu');
@@ -53,11 +50,9 @@ test.describe('Context Menu', () => {
       await expect(window.getByTestId(id)).toBeVisible();
       await expect(window.getByTestId(id)).not.toHaveAttribute('aria-disabled', 'true');
     }
-    // no clip templates are seeded here, so the submenu is present and says so
     await expect(window.getByTestId('menu-fill-clip-template')).toBeVisible();
     await expect(window.getByTestId('menu-fill-clip-template')).toContainText('no clip templates');
 
-    // Close by pressing Escape
     await window.keyboard.press('Escape');
     await expect(menu).toBeHidden();
   });
@@ -76,7 +71,6 @@ test.describe('Context Menu', () => {
   });
 
   test('right-click on a clip further down the list shows context menu fully visible', async () => {
-    // Add several more clips to push items down the list
     for (let i = 0; i < 8; i++) {
       await app.evaluate(async ({ clipboard }, t) => {
         clipboard.writeText(t);
@@ -85,12 +79,10 @@ test.describe('Context Menu', () => {
     }
     await window.waitForTimeout(1000);
 
-    // Scroll to clipA (now further down) and right-click
     const target = window.locator(`text=${clipA}`).first();
     await target.scrollIntoViewIfNeeded();
     await target.click({ button: 'right' });
 
-    // Context menu should be fully visible (portalled to body, not clipped by overflow)
     await expect(window.getByTestId('menu-copy')).toBeVisible({ timeout: 3000 });
     await expect(window.getByTestId('menu-delete')).toBeVisible();
 
@@ -104,8 +96,6 @@ test.describe('Context Menu', () => {
 
     await expect(window.getByTestId('menu-copy')).toBeVisible({ timeout: 3000 });
 
-    // Click elsewhere to close. The status bar's left edge is inert; (5, 5) on the body is
-    // row 1's number cell, which copies the clip and leaves a toast for later cases.
     await window.getByTestId('status-bar').click({ position: { x: 5, y: 5 } });
 
     await expect(window.getByTestId('menu-copy')).toBeHidden({ timeout: 3000 });
@@ -131,13 +121,11 @@ test.describe('Context Menu', () => {
     await expect(window.getByTestId('menu-copy')).toBeVisible({ timeout: 3000 });
     await window.getByTestId('menu-copy').click();
 
-    // Menu should close after action
     await expect(window.getByTestId('menu-copy')).toBeHidden({ timeout: 3000 });
     await expect(window.getByTestId('toast').filter({ hasText: 'Copied clip' })).toBeVisible({
       timeout: 3000,
     });
 
-    // Verify clipboard contains the expected text
     const clipboardText = await app.evaluate(async ({ clipboard }) => {
       return clipboard.readText();
     });

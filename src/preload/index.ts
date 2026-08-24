@@ -17,10 +17,6 @@ import type {
   AppPathName,
 } from '../shared/types';
 
-/**
- * Every on* method returns a function that removes only its own listener, so two
- * subscribers to one channel never remove each other.
- */
 function subscribe<Args extends unknown[]>(
   channel: string,
   handler: (...args: Args) => void
@@ -31,13 +27,10 @@ function subscribe<Args extends unknown[]>(
   return () => electronAPI.ipcRenderer.removeListener(channel, listener);
 }
 
-// Custom APIs for renderer
 const api = {
-  // Platform info
   platform: process.platform,
   arch: process.arch,
 
-  // Auto-updater APIs
   checkForUpdates: () => electronAPI.ipcRenderer.invoke('check-for-updates'),
   downloadUpdate: () => electronAPI.ipcRenderer.invoke('download-update'),
   quitAndInstall: () => electronAPI.ipcRenderer.invoke('quit-and-install'),
@@ -48,7 +41,6 @@ const api = {
     return () => electronAPI.ipcRenderer.removeListener('update-state', listener);
   },
 
-  // Clipboard APIs
   getCurrentClipboardData: () => electronAPI.ipcRenderer.invoke('get-current-clipboard-data'),
   setClipboardText: (text: string) => electronAPI.ipcRenderer.invoke('set-clipboard-text', text),
   setClipboardHTML: (html: string) => electronAPI.ipcRenderer.invoke('set-clipboard-html', html),
@@ -67,15 +59,12 @@ const api = {
   onHotkeyClipCopied: (callback: (clipIndex: number) => void) =>
     subscribe('hotkey-clip-copied', (clipIndex: number) => callback(clipIndex)),
 
-  // Settings APIs
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),
   getAutoStartState: (): Promise<boolean | null> =>
     electronAPI.ipcRenderer.invoke('auto-start-get-state'),
   settingsChanged: (settings: UserSettings): Promise<SettingsApplyResult> =>
     electronAPI.ipcRenderer.invoke('settings-changed', settings),
-  // Import with replace restarts the app after the save queue drains (spec 15.5)
   restartApp: (): Promise<void> => electronAPI.ipcRenderer.invoke('app-restart'),
-  // The About panel's folder links; resolves to the shell's error text, empty on success
   openAppPath: (name: AppPathName): Promise<string> =>
     electronAPI.ipcRenderer.invoke('open-app-path', name),
   onSettingsUpdated: (callback: (settings: UserSettings) => void) =>
@@ -83,7 +72,6 @@ const api = {
   hotkeysGetDefaults: (): Promise<HotkeySettings> =>
     electronAPI.ipcRenderer.invoke('hotkeys-get-defaults'),
 
-  // Storage APIs
   onStorageReady: (callback: () => void) => subscribe('storage-ready', () => callback()),
   storageGetClips: () => electronAPI.ipcRenderer.invoke('storage-get-clips'),
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
@@ -97,7 +85,6 @@ const api = {
     electronAPI.ipcRenderer.invoke('storage-import-data', jsonData),
   storageClearAll: () => electronAPI.ipcRenderer.invoke('storage-clear-all'),
 
-  // Template APIs
   templatesGetAll: () => electronAPI.ipcRenderer.invoke('templates-get-all'),
   templatesCreate: (name: string, content: string) =>
     electronAPI.ipcRenderer.invoke('templates-create', name, content),
@@ -107,7 +94,6 @@ const api = {
   templatesReorder: (templates: Template[]) =>
     electronAPI.ipcRenderer.invoke('templates-reorder', templates),
 
-  // Quick Clips - Search Terms APIs
   searchTermsGetAll: () => electronAPI.ipcRenderer.invoke('search-terms-get-all'),
   searchTermsCreate: (name: string, pattern: string) =>
     electronAPI.ipcRenderer.invoke('search-terms-create', name, pattern),
@@ -115,7 +101,6 @@ const api = {
     electronAPI.ipcRenderer.invoke('search-terms-update', id, updates),
   searchTermsDelete: (id: string) => electronAPI.ipcRenderer.invoke('search-terms-delete', id),
 
-  // Quick Clips - Tools APIs
   quickToolsGetAll: () => electronAPI.ipcRenderer.invoke('quick-tools-get-all'),
   quickToolsCreate: (name: string, url: string, captureGroups: string[]) =>
     electronAPI.ipcRenderer.invoke('quick-tools-create', name, url, captureGroups),
@@ -123,7 +108,6 @@ const api = {
     electronAPI.ipcRenderer.invoke('quick-tools-update', id, updates),
   quickToolsDelete: (id: string) => electronAPI.ipcRenderer.invoke('quick-tools-delete', id),
 
-  // Tabs from the tray and the reader: http and https only, opened in order (spec 17.3)
   openExternalUrls: (urls: string[]): Promise<number> =>
     electronAPI.ipcRenderer.invoke('open-external-urls', urls),
   quickClipsExportConfig: (): Promise<QuickClipsConfig> =>
@@ -136,19 +120,14 @@ const api = {
     return () => electronAPI.ipcRenderer.removeListener('quick-clips-config-changed', listener);
   },
 
-  // Group colours
   groupColoursGet: (): Promise<GroupColours> => electronAPI.ipcRenderer.invoke('group-colours-get'),
   groupColoursSet: (groupColours: GroupColours): Promise<GroupColours> =>
     electronAPI.ipcRenderer.invoke('group-colours-set', groupColours),
   onToggleSearch: (callback: () => void) => subscribe('toggle-search', () => callback()),
-  // The quick look hotkey; pending says a clipboard change is on its way (spec 17.3)
   onOpenQuickLook: (callback: (payload: { pending: boolean }) => void) =>
     subscribe('open-quick-look', (payload: { pending: boolean }) => callback(payload)),
 };
 
-// Use `contextBridge` APIs to expose Electron APIs to
-// renderer only if context isolation is enabled, otherwise
-// just add to the DOM global.
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI);
@@ -157,8 +136,5 @@ if (process.contextIsolated) {
     console.error(error);
   }
 } else {
-  // @ts-ignore (define in dts)
-  window.electron = electronAPI;
-  // @ts-ignore (define in dts)
-  window.api = api;
+  Object.assign(window, { electron: electronAPI, api });
 }

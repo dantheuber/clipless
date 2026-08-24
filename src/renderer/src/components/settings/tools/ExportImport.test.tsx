@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { screen, fireEvent, cleanup, within } from '@testing-library/react';
-import { ExportImport, summarizeConfig } from './ExportImport';
+import { ExportImport } from './ExportImport';
+import { summarizeConfig } from './configSummary';
 import { api, defaultConfig, flush, installConfig, renderTools } from './harness';
 
 beforeEach(() => {

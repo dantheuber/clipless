@@ -1,28 +1,8 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TOAST_DURATION, ToastContext, type ToastFn } from './useToast';
 import styles from './Toast.module.css';
 
-/**
- * In-window feedback for actions with no visible result: every clipboard write, dropped
- * pins, a cleared filter (spec 17.1). Stacks at most three, each shown for 3.4 s, dismissed
- * on click. Both windows mount the provider.
- */
-
-export const TOAST_DURATION = 3400;
-export const TOAST_LIMIT = 3;
-
-export interface ToastOptions {
-  duration?: number;
-}
-
-export type ToastFn = (title: string, detail?: string | string[], options?: ToastOptions) => void;
+const TOAST_LIMIT = 3;
 
 interface ToastEntry {
   id: number;
@@ -30,16 +10,6 @@ interface ToastEntry {
   detail: string[];
   duration: number;
 }
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const ToastContext = createContext<ToastFn | null>(null);
-
-// eslint-disable-next-line react-refresh/only-export-components
-export const useToast = (): ToastFn => {
-  const ctx = useContext(ToastContext);
-  if (!ctx) throw new Error('useToast must be used within ToastProvider');
-  return ctx;
-};
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastEntry[]>([]);

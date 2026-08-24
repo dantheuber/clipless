@@ -1,12 +1,5 @@
 import { Parser } from 'htmlparser2';
 
-/**
- * Plain text of an HTML clip for the row, the scanner and the reader's text view. A parser
- * walk, not a regex strip: entity text, script bodies and style rules never reach the
- * scanner. Runs at capture in monitoring.ts and in migrateData for clips stored without
- * text. No DOM, no network.
- */
-
 const SKIPPED = new Set(['script', 'style', 'template', 'noscript', 'head']);
 
 const BLOCK = new Set([
@@ -50,7 +43,7 @@ const BLOCK = new Set([
 ]);
 
 export function htmlToText(html: string): string {
-  const parts: string[] = [];
+  const parts: string[] = []; // a parser walk, not a regex strip: entity text, script bodies and style rules never reach the scanner
   let skipDepth = 0;
   let preDepth = 0;
   let cellsInRow = 0;
@@ -76,13 +69,11 @@ export function htmlToText(html: string): string {
       },
       ontext(text) {
         if (skipDepth > 0) return;
-        // Source line breaks are whitespace except inside pre, where they are lines
-        parts.push(preDepth > 0 ? text : text.replace(/[\r\n]+/g, ' '));
+        parts.push(preDepth > 0 ? text : text.replace(/[\r\n]+/g, ' ')); // source line breaks are whitespace except inside pre, where they are lines
       },
       onclosetag(name) {
         if (SKIPPED.has(name)) {
-          // htmlparser2 never reports a closer without an opener, so this cannot go negative
-          skipDepth--;
+          skipDepth--; // cannot go negative: htmlparser2 never reports a closer without an opener
           return;
         }
         if (skipDepth > 0) return;

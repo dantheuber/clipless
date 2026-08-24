@@ -92,9 +92,6 @@ describe('htmlToText', () => {
 
     expect(text.startsWith('Ticket OPS-1234 from 203.0.113.42 & ops@example.com link')).toBe(true);
     expect(text).not.toContain('color:red');
-    // The poll runs every 250 ms on the main process and a warm run takes about 60 ms here.
-    // The bound is loose on purpose: it catches a quadratic regression, not a slow CI runner
-    // (one took 253 ms under coverage instrumentation).
-    expect(elapsed).toBeLessThan(2000);
+    expect(elapsed).toBeLessThan(2000); // loose bound on purpose: catches a quadratic regression, not a slow CI runner (poll is 250 ms, warm run ~60 ms, one CI run took 253 ms under coverage)
   });
 });

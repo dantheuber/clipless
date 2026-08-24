@@ -1,7 +1,14 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
-import type { ClipItem, ScanResult } from '../../../../../shared/types';
+import type { ClipItem } from '../../../../../shared/types';
 import { ClipWrapper } from './ClipWrapper';
+import {
+  emptyClip as empty,
+  htmlClip as html,
+  imageClip as image,
+  ipScan,
+  textClip as text,
+} from './clipTestFixtures';
 
 const { state } = vi.hoisted(() => ({
   state: {
@@ -14,17 +21,6 @@ const { state } = vi.hoisted(() => ({
     pendingScan: false,
   },
 }));
-
-const ipScan = (text: string): ScanResult => {
-  const matches = [...text.matchAll(/\b(?:\d{1,3}\.){3}\d{1,3}\b/g)].map((m) => ({
-    group: 'ip',
-    value: m[0],
-    start: m.index as number,
-    end: (m.index as number) + m[0].length,
-    termId: 't',
-  }));
-  return { matches, groups: matches.length ? ['ip'] : [], errors: [], large: false };
-};
 
 vi.mock('../../../providers/clips', async () => {
   const utils = await import('../../../providers/clips/utils');
@@ -65,11 +61,6 @@ vi.mock('./ClipContextMenu', () => ({
     </div>
   ),
 }));
-
-const text: ClipItem = { id: 'a', type: 'text', content: 'host 1.1.1.1' };
-const html: ClipItem = { id: 'h', type: 'html', content: '<p>x</p>', text: 'x 2.2.2.2' };
-const image: ClipItem = { id: 'i', type: 'image', content: 'data:image/png;base64,x' };
-const empty: ClipItem = { id: 'e', type: 'text', content: '' };
 
 const row = (
   clip: ClipItem,
@@ -146,7 +137,6 @@ describe('ClipWrapper', () => {
     expect(state.togglePins).toHaveBeenCalledTimes(1);
     fireEvent.keyDown(r, { key: 'Enter' });
     expect(screen.getByRole('textbox')).toBeInTheDocument();
-    // keys from the editor are the editor's own
     fireEvent.keyDown(screen.getByRole('textbox'), { key: ' ' });
     expect(state.openQuickLook).toHaveBeenCalledTimes(1);
   });

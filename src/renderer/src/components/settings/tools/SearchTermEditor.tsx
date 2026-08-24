@@ -1,12 +1,14 @@
 import classNames from 'classnames';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { scanText } from '../../../../../shared/scan';
 import { patternGroups } from '../../../../../shared/readiness';
 import { ToggleSwitch } from '../usersettings/ToggleSwitch';
 import { GroupPill } from './GroupPill';
 import { ChipsPreview } from './ValueChip';
 import { Consumers } from './UsesList';
-import { trapTab, useEditorHost } from './editorHost';
+import { trapTab } from './editorHost';
+import { EditorActions } from './editorControls';
+import { useEditorLifecycle } from './editorHooks';
 import { groupState, validatePattern } from './model';
 import { useToolsData } from './useToolsData';
 import w from '../shell/widgets.module.css';
@@ -20,17 +22,12 @@ export interface TermDraft {
 
 interface SearchTermEditorProps {
   initial: TermDraft;
-  /** The id of the term under edit, so its own scan errors are not confused with others */
+
   id?: string;
   onSave: (draft: TermDraft) => void | Promise<void>;
   onCancel: () => void;
 }
 
-/**
- * The search term editor (spec 14.3): name, enabled toggle, pattern, validation, the
- * "produces" pills, the pattern under edit run against the sample and shown as chips, and
- * the "feeds" list. Save is disabled while invalid; nothing is stored until Save.
- */
 export function SearchTermEditor({
   initial,
   id = 'draft',
@@ -38,7 +35,6 @@ export function SearchTermEditor({
   onCancel,
 }: SearchTermEditorProps) {
   const { config, sample } = useToolsData();
-  const host = useEditorHost();
   const [name, setName] = useState(initial.name);
   const [pattern, setPattern] = useState(initial.pattern);
   const [enabled, setEnabled] = useState(initial.enabled);
@@ -50,7 +46,6 @@ export function SearchTermEditor({
   const canSave = !error && name.trim().length > 0 && !saving;
   const dirty = name !== initial.name || pattern !== initial.pattern || enabled !== initial.enabled;
 
-  // The same scanText the rows use, on the one pattern under edit, so chips cannot disagree
   const scan = useMemo(
     () => (error && !/empty string/.test(error) ? null : scanText(sample, [{ id, pattern }])),
     [sample, pattern, id, error]
@@ -65,17 +60,7 @@ export function SearchTermEditor({
     }
   };
 
-  useEffect(() => {
-    host.setDirty(dirty);
-  }, [dirty, host]);
-  useEffect(() => {
-    host.setSaver(canSave ? save : null);
-    return () => host.setSaver(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSave, name, pattern, enabled]);
-  useEffect(() => {
-    patternRef.current?.focus();
-  }, []);
+  useEditorLifecycle({ dirty, canSave, save, focusRef: patternRef });
 
   return (
     <div className={styles.editor} onKeyDown={trapTab} data-testid="term-editor">
@@ -156,25 +141,7 @@ export function SearchTermEditor({
           />
         </div>
       )}
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={classNames(w.btn, w.primary)}
-          disabled={!canSave}
-          onClick={save}
-          data-testid="term-save"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          className={classNames(w.btn, w.ghost)}
-          onClick={onCancel}
-          data-testid="term-cancel"
-        >
-          Cancel
-        </button>
-      </div>
+      <EditorActions prefix="term" canSave={canSave} onSave={save} onCancel={onCancel} />
     </div>
   );
 }

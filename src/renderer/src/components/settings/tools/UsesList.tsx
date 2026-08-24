@@ -11,7 +11,6 @@ interface ItemChipProps {
   onGo?: (selection: Selection) => void;
 }
 
-/** A term, tool or template named as a chip; click follows it to its Uses view. */
 export function ItemChip({ kind, id, name, off, onGo }: ItemChipProps) {
   const className = classNames(styles.item, {
     [styles.itemTemplate]: kind === 'template',
@@ -39,7 +38,6 @@ interface ConsumersProps {
   onGo?: (selection: Selection) => void;
 }
 
-/** The tools and templates that use any of the groups. */
 export function Consumers({
   config,
   groups,
@@ -72,7 +70,6 @@ interface ProducersProps {
   onGo?: (selection: Selection) => void;
 }
 
-/** The search terms, enabled or not, that produce any of the groups. */
 export function Producers({ config, groups, onGo }: ProducersProps) {
   const seen = new Map<string, { name: string; enabled: boolean }>();
   for (const g of groups) {

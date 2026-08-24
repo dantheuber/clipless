@@ -1,7 +1,7 @@
-import { useToast } from '../../Toast';
+import { useToast } from '../../useToast';
 import { Pane } from '../shell/Pane';
 import { Footer } from '../shell/Footer';
-import { StatsProvider } from './stats';
+import { StatsProvider } from './StatsProvider';
 import { Application } from './Application';
 import { Window } from './Window';
 import { Storage } from './Storage';
@@ -14,10 +14,6 @@ import { errorText } from '../shell/errorText';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
-/**
- * General (spec 15.4): two panels side by side, three short panels across the bottom, and
- * the rare data actions as footer links. Every control applies as it is changed.
- */
 export function General() {
   const toast = useToast();
 

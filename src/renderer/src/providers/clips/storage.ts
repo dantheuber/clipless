@@ -4,9 +4,6 @@ import { DEFAULT_MAX_CLIPS } from '../constants';
 import { shrinkClips, updateClipsLength } from './utils';
 import { UserSettings, StoredClip } from '../../../../shared/types';
 
-/**
- * Hook for managing storage operations for clips and settings
- */
 export const useClipsStorage = (
   clips: ClipItem[],
   lockedClips: Record<number, boolean>,
@@ -17,7 +14,6 @@ export const useClipsStorage = (
   setMaxClips: React.Dispatch<React.SetStateAction<number>>,
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
 ) => {
-  // Shared function to load all stored data (clips + settings)
   const loadStoredData = useCallback(async () => {
     if (!window.api) {
       setIsInitiallyLoading(false);
@@ -25,26 +21,20 @@ export const useClipsStorage = (
     }
 
     try {
-      // Load settings first
       const settings = await window.api.storageGetSettings();
       if (settings && typeof settings.maxClips === 'number') {
         setMaxClips(settings.maxClips);
       }
-      // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
-
-      // Load clips from storage
       const storedClips = await window.api.storageGetClips();
 
       if (storedClips && storedClips.length > 0) {
         const loadedClips: ClipItem[] = [];
         const loadedLocks: Record<number, boolean> = {};
 
-        // Process stored clips and rebuild the array properly
         let clipIndex = 0;
         storedClips.forEach((storedClip: StoredClip) => {
           if (storedClip.clip?.content && storedClip.clip.content.trim() !== '') {
-            loadedClips.push(storedClip.clip); // Use push instead of index assignment
-            // Only allow locking for clips at index 1 and higher
+            loadedClips.push(storedClip.clip);
             if (storedClip.isLocked && clipIndex > 0) {
               loadedLocks[clipIndex] = true;
             }
@@ -52,12 +42,10 @@ export const useClipsStorage = (
           }
         });
 
-        // Ensure the first clip (index 0) is never locked
         if (loadedLocks[0]) {
           delete loadedLocks[0];
         }
 
-        // Always update clips state, even if empty, to ensure proper initialization
         const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
         const paddedClips = updateClipsLength(loadedClips, currentMaxClips);
         setClips(paddedClips);
@@ -76,12 +64,10 @@ export const useClipsStorage = (
     }
   }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]);
 
-  // Load data from storage on mount
   useEffect(() => {
     loadStoredData();
   }, [loadStoredData]);
 
-  // Re-load data when background storage loading completes
   useEffect(() => {
     if (!window.api?.onStorageReady) return;
 
@@ -91,11 +77,9 @@ export const useClipsStorage = (
     });
   }, [loadStoredData]);
 
-  // The latest list and locks, for the settings listener below
   const latest = useRef({ clips, lockedClips });
   latest.current = { clips, lockedClips };
 
-  // Listen for settings updates from other windows (like settings window)
   useEffect(() => {
     if (!window.api?.onSettingsUpdated) return;
 
@@ -105,42 +89,33 @@ export const useClipsStorage = (
         const max = updatedSettings.maxClips;
         setMaxClips(max);
 
-        // A lower limit drops the oldest unlocked clips first; locked clips stay (15.5)
         const shrunk = shrinkClips(latest.current.clips, latest.current.lockedClips, max);
         setClips(shrunk.clips);
         setLockedClips(shrunk.locked);
       }
-      // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
     };
 
     return window.api.onSettingsUpdated(handleSettingsUpdate);
   }, [setMaxClips, setClips, setLockedClips]);
 
-  // Save clips to storage whenever they change
   useEffect(() => {
-    // Don't save during initial loading
     if (isInitiallyLoading) return;
 
     const saveClipsToStorage = async () => {
       if (!window.api) return;
 
       try {
-        // Save all clips, including empty ones to preserve array structure
-        // Filter will be done on the storage side if needed
         await window.api.storageSaveClips(clips, lockedClips);
       } catch (error) {
         console.error('Failed to save clips to storage:', error);
       }
     };
 
-    // Debounce saves to avoid excessive writes
     const timeoutId = setTimeout(saveClipsToStorage, 1000);
     return () => clearTimeout(timeoutId);
   }, [clips, lockedClips, isInitiallyLoading]);
 
-  // Save settings whenever maxClips changes
   useEffect(() => {
-    // Don't save during initial loading
     if (isInitiallyLoading) return;
 
     const saveSettingsToStorage = async () => {
@@ -153,7 +128,6 @@ export const useClipsStorage = (
       }
     };
 
-    // Debounce saves
     const timeoutId = setTimeout(saveSettingsToStorage, 500);
     return () => clearTimeout(timeoutId);
   }, [maxClips, isInitiallyLoading]);

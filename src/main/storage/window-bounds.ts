@@ -1,9 +1,6 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 
-/**
- * Save window bounds to storage
- */
 export async function saveWindowBounds(
   dataPath: string,
   bounds: { x: number; y: number; width: number; height: number }
@@ -16,9 +13,6 @@ export async function saveWindowBounds(
   }
 }
 
-/**
- * Get window bounds from storage
- */
 export async function getWindowBounds(
   dataPath: string
 ): Promise<{ x: number; y: number; width: number; height: number } | null> {
@@ -27,7 +21,6 @@ export async function getWindowBounds(
     const data = await fs.readFile(boundsPath, 'utf-8');
     return JSON.parse(data);
   } catch {
-    // File doesn't exist or is invalid, return null
     return null;
   }
 }

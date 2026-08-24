@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { ConfirmDialog } from '../../ConfirmDialog';
-import { useToast } from '../../Toast';
+import { useToast } from '../../useToast';
 import { formatBytes, readFileText, summarizeBackup, type BackupSummary } from './backup';
 import { errorText } from '../shell/errorText';
 import w from '../shell/widgets.module.css';
@@ -14,11 +14,6 @@ interface Picked {
   error: string | null;
 }
 
-/**
- * Import data (spec 15.5): shows what the file holds (clips, locked, settings, shortcuts,
- * terms, tools, templates) and states that it replaces everything and restarts, before
- * offering Replace and restart. Failure is inline text.
- */
 export function ImportPreview() {
   const toast = useToast();
   const input = useRef<HTMLInputElement>(null);
@@ -40,7 +35,6 @@ export function ImportPreview() {
     if (input.current) input.current.value = '';
   };
 
-  // Only reachable while the confirm button is enabled, so a summary exists
   const replace = async () => {
     const current = picked as Picked;
     const summary = current.summary as BackupSummary;

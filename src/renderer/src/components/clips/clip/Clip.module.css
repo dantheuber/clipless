@@ -1,4 +1,3 @@
-/* One row of the list (spec 4): 40px, one line, number cell, content, right edge */
 .clip {
   position: relative;
   width: 100%;
@@ -81,20 +80,6 @@
   padding: 5px 12px;
 }
 
-.lang {
-  font-family: var(--sans);
-  font-size: 10px;
-  color: var(--muted);
-  background: var(--lang-bg);
-  border: 1px solid var(--lang-bd);
-  border-radius: 3px;
-  padding: 0 5px;
-  margin-right: 8px;
-  vertical-align: middle;
-  line-height: 16px;
-  display: inline-block;
-}
-
 .rightEdge {
   display: flex;
   align-items: center;
@@ -157,7 +142,6 @@
   font-size: 12px;
 }
 
-/* Type rows */
 .imageLine {
   display: flex;
   align-items: center;
@@ -192,7 +176,6 @@
   color: var(--muted);
 }
 
-/* Inline text editing styles */
 .editableText {
   cursor: text;
   white-space: nowrap;

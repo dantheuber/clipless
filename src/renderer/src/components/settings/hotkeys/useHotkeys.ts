@@ -10,22 +10,21 @@ import {
   type HotkeyActionId,
 } from './conflicts';
 
-export interface HotkeyRow {
+interface HotkeyRow {
   id: HotkeyActionId;
   name: string;
   description: string;
   key: string;
   enabled: boolean;
   isDefault: boolean;
-  /** Another row bound to the same key (a duplicate after an import) */
+
   duplicate: HotkeyActionId | null;
-  /** Why the OS may keep the key; advisory */
+
   reserved: string | null;
   status: RowStatus | undefined;
 }
 
 export interface HotkeysModel {
-  /** null until the defaults have arrived from the main process */
   hotkeys: HotkeySettings | null;
   defaults: HotkeySettings | null;
   rows: HotkeyRow[];
@@ -35,18 +34,12 @@ export interface HotkeysModel {
   setKey: (id: HotkeyActionId, accelerator: string) => Promise<void>;
   swap: (id: HotkeyActionId, other: HotkeyActionId, accelerator: string) => Promise<void>;
   reset: (id: HotkeyActionId) => Promise<void>;
-  /** Resolves to how many rows changed */
+
   resetAll: () => Promise<number>;
 }
 
 export const statusKey = (id: HotkeyActionId | 'enabled'): string => `hk:${id}`;
 
-/**
- * The Hotkeys tab's model over the settings store. Every write goes through
- * settings-changed and "saved" means the shortcut is registered: a row whose accelerator
- * the OS refused shows "not saved" with retry and goes back to its previous key. A swap
- * writes both rows at once and rolls both back when either registration fails.
- */
 export function useHotkeys(platform: string): HotkeysModel {
   const { settings, statuses, commit, setStatus } = useSettingsStore();
   const [defaults, setDefaults] = useState<HotkeySettings | null>(null);
@@ -63,10 +56,6 @@ export function useHotkeys(platform: string): HotkeysModel {
     return { ...defaults, ...(settings?.hotkeys ?? {}) };
   }, [defaults, settings]);
 
-  /**
-   * Write a hotkey map. The changed rows own the statuses and roll back when any of their
-   * accelerators failed; other rows whose accelerator failed are told on their own slot.
-   */
   const write = useCallback(
     async (next: HotkeySettings, changed: (HotkeyActionId | 'enabled')[], undo = true) => {
       const keysOf = (ids: (HotkeyActionId | 'enabled')[]) =>
@@ -92,10 +81,6 @@ export function useHotkeys(platform: string): HotkeysModel {
     [commit, platform, setStatus]
   );
 
-  /**
-   * Every action is a plan over the current map and the defaults; nothing can change
-   * before both have loaded, which is also when the rows first render.
-   */
   const change = useCallback(
     async (
       make: (

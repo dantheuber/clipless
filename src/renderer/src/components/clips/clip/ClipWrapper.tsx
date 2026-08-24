@@ -17,7 +17,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 interface ClipProps {
   clip: ClipItem;
   index: number;
-  /** Position in the visible list, for keyboard focus */
+
   visibleIndex: number;
   isCurrentCopiedClip: boolean;
   isEvenRow?: boolean;
@@ -27,12 +27,6 @@ interface ClipProps {
 const isTypingTarget = (target: EventTarget | null): boolean =>
   target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement;
 
-/**
- * One row (spec 4): number cell, the one-line content with chips, and at the right edge
- * one dot per capture group, the lock glyph, and an eye on hover or focus. Rows take
- * keyboard focus: Space opens quick look, Enter edits (or opens the reader for a non-text
- * clip), p pins every chip in the row.
- */
 export const ClipWrapper = memo(function ClipWrapper({
   clip,
   index,
@@ -147,10 +141,8 @@ export const ClipWrapper = memo(function ClipWrapper({
           {isCurrentCopiedClip ? <FontAwesomeIcon icon="clipboard-check" /> : index + 1}
         </div>
 
-        {/* Content area */}
         <div className={styles.contentArea}>{renderClipContent()}</div>
 
-        {/* Right edge: dots, lock, eye (spec 4) */}
         <div className={styles.rightEdge}>
           {scan && scan.groups.length > 0 && (
             <span className={styles.dots} data-testid="group-dots">
@@ -189,7 +181,6 @@ export const ClipWrapper = memo(function ClipWrapper({
         </div>
       </div>
 
-      {/* Context Menu */}
       {contextMenu.isOpen && contextMenu.targetIndex === index && (
         <ClipContextMenu
           index={index}

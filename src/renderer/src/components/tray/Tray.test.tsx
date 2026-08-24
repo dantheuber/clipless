@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
-import { Tray, openTabs, tabCount } from './Tray';
+import { Tray } from './Tray';
+import { openTabs, tabCount } from './openTabs';
 
 const { state } = vi.hoisted(() => ({
   state: {
@@ -35,7 +36,7 @@ vi.mock('../../providers/scan', () => ({
   useScanIndex: () => ({ tools: state.tools, templates: state.templates, slotFor: () => 0 }),
 }));
 
-vi.mock('../Toast', () => ({
+vi.mock('../useToast', () => ({
   useToast: () => state.toast,
 }));
 

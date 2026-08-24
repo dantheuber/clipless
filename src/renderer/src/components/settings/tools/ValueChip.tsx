@@ -3,21 +3,17 @@ import type { ReactNode } from 'react';
 import type { ScanResult } from '../../../../../shared/types';
 import { useScanIndex } from '../../../providers/scan';
 import { visibleMatches } from '../../clips/clip/matches';
-import { groupStyle } from './GroupPill';
+import { groupStyle } from './groupStyle';
 import styles from './Tools.module.css';
 
 interface ValueChipProps {
   group: string;
   value: string;
-  /** A plain value chip (no +), for sample values in Uses and the overview */
+
   plain?: boolean;
   children?: ReactNode;
 }
 
-/**
- * A match as the clips window would draw it, in the group's colour, for previews. It is a
- * preview, so it pins nothing.
- */
 export function ValueChip({ group, value, plain, children }: ValueChipProps) {
   const { slotFor } = useScanIndex();
   return (
@@ -33,10 +29,6 @@ export function ValueChip({ group, value, plain, children }: ValueChipProps) {
   );
 }
 
-/**
- * The sample text with a chip on every match of the scan (spec 14.3): what the term under
- * edit would highlight, from the same scanText the rows use.
- */
 export function ChipsPreview({ text, scan }: { text: string; scan: ScanResult }) {
   const pieces: ReactNode[] = [];
   let cursor = 0;

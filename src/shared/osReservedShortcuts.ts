@@ -1,10 +1,3 @@
-/**
- * Combinations the operating system keeps for itself. Hand-maintained and short; the
- * hotkey recorder shows an amber advisory for these and still accepts them (spec 15.6).
- * Accelerators are in Electron form after normalisation (CommandOrControl resolved per
- * platform, modifiers sorted, key upper-cased).
- */
-
 export type ReservedPlatform = 'darwin' | 'win32' | 'linux';
 
 export interface ReservedShortcut {
@@ -26,9 +19,6 @@ const MODIFIER_ALIASES: Record<string, string> = {
   meta: 'Super',
 };
 
-/**
- * One spelling per combination so lists and input compare by string.
- */
 export function normalizeAccelerator(accelerator: string, platform: ReservedPlatform): string {
   const parts = accelerator
     .split('+')
@@ -91,9 +81,6 @@ export const OS_RESERVED_SHORTCUTS: Record<ReservedPlatform, ReservedShortcut[]>
   ],
 };
 
-/**
- * Why the OS may keep a combination, or null when Clipless can expect to receive it.
- */
 export function osReservedReason(accelerator: string, platform: ReservedPlatform): string | null {
   const normalized = normalizeAccelerator(accelerator, platform);
   if (normalized.length === 0) return null;

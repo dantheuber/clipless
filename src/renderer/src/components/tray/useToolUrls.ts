@@ -4,11 +4,6 @@ import { buildToolUrls, toolReady, toolTokens } from '../../../../shared/tools';
 import { useClipsPins } from '../../providers/clips';
 import { useScanIndex } from '../../providers/scan';
 
-/**
- * The tools the pinned set can launch and every URL they would open, from the one shared
- * buildToolUrls, so the tray's multipliers, Open all and the reader's Launch button agree
- * (spec 8, 17.3). A tool is offered only when every token has a pinned value.
- */
 export function useToolUrls(): {
   readyTools: QuickTool[];
   allUrls: string[];

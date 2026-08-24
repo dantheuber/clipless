@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
+import { hotkeySettings } from './components/settings/hotkeys/hotkeyFixtures';
 
-// Mock matchMedia for jsdom
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({
@@ -16,7 +16,6 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-// Mock window.api for renderer tests
 const createMockApi = () => ({
   platform: 'win32' as NodeJS.Platform,
   arch: 'x64',
@@ -37,17 +36,7 @@ const createMockApi = () => ({
   settingsChanged: vi.fn().mockResolvedValue({ ok: true, failed: [] }),
   getAutoStartState: vi.fn().mockResolvedValue(null),
   onSettingsUpdated: vi.fn().mockReturnValue(() => {}),
-  hotkeysGetDefaults: vi.fn().mockResolvedValue({
-    enabled: false,
-    focusWindow: { enabled: true, key: 'CommandOrControl+Shift+V' },
-    quickClip1: { enabled: true, key: 'CommandOrControl+Shift+1' },
-    quickClip2: { enabled: true, key: 'CommandOrControl+Shift+2' },
-    quickClip3: { enabled: true, key: 'CommandOrControl+Shift+3' },
-    quickClip4: { enabled: true, key: 'CommandOrControl+Shift+4' },
-    quickClip5: { enabled: true, key: 'CommandOrControl+Shift+5' },
-    quickLook: { enabled: true, key: 'CommandOrControl+Shift+T' },
-    searchClips: { enabled: true, key: 'CommandOrControl+Shift+F' },
-  }),
+  hotkeysGetDefaults: vi.fn().mockResolvedValue(hotkeySettings(false)),
   restartApp: vi.fn().mockResolvedValue(undefined),
   openAppPath: vi.fn().mockResolvedValue(''),
   storageGetStats: vi.fn().mockResolvedValue({ clipCount: 0, lockedCount: 0, dataSize: 0 }),

@@ -6,10 +6,6 @@ import { loadImage } from '../storage/image-store';
 import { checkClipboardNow, setSkipNextImageChange } from '../clipboard/monitoring';
 import type { ClipItem, StoredClip } from '../../shared/types';
 
-/**
- * What the OS notification for a hotkey copy says: the clip's first line, since the window
- * may be hidden and "Clip 2" means nothing there (spec 17.7).
- */
 export function clipSummary(clip: ClipItem): string {
   if (clip.type === 'image') return 'Image';
   const text =
@@ -22,9 +18,6 @@ export function clipSummary(clip: ClipItem): string {
   return line.length > 80 ? `${line.slice(0, 79)}…` : line;
 }
 
-/**
- * Handles all hotkey action implementations
- */
 export class HotkeyActions {
   private mainWindow: BrowserWindow | null = null;
 
@@ -32,14 +25,10 @@ export class HotkeyActions {
     this.mainWindow = window;
   }
 
-  /**
-   * Toggle window visibility - focus if hidden/minimized, hide if currently focused
-   */
   focusWindow(): void {
     if (!this.mainWindow) return;
 
     try {
-      // If window is visible and focused, hide it
       if (this.mainWindow.isVisible() && this.mainWindow.isFocused()) {
         this.mainWindow.hide();
         return;
@@ -51,9 +40,6 @@ export class HotkeyActions {
     }
   }
 
-  /**
-   * Show and focus the main window, restoring it if minimised
-   */
   private showWindow(window: BrowserWindow): void {
     if (window.isMinimized()) {
       window.restore();
@@ -62,15 +48,11 @@ export class HotkeyActions {
     window.show();
     window.focus();
 
-    // On macOS, we need to bring the app to front
     if (process.platform === 'darwin') {
       app.focus();
     }
   }
 
-  /**
-   * Copy a quick clip to the clipboard by index
-   */
   async copyQuickClip(index: number): Promise<void> {
     try {
       const clips = await storage.getClips();
@@ -85,12 +67,10 @@ export class HotkeyActions {
         return;
       }
 
-      // Notify renderer BEFORE copying to clipboard so it can set up duplicate detection
       if (this.mainWindow && !this.mainWindow.isDestroyed()) {
         this.mainWindow.webContents.send('hotkey-clip-copied', index);
       }
 
-      // Copy the clip content with the appropriate format based on its type
       await this.copyClipToClipboard(clipToCopy);
 
       console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
@@ -100,9 +80,6 @@ export class HotkeyActions {
     }
   }
 
-  /**
-   * Copy a clip to the system clipboard based on its type
-   */
   private async copyClipToClipboard(clipToCopy: StoredClip): Promise<void> {
     switch (clipToCopy.clip.type) {
       case 'text':
@@ -129,15 +106,10 @@ export class HotkeyActions {
     }
   }
 
-  /**
-   * Handle copying image clips with fallback.
-   * If imageId is present, loads full image from image store.
-   */
   private async copyImageClip(content: string, imageId?: string): Promise<void> {
     try {
       let dataUrl = content;
 
-      // Load full image from image store if imageId is present
       if (imageId) {
         const dataPath = join(app.getPath('userData'), 'clipless-data');
         dataUrl = await loadImage(imageId, dataPath);
@@ -148,7 +120,6 @@ export class HotkeyActions {
       if (!image.isEmpty()) {
         clipboard.writeImage(image);
       } else {
-        // Fallback to copying data URL as text
         clipboard.writeText(dataUrl);
       }
     } catch (error) {
@@ -157,9 +128,6 @@ export class HotkeyActions {
     }
   }
 
-  /**
-   * Toggle search bar in the main window
-   */
   toggleSearchBar(): void {
     if (!this.mainWindow) return;
 
@@ -181,12 +149,6 @@ export class HotkeyActions {
     }
   }
 
-  /**
-   * The quick look hotkey (spec 9, 17.3): run the clipboard poll once so a copy made just
-   * before the hotkey reaches the renderer as clipboard-changed, bring the window forward,
-   * then tell the renderer to open the reader on row 1. pending says whether a change was
-   * sent, so the renderer waits for it only when there is one.
-   */
   async quickLook(): Promise<void> {
     if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
 

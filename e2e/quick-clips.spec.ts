@@ -10,11 +10,9 @@ test.describe('Quick Clips', () => {
     const window = await app.firstWindow();
     await window.waitForSelector('#root > *');
 
-    // Verify the app loaded successfully
     const content = await window.textContent('body');
     expect(content).toBeTruthy();
 
-    // Check console for errors related to quick clips
     const errors: string[] = [];
     window.on('console', (msg) => {
       if (msg.type() === 'error') {

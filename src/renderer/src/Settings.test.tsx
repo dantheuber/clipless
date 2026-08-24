@@ -7,7 +7,11 @@ const flush = () => act(async () => {});
 
 beforeEach(() => {
   vi.clearAllMocks();
-  api().storageGetSettings.mockResolvedValue({ maxClips: 100, startMinimized: false, autoStart: false });
+  api().storageGetSettings.mockResolvedValue({
+    maxClips: 100,
+    startMinimized: false,
+    autoStart: false,
+  });
   api().storageGetStats.mockResolvedValue({ clipCount: 0, lockedCount: 0, dataSize: 0 });
   window.history.replaceState({}, '', '/');
 });

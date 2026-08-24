@@ -1,11 +1,6 @@
 import type { UpdateState } from '../../../../../shared/types';
 import type { DotKind } from '../shell/Dot';
 
-/**
- * The Updates panel (spec 15.4, 15.5) renders from the updater's state enum: a dot, one
- * line of text, one line of dim detail, and one button. No display string is ever
- * matched. On macOS the builds are unsigned, so the panel offers the releases page.
- */
 export interface UpdateView {
   dot: DotKind;
   head: string;

@@ -7,11 +7,6 @@ interface ImageViewProps {
   onInfo: (info: { width: number; height: number }) => void;
 }
 
-/**
- * The reader for an image (spec 16 rule 6): the full image fitted to the pane on a
- * checkerboard. The full image loads from the image store on open; the thumbnail shows
- * until it lands.
- */
 export function ImageView({ clip, onInfo }: ImageViewProps) {
   const [src, setSrc] = useState<string>(clip.thumbnailDataUrl || clip.content);
 
@@ -36,7 +31,6 @@ export function ImageView({ clip, onInfo }: ImageViewProps) {
         src={src}
         alt="Clip image"
         onLoad={(event) => {
-          // The thumbnail's size is not the image's; report once the full image is in
           const img = event.currentTarget;
           if (src !== clip.thumbnailDataUrl) {
             onInfo({ width: img.naturalWidth, height: img.naturalHeight });

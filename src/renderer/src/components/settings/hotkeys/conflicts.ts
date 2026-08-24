@@ -2,12 +2,6 @@ import type { HotkeySettings } from '../../../../../shared/types';
 import { normalizeAccelerator, osReservedReason } from '../../../../../shared/osReservedShortcuts';
 import { keyPlatform } from './display';
 
-/**
- * The rows of the Hotkeys table in spec order (15.6) and the conflict rules: another
- * Clipless row holding the combination blocks acceptance and offers a swap; two rows on
- * one key after an import show on both; an OS-reserved combination is advisory.
- */
-
 export type HotkeyActionId = Exclude<keyof HotkeySettings, 'enabled'>;
 
 export interface HotkeyRowMeta {
@@ -49,9 +43,6 @@ export function sameAccelerator(a: string, b: string, platform: string): boolean
   return normalizeAccelerator(a, target) === normalizeAccelerator(b, target);
 }
 
-/**
- * The other row that already holds the combination, or null.
- */
 export function findConflict(
   hotkeys: HotkeySettings,
   id: HotkeyActionId,
@@ -65,10 +56,6 @@ export function findConflict(
   return null;
 }
 
-/**
- * Swap: this row takes the recorded combination and the other row takes this row's old
- * key, so both stay valid (spec 15.6).
- */
 export function swapKeys(
   hotkeys: HotkeySettings,
   id: HotkeyActionId,
@@ -82,10 +69,6 @@ export function swapKeys(
   };
 }
 
-/**
- * The first other row bound to the same key as this one (a duplicate left by an import,
- * say). Both rows of a pair report each other.
- */
 export function duplicateOf(
   hotkeys: HotkeySettings,
   id: HotkeyActionId,
@@ -94,9 +77,6 @@ export function duplicateOf(
   return findConflict(hotkeys, id, hotkeys[id].key, platform);
 }
 
-/**
- * Why the OS may keep the combination for itself, or null. Advisory only.
- */
 export function reservedReason(accelerator: string, platform: string): string | null {
   return osReservedReason(accelerator, keyPlatform(platform));
 }

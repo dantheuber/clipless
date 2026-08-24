@@ -40,7 +40,6 @@ describe('useOpenQuickLookSignal', () => {
     expect(onOpen).not.toHaveBeenCalled();
     act(() => clipboardHandler());
     expect(onOpen).toHaveBeenCalledTimes(1);
-    // later clipboard changes do not reopen the reader
     act(() => clipboardHandler());
     expect(onOpen).toHaveBeenCalledTimes(1);
   });

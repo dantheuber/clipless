@@ -20,7 +20,6 @@ describe('StartFrom', () => {
     const cards = screen.getAllByTestId(/^library-/);
     expect(cards).toHaveLength(BUILTIN_PATTERNS.length + 1);
     expect(screen.getByTestId('library-ip')).toHaveTextContent('finds 2 in the sample');
-    // the fixture's email term has the library body under another name: added, by pattern
     expect(screen.getByTestId('library-email')).toHaveTextContent('already added');
     expect(screen.getByTestId('library-mac')).not.toHaveTextContent('finds');
     expect(screen.getByTestId('library-ip')).toHaveTextContent(

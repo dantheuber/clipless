@@ -11,7 +11,6 @@ import { Tools } from './components/settings/tools/Tools';
 import styles from './components/settings/shell/Shell.module.css';
 import w from './components/settings/shell/widgets.module.css';
 
-// Legacy tab params map onto the three tabs
 const TAB_PARAM_MAP: Record<string, SettingsTab> = {
   general: 'general',
   hotkeys: 'hotkeys',
@@ -25,10 +24,6 @@ function initialTab(): SettingsTab {
   return (param && TAB_PARAM_MAP[param]) || 'general';
 }
 
-/**
- * The settings window (spec 15.2): one shell with a left rail, one loading state for the
- * window, one toast stack. Each tab fills the pane.
- */
 function SettingsShell(): React.JSX.Element {
   const [tab, setTab] = useState<SettingsTab>(initialTab);
   const { settings, loadError, reload } = useSettingsStore();

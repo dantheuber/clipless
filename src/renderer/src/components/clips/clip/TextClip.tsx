@@ -7,6 +7,7 @@ import { prismLanguage } from '../../quick-look/tokens';
 import { Editor } from './Editor';
 import { CollapsedLine } from './CollapsedLine';
 import styles from './Clip.module.css';
+import { ClipTag } from './ClipTag';
 
 interface TextClipProps {
   clip: ClipItem;
@@ -14,15 +15,10 @@ interface TextClipProps {
   searchTerm?: string;
   onUpdate: (newContent: string) => void;
   onEditingChange?: (isEditing: boolean) => void;
-  /** Bumped by the row's Enter key to enter edit from the keyboard */
+
   editSeq?: number;
 }
 
-/**
- * A text row (spec 4): one collapsed line with a language tag for code and a chip on every
- * match. Clicking plain text edits in place; chips are not rendered while editing. Enter
- * commits, Esc restores the pre-edit content; nothing is saved while typing.
- */
 export const TextClip = ({
   clip,
   scan,
@@ -90,7 +86,7 @@ export const TextClip = ({
         '(empty)'
       ) : (
         <>
-          {language && <span className={styles.lang}>{language}</span>}
+          {language && <ClipTag row>{language}</ClipTag>}
           <CollapsedLine text={clip.content} scan={scan} term={searchTerm} />
         </>
       )}

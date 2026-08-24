@@ -3,10 +3,6 @@ import type { SearchTerm } from '../../shared/types';
 
 const RESERVED_GROUP_NAME = /^c\d+$/;
 
-/**
- * Validate that named capture groups in a pattern don't use reserved names (c1, c2, etc.)
- * These names conflict with positional template tokens.
- */
 function validateCaptureGroupNames(pattern: string): void {
   const groupNameRegex = /\(\?<(\w+)>/g;
   let match;
@@ -20,7 +16,6 @@ function validateCaptureGroupNames(pattern: string): void {
   }
 }
 
-// Search terms management functions
 export const getAllSearchTerms = async () => {
   try {
     return await storage.getSearchTerms();

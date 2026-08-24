@@ -11,12 +11,6 @@ import {
 } from './useSetting';
 import { errorText } from '../shell/errorText';
 
-/**
- * One load of the settings for the whole window (spec 15.2) and the one write path.
- * A change is applied to the control at once, sent through settings-changed, and put
- * back if the main process says no. No control is ever disabled by another control's
- * save: commits run side by side and each owns only its status keys.
- */
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [settings, setSettingsState] = useState<UserSettings | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -33,8 +27,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     setLoadError(null);
     try {
       const loaded = await window.api.storageGetSettings();
-      // Reflect the real login-item state so the toggle cannot drift from what happens
-      // at boot; null means the OS does not manage it here (Linux, dev builds).
       const osAutoStart = await window.api.getAutoStartState();
       if (typeof osAutoStart === 'boolean') loaded.autoStart = osAutoStart;
       setSettings(loaded);
@@ -124,8 +116,6 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
         );
         if (undo) schedule(keys, UNDO_MS, () => mark(keys, null));
       } else {
-        // Put the controls back, and the main process with them, so a refused hotkey
-        // or login item never stays half applied. Other in-flight changes keep theirs.
         const back = {
           ...(settingsRef.current as UserSettings),
           ...previousPatch(previous, patch),

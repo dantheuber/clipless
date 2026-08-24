@@ -10,15 +10,12 @@ test.describe('Clipboard', () => {
     const window = await app.firstWindow();
     await window.waitForSelector('#root > *');
 
-    // Write text to clipboard via Electron
     await app.evaluate(async ({ clipboard }) => {
       clipboard.writeText('Test clipboard entry');
     });
 
-    // Wait for clip to appear (polling interval is 250ms)
     await window.waitForTimeout(1000);
 
-    // Check that the clip content appears in the window
     const content = await window.textContent('body');
     expect(content).toContain('Test clipboard entry');
 

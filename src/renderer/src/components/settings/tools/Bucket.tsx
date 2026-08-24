@@ -2,13 +2,14 @@ import classNames from 'classnames';
 import { useEffect, useRef, type CSSProperties } from 'react';
 import type { GroupColours } from '../../../../../shared/types';
 import { DEFAULT_GROUP_SLOTS, GROUP_COLOUR_SLOTS } from '../../../../../shared/groupColours';
-import { GroupPill, groupStyle } from './GroupPill';
+import { GroupPill } from './GroupPill';
+import { groupStyle } from './groupStyle';
 import w from '../shell/widgets.module.css';
 import styles from './Tools.module.css';
 
 interface BucketProps {
   group: string;
-  /** Every other group, for the shared-swatch marks */
+
   others: readonly string[];
   slotFor: (group: string) => number;
   groupColours: GroupColours;
@@ -17,11 +18,6 @@ interface BucketProps {
   onClose: () => void;
 }
 
-/**
- * The colour bucket (spec 14.4): twelve fixed slots. A swatch another group uses is marked
- * and named on hover; sharing is allowed. Reset restores the default: the named default
- * for the six prototype groups, else the next free slot.
- */
 export function Bucket({
   group,
   others,

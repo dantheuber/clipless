@@ -2,15 +2,9 @@ import React, { useRef, useEffect } from 'react';
 import { useClipsData, useClipsMeta, useClipsPins, useQuickLook } from '../providers/clips';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
+import { SEARCH_INPUT_ID } from './searchInput';
 import styles from './SearchBar.module.css';
 
-export const SEARCH_INPUT_ID = 'clip-search-input';
-
-/**
- * The filter bar under the list (spec 16 rule 2): substring, images excluded, a count line
- * that names what was not searched, a pinned toggle, and one Esc level per press (text,
- * then the bar). Down or Enter hands focus to the first visible row.
- */
 export const SearchBar: React.FC = () => {
   const { searchTerm, pinnedOnly, filteredClips, clips, imagesNotSearched, isFiltering } =
     useClipsData();

@@ -3,7 +3,7 @@ import styles from './Shell.module.css';
 
 export type SettingsTab = 'general' | 'hotkeys' | 'tools';
 
-export const TABS: { id: SettingsTab; label: string }[] = [
+const TABS: { id: SettingsTab; label: string }[] = [
   { id: 'general', label: 'General' },
   { id: 'hotkeys', label: 'Hotkeys' },
   { id: 'tools', label: 'Tools' },
@@ -15,10 +15,6 @@ interface RailProps {
   version: string;
 }
 
-/**
- * The left rail (spec 15.2): General, Hotkeys, Tools, and the app version in monospace at
- * the bottom. No top tab strip, no Versions card.
- */
 export function Rail({ active, onSelect, version }: RailProps) {
   return (
     <nav className={styles.rail} data-testid="rail" aria-label="Settings sections">

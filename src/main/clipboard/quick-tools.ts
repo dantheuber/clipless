@@ -1,7 +1,6 @@
 import { storage } from '../storage';
 import type { QuickTool } from '../../shared/types';
 
-// Quick tools management functions
 export const getAllQuickTools = async () => {
   try {
     return await storage.getQuickTools();

@@ -1,9 +1,3 @@
-/**
- * Accelerator to platform key names (spec 15.6): Ctrl, Alt and Shift on Windows and
- * Linux; Cmd, Opt and Shift on macOS. Keys are stored as Electron accelerators and this is
- * the one function that turns them into something shown; the raw string never is.
- */
-
 export type KeyPlatform = 'darwin' | 'win32' | 'linux';
 
 export function keyPlatform(platform: string): KeyPlatform {
@@ -54,10 +48,6 @@ export function isModifierName(part: string): boolean {
   return part.toLowerCase() in MODIFIERS;
 }
 
-/**
- * The parts of an accelerator as shown, in order: modifiers first as the platform names
- * them, then the key.
- */
 export function displayKeys(accelerator: string, platform: string): string[] {
   const target = keyPlatform(platform);
   const parts = accelerator

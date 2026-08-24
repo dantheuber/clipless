@@ -1,8 +1,3 @@
-/*
- * Hotkeys (spec 15.6): the master toggle first, then a table with the keycaps as the
- * recorder. Off dims the table and blocks recording; the table is never hidden.
- */
-
 .master {
   display: flex;
   align-items: center;

@@ -2,10 +2,6 @@ import { useToolsData } from './useToolsData';
 import w from '../shell/widgets.module.css';
 import styles from './Tools.module.css';
 
-/**
- * The sample text every preview runs against (spec 14.4). Persists per user as a setting
- * when edited; empty falls back to the newest clip.
- */
 export function SampleText({
   caption = 'Sample text, drives every preview',
 }: {

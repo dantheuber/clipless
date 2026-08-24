@@ -1,7 +1,8 @@
 import type { ScanResult } from '../../../../shared/types';
 import { TemplatePills } from '../TemplatePills';
-import { tabCount } from '../tray/Tray';
+import { tabCount } from '../tray/openTabs';
 import styles from './QuickLook.module.css';
+import { CompactPrimaryButton } from '../CompactPrimaryButton';
 
 interface FooterProps {
   scan: ScanResult | null;
@@ -11,11 +12,6 @@ interface FooterProps {
   onLaunch: () => void;
 }
 
-/**
- * The reader footer (spec 5, 7): keyboard hints, the templates strip, the pinned count and
- * a Launch button that states the tab count. In a short window the hints drop and only
- * ready templates show.
- */
 export function Footer({ scan, pinnedTotal, urlCount, short, onLaunch }: FooterProps) {
   return (
     <div className={styles.footer} data-testid="ql-footer">
@@ -37,15 +33,9 @@ export function Footer({ scan, pinnedTotal, urlCount, short, onLaunch }: FooterP
           'nothing pinned'
         )}
       </span>
-      <button
-        type="button"
-        className={styles.primary}
-        onClick={onLaunch}
-        disabled={urlCount === 0}
-        data-testid="ql-launch"
-      >
+      <CompactPrimaryButton onClick={onLaunch} disabled={urlCount === 0} testId="ql-launch">
         {pinnedTotal > 0 ? `Launch (${tabCount(urlCount)})` : 'Launch'}
-      </button>
+      </CompactPrimaryButton>
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { GroupPill } from './GroupPill';
 import { SampleText } from './SampleText';
-import { Bucket } from './Bucket';
+import { ColourBucket, type ColourBucketTarget } from './ColourBucket';
 import { Consumers, ItemChip } from './UsesList';
 import { Fixes, type FixActions } from './Fixes';
 import type { Selection } from './ListPane';
@@ -16,15 +16,10 @@ interface OverviewProps {
   onPickColour: (group: string, slot: number | null) => void;
 }
 
-/**
- * Nothing selected (spec 14.3): the sample text, then one row per group with its pill and
- * sample count, "produced by" and "used by". A group nobody produces shows "nothing" and
- * the fix buttons. Clicking a pill opens the bucket.
- */
 export function Overview({ onGo, fixes, onPickColour }: OverviewProps) {
   const { config, values, slotFor, groupColours } = useToolsData();
   const groups = allGroups(config);
-  const [bucket, setBucket] = useState<{ group: string; anchor: HTMLElement } | null>(null);
+  const [bucket, setBucket] = useState<ColourBucketTarget | null>(null);
 
   return (
     <div data-testid="overview">
@@ -79,20 +74,14 @@ export function Overview({ onGo, fixes, onPickColour }: OverviewProps) {
           </div>
         );
       })}
-      {bucket && (
-        <Bucket
-          group={bucket.group}
-          others={groups.filter((g) => g !== bucket.group)}
-          slotFor={slotFor}
-          groupColours={groupColours}
-          anchor={bucket.anchor}
-          onPick={(slot) => {
-            onPickColour(bucket.group, slot);
-            setBucket(null);
-          }}
-          onClose={() => setBucket(null)}
-        />
-      )}
+      <ColourBucket
+        target={bucket}
+        groups={groups}
+        slotFor={slotFor}
+        groupColours={groupColours}
+        onPickColour={onPickColour}
+        onClose={() => setBucket(null)}
+      />
     </div>
   );
 }

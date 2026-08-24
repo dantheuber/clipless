@@ -8,17 +8,11 @@ import w from '../shell/widgets.module.css';
 import styles from './Tools.module.css';
 
 interface StartFromProps {
-  /** A library entry to prefill the editor with, or null for blank */
   onPick: (entry: BuiltinPattern | null) => void;
-  /** The entry is already a search term: select it, re-enabling it if it is off */
+
   onExisting: (existing: SearchTerm, disabled: boolean) => void;
 }
 
-/**
- * New search term (spec 14.3): one card per library entry with its group pill, name, the
- * regex and "already added" or "finds N in the sample", and a Blank card. The library
- * never runs on its own; picking an entry opens the editor prefilled.
- */
 export function StartFrom({ onPick, onExisting }: StartFromProps) {
   const { config, sample } = useToolsData();
   return (

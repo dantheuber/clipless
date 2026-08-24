@@ -10,8 +10,6 @@ test.describe('Theme', () => {
     const window = await app.firstWindow();
     await window.waitForSelector('#root > *');
 
-    // Check that a theme class is applied to the body
-    // Theme is applied asynchronously after settings load
     await window.waitForFunction(() => /light|dark/.test(document.body.className));
     const bodyClasses = await window.evaluate(() => document.body.className);
     expect(bodyClasses).toMatch(/light|dark/);

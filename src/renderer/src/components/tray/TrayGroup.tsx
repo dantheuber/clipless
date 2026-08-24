@@ -8,18 +8,13 @@ interface TrayGroupProps {
   values: readonly string[];
   tools: QuickTool[];
   pinsByGroup: PinsByGroup;
-  style: CSSProperties; // carries --gc
+  style: CSSProperties;
   onRemove: (value: string) => void;
   onOpen: (urls: string[]) => void;
 }
 
 const shorten = (value: string) => (value.length > 30 ? `${value.slice(0, 28)}…` : value);
 
-/**
- * One capture group in the tray: name and colour, the pinned values as removable chips, and
- * one button per compatible tool with a multiplier when it opens more than one tab. Under
- * 480px the three columns stack (CSS).
- */
 export function TrayGroup({
   group,
   values,

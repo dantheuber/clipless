@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
-import type { ScanResult, Template } from '../../../shared/types';
-import { TemplatePills, useTemplatePills, usedValues } from './TemplatePills';
+import type { Template } from '../../../shared/types';
+import { TemplatePills } from './TemplatePills';
+import { useTemplatePills, usedValues } from './useTemplatePills';
+import { template, templateScan as scan } from './templatePillsFixtures';
 
 const { state } = vi.hoisted(() => ({
   state: {
@@ -26,31 +28,9 @@ vi.mock('../providers/clips', () => ({
   clipText: (clip: { content: string }) => clip.content,
 }));
 
-vi.mock('./Toast', () => ({
+vi.mock('./useToast', () => ({
   useToast: () => state.toast,
 }));
-
-const template = (id: string, name: string, content: string): Template => ({
-  id,
-  name,
-  content,
-  createdAt: 0,
-  updatedAt: 0,
-  order: 0,
-});
-
-const scan = (matches: [string, string][]): ScanResult => ({
-  matches: matches.map(([group, value], i) => ({
-    group,
-    value,
-    start: i * 20,
-    end: i * 20 + value.length,
-    termId: 't',
-  })),
-  groups: [...new Set(matches.map(([g]) => g))],
-  errors: [],
-  large: false,
-});
 
 beforeEach(() => {
   state.templates = [

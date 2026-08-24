@@ -1,10 +1,6 @@
 import { createContext, useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import { detectLanguage, isCode, mapToSyntaxHighlighterLanguage } from '../utils/languageDetection';
 
-/**
- * Language detection context for managing code detection and syntax highlighting settings
- */
-
 export interface LanguageDetectionSettings {
   codeDetectionEnabled: boolean;
   showLanguageLabel: boolean;
@@ -17,14 +13,11 @@ export interface DetectedLanguageInfo {
 }
 
 export interface LanguageDetectionContextType {
-  // Settings
   settings: LanguageDetectionSettings;
   updateSettings: (newSettings: Partial<LanguageDetectionSettings>) => void;
 
-  // Language detection functions
   detectTextLanguage: (text: string) => DetectedLanguageInfo;
   isCodeDetectionEnabled: boolean;
-  /** Row tag on code clips; false while code detection is off. */
   isLanguageLabelEnabled: boolean;
 }
 
@@ -33,8 +26,7 @@ const defaultSettings: LanguageDetectionSettings = {
   showLanguageLabel: true,
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const LanguageDetectionContext = createContext<LanguageDetectionContextType>({
+const LanguageDetectionContext = createContext<LanguageDetectionContextType>({
   settings: defaultSettings,
   updateSettings: () => {},
   detectTextLanguage: () => ({ language: null, isCode: false, syntaxHighlighterLanguage: 'text' }),
@@ -50,7 +42,6 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
   const [settings, setSettings] = useState<LanguageDetectionSettings>(defaultSettings);
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
 
-  // Load settings from storage on mount
   useEffect(() => {
     const loadSettings = async () => {
       if (!window.api) {
@@ -79,7 +70,6 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
     loadSettings();
   }, []);
 
-  // Save settings to storage whenever they change
   useEffect(() => {
     if (isInitiallyLoading) return;
 
@@ -87,7 +77,6 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
       if (!window.api) return;
 
       try {
-        // Get current settings and merge with language detection settings
         const currentSettings = (await window.api.storageGetSettings()) || {};
         const updatedSettings = {
           ...currentSettings,
@@ -100,12 +89,10 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
       }
     };
 
-    // Debounce saves
     const timeoutId = setTimeout(saveSettings, 500);
     return () => clearTimeout(timeoutId);
   }, [settings, isInitiallyLoading]);
 
-  // Listen for settings updates from other windows
   useEffect(() => {
     if (!window.api?.onSettingsUpdated) return;
 
@@ -126,9 +113,6 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
     return window.api.onSettingsUpdated(handleSettingsUpdate);
   }, []);
 
-  /**
-   * Update language detection settings
-   */
   const updateSettings = useCallback((newSettings: Partial<LanguageDetectionSettings>) => {
     setSettings((prevSettings) => ({
       ...prevSettings,
@@ -136,9 +120,6 @@ export function LanguageDetectionProvider({ children }: { children: React.ReactN
     }));
   }, []);
 
-  /**
-   * Detect the language of a text snippet
-   */
   const detectTextLanguage = useCallback(
     (text: string): DetectedLanguageInfo => {
       if (!settings.codeDetectionEnabled) {

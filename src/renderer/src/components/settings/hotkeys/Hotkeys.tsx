@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { useState } from 'react';
-import { useToast } from '../../Toast';
+import { useToast } from '../../useToast';
 import { Pane } from '../shell/Pane';
 import { Footer } from '../shell/Footer';
 import { Status } from '../shell/Status';
@@ -14,11 +14,6 @@ import w from '../shell/widgets.module.css';
 import shell from '../shell/Shell.module.css';
 import styles from './Hotkeys.module.css';
 
-/**
- * Hotkeys (spec 15.6): the master toggle, then a table of Action, Shortcut, status, On and
- * reset. Clicking the keycaps records in place; a conflict is caught before registration;
- * a refused registration shows "not saved, retry" on the row.
- */
 export function Hotkeys() {
   const platform = window.api.platform;
   const toast = useToast();

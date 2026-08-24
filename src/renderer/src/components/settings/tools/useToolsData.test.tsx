@@ -69,7 +69,6 @@ describe('useToolsData', () => {
       expect.objectContaining({ toolsSampleText: 'now 198.51.100.7' })
     );
 
-    // a blur with nothing new writes nothing
     fireEvent.blur(box);
     await flush();
     expect(api().settingsChanged).toHaveBeenCalledTimes(1);

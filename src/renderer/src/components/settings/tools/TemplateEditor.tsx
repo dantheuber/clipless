@@ -1,9 +1,11 @@
 import classNames from 'classnames';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Readiness } from './Readiness';
-import { TokenPicker, insertAtCaret } from './TokenPicker';
+import { TokenPicker } from './TokenPicker';
 import { TokenText } from './TokenText';
-import { trapTab, useEditorHost } from './editorHost';
+import { trapTab } from './editorHost';
+import { EditorActions } from './editorControls';
+import { useCaretInsertion, useEditorLifecycle } from './editorHooks';
 import { isClipTemplate } from './model';
 import { resolveTemplate } from './resolve';
 import { useToolsData } from './useToolsData';
@@ -21,19 +23,12 @@ interface TemplateEditorProps {
   onCancel: () => void;
 }
 
-/**
- * The template editor (spec 14.3): name, text, token picker, readiness line, generated
- * text with values coloured by group. A positional-only template says "clip template"
- * instead of a readiness line.
- */
 export function TemplateEditor({ initial, onSave, onCancel }: TemplateEditorProps) {
   const { config, values, scan } = useToolsData();
-  const host = useEditorHost();
   const [name, setName] = useState(initial.name);
   const [content, setContent] = useState(initial.content);
   const [saving, setSaving] = useState(false);
   const textRef = useRef<HTMLTextAreaElement>(null);
-  const [caret, setCaret] = useState<number | null>(null);
 
   const canSave = name.trim().length > 0 && content.trim().length > 0 && !saving;
   const dirty = name !== initial.name || content !== initial.content;
@@ -48,30 +43,8 @@ export function TemplateEditor({ initial, onSave, onCancel }: TemplateEditorProp
     }
   };
 
-  useEffect(() => {
-    host.setDirty(dirty);
-  }, [dirty, host]);
-  useEffect(() => {
-    host.setSaver(canSave ? save : null);
-    return () => host.setSaver(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSave, name, content]);
-  useEffect(() => {
-    textRef.current?.focus();
-  }, []);
-  useEffect(() => {
-    if (caret !== null && textRef.current) {
-      textRef.current.focus();
-      textRef.current.setSelectionRange(caret, caret);
-      setCaret(null);
-    }
-  }, [caret, content]);
-
-  const insert = (token: string) => {
-    const next = insertAtCaret(textRef.current, content, token);
-    setContent(next.value);
-    setCaret(next.caret);
-  };
+  useEditorLifecycle({ dirty, canSave, save, focusRef: textRef });
+  const insert = useCaretInsertion(textRef, content, setContent);
 
   return (
     <div className={styles.editor} onKeyDown={trapTab} data-testid="template-editor">
@@ -123,25 +96,7 @@ export function TemplateEditor({ initial, onSave, onCancel }: TemplateEditorProp
           <span className={styles.none}>empty</span>
         )}
       </div>
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={classNames(w.btn, w.primary)}
-          disabled={!canSave}
-          onClick={save}
-          data-testid="template-save"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          className={classNames(w.btn, w.ghost)}
-          onClick={onCancel}
-          data-testid="template-cancel"
-        >
-          Cancel
-        </button>
-      </div>
+      <EditorActions prefix="template" canSave={canSave} onSave={save} onCancel={onCancel} />
     </div>
   );
 }

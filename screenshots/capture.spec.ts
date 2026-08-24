@@ -1,13 +1,3 @@
-/**
- * Documentation screenshot capture.
- *
- * Run with: `npm run screenshots` (builds first) or `npm run screenshots:only`
- * (reuses an existing build). Output lands in `screenshots/output/` — copy those
- * PNGs into the `gh-pages` branch's image folder to publish them.
- *
- * NOTE: this drives the real Electron app. It uses an isolated profile, so it
- * does not touch your real clip store, but it briefly writes the OS clipboard.
- */
 import { test } from '@playwright/test';
 import {
   launchApp,
@@ -28,22 +18,18 @@ for (const theme of THEMES) {
   test(`capture ${theme} theme screenshots`, async () => {
     const { app, page, userDataDir } = await launchApp();
     try {
-      await seed(app, page, theme);
+      await seed(app, page, theme); // drives the real app: isolated profile, but briefly writes the OS clipboard
 
-      // 1. Main window with curated clips (hero).
       await shoot(page, `main-${theme}.png`);
 
-      // 2. Clip search filtering in action.
       await showSearch(app);
       await page.fill(SEARCH_INPUT, SEARCH_FILTER);
       await page.waitForTimeout(400);
       await shoot(page, `search-${theme}.png`);
-      // The first Escape clears the filter, the second hides the bar.
-      await page.press(SEARCH_INPUT, 'Escape');
-      await page.press(SEARCH_INPUT, 'Escape');
+      await page.press(SEARCH_INPUT, 'Escape'); // once to clear the filter
+      await page.press(SEARCH_INPUT, 'Escape'); // again to hide the bar
       await page.locator(SEARCH_INPUT).waitFor({ state: 'hidden' });
 
-      // 3. Settings tabs.
       const settings = await openSettingsWindow(app, page);
       await shoot(settings, `settings-general-${theme}.png`);
       await settings.getByRole('button', { name: 'Tools' }).click();
@@ -54,10 +40,8 @@ for (const theme of THEMES) {
       await shoot(settings, `settings-hotkeys-${theme}.png`);
       await settings.close();
 
-      // 4. Quick look on the newest clip, with the IP pinned so the tray shows its tools.
-      await openQuickLook(page, QUICK_LOOK_CONTENT, 'ip');
-      // Wrap the long line so every chip is in view.
-      await page.keyboard.press('w');
+      await openQuickLook(page, QUICK_LOOK_CONTENT, 'ip'); // pinning the IP brings up the tray with its tools
+      await page.keyboard.press('w'); // wrap the long line so every chip is in view
       await page.waitForTimeout(500);
       await shoot(page, `patterns-${theme}.png`);
       await page.keyboard.press('Escape');

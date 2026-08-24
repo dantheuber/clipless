@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import type { ScanResult } from '../../../../../shared/types';
-import { CollapsedLine, ROW_TEXT_LIMIT, markHits, visibleMatches } from './CollapsedLine';
+import { CollapsedLine } from './CollapsedLine';
+import { ROW_TEXT_LIMIT, markHits, visibleMatches } from './matches';
 
-vi.mock('../../../providers/clips', () => ({
-  useClipsPins: () => ({ isPinned: () => false, togglePins: vi.fn() }),
-}));
+vi.mock('../../../providers/clips', async () =>
+  (await import('./clipTestFixtures')).unpinnedClipHooks()
+);
 
-vi.mock('../../../providers/scan', () => ({
-  useScanIndex: () => ({ slotFor: () => 0 }),
-}));
+vi.mock('../../../providers/scan', async () =>
+  (await import('./clipTestFixtures')).fixedScanSlotHooks(0)
+);
 
 const m = (group: string, value: string, start: number) => ({
   group,

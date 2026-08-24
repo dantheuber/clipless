@@ -1,13 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, act } from '@testing-library/react';
-import {
-  RenderedView,
-  FRAME_CSP,
-  FRAME_HEAD,
-  frameDocument,
-  frameTextColour,
-  frameThumbColour,
-} from './RenderedView';
+import { RenderedView } from './RenderedView';
+import { FRAME_CSP, FRAME_HEAD, frameDocument, frameTextColour, frameThumbColour } from './frame';
 
 const HOSTILE =
   '<p><b>Invoice #4471</b> is overdue. <a href="javascript:alert(1)">Pay now</a></p>' +
@@ -54,7 +48,6 @@ describe('RenderedView', () => {
       Object.defineProperty(Element.prototype, 'innerHTML', innerHtml);
     }
     expect(setter).not.toHaveBeenCalled();
-    // the raw source reaches no element and no text node
     const everything = [...document.body.querySelectorAll('*')];
     for (const element of everything) {
       for (const attr of element.getAttributeNames()) {
@@ -120,7 +113,7 @@ describe('RenderedView', () => {
     expect(doc.startsWith(FRAME_HEAD)).toBe(true);
     expect(doc).toContain('color:#123456');
     expect(doc.endsWith('<p>hi</p></body></html>')).toBe(true);
-    expect(frameTextColour()).toBe('#eeeeee'); // jsdom has no --text variable
+    expect(frameTextColour()).toBe('#eeeeee');
     document.body.style.setProperty('--text', '#abcdef');
     expect(frameTextColour()).toBe('#abcdef');
     document.body.style.removeProperty('--text');
@@ -130,7 +123,7 @@ describe('RenderedView', () => {
     const doc = frameDocument('<p>hi</p>', '#123456', '#654321');
     expect(doc).toContain('::-webkit-scrollbar-thumb{background:#654321');
     expect(doc).toContain('::-webkit-scrollbar-button{display:none}');
-    expect(frameThumbColour()).toBe('#4d4d4d'); // jsdom has no --sb-thumb variable
+    expect(frameThumbColour()).toBe('#4d4d4d');
     document.body.style.setProperty('--sb-thumb', '#101010');
     expect(frameThumbColour()).toBe('#101010');
     document.body.style.removeProperty('--sb-thumb');

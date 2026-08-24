@@ -9,10 +9,6 @@ interface ToggleSwitchProps {
   testId?: string;
 }
 
-/**
- * The one toggle of the settings window: a track and a knob, no ON or OFF text, both
- * themes through the variable set.
- */
 export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   checked,
   onChange,

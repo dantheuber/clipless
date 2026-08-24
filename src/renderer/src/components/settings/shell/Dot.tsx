@@ -12,10 +12,6 @@ const CLASS: Record<DotKind, string> = {
   busy: w.dotBusy,
 };
 
-/**
- * Status dots mean the same everywhere (spec 15.2): green live or healthy, amber needs
- * attention, red broken or conflicting, grey off, hollow informational, blue busy.
- */
 export function Dot({
   kind,
   title,

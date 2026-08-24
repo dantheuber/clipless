@@ -1,19 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import type { HotkeySettings } from '../../../../../shared/types';
 import { Recorder } from './Recorder';
+import { hotkeySettings } from './hotkeyFixtures';
 
-const hotkeys: HotkeySettings = {
-  enabled: true,
-  focusWindow: { enabled: true, key: 'CommandOrControl+Shift+V' },
-  quickClip1: { enabled: true, key: 'CommandOrControl+Shift+1' },
-  quickClip2: { enabled: true, key: 'CommandOrControl+Shift+2' },
-  quickClip3: { enabled: true, key: 'CommandOrControl+Shift+3' },
-  quickClip4: { enabled: true, key: 'CommandOrControl+Shift+4' },
-  quickClip5: { enabled: true, key: 'CommandOrControl+Shift+5' },
-  quickLook: { enabled: true, key: 'CommandOrControl+Shift+T' },
-  searchClips: { enabled: true, key: 'CommandOrControl+Shift+F' },
-};
+const hotkeys = hotkeySettings(true);
 
 const onAccept = vi.fn();
 const onSwap = vi.fn();
@@ -114,7 +104,6 @@ describe('Recorder', () => {
         onCancel={onCancel}
       />
     );
-    // Cmd+Shift+3 is held by nobody now but is a macOS screenshot key: accepted with the warning shown
     press({ key: 'Meta', code: 'MetaLeft', metaKey: true });
     press({ key: '3', code: 'Digit3', metaKey: true, shiftKey: true });
     expect(screen.getByTestId('recorder')).toHaveTextContent('screenshot');

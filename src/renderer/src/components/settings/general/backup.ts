@@ -1,8 +1,3 @@
-/**
- * The full backup file the General footer exports and imports (spec 15.5): what it holds,
- * how it is named, and how sizes read.
- */
-
 export interface BackupSummary {
   clips: number;
   locked: number;
@@ -15,9 +10,6 @@ export interface BackupSummary {
 
 const count = (value: unknown): number => (Array.isArray(value) ? value.length : 0);
 
-/**
- * What a backup holds, or the reason it cannot be read.
- */
 export function summarizeBackup(text: string): { summary: BackupSummary } | { error: string } {
   let data: unknown;
   try {
@@ -54,10 +46,6 @@ export function summarizeBackup(text: string): { summary: BackupSummary } | { er
   };
 }
 
-/**
- * The text of a picked file. Blob.text is missing in some embedders, so fall back to a
- * FileReader.
- */
 export function readFileText(file: File): Promise<string> {
   if (typeof file.text === 'function') return file.text();
   return new Promise((resolve, reject) => {
@@ -77,9 +65,6 @@ export function formatBytes(bytes: number): string {
   return `${Math.round(bytes / 1024)} KB`;
 }
 
-/**
- * Save text as a file through the browser's download path. Returns its byte size.
- */
 export function downloadText(name: string, text: string, type = 'application/json'): number {
   const blob = new Blob([text], { type });
   const url = URL.createObjectURL(blob);

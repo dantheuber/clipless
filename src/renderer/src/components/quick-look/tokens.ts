@@ -15,14 +15,6 @@ import bash from 'refractor/bash';
 import powershell from 'refractor/powershell';
 import type { Match } from '../../../../shared/types';
 
-/**
- * Syntax tokens per line with chips inside them (spec 17, plan step 2). Prism runs on one
- * line at a time (tokens never span lines, so multi-line token state stays out of scope),
- * then each line's text is split at the token boundaries and at the match offsets from
- * the scan. A match that spans a token boundary splits both tokens; the renderer wraps the
- * run of segments that share a match in one chip.
- */
-
 for (const syntax of [
   javascript,
   typescript,
@@ -43,31 +35,26 @@ for (const syntax of [
 
 export interface Run {
   text: string;
-  classes: string[]; // Prism token types, without the "token" prefix
+  classes: string[];
 }
 
 export interface Segment {
-  start: number; // offset within the line
+  start: number;
   end: number;
   classes: string[];
   match: Match | null;
 }
 
 export interface Line {
-  start: number; // offset of the line within the text
+  start: number;
   text: string;
-  matches: Match[]; // the non-overlapping matches on this line
+  matches: Match[];
 }
 
-/**
- * Prism's token tree for one line, flattened to runs. An unknown language gives one plain
- * run, so the content pane renders the same way for prose.
- */
 export function tokenizeLine(line: string, language: string | null): Run[] {
   if (line.length === 0) return [];
   if (!language || !refractor.registered(language)) return [{ text: line, classes: [] }];
   const runs: Run[] = [];
-  // refractor's tree holds text nodes and elements with a className list; nothing else
   const walk = (nodes: RootContent[], inherited: string[]) => {
     for (const node of nodes) {
       if (node.type === 'text') {
@@ -83,11 +70,6 @@ export function tokenizeLine(line: string, language: string | null): Run[] {
   return runs;
 }
 
-/**
- * Split the text into lines with their offsets and the matches that fall on each. Matches
- * are already sorted by start; when two overlap the earlier one wins (spec 17.3), and a
- * match that crosses a line break is clipped to each line it touches.
- */
 export function splitLines(text: string, matches: readonly Match[]): Line[] {
   const lines: Line[] = [];
   const parts = text.split('\n');
@@ -98,7 +80,6 @@ export function splitLines(text: string, matches: readonly Match[]): Line[] {
     const body = part.endsWith('\r') ? part.slice(0, -1) : part;
     const end = offset + body.length;
     const onLine: Match[] = [];
-    // matches that started before this line and reach into it
     for (let i = next; i < kept.length && kept[i].start < end; i++) {
       const m = kept[i];
       if (m.end > offset) onLine.push(m);
@@ -121,10 +102,6 @@ function nonOverlapping(matches: readonly Match[]): Match[] {
   return kept;
 }
 
-/**
- * One line's runs cut at every match boundary. Offsets are within the line; the line's
- * matches carry text offsets, so lineStart converts them.
- */
 export function segmentLine(
   runs: readonly Run[],
   lineStart: number,
@@ -154,9 +131,6 @@ export function segmentLine(
   return segments;
 }
 
-/**
- * Segments grouped so consecutive ones with the same match render inside one chip.
- */
 export function groupByMatch(
   segments: readonly Segment[]
 ): { match: Match | null; segments: Segment[] }[] {
@@ -172,10 +146,6 @@ export function groupByMatch(
   return groups;
 }
 
-/**
- * The Prism language for a clip, or null for prose. Mirrors the names languageDetection
- * produces; markup covers html and xml.
- */
 export function prismLanguage(
   language: string | undefined,
   isCode: boolean | undefined

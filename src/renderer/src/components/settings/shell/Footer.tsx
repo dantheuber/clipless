@@ -7,9 +7,6 @@ interface FooterProps {
   children?: ReactNode;
 }
 
-/**
- * One line per tab (spec 15.2): which model the tab uses, and the rare actions as links.
- */
 export function Footer({ text, children }: FooterProps) {
   return (
     <div className={styles.footer} data-testid="footer">

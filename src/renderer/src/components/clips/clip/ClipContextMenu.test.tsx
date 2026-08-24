@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
-import { ClipContextMenu, ROW_ONE_REASON, templatePreview } from './ClipContextMenu';
+import { ClipContextMenu } from './ClipContextMenu';
+import { ROW_ONE_REASON, templatePreview } from './menuText';
+import { clipMenuTemplates } from './menuFixtures';
 
 const { state } = vi.hoisted(() => ({
   state: {
@@ -41,7 +43,7 @@ vi.mock('../../../providers/scan', () => ({
   useScanIndex: () => ({ templates: state.templates }),
 }));
 
-vi.mock('../../Toast', () => ({
+vi.mock('../../useToast', () => ({
   useToast: () => state.toast,
 }));
 
@@ -50,11 +52,7 @@ const api = () => window.api as unknown as Record<string, ReturnType<typeof vi.f
 beforeEach(() => {
   vi.clearAllMocks();
   state.locked = new Set();
-  state.templates = [
-    { id: 't1', name: 'Standup', content: 'Yesterday: {c1}\nToday: {c2}' },
-    { id: 't2', name: 'Match driven', content: 'ip {ip}' },
-    { id: 't3', name: 'Static', content: 'no tokens' },
-  ];
+  state.templates = clipMenuTemplates();
   api().setClipboardText.mockResolvedValue(undefined);
 });
 
@@ -88,7 +86,6 @@ describe('ClipContextMenu', () => {
     fireEvent.click(del);
     expect(state.toggleClipLock).not.toHaveBeenCalled();
     expect(state.emptyClip).not.toHaveBeenCalled();
-    // quick look and copy still work on row 1
     expect(screen.getByTestId('menu-quick-look')).not.toHaveAttribute('aria-disabled');
   });
 

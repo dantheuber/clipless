@@ -16,10 +16,6 @@ interface InspectorProps {
   children: ReactNode;
 }
 
-/**
- * The inspector frame (spec 14.3): a header with the back arrow, the item name, its kind
- * tag, Edit and Uses tabs and Delete, then the body.
- */
 export function Inspector({
   title,
   kind,

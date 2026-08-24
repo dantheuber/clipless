@@ -56,8 +56,7 @@ describe('resolveGroupSlot', () => {
   });
 
   it('gives an unnamed group the lowest slot no known group uses', () => {
-    // ip takes 0 and email takes 1 by default, so the first free slot is 2
-    expect(resolveGroupSlot('mac', undefined, ['ip', 'email', 'mac'])).toBe(2);
+    expect(resolveGroupSlot('mac', undefined, ['ip', 'email', 'mac'])).toBe(2); // ip and email hold 0 and 1 by default
   });
 
   it('skips slots taken by overrides when picking a free one', () => {

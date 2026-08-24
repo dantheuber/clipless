@@ -1,6 +1,7 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
-import { ImageClip, formatBytes, imageBytes, imageFormat, imageMeta } from './ImageClip';
+import { ImageClip } from './ImageClip';
+import { formatBytes, imageBytes, imageFormat, imageMeta } from './imageMeta';
 
 afterEach(cleanup);
 
@@ -48,7 +49,7 @@ describe('ImageClip', () => {
   it('shows a generic tag and an estimated size for a clip with no recorded metadata', () => {
     render(<ImageClip clip={{ id: 'c1', type: 'image', content: 'not-a-data-url' }} />);
     expect(screen.getByText('image')).toBeInTheDocument();
-    expect(screen.getByText('11 B')).toBeInTheDocument(); // 14 characters * 0.75, rounded
+    expect(screen.getByText('11 B')).toBeInTheDocument();
   });
 
   it('shows a fallback when the image fails to load', () => {

@@ -1,9 +1,6 @@
 import { globalShortcut } from 'electron';
 import type { HotkeyRegistryState } from './types';
 
-/**
- * Handles low-level hotkey registration and unregistration
- */
 export class HotkeyRegistry {
   private state: HotkeyRegistryState = {
     isInitialized: false,
@@ -18,12 +15,8 @@ export class HotkeyRegistry {
     this.state.isInitialized = value;
   }
 
-  /**
-   * Register a single hotkey with the system
-   */
   registerHotkey(accelerator: string, callback: () => void): boolean {
     try {
-      // Check if hotkey is already registered
       if (this.state.currentHotkeys.has(accelerator)) {
         console.warn(`Hotkey ${accelerator} is already registered`);
         return false;
@@ -44,9 +37,6 @@ export class HotkeyRegistry {
     }
   }
 
-  /**
-   * Unregister all currently registered hotkeys
-   */
   unregisterAllHotkeys(): void {
     this.state.currentHotkeys.forEach((accelerator) => {
       try {
@@ -58,23 +48,14 @@ export class HotkeyRegistry {
     this.state.currentHotkeys.clear();
   }
 
-  /**
-   * Get the list of currently registered hotkey accelerators
-   */
   getCurrentHotkeys(): string[] {
     return Array.from(this.state.currentHotkeys);
   }
 
-  /**
-   * Check if a specific hotkey is currently registered
-   */
   isHotkeyRegistered(accelerator: string): boolean {
     return this.state.currentHotkeys.has(accelerator);
   }
 
-  /**
-   * Clean up all hotkeys on shutdown
-   */
   cleanup(): void {
     this.unregisterAllHotkeys();
     this.state.isInitialized = false;

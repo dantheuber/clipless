@@ -19,25 +19,20 @@ import { openAppPath } from '../app/open-path';
 import type { AppPathName, SettingsApplyResult, UserSettings } from '../../shared/types';
 
 export function setupMainIPC(): void {
-  // IPC test
   ipcMain.on('ping', () => console.log('pong'));
 
-  // Settings window IPC handlers
   ipcMain.handle('open-settings', (_event, tab?: string) => {
     createSettingsWindow(tab);
   });
 
-  // The one write path for settings: save, apply, re-register the hotkeys, relay to
-  // every window, and answer what the OS refused so the row can say "not saved" (15.3).
   ipcMain.handle(
-    'settings-changed',
+    'settings-changed', // the one write path for settings: save, apply, re-register hotkeys, relay to every window, and answer what the OS refused so the row can say "not saved" (spec 15.3)
     async (_event, settings: UserSettings): Promise<SettingsApplyResult> => {
       try {
         const previous = await storage.getSettings();
         await storage.saveSettings(settings);
 
-        // The one expected refusal on General: the OS declining the login item (15.5)
-        const autoStartApplied = applyAutoStart(settings.autoStart);
+        const autoStartApplied = applyAutoStart(settings.autoStart); // the one expected refusal on General: the OS declining the login item (spec 15.5)
         const autoStartRefused = !autoStartApplied && settings.autoStart !== previous.autoStart;
 
         const mainWindow = getMainWindow();
@@ -75,18 +70,13 @@ export function setupMainIPC(): void {
     }
   );
 
-  // Import with replace restarts (15.5); the restart waits for the save queue first
-  ipcMain.handle('app-restart', () => restartApp());
+  ipcMain.handle('app-restart', () => restartApp()); // import-with-replace restarts (spec 15.5); the restart waits for the save queue first
 
-  // The About panel's data folder and log links (15.4)
-  ipcMain.handle('open-app-path', (_event, name: AppPathName) => openAppPath(name));
+  ipcMain.handle('open-app-path', (_event, name: AppPathName) => openAppPath(name)); // the About panel's data folder and log links (spec 15.4)
 
-  // The one copy of the hotkey defaults; the settings window reads them from here
   ipcMain.handle('hotkeys-get-defaults', () => DEFAULT_HOTKEY_SETTINGS);
 
-  // Auto-updater IPC handlers. The electron-updater events move the state; the
-  // handlers only cover what the events cannot see (a timeout, a dev build).
-  ipcMain.handle('get-update-state', () => getUpdateState());
+  ipcMain.handle('get-update-state', () => getUpdateState()); // electron-updater events move the update state; the handlers below only cover what the events cannot see (a timeout, a dev build)
 
   ipcMain.handle('check-for-updates', async () => {
     if (!is.dev) {
@@ -102,8 +92,7 @@ export function setupMainIPC(): void {
         );
       }
     }
-    // Dev builds cannot check; report up to date as the old prose status did
-    setUpdateState({ status: 'upToDate' });
+    setUpdateState({ status: 'upToDate' }); // dev builds cannot check; report up to date as the old prose status did
     return null;
   });
 

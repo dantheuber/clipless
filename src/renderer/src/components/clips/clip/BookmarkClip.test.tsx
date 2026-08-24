@@ -2,13 +2,13 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, cleanup } from '@testing-library/react';
 import { BookmarkClip } from './BookmarkClip';
 
-vi.mock('../../../providers/clips', () => ({
-  useClipsPins: () => ({ isPinned: () => false, togglePins: vi.fn() }),
-}));
+vi.mock('../../../providers/clips', async () =>
+  (await import('./clipTestFixtures')).unpinnedClipHooks()
+);
 
-vi.mock('../../../providers/scan', () => ({
-  useScanIndex: () => ({ slotFor: () => 4 }),
-}));
+vi.mock('../../../providers/scan', async () =>
+  (await import('./clipTestFixtures')).fixedScanSlotHooks(4)
+);
 
 afterEach(cleanup);
 

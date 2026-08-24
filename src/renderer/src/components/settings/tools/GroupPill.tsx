@@ -1,7 +1,7 @@
 import classNames from 'classnames';
-import type { CSSProperties } from 'react';
 import { useScanIndex } from '../../../providers/scan';
 import type { GroupState } from './model';
+import { groupStyle } from './groupStyle';
 import styles from './Tools.module.css';
 
 interface GroupPillProps {
@@ -13,15 +13,6 @@ interface GroupPillProps {
   title?: string;
 }
 
-export function groupStyle(slot: number): CSSProperties {
-  return { '--gc': `var(--slot-${slot})` } as CSSProperties;
-}
-
-/**
- * A capture group pill: swatch plus name in the group's colour (spec 14.3). An orphan is
- * dashed and hollow; a group with only disabled producers is dimmed. Clickable pills open
- * the bucket or insert a token.
- */
 export function GroupPill({ group, state = 'ok', count, big, onClick, title }: GroupPillProps) {
   const { slotFor } = useScanIndex();
   const className = classNames(styles.pill, {

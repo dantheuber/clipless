@@ -6,6 +6,8 @@
 * [Dev Builds Silently Defer to an Installed Instance](dev-builds-defer-to-an-installed-instance.md)
 * [E2E on Linux: Playwright forces the basic password store; set CLIPLESS_PLAINTEXT_STORAGE=1](e2e-on-linux-playwright-forces-the-basic-password-store.md)
 * [E2E Tests Touch the Real System Clipboard](e2e-tests-touch-system-clipboard.md)
+* [habit-hooks comment sensor is length-based](habit-hooks-comment-sensor-is-length-based.md)
+* [habit-hooks needs project-installed ts-morph and jscpd](habit-hooks-needs-project-installed-ts-morph-and-jscpd.md)
 * [Language detection over-labels prose as code](language-detection-over-labels-prose-as-code.md)
 * [macOS Builds Are Unsigned](macos-unsigned-builds.md)
 * [Scrollbars are styled once in theme.css](scrollbars-are-styled-once-in-theme-css.md)

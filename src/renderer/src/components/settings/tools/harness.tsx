@@ -6,12 +6,6 @@ import { ScanIndexProvider } from '../../../providers/scan';
 import { SettingsProvider } from '../general/SettingsProvider';
 import { ToolsDataProvider } from './ToolsDataProvider';
 
-/**
- * Test harness for the Tools tab: a fake Quick Clips config behind the mocked window.api,
- * with the config-changed broadcast wired so a write reloads the providers as the real
- * main process would.
- */
-
 export const term = (id: string, name: string, pattern: string, enabled = true): SearchTerm => ({
   id,
   name,
@@ -21,7 +15,7 @@ export const term = (id: string, name: string, pattern: string, enabled = true):
   updatedAt: 0,
   order: 0,
 });
-export const tool = (id: string, name: string, url: string): QuickTool => ({
+const tool = (id: string, name: string, url: string): QuickTool => ({
   id,
   name,
   url,
@@ -30,7 +24,7 @@ export const tool = (id: string, name: string, url: string): QuickTool => ({
   updatedAt: 0,
   order: 0,
 });
-export const template = (id: string, name: string, content: string): Template => ({
+const template = (id: string, name: string, content: string): Template => ({
   id,
   name,
   content,
@@ -76,14 +70,10 @@ export function defaultConfig(): FakeConfig {
 let listener: (() => void) | null = null;
 let seq = 100;
 
-/** What the main process does after any config write: tell every window. */
 export function fireConfigChanged(): void {
   listener?.();
 }
 
-/**
- * Point the mocked api at a config. Writes mutate it and fire the broadcast.
- */
 export function installConfig(
   config: FakeConfig,
   settings: Partial<UserSettings> = {}

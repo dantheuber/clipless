@@ -3,10 +3,6 @@ import type { RowStatus } from '../general/useSetting';
 import styles from './Shell.module.css';
 import w from './widgets.module.css';
 
-/**
- * The one status slot beside a control (spec 15.3): "saving" dim, "saved" green with an undo
- * link, "not saved" red with a retry link. Empty when the row has nothing to say.
- */
 export function Status({ status, testId }: { status: RowStatus | undefined; testId?: string }) {
   if (!status) return <span className={styles.status} data-testid={testId} />;
   if (status.kind === 'saving') {

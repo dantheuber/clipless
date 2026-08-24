@@ -3,12 +3,6 @@ import { extractTemplateTokens } from './templates';
 import { toolTokens, type PinsByGroup } from './tools';
 import { valuesByGroup } from './scan';
 
-/**
- * Readiness of a template against the pinned set (spec 7), and of a tool or template
- * against the configuration (spec 14.4). Every pill, the t key and the settings readiness
- * line call these, so the wording lives here once.
- */
-
 export type TemplateReadiness =
   | { kind: 'clip-template' }
   | {
@@ -23,9 +17,6 @@ export type TemplateReadiness =
       lacking: string[]; // the missing tokens the open clip also lacks
     };
 
-/**
- * Key of a pin: group and value, so pinning a value pins every occurrence in every clip.
- */
 export function pinKey(group: string, value: string): string {
   return `${group}|${value}`;
 }
@@ -59,17 +50,11 @@ export function templateReadiness(
   return { kind: 'needs', missing, pins: pins_, lacking };
 }
 
-/**
- * Human list: "a", "a and b", "a, b and c".
- */
 export function listTokens(tokens: readonly string[]): string {
   if (tokens.length <= 1) return tokens.join('');
   return `${tokens.slice(0, -1).join(', ')} and ${tokens[tokens.length - 1]}`;
 }
 
-/**
- * The named groups a pattern produces, in pattern order.
- */
 export function patternGroups(pattern: string): string[] {
   const groups: string[] = [];
   for (const match of pattern.matchAll(/\(\?<(\w+)>/g)) {
@@ -78,9 +63,6 @@ export function patternGroups(pattern: string): string[] {
   return groups;
 }
 
-/**
- * Every group some search term produces, with whether any producer is enabled.
- */
 export function producers(
   terms: readonly Pick<SearchTerm, 'pattern' | 'enabled'>[]
 ): Map<string, boolean> {
@@ -95,10 +77,6 @@ export function producers(
 
 export type ConfigItem = Pick<Template, 'content'> | { url: string };
 
-/**
- * The tokens a tool or template needs. A tool token may have pipe alternatives; a template
- * token has one.
- */
 export function itemTokens(item: ConfigItem): { name: string; groups: string[] }[] {
   if ('url' in item) {
     return toolTokens(item.url).map((t) => ({ name: t.groups.join('|'), groups: t.groups }));
@@ -111,10 +89,6 @@ export type ConfigReadiness =
   | { level: 'disabled'; tokens: string[] } // every producer is disabled
   | { level: 'ok' };
 
-/**
- * Whether every token the item needs has an enabled producer. List dots and the overview
- * reflect this only.
- */
 export function configReadiness(
   item: ConfigItem,
   terms: readonly Pick<SearchTerm, 'pattern' | 'enabled'>[]
@@ -137,10 +111,6 @@ export type SampleReadiness =
   | { level: 'sample'; tokens: string[] } // the sample text has no value for these
   | { level: 'ready' };
 
-/**
- * Config readiness, then whether the sample text has a value for every token. Shown on the
- * readiness line only.
- */
 export function sampleReadiness(
   item: ConfigItem,
   terms: readonly Pick<SearchTerm, 'pattern' | 'enabled'>[],
@@ -156,9 +126,6 @@ export function sampleReadiness(
   return { level: 'ready' };
 }
 
-/**
- * The four wordings of spec 14.4. They never merge.
- */
 export function readinessText(readiness: SampleReadiness | ConfigReadiness): string {
   switch (readiness.level) {
     case 'never':

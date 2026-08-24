@@ -35,7 +35,7 @@ export const nativeImage = {
   }),
 };
 
-export const BrowserWindow = vi.fn().mockImplementation(() => ({
+export const createMockBrowserWindow = () => ({
   isVisible: vi.fn().mockReturnValue(true),
   isFocused: vi.fn().mockReturnValue(false),
   isMinimized: vi.fn().mockReturnValue(false),
@@ -47,7 +47,9 @@ export const BrowserWindow = vi.fn().mockImplementation(() => ({
   webContents: {
     send: vi.fn(),
   },
-}));
+});
+
+export const BrowserWindow = vi.fn().mockImplementation(createMockBrowserWindow);
 
 export const shell = {
   openExternal: vi.fn().mockResolvedValue(undefined),

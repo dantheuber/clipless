@@ -44,7 +44,6 @@ export function createTray(
   tray.setContextMenu(contextMenu);
   tray.setToolTip('Clipless - Clipboard Manager');
 
-  // Double-click to show main window
   tray.on('double-click', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();

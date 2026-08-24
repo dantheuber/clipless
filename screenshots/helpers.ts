@@ -1,16 +1,3 @@
-/**
- * Shared utilities for the documentation screenshot harness.
- *
- * The harness launches the *built* Electron app (`out/main/index.js`) against an
- * isolated temporary user-data profile. Isolation does two things:
- *   1. It never reads or writes your real encrypted clip store, and
- *   2. the per-profile single-instance lock means the harness won't collide with
- *      a Clipless instance you already have running.
- *
- * Each capture run starts from an empty profile, seeds curated demo data via the
- * same IPC the renderer uses, then drives the main and settings windows and writes PNGs
- * to `screenshots/output/`.
- */
 import {
   _electron as electron,
   type ElectronApplication,
@@ -30,15 +17,12 @@ import {
 
 export type Theme = 'light' | 'dark';
 
-/** Built main-process entry point. Requires `npm run build` first. */
-const MAIN_ENTRY = resolve(__dirname, '../out/main/index.js');
+const MAIN_ENTRY = resolve(__dirname, '../out/main/index.js'); // the built app: requires `npm run build` first
 
-/** Window sizes the app opens at by default; set explicitly so captures match everywhere. */
-const MAIN_WINDOW_SIZE = { width: 900, height: 670 };
+const MAIN_WINDOW_SIZE = { width: 900, height: 670 }; // pinned so captures match across machines and window managers
 const SETTINGS_WINDOW_SIZE = { width: 900, height: 600 };
 
-/** Where captured PNGs are written (gitignored on the code branch). */
-export const OUTPUT_DIR = resolve(__dirname, 'output');
+const OUTPUT_DIR = resolve(__dirname, 'output');
 
 export interface LaunchedApp {
   app: ElectronApplication;
@@ -46,36 +30,24 @@ export interface LaunchedApp {
   userDataDir: string;
 }
 
-/** `window.api` is exposed by the preload bridge but untyped in this context. */
-type WindowWithApi = Window & { api: Record<string, (...args: unknown[]) => Promise<unknown>> };
+type WindowWithApi = Window & { api: Record<string, (...args: unknown[]) => Promise<unknown>> }; // the preload bridge exposes window.api untyped here
 
-/**
- * Launch the built app with an isolated profile at 2x device scale for crisp,
- * retina-quality screenshots.
- */
 export async function launchApp(): Promise<LaunchedApp> {
   mkdirSync(OUTPUT_DIR, { recursive: true });
   const userDataDir = mkdtempSync(join(tmpdir(), 'clipless-shots-'));
   const app = await electron.launch({
     args: [MAIN_ENTRY, `--user-data-dir=${userDataDir}`, '--force-device-scale-factor=2'],
-    // Linux only: Playwright's basic password store leaves safeStorage without encryption.
-    env: { ...process.env, CLIPLESS_PLAINTEXT_STORAGE: '1' },
+    env: { ...process.env, CLIPLESS_PLAINTEXT_STORAGE: '1' }, // Playwright's basic password store leaves Linux safeStorage without encryption
   });
   const page = await app.firstWindow();
   await page.waitForSelector('#root > *');
-  // Pin the size so captures match across machines and window managers.
   await app.evaluate(({ BrowserWindow }, size) => {
     BrowserWindow.getAllWindows()[0]?.setSize(size.width, size.height);
   }, MAIN_WINDOW_SIZE);
   return { app, page, userDataDir };
 }
 
-/**
- * Seed settings, Quick Clips config, and clips, then reload so the renderer
- * picks everything up with the requested theme applied.
- */
 export async function seed(app: ElectronApplication, page: Page, theme: Theme): Promise<void> {
-  // Theme + code highlighting + a generous clip cap.
   await page.evaluate(async (t) => {
     await (window as unknown as WindowWithApi).api.storageSaveSettings({
       theme: t,
@@ -84,7 +56,6 @@ export async function seed(app: ElectronApplication, page: Page, theme: Theme): 
     });
   }, theme);
 
-  // Quick Clips patterns, tools, and templates via the renderer IPC.
   await page.evaluate(
     async (data) => {
       const api = (window as unknown as WindowWithApi).api;
@@ -96,17 +67,12 @@ export async function seed(app: ElectronApplication, page: Page, theme: Theme): 
     { searchTerms: SEARCH_TERMS, quickTools: QUICK_TOOLS, templates: TEMPLATES }
   );
 
-  // Pre-set the OS clipboard to the most-recent clip so the clipboard monitor
-  // dedupes against it instead of injecting whatever is currently copied.
   await app.evaluate(
     ({ clipboard }, text) => clipboard.writeText(text),
     DEMO_CLIPS[0].clip.content
-  );
+  ); // pre-set so the clipboard monitor dedupes instead of injecting whatever is currently copied
 
-  // Persist the curated clip list. The main `storage-save-clips` handler takes a
-  // ClipItem[] plus a map of locked indices (it derives StoredClip metadata
-  // itself), so we pass the bare clips — not pre-wrapped StoredClip objects.
-  const clipItems = DEMO_CLIPS.map((d: DemoClip) => d.clip);
+  const clipItems = DEMO_CLIPS.map((d: DemoClip) => d.clip); // storage-save-clips takes bare ClipItems plus a locked map; it derives StoredClip itself
   const locks: Record<number, boolean> = {};
   DEMO_CLIPS.forEach((d: DemoClip, i: number) => {
     if (d.locked && i > 0) locks[i] = true;
@@ -118,20 +84,16 @@ export async function seed(app: ElectronApplication, page: Page, theme: Theme): 
     { clipItems, locks }
   );
 
-  // Reload so stored clips + theme render from a clean state.
   await page.reload();
   await page.waitForSelector('#root > *');
   await page.waitForFunction(() => /light|dark/.test(document.body.className));
-  // Let the clipboard poll settle and syntax highlighting paint.
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(800); // let the clipboard poll settle and syntax highlighting paint
 }
 
-/** Capture a full-window screenshot into the output directory. */
 export async function shoot(target: Page, fileName: string): Promise<void> {
   await target.screenshot({ path: join(OUTPUT_DIR, fileName) });
 }
 
-/** Toggle the clip search bar in the main window via its IPC channel. */
 export async function showSearch(app: ElectronApplication): Promise<void> {
   await app.evaluate(({ BrowserWindow }) => {
     const win = BrowserWindow.getAllWindows()[0];
@@ -139,7 +101,6 @@ export async function showSearch(app: ElectronApplication): Promise<void> {
   });
 }
 
-/** Open the settings window and wait for it to render with the theme applied. */
 export async function openSettingsWindow(app: ElectronApplication, page: Page): Promise<Page> {
   const [win] = await Promise.all([
     app.waitForEvent('window'),
@@ -154,12 +115,6 @@ export async function openSettingsWindow(app: ElectronApplication, page: Page): 
   return win;
 }
 
-/**
- * Open quick look on the clip with the given content and wait for the reader to
- * paint its chips, so the capture is stable. Pass `pinGroup` to also pin the
- * first chip of that capture group, which brings up the tray with its tools.
- * Close it afterwards with `page.keyboard.press('Escape')`.
- */
 export async function openQuickLook(
   page: Page,
   content: string,
@@ -181,11 +136,8 @@ export async function openQuickLook(
   return reader;
 }
 
-/** Best-effort removal of the temporary profile after the app has closed. */
 export function cleanup(userDataDir: string): void {
   try {
     rmSync(userDataDir, { recursive: true, force: true });
-  } catch {
-    // Windows may briefly hold a lock on the profile; safe to ignore.
-  }
+  } catch {} // Windows may briefly hold a lock on the profile; safe to ignore
 }

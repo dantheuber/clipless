@@ -9,24 +9,20 @@ interface ConfirmDialogProps {
   message: React.ReactNode;
   confirmText?: string;
   cancelText?: string;
-  /** Absent only with noConfirm, when the dialog reports and offers no action */
+
   onConfirm?: () => void;
   onCancel: () => void;
   type?: 'danger' | 'warning' | 'info';
-  /** Rare extra actions at the left of the buttons, as links */
+
   extra?: React.ReactNode;
   confirmDisabled?: boolean;
-  /** Hide the confirm button: the dialog only reports something */
+
   noConfirm?: boolean;
   wide?: boolean;
 }
 
 const ICONS = { danger: 'trash', warning: 'exclamation-triangle', info: 'info-circle' } as const;
 
-/**
- * The one confirmation dialog. Both windows use it; colours come from theme.css so it
- * carries no theme branch of its own. The message can name numbers in bold.
- */
 export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
@@ -41,8 +37,6 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   noConfirm = false,
   wide = false,
 }) => {
-  // The dialog owns Esc while open: it is the innermost level of the Esc stack, so the
-  // key never reaches the reader, the search bar or a row editor behind it.
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (event: KeyboardEvent) => {

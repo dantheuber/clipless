@@ -9,7 +9,7 @@ import React, {
 import type { UserSettings } from '../../../shared/types';
 import { GROUP_COLOUR_SLOTS } from '../../../shared/groupColours';
 
-export type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark' | 'system';
 
 interface ThemeContextType {
   theme: Theme;
@@ -21,10 +21,6 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-/**
- * --slot-0 to --slot-11 on the root element, from the dark or light value of each bucket
- * pair (spec 17.2). Chips, dots, swatches and pills reference these and never a hex.
- */
 // eslint-disable-next-line react-refresh/only-export-components
 export function applySlotVariables(theme: 'light' | 'dark'): void {
   const root = document.documentElement.style;
@@ -41,7 +37,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setThemeState] = useState<Theme>('system');
   const [effectiveTheme, setEffectiveTheme] = useState<'light' | 'dark'>('dark');
 
-  // Update effective theme based on user preference and system preference
   const updateEffectiveTheme = useCallback((themePreference: Theme) => {
     let resolvedTheme: 'light' | 'dark';
 
@@ -54,7 +49,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     setEffectiveTheme(resolvedTheme);
     applySlotVariables(resolvedTheme);
 
-    // Apply theme to document body for global CSS
     if (resolvedTheme === 'light') {
       document.body.classList.add('light');
       document.body.classList.remove('dark');
@@ -64,7 +58,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
   }, []);
 
-  // Load theme from settings
   useEffect(() => {
     const loadTheme = async () => {
       if (!window.api) return;
@@ -76,7 +69,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
         updateEffectiveTheme(userTheme);
       } catch (error) {
         console.error('Failed to load theme settings:', error);
-        // Default to system theme
         updateEffectiveTheme('system');
       }
     };
@@ -84,7 +76,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     loadTheme();
   }, [updateEffectiveTheme]);
 
-  // Listen for settings changes from other windows
   useEffect(() => {
     if (!window.api?.onSettingsUpdated) return;
 
@@ -95,14 +86,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       }
     };
 
-    // onSettingsUpdated now returns a cleanup function
     const cleanup = window.api.onSettingsUpdated(handleSettingsUpdate);
-
-    // Return the cleanup function to remove only this specific listener
     return cleanup;
-  }, [updateEffectiveTheme]); // Empty dependency array since we want this to run only once
+  }, [updateEffectiveTheme]);
 
-  // Listen for system theme changes when using system theme
   useEffect(() => {
     if (theme !== 'system') return;
 
@@ -117,7 +104,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     setThemeState(newTheme);
     updateEffectiveTheme(newTheme);
 
-    // Save theme to settings
     if (window.api) {
       try {
         const currentSettings: UserSettings = await window.api.storageGetSettings();

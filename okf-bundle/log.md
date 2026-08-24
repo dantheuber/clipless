@@ -1,6 +1,8 @@
 # Update Log
 
 ## 2026-08-24
+* Record that habit-hooks' non-essential-comment sensor is purely length-based (10/15 char thresholds, eslint-disable exempt)
+* **Creation**: Created [habit-hooks needs project-installed ts-morph and jscpd](/gotchas/habit-hooks-needs-project-installed-ts-morph-and-jscpd.md).
 * Record the prose-as-python false positive and the showLanguageLabel mitigation
 
 ## 2026-08-23

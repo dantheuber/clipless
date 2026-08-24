@@ -23,10 +23,6 @@ const CLASS = {
   ready: styles.readyOk,
 };
 
-/**
- * The readiness line (spec 14.4): one of four wordings that never merge, with the pills of
- * every group the item needs.
- */
 export function Readiness({ item, terms, scan }: ReadinessProps) {
   const tokens = itemTokens(item);
   if (tokens.length === 0) {

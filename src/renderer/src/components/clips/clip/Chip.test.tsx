@@ -9,12 +9,12 @@ const { pinsState } = vi.hoisted(() => ({
   },
 }));
 
-vi.mock('../../../providers/clips', () => ({
-  useClipsPins: () => ({
-    isPinned: (key: string) => pinsState.pinned.has(key),
-    togglePins: pinsState.togglePins,
-  }),
-}));
+vi.mock('../../../providers/clips', async () =>
+  (await import('./clipTestFixtures')).pinnedClipHooks(
+    (key) => pinsState.pinned.has(key),
+    pinsState.togglePins
+  )
+);
 
 vi.mock('../../../providers/scan', () => ({
   useScanIndex: () => ({ slotFor: (group: string) => (group === 'ip' ? 0 : 5) }),

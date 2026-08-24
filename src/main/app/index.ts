@@ -14,26 +14,16 @@ import {
 import { applyAutoStart } from '../autoStart';
 
 export async function initializeApp(): Promise<void> {
-  // Playwright launches Electron with --password-store=basic, and with that store Linux
-  // reports no encryption, so every encrypted write fails. The e2e suite sets this variable
-  // to use an in-memory key instead; nothing else does, and it is ignored off Linux.
   if (process.env.CLIPLESS_PLAINTEXT_STORAGE === '1' && process.platform === 'linux') {
-    safeStorage.setUsePlainTextEncryption(true);
+    safeStorage.setUsePlainTextEncryption(true); // e2e only: Playwright's --password-store=basic makes Linux report no encryption, failing every encrypted write
   }
 
-  // Set app user model id for windows. This must be unique to Clipless: on
-  // Windows it is also used as the registry value name for the autostart login
-  // item, so a shared default (e.g. 'com.electron') would collide with other
-  // Electron apps and let dev builds clobber the installed app's entry.
-  electronApp.setAppUserModelId('com.clipless.app');
+  electronApp.setAppUserModelId('com.clipless.app'); // must be unique: on Windows it doubles as the autostart registry value name, so a shared default would collide with other Electron apps
 
-  // Keep window backgrounds in step with the OS theme for theme: 'system'
   watchSystemThemeForWindowBackground();
 
-  // Create window first for better perceived performance
   await initializeWindowSystem();
 
-  // Initialize everything else in parallel to avoid blocking UI
   Promise.all([
     // Initialize secure storage in background
     storage
@@ -46,35 +36,26 @@ export async function initializeApp(): Promise<void> {
       }),
   ]);
 
-  // Set up callback to re-apply window settings and notify renderer after background storage loading completes
   storage.setOnBackgroundLoadComplete(async () => {
     const mainWindow = getMainWindow();
     if (mainWindow) {
       console.log('Background storage loading complete, re-applying window settings');
       applyWindowSettings(mainWindow);
 
-      // Notify renderer that storage data is ready for re-fetching
       mainWindow.webContents.send('storage-ready');
     }
 
-    // Reconcile OS login-item state with persisted setting
     try {
       const settings = await storage.getSettings();
       applyAutoStart(settings.autoStart);
-      // Windows were created before storage was ready, so their background
-      // still reflects the OS preference — correct it to the stored theme.
-      applyWindowBackgroundTheme(settings.theme);
+      applyWindowBackgroundTheme(settings.theme); // windows were created before storage was ready, so their background still reflects the OS preference
     } catch (error) {
       console.error('Failed to apply auto-start setting on startup:', error);
     }
 
-    // Silently check for updates in the background. Errors are swallowed
-    // inside the function so unsupported platforms (e.g. unsigned macOS
-    // builds) never surface failures to the user.
-    runAutomaticUpdateCheck();
+    runAutomaticUpdateCheck(); // errors are swallowed inside so unsupported platforms (e.g. unsigned macOS builds) never surface failures
   });
 
-  // Apply window bounds if available after initialization
   const mainWindow = getMainWindow();
   const windowBounds = getWindowBounds();
   if (mainWindow && windowBounds) {
@@ -83,11 +64,8 @@ export async function initializeApp(): Promise<void> {
 }
 
 export function setupAppEvents(): void {
-  // When a second launch is attempted, the new process quits itself via the
-  // single-instance lock (see index.ts) and fires this event on the primary
-  // instance — surface the existing window instead of starting over.
   app.on('second-instance', () => {
-    const mainWindow = getMainWindow();
+    const mainWindow = getMainWindow(); // this event fires on the primary instance when a second launch quits itself via the single-instance lock (see index.ts) — surface the existing window
     if (mainWindow) {
       if (mainWindow.isMinimized()) {
         mainWindow.restore();
@@ -100,41 +78,30 @@ export function setupAppEvents(): void {
   });
 
   app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) {
       initializeWindowSystem();
     }
   });
 
-  // Quit when all windows are closed, except on macOS. There, it's common
-  // for applications and their menu bar to stay active until the user quits
-  // explicitly with Cmd + Q. With tray, we don't quit when windows are closed.
   app.on('window-all-closed', () => {
-    // Don't quit the app when all windows are closed if we have a tray
     if (process.platform !== 'darwin' && !getTray()) {
       app.quit();
     }
   });
 
-  // Handle app before quit to set the quitting flag
   app.on('before-quit', () => {
     setIsQuitting(true);
     hotkeyManager.cleanup();
   });
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
   app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window);
+    optimizer.watchWindowShortcuts(window); // F12 toggles DevTools in dev; CommandOrControl+R is ignored in production
   });
 }
 
 export function initializeServices(): void {
-  // Setup IPC handlers
   setupMainIPC();
 
-  // Configure and setup auto-updater
   configureAutoUpdater();
   setupAutoUpdaterEvents();
 }

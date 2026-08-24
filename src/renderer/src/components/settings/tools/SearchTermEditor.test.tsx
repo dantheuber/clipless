@@ -46,7 +46,7 @@ describe('SearchTermEditor', () => {
 
     fireEvent.change(pattern, { target: { value: '(?<ticket>INC-\\d+)' } });
     expect(screen.queryByTestId('term-error')).toBeNull();
-    expect(save).toBeDisabled(); // the name is still empty
+    expect(save).toBeDisabled();
     fireEvent.change(screen.getByTestId('term-name'), { target: { value: 'Ticket' } });
     expect(save).not.toBeDisabled();
     expect(host.setSaver).toHaveBeenLastCalledWith(expect.any(Function));
@@ -59,7 +59,6 @@ describe('SearchTermEditor', () => {
     expect(chips).toHaveLength(1);
     expect(chips[0]).toHaveTextContent('INC-4821');
     expect(preview).toHaveTextContent('Investigating alert');
-    // nothing was written
     expect(window.api.searchTermsCreate).not.toHaveBeenCalled();
 
     fireEvent.change(screen.getByTestId('term-pattern'), {

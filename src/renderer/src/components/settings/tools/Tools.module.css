@@ -1,8 +1,3 @@
-/*
- * The Tools tab (spec 14.3): a list pane on the left, the inspector on the right. Colours
- * come from theme.css; group colour is always var(--gc), set from --slot-N.
- */
-
 .body {
   display: grid;
   grid-template-columns: 250px minmax(0, 1fr);
@@ -185,7 +180,6 @@
   }
 }
 
-/* chips and pills */
 .chip {
   position: relative;
   border-radius: 3px;
@@ -290,7 +284,6 @@
   height: 10px;
 }
 
-/* tokens inside a URL or template preview */
 .token {
   display: inline-block;
   font-family: var(--mono);
@@ -318,7 +311,6 @@
   --gc: var(--orphan);
 }
 
-/* readiness line */
 .ready {
   display: inline-flex;
   align-items: center;
@@ -348,7 +340,6 @@
   color: var(--dim);
 }
 
-/* editor pieces */
 .meta {
   display: flex;
   flex-wrap: wrap;
@@ -496,7 +487,6 @@
   }
 }
 
-/* overview and uses */
 .groupRow {
   display: grid;
   grid-template-columns: 120px repeat(2, minmax(0, 1fr));
@@ -550,10 +540,6 @@
   margin-top: 2px;
 }
 
-/* start from */
-/* minmax(0, 1fr) and min-width: 0: a grid item's default min-width is its content, so the
-   nowrap pattern line of a long entry (Domain Name) would otherwise widen its column past
-   the pane. */
 .start {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -603,7 +589,6 @@
   font-size: 11px;
 }
 
-/* bucket */
 .bucket {
   position: absolute;
   z-index: 15;

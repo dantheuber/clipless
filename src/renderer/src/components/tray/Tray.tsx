@@ -2,35 +2,15 @@ import { useMemo, useState, type CSSProperties } from 'react';
 import classNames from 'classnames';
 import { useClipsPins } from '../../providers/clips';
 import { useScanIndex } from '../../providers/scan';
-import { useToast, type ToastFn } from '../Toast';
+import { useToast } from '../useToast';
 import { NARROW_WINDOW, SHORT_WINDOW, useMediaQuery } from '../../hooks/useMediaQuery';
 import { useToolUrls } from './useToolUrls';
 import { TrayGroup } from './TrayGroup';
 import { TrayFooter } from './TrayFooter';
+import { openTabs, tabCount } from './openTabs';
 import styles from './Tray.module.css';
+import { CompactPrimaryButton } from '../CompactPrimaryButton';
 
-/**
- * Open the tabs a tool or the tray produces through the main process, which accepts http
- * and https only. Every control states its count before it is clicked (spec 6).
- */
-export async function openTabs(urls: string[], toast: ToastFn): Promise<void> {
-  if (urls.length === 0) return;
-  try {
-    const opened = await window.api.openExternalUrls(urls);
-    toast(`Opened ${opened} ${opened === 1 ? 'tab' : 'tabs'}`, urls);
-  } catch (error) {
-    console.error('Failed to open tabs:', error);
-    toast('Could not open the tabs', String(error));
-  }
-}
-
-export const tabCount = (n: number): string => `${n} ${n === 1 ? 'tab' : 'tabs'}`;
-
-/**
- * The launch tray under the list (spec 6, 16 rule 1): hidden until something is pinned,
- * one row per capture group, tool buttons with multipliers, Open all with the exact count.
- * Under 360px tall or 480px wide it opens collapsed to one line.
- */
 export function Tray() {
   const { pins, pinsByGroup, setPins, clearPins, droppedNotice, dismissDroppedNotice } =
     useClipsPins();
@@ -52,15 +32,13 @@ export function Tray() {
     .map((g) => (pinsByGroup[g].length > 1 ? `${g} x${pinsByGroup[g].length}` : g))
     .join(', ');
   const openAll = (
-    <button
-      type="button"
-      className={styles.primary}
+    <CompactPrimaryButton
       onClick={() => openTabs(allUrls, toast)}
       disabled={allUrls.length === 0}
-      data-testid="open-all"
+      testId="open-all"
     >
       Open all ({tabCount(allUrls.length)})
-    </button>
+    </CompactPrimaryButton>
   );
 
   return (

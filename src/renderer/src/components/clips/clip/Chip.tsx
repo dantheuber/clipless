@@ -8,22 +8,16 @@ import styles from './Chip.module.css';
 interface ChipProps {
   group: string;
   value: string;
-  /** Rendered content; defaults to the value. The reader passes its syntax-coloured spans. */
+
   children?: ReactNode;
-  /** "xN" when the value occurs more than once (side column) */
+
   count?: number;
-  /** Outlined because the matching side column entry is hovered, or the reverse */
+
   lit?: boolean;
   onHover?: (key: string | null) => void;
   className?: string;
 }
 
-/**
- * The clickable rendering of a match (spec 4): dashed outline in the group's colour with a
- * "+" suffix; pinned is a solid outline with a tick. Click toggles the pin and never enters
- * edit; double-click selects the text for people who want a substring. Colour comes from
- * --slot-N through --gc, never a hex.
- */
 export const Chip = memo(function Chip({
   group,
   value,
@@ -41,7 +35,7 @@ export const Chip = memo(function Chip({
   const handleClick = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation();
     event.preventDefault();
-    if (event.detail >= 2) return; // the double-click selected text; leave the pin alone
+    if (event.detail >= 2) return;
     togglePins([key]);
   };
 

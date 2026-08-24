@@ -1,18 +1,13 @@
 import classNames from 'classnames';
 import { useEffect, useState } from 'react';
 import type { UpdateState } from '../../../../../shared/types';
-import { useToast } from '../../Toast';
+import { useToast } from '../../useToast';
 import { Dot } from '../shell/Dot';
 import { Panel, ToggleRow } from './Row';
 import { RELEASES_URL, updateView } from './updateStatus';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
-/**
- * Updates (spec 15.4): the Check on start toggle, a status line driven by the updater's
- * state enum, then Check now, replaced by Restart and install once a download has landed.
- * macOS shows a releases link instead of a button.
- */
 export function Updates() {
   const toast = useToast();
   const [state, setState] = useState<UpdateState>({ status: 'idle' });
@@ -32,7 +27,6 @@ export function Updates() {
       const result = await window.api.checkForUpdates();
       if (result) await window.api.downloadUpdate();
     } catch (error) {
-      // The main process has set the error state; nothing else to say here
       console.error('Update check failed:', error);
     }
   };

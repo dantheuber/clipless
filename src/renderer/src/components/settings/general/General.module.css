@@ -1,9 +1,3 @@
-/*
- * General (spec 15.4): Application and Window side by side, Storage, Updates and About as
- * three short panels across the bottom. Nothing scrolls at 900 x 600; below 760 wide the
- * grid collapses to one column and scrolls inside the pane.
- */
-
 .grid2 {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -9,7 +9,6 @@ interface StatusBarProps {
   onOpenSettings?: () => void;
 }
 
-/** The hotkey a button's tooltip names, when the hotkeys are on */
 function hotkeyHint(
   hotkeys: HotkeySettings | undefined,
   action: 'quickLook' | 'searchClips'
@@ -18,11 +17,6 @@ function hotkeyHint(
   return hotkeys?.enabled && config?.enabled && config.key ? ` (${config.key})` : '';
 }
 
-/**
- * The bottom strip (spec 16 rules 1 and 5): counts on the left (words drop under 480px),
- * then search with an on-state, quick look on the newest clip, settings. A downloaded
- * update is a pill here, never a strip.
- */
 export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
   const { clips } = useClipsData();
   const { isClipLocked } = useClipsActions();
@@ -47,10 +41,8 @@ export const StatusBar: React.FC<StatusBarProps> = ({ onOpenSettings }) => {
     return window.api.onUpdateState(setUpdate);
   }, []);
 
-  // Count non-empty clips
   const activeClipsCount = clips.filter((clip) => clip.content.trim() !== '').length;
 
-  // Count locked clips
   const lockedClipsCount = clips.filter((_, index) => isClipLocked(index)).length;
 
   const handleOpenSettings = async () => {

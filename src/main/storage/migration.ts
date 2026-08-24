@@ -17,17 +17,8 @@ import { isSlotIndex } from '../../shared/groupColours';
 import { htmlToText } from '../clipboard/extract-html';
 import { rtfToText } from '../clipboard/extract-rtf';
 
-/**
- * Bumped to 2 when clips gained id and text and templates.enc gained groupColours. Nothing
- * branches on it yet; it is here so the next change has a number to branch on.
- */
-export const CURRENT_STORAGE_VERSION = 2;
+const CURRENT_STORAGE_VERSION = 2;
 
-/**
- * Fill in what a clip saved by an older build lacks: an id (identity for the reader, the
- * copied marker and pins) and, for html and rtf, the extracted text the row and the scanner
- * read. Clips that already have them are returned as they are; unknown keys are kept.
- */
 export function backfillClip(clip: ClipItem): ClipItem {
   let result = clip;
   if (typeof result.id !== 'string' || result.id.length === 0) {
@@ -40,21 +31,15 @@ export function backfillClip(clip: ClipItem): ClipItem {
   return result;
 }
 
-/**
- * Migrate data from older versions (validates and normalizes an AppData blob)
- */
 export function migrateData(data: unknown): AppData {
-  // Start with default data
   const migratedData: AppData = { ...DEFAULT_DATA };
 
-  // Validate data structure
   if (!data || typeof data !== 'object') {
     return migratedData;
   }
 
   const dataObj = data as Record<string, unknown>;
 
-  // Copy over valid clips, backfilling id and text
   if (dataObj.clips && Array.isArray(dataObj.clips)) {
     migratedData.clips = dataObj.clips
       .filter(
@@ -75,7 +60,6 @@ export function migrateData(data: unknown): AppData {
       });
   }
 
-  // Copy over valid settings
   if (dataObj.settings && typeof dataObj.settings === 'object') {
     migratedData.settings = {
       ...DEFAULT_SETTINGS,
@@ -83,7 +67,6 @@ export function migrateData(data: unknown): AppData {
     };
   }
 
-  // Copy over valid templates
   if (dataObj.templates && Array.isArray(dataObj.templates)) {
     migratedData.templates = dataObj.templates.filter(
       (template: unknown): template is Template =>
@@ -104,7 +87,6 @@ export function migrateData(data: unknown): AppData {
     );
   }
 
-  // Copy over valid search terms
   if (dataObj.searchTerms && Array.isArray(dataObj.searchTerms)) {
     migratedData.searchTerms = dataObj.searchTerms.filter(
       (searchTerm: unknown): searchTerm is SearchTerm =>
@@ -127,7 +109,6 @@ export function migrateData(data: unknown): AppData {
     );
   }
 
-  // Copy over valid quick tools
   if (dataObj.quickTools && Array.isArray(dataObj.quickTools)) {
     migratedData.quickTools = dataObj.quickTools.filter(
       (quickTool: unknown): quickTool is QuickTool =>
@@ -150,7 +131,6 @@ export function migrateData(data: unknown): AppData {
     );
   }
 
-  // Copy over valid group colours: a slot index per group, nothing else
   if (dataObj.groupColours && typeof dataObj.groupColours === 'object') {
     const groupColours: GroupColours = {};
     for (const [group, slot] of Object.entries(dataObj.groupColours as Record<string, unknown>)) {
@@ -159,7 +139,6 @@ export function migrateData(data: unknown): AppData {
     migratedData.groupColours = groupColours;
   }
 
-  // Preserve version
   if (dataObj.version && typeof dataObj.version === 'string') {
     migratedData.version = dataObj.version;
   }
@@ -167,14 +146,6 @@ export function migrateData(data: unknown): AppData {
   return migratedData;
 }
 
-/**
- * Check if legacy data.enc exists and needs migration to domain-specific files.
- * If data.enc exists but clips.enc does not, splits legacy data into:
- *   - settings.enc, clips.enc, templates.enc, meta.json
- * Then renames data.enc to data.enc.migrated.
- *
- * Returns true if migration was performed.
- */
 export async function migrateLegacyStorage(dataPath: string): Promise<boolean> {
   const legacyPath = join(dataPath, 'data.enc');
   const clipsPath = join(dataPath, 'clips.enc');
@@ -182,28 +153,25 @@ export async function migrateLegacyStorage(dataPath: string): Promise<boolean> {
   const templatesPath = join(dataPath, 'templates.enc');
   const metaPath = join(dataPath, 'meta.json');
 
-  // Check if legacy file exists
   try {
     await fs.access(legacyPath);
   } catch {
     return false; // No legacy file
   }
 
-  // Check if already migrated (clips.enc exists)
-  try {
-    await fs.access(clipsPath);
+  const clipsAlreadyMigrated = await fs.access(clipsPath).then(
+    () => true,
+    () => false
+  );
+  if (clipsAlreadyMigrated) {
     return false; // Already migrated
-  } catch {
-    // clips.enc doesn't exist, proceed with migration
   }
 
   console.log('Migrating legacy data.enc to domain-specific files...');
 
-  // Load and validate legacy data
   const legacyRaw = await loadEncryptedJson<unknown>(legacyPath);
   const data = migrateData(legacyRaw);
 
-  // Split into domain files
   await saveEncryptedJson(data.settings, settingsPath);
   await saveEncryptedJson(data.clips, clipsPath);
   await saveEncryptedJson(
@@ -222,7 +190,6 @@ export async function migrateLegacyStorage(dataPath: string): Promise<boolean> {
   };
   await saveJsonFile(meta, metaPath);
 
-  // Rename legacy file
   await fs.rename(legacyPath, legacyPath + '.migrated');
 
   console.log('Legacy migration complete');

@@ -18,10 +18,6 @@ interface RowProps {
   children: ReactNode;
 }
 
-/**
- * A row is a label and a control (spec 15.4); the description is the label's tooltip and
- * the status slot sits between them.
- */
 export function Row({ id, label, description, status, dimmed, tight, children }: RowProps) {
   return (
     <div
@@ -61,7 +57,6 @@ interface ToggleRowProps {
   tight?: boolean;
 }
 
-/** A boolean setting as a row: the toggle applies at once and reports beside itself. */
 export function ToggleRow({ id, label, description, dimmed, tight }: ToggleRowProps) {
   const { value, set, status } = useSetting(id);
   return (

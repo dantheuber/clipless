@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act, cleanup } from '@testing-library/react';
-import { ToastProvider, useToast, TOAST_DURATION } from './Toast';
+import { ToastProvider } from './Toast';
+import { useToast, TOAST_DURATION } from './useToast';
 
 function Button({ title, detail }: { title: string; detail?: string | string[] }) {
   const toast = useToast();

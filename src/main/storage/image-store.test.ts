@@ -1,32 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-vi.mock('electron', () => ({
-  nativeImage: {
-    createFromDataURL: vi.fn().mockReturnValue({
-      getSize: () => ({ width: 400, height: 300 }),
-      resize: vi.fn().mockReturnValue({
-        toDataURL: () => 'data:image/png;base64,thumb',
-      }),
-    }),
-  },
-  safeStorage: {
-    isEncryptionAvailable: vi.fn().mockReturnValue(true),
-    encryptString: vi.fn((str: string) => Buffer.from(str)),
-    decryptString: vi.fn((buf: Buffer) => buf.toString()),
-  },
-}));
-
-vi.mock('fs', () => ({
-  promises: {
-    mkdir: vi.fn().mockResolvedValue(undefined),
-    writeFile: vi.fn().mockResolvedValue(undefined),
-    readFile: vi.fn(),
-    rename: vi.fn().mockResolvedValue(undefined),
-    unlink: vi.fn().mockResolvedValue(undefined),
-    access: vi.fn().mockResolvedValue(undefined),
-    rm: vi.fn().mockResolvedValue(undefined),
-  },
-}));
+vi.mock('electron', () => import('../__mocks__/electron.js'));
+vi.mock('fs', () => import('./fs-test-mock.js'));
 
 import { saveImage, loadImage, loadThumbnail, deleteImage, deleteAllImages } from './image-store';
 import { nativeImage } from 'electron';
@@ -35,6 +10,11 @@ import { promises as fs } from 'fs';
 describe('saveImage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValue({
+      getSize: () => ({ width: 400, height: 300 }),
+      resize: vi.fn().mockReturnValue({ toDataURL: () => 'data:image/png;base64,thumb' }),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any);
   });
 
   it('saves full image and thumbnail, returns thumbnail data URL', async () => {
@@ -42,7 +22,6 @@ describe('saveImage', () => {
 
     expect(result).toBe('data:image/png;base64,thumb');
     expect(fs.mkdir).toHaveBeenCalled();
-    // Full image + thumbnail = 2 encrypted saves
     expect(fs.writeFile).toHaveBeenCalledTimes(2);
     expect(fs.rename).toHaveBeenCalledTimes(2);
   });

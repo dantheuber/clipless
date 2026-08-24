@@ -1,11 +1,5 @@
 import type { GroupColours } from './types';
 
-/**
- * The colour bucket: twelve slots, each with a dark-theme and a light-theme value of the
- * same hue (spec 16.2, contrast pass of 2026-08-22). Groups store a slot index, never a hex.
- * The renderer sets --slot-0 to --slot-11 from the pair that matches the theme; nothing
- * references a hex directly.
- */
 export interface GroupColourSlot {
   dark: string;
   light: string;
@@ -28,9 +22,6 @@ export const GROUP_COLOUR_SLOTS: readonly GroupColourSlot[] = [
 
 export const GROUP_COLOUR_SLOT_COUNT = GROUP_COLOUR_SLOTS.length;
 
-/**
- * Slots 0 to 5 belong to the six prototype groups by default (spec 14.4).
- */
 export const DEFAULT_GROUP_SLOTS: Readonly<Record<string, number>> = {
   ip: 0,
   email: 1,
@@ -46,12 +37,6 @@ export function isSlotIndex(value: unknown): value is number {
   );
 }
 
-/**
- * Assign a slot to every known group, in order: the stored override if present, else the
- * named default, else the lowest slot no earlier group took (wrapping to 0 once all twelve
- * are in use). knownGroups is every group in every search term, in term order, so the
- * answer is the same on every render.
- */
 export function assignGroupSlots(
   groupColours: GroupColours | undefined,
   knownGroups: readonly string[]
@@ -92,10 +77,6 @@ function lowestFreeSlot(used: Set<number>): number {
   return slot;
 }
 
-/**
- * The slot one group renders in. A group outside knownGroups (the pattern under edit in
- * settings) is treated as if it were appended to the list.
- */
 export function resolveGroupSlot(
   group: string,
   groupColours: GroupColours | undefined,

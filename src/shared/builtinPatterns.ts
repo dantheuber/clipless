@@ -1,19 +1,14 @@
 import { TLD_PATTERN } from './tlds';
 
-/**
- * The built-in pattern library. It never runs on its own: adding an entry copies it in as an
- * ordinary search term. Group names follow the spec 3 vocabulary; search terms a user added
- * from the old library keep their old names (ipAddress, domainName, ...) because tools
- * reference them.
- */
 export interface BuiltinPattern {
   name: string;
-  /** A few words on what the pattern covers, shown beside the name on its Start from card */
   description: string;
   pattern: string;
 }
 
 export const BUILTIN_PATTERNS: readonly BuiltinPattern[] = [
+  // adding an entry copies it in as an ordinary search term; terms copied from the old
+  // library keep their old group names (ipAddress, domainName, ...) because tools reference them
   {
     name: 'Email Address',
     description: 'user@host, no quoting',

@@ -1,44 +1,19 @@
 import { app } from 'electron';
 
-/**
- * Legacy registry value name used by older builds. On Windows, Electron writes
- * the login-item entry to the `Run` registry key under the app's
- * AppUserModelId. Earlier versions shipped with the electron-vite template
- * default (`com.electron`), so their autostart entry lives under that name. We
- * remove it whenever reconciling so a stale entry can't keep launching the app
- * after autostart is turned off — and can't cause a duplicate launch while it's
- * on. The current AppUserModelId is set in app/index.ts.
- */
-const LEGACY_LOGIN_ITEM_NAME = 'com.electron';
+const LEGACY_LOGIN_ITEM_NAME = 'com.electron'; // older builds shipped the electron-vite template AppUserModelId, so their Windows autostart registry entry lives under this name; cleared on every reconcile so a stale entry can't keep launching the app or cause a duplicate launch (current id is set in app/index.ts)
 
-/** Auto-start via OS login items is not supported on Linux. */
 export const isAutoStartSupported = (): boolean => process.platform !== 'linux';
 
-/**
- * Only packaged builds may manage OS login items. In dev/preview,
- * `process.execPath` points at `node_modules/electron`, so writing a login item
- * would register a useless entry at boot and clobber the real install's
- * autostart entry.
- */
-const canManageAutoStart = (): boolean => isAutoStartSupported() && app.isPackaged;
+const canManageAutoStart = (): boolean => isAutoStartSupported() && app.isPackaged; // only packaged builds: in dev/preview process.execPath points at node_modules/electron, so a login item would register a useless boot entry and clobber the real install's
 
-/**
- * Reconcile the OS login-item state with the desired setting. Clears the legacy
- * Windows entry first so the migration to the current AppUserModelId is
- * self-healing across upgrades.
- *
- * Returns whether the OS now holds the requested state. Where login items are not
- * managed (Linux, dev builds) there is nothing to refuse, so that counts as applied.
- * The settings window shows "not saved, retry" on the row when this is false (spec 15.5).
- */
 export const applyAutoStart = (enabled: boolean): boolean => {
   if (!canManageAutoStart()) {
-    return true;
+    return true; // returns whether the OS now holds the requested state — the settings window shows "not saved, retry" when false (spec 15.5); where login items are not managed (Linux, dev builds) there is nothing to refuse, so that counts as applied
   }
 
   try {
     if (process.platform === 'win32') {
-      app.setLoginItemSettings({ openAtLogin: false, name: LEGACY_LOGIN_ITEM_NAME });
+      app.setLoginItemSettings({ openAtLogin: false, name: LEGACY_LOGIN_ITEM_NAME }); // clearing the legacy entry first keeps the AppUserModelId migration self-healing across upgrades
     }
     app.setLoginItemSettings({ openAtLogin: enabled });
     return app.getLoginItemSettings().openAtLogin === enabled;
@@ -48,14 +23,9 @@ export const applyAutoStart = (enabled: boolean): boolean => {
   }
 };
 
-/**
- * Read the actual OS login-item state. Returns `null` when autostart is not
- * managed by this process (Linux, or an unpackaged dev/preview build) so callers
- * can fall back to the persisted setting instead of showing a misleading value.
- */
 export const getAutoStartState = (): boolean | null => {
   if (!canManageAutoStart()) {
-    return null;
+    return null; // autostart is not managed by this process (Linux, or unpackaged dev/preview) — callers fall back to the persisted setting instead of showing a misleading value
   }
 
   try {

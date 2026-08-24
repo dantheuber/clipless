@@ -27,13 +27,6 @@ type Message =
   | { kind: 'conflict'; other: HotkeyActionId; accelerator: string }
   | null;
 
-/**
- * The keycaps as the recorder (spec 15.6): echoes held modifiers live and says "press keys,
- * Esc cancels". The first non-modifier key completes the combination; a press without
- * Ctrl (Cmd), Shift or Alt shows "needs Ctrl, Shift or Alt" and keeps recording; Esc
- * cancels. A combination another row holds blocks acceptance with "used by <row>", "swap"
- * and "keep trying". The old binding is untouched until onAccept or onSwap fires.
- */
 export function Recorder({ id, hotkeys, platform, onAccept, onSwap, onCancel }: RecorderProps) {
   const [mods, setMods] = useState<string[]>([]);
   const [key, setKey] = useState<string | null>(null);

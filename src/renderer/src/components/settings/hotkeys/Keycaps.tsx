@@ -11,9 +11,6 @@ interface KeycapsProps {
   className?: string;
 }
 
-/**
- * An accelerator as keycaps in the platform's names. The raw string is never shown.
- */
 export function Keycaps({ accelerator, platform, off, className }: KeycapsProps) {
   const keys = displayKeys(accelerator, platform);
   return (

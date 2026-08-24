@@ -1,12 +1,6 @@
 import type { ClipItem } from '../../../../shared/types';
 import { clipText } from './utils';
 
-/**
- * The reader's state (spec 17.1). It tracks a clip by id, not an index: when a clip lands
- * above, the header renumbers; when the id disappears, the reader closes. Walking uses
- * the visible list and skips empty rows (spec 16 rules 3 and 14).
- */
-
 export type QuickLookView = 'text' | 'source' | 'rendered';
 
 export interface QuickLookState {
@@ -14,7 +8,7 @@ export interface QuickLookState {
   view: QuickLookView;
   editing: boolean;
   returnFocusIndex: number | null;
-  wrap: boolean; // per session, default off (spec 12)
+  wrap: boolean;
 }
 
 export const INITIAL_QUICK_LOOK: QuickLookState = {
@@ -30,10 +24,6 @@ export interface VisibleClip {
   originalIndex: number;
 }
 
-/**
- * Open on a clip. The view resets to text on every open (rule 6); wrap is kept.
- * returnFocusIndex is the row focus goes back to on close; walking keeps the original.
- */
 export function openOn(
   state: QuickLookState,
   clipId: string,
@@ -50,19 +40,16 @@ export function hasContent(clip: ClipItem): boolean {
   return clip.type === 'image' ? clip.content.length > 0 : clipText(clip).trim().length > 0;
 }
 
-/**
- * The clips the reader can land on: visible rows with content, in row order.
- */
 export function walkable(visible: readonly VisibleClip[]): VisibleClip[] {
   return visible.filter(({ clip }) => hasContent(clip));
 }
 
 export interface QuickLookPosition {
-  index: number; // row index in the full list, -1 when the clip is gone
-  visibleIndex: number; // index among walkable visible clips, -1 when hidden by the filter
+  index: number;
+  visibleIndex: number;
   visibleCount: number;
   hidden: boolean;
-  label: string; // "5 / 6", "2 / 5 filtered", "hidden by filter"
+  label: string;
 }
 
 export function quickLookPosition(
@@ -81,10 +68,6 @@ export function quickLookPosition(
   return { index, visibleIndex, visibleCount: steps.length, hidden, label };
 }
 
-/**
- * The id of the previous or next clip with content in the visible set, or null at the
- * ends. From a clip the filter hides, the nearest visible clip in that direction.
- */
 export function walkTarget(
   clips: readonly ClipItem[],
   visible: readonly VisibleClip[],

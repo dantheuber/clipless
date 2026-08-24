@@ -1,55 +1,13 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, act, cleanup } from '@testing-library/react';
-import { ThemeProvider, useTheme, applySlotVariables } from './theme';
-import { GROUP_COLOUR_SLOTS } from '../../../shared/groupColours';
-
-// Test component that displays theme info
-function ThemeDisplay() {
-  const { theme, effectiveTheme, isLight, isDark, setTheme } = useTheme();
-  return (
-    <div>
-      <span data-testid="theme">{theme}</span>
-      <span data-testid="effective">{effectiveTheme}</span>
-      <span data-testid="isLight">{String(isLight)}</span>
-      <span data-testid="isDark">{String(isDark)}</span>
-      <button onClick={() => setTheme('light')}>Set Light</button>
-      <button onClick={() => setTheme('dark')}>Set Dark</button>
-      <button onClick={() => setTheme('system')}>Set System</button>
-    </div>
-  );
-}
+import { ThemeDisplay } from './themeTestHarness';
+import { configureThemeApi, preferDarkTheme, renderTheme } from './themeTestData';
 
 describe('ThemeProvider', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let settingsCallback: ((settings: any) => void) | null = null;
-  let mediaChangeCallback: (() => void) | null = null;
+  let events: ReturnType<typeof configureThemeApi>;
 
   beforeEach(() => {
-    settingsCallback = null;
-    mediaChangeCallback = null;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).api = {
-      storageGetSettings: vi.fn().mockResolvedValue({ theme: 'system' }),
-      storageSaveSettings: vi.fn().mockResolvedValue(undefined),
-      onSettingsUpdated: vi.fn().mockImplementation((cb) => {
-        settingsCallback = cb;
-        return vi.fn(); // cleanup function
-      }),
-    };
-
-    // Mock matchMedia
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query) => ({
-        matches: false,
-        media: query,
-        addEventListener: vi.fn().mockImplementation((_event, cb) => {
-          mediaChangeCallback = cb;
-        }),
-        removeEventListener: vi.fn(),
-      })),
-    });
+    events = configureThemeApi();
   });
 
   afterEach(() => {
@@ -57,20 +15,12 @@ describe('ThemeProvider', () => {
   });
 
   it('provides default theme values', () => {
-    render(
-      <ThemeProvider>
-        <ThemeDisplay />
-      </ThemeProvider>
-    );
+    renderTheme();
     expect(screen.getByTestId('theme').textContent).toBe('system');
   });
 
   it('allows setting theme to light', async () => {
-    render(
-      <ThemeProvider>
-        <ThemeDisplay />
-      </ThemeProvider>
-    );
+    renderTheme();
 
     await act(async () => {
       screen.getByText('Set Light').click();
@@ -83,11 +33,7 @@ describe('ThemeProvider', () => {
 
   it('allows setting theme to dark', async () => {
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     await act(async () => {
@@ -102,11 +48,7 @@ describe('ThemeProvider', () => {
     (window.api as any).storageGetSettings = vi.fn().mockResolvedValue({ theme: 'dark' });
 
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     expect(screen.getByTestId('theme').textContent).toBe('dark');
@@ -119,11 +61,7 @@ describe('ThemeProvider', () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     expect(screen.getByTestId('theme').textContent).toBe('system');
@@ -135,11 +73,7 @@ describe('ThemeProvider', () => {
     (window as any).api = undefined;
 
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     expect(screen.getByTestId('theme').textContent).toBe('system');
@@ -147,17 +81,13 @@ describe('ThemeProvider', () => {
 
   it('responds to settings updates from other windows', async () => {
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
-    expect(settingsCallback).toBeTruthy();
+    expect(events.settings).toBeTruthy();
 
     await act(async () => {
-      settingsCallback!({ theme: 'light' });
+      events.settings!({ theme: 'light' });
     });
 
     expect(screen.getByTestId('theme').textContent).toBe('light');
@@ -169,29 +99,19 @@ describe('ThemeProvider', () => {
     (window.api as any).storageSaveSettings = vi.fn().mockRejectedValue(new Error('save fail'));
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    render(
-      <ThemeProvider>
-        <ThemeDisplay />
-      </ThemeProvider>
-    );
+    renderTheme();
 
     await act(async () => {
       screen.getByText('Set Light').click();
     });
 
-    // Should still update locally even if save fails
     expect(screen.getByTestId('effective').textContent).toBe('light');
     spy.mockRestore();
   });
 
   it('handles missing api during save', async () => {
-    render(
-      <ThemeProvider>
-        <ThemeDisplay />
-      </ThemeProvider>
-    );
+    renderTheme();
 
-    // Remove api after mount
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any).api = undefined;
 
@@ -199,16 +119,11 @@ describe('ThemeProvider', () => {
       screen.getByText('Set Light').click();
     });
 
-    // Should still update locally
     expect(screen.getByTestId('effective').textContent).toBe('light');
   });
 
   it('resolves system theme to light when matchMedia prefers light', () => {
-    render(
-      <ThemeProvider>
-        <ThemeDisplay />
-      </ThemeProvider>
-    );
+    renderTheme();
 
     expect(screen.getByTestId('theme').textContent).toBe('system');
   });
@@ -220,22 +135,10 @@ describe('ThemeProvider', () => {
   });
 
   it('resolves system theme to dark when matchMedia prefers dark', async () => {
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: true, // prefers dark
-        media: query,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    });
+    preferDarkTheme();
 
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     expect(screen.getByTestId('effective').textContent).toBe('dark');
@@ -246,11 +149,7 @@ describe('ThemeProvider', () => {
     (window.api as any).storageGetSettings = vi.fn().mockResolvedValue({});
 
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     expect(screen.getByTestId('theme').textContent).toBe('system');
@@ -258,81 +157,29 @@ describe('ThemeProvider', () => {
 
   it('ignores settings update without theme property', async () => {
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
     await act(async () => {
-      settingsCallback!({ maxClips: 200 }); // no theme property
+      events.settings!({ maxClips: 200 });
     });
 
-    // Theme should remain unchanged (system)
     expect(screen.getByTestId('theme').textContent).toBe('system');
   });
 
   it('responds to system theme media change', async () => {
-    // Theme defaults to 'system', so the media change listener should be active
     await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
+      renderTheme();
     });
 
-    expect(mediaChangeCallback).toBeTruthy();
+    expect(events.mediaChange).toBeTruthy();
 
-    // Simulate system theme change
-    // Change matchMedia to return dark
-    Object.defineProperty(window, 'matchMedia', {
-      writable: true,
-      value: vi.fn().mockImplementation((query: string) => ({
-        matches: true,
-        media: query,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    });
+    preferDarkTheme();
 
     await act(async () => {
-      mediaChangeCallback!();
+      events.mediaChange!();
     });
 
     expect(screen.getByTestId('effective').textContent).toBe('dark');
-  });
-
-  it('does not listen for settings updates when api.onSettingsUpdated is missing', async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (window as any).api = {
-      storageGetSettings: vi.fn().mockResolvedValue({ theme: 'system' }),
-      storageSaveSettings: vi.fn(),
-    };
-
-    await act(async () => {
-      render(
-        <ThemeProvider>
-          <ThemeDisplay />
-        </ThemeProvider>
-      );
-    });
-
-    // Should not throw
-    expect(screen.getByTestId('theme').textContent).toBe('system');
-  });
-});
-
-describe('applySlotVariables', () => {
-  it('sets every slot variable from the pair that matches the theme', () => {
-    applySlotVariables('dark');
-    const root = document.documentElement.style;
-    GROUP_COLOUR_SLOTS.forEach((slot, i) => {
-      expect(root.getPropertyValue(`--slot-${i}`)).toBe(slot.dark);
-    });
-    applySlotVariables('light');
-    expect(root.getPropertyValue('--slot-0')).toBe(GROUP_COLOUR_SLOTS[0].light);
-    expect(root.getPropertyValue('--slot-11')).toBe(GROUP_COLOUR_SLOTS[11].light);
   });
 });

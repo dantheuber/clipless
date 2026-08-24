@@ -15,11 +15,7 @@ import { resolveWindowBackground } from './background';
 import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
 
-/**
- * 900 x 600 by default; the General grid collapses to one column and scrolls below 720
- * wide, and nothing is designed for less than 720 x 440 (spec 15.2, 14.8).
- */
-export const SETTINGS_WINDOW = { width: 900, height: 600, minWidth: 720, minHeight: 440 };
+const SETTINGS_WINDOW = { width: 900, height: 600, minWidth: 720, minHeight: 440 }; // below 720 wide the General grid collapses to one column and scrolls; nothing is designed under 720 x 440 (spec 15.2, 14.8)
 
 let mainWindow: BrowserWindow | null = null;
 let settingsWindow: BrowserWindow | null = null;
@@ -35,7 +31,6 @@ export function getSettingsWindow(): BrowserWindow | null {
 export function createSettingsWindow(tab?: string): void {
   if (settingsWindow) {
     settingsWindow.focus();
-    // If window exists and we have a tab parameter, send message to change tab
     if (tab) {
       settingsWindow.webContents.once('did-finish-load', () => {
         settingsWindow?.webContents.send('settings-set-tab', tab);
@@ -44,9 +39,6 @@ export function createSettingsWindow(tab?: string): void {
     return;
   }
 
-  // Calculate positioning to keep settings window within screen bounds
-  // This uses minimal padding and allows overlap with main window when needed
-  // to keep the settings window close to the screen edges
   const settingsWidth = SETTINGS_WINDOW.width;
   const settingsHeight = SETTINGS_WINDOW.height;
   const position = calculateWindowPosition(mainWindow, settingsWidth, settingsHeight);
@@ -81,7 +73,6 @@ export function createSettingsWindow(tab?: string): void {
     settingsWindow = null;
   });
 
-  // Load the settings HTML file - use dev server in development mode
   const baseUrl =
     is.dev && process.env['ELECTRON_RENDERER_URL']
       ? process.env['ELECTRON_RENDERER_URL']
@@ -99,7 +90,6 @@ export function createSettingsWindow(tab?: string): void {
 }
 
 export async function createWindow(): Promise<void> {
-  // Create the browser window.
   const windowOptions: BrowserWindowConstructorOptions = {
     width: 900,
     height: 670,
@@ -113,7 +103,6 @@ export async function createWindow(): Promise<void> {
     },
   };
 
-  // Apply saved window bounds if available
   const windowBounds = getWindowBounds();
   if (windowBounds) {
     windowOptions.x = windowBounds.x;
@@ -129,10 +118,7 @@ export async function createWindow(): Promise<void> {
       return;
     }
 
-    // Honor "Start Minimized": keep the window hidden (tray only) on launch
-    // when enabled. Settings load from storage in the background; if they
-    // aren't ready yet this safely defaults to showing the window.
-    let startMinimized = false;
+    let startMinimized = false; // "Start Minimized" keeps launch hidden to the tray; if settings aren't loaded yet this default safely shows the window
     try {
       const settings = await storage.getSettings();
       startMinimized = settings.startMinimized;
@@ -144,11 +130,9 @@ export async function createWindow(): Promise<void> {
       mainWindow.show();
     }
 
-    // Apply window settings after the window is ready
     applyWindowSettings(mainWindow);
   });
 
-  // Handle window close - minimize to tray instead of quitting
   mainWindow.on('close', (event) => {
     if (!getIsQuitting()) {
       event.preventDefault();
@@ -159,15 +143,12 @@ export async function createWindow(): Promise<void> {
     }
   });
 
-  // Save window bounds when moved or resized
   mainWindow.on('moved', () => saveWindowBounds(mainWindow!));
   mainWindow.on('resized', () => saveWindowBounds(mainWindow!));
 
-  // Handle focus/blur for transparency settings
   mainWindow.on('focus', () => handleWindowFocus(mainWindow!));
   mainWindow.on('blur', () => handleWindowBlur(mainWindow!));
 
-  // Create system tray
   createTrayIcon(mainWindow, createSettingsWindow);
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -175,21 +156,16 @@ export async function createWindow(): Promise<void> {
     return { action: 'deny' };
   });
 
-  // HMR for renderer base on electron-vite cli.
-  // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'));
   }
 
-  // Setup clipboard system (IPC handlers and monitoring)
   initializeClipboardSystem(mainWindow);
 
-  // Initialize non-critical components after window loads to improve startup perception
   mainWindow.webContents.once('did-finish-load', async () => {
-    // Initialize hotkey manager
-    hotkeyManager.setMainWindow(mainWindow);
+    hotkeyManager.setMainWindow(mainWindow); // hotkey init is deferred until load to improve startup perception
     await hotkeyManager.initialize();
   });
 }

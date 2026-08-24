@@ -1,11 +1,13 @@
 import classNames from 'classnames';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { buildToolUrls } from '../../../../../shared/tools';
 import { Readiness } from './Readiness';
-import { TokenPicker, insertAtCaret } from './TokenPicker';
+import { TokenPicker } from './TokenPicker';
 import { TokenText } from './TokenText';
 import { Producers } from './UsesList';
-import { trapTab, useEditorHost } from './editorHost';
+import { trapTab } from './editorHost';
+import { EditorActions } from './editorControls';
+import { useCaretInsertion, useEditorLifecycle } from './editorHooks';
 import { groupsNeeded } from './model';
 import { resolveToolUrls, tokenise } from './resolve';
 import { useToolsData } from './useToolsData';
@@ -25,19 +27,12 @@ interface ToolEditorProps {
 
 const PREVIEW_LIMIT = 4;
 
-/**
- * The tool editor (spec 14.3): name, URL, token picker, readiness line, a preview titled
- * "Would open N tabs from the sample" listing every resolved URL with values coloured by
- * group, and the "fed by" list. The count comes from buildToolUrls, as the tray's does.
- */
 export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
   const { config, values, scan } = useToolsData();
-  const host = useEditorHost();
   const [name, setName] = useState(initial.name);
   const [url, setUrl] = useState(initial.url);
   const [saving, setSaving] = useState(false);
   const urlRef = useRef<HTMLInputElement>(null);
-  const [caret, setCaret] = useState<number | null>(null);
 
   const canSave = name.trim().length > 0 && url.trim().length > 0 && !saving;
   const dirty = name !== initial.name || url !== initial.url;
@@ -54,30 +49,8 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
     }
   };
 
-  useEffect(() => {
-    host.setDirty(dirty);
-  }, [dirty, host]);
-  useEffect(() => {
-    host.setSaver(canSave ? save : null);
-    return () => host.setSaver(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canSave, name, url]);
-  useEffect(() => {
-    urlRef.current?.focus();
-  }, []);
-  useEffect(() => {
-    if (caret !== null && urlRef.current) {
-      urlRef.current.focus();
-      urlRef.current.setSelectionRange(caret, caret);
-      setCaret(null);
-    }
-  }, [caret, url]);
-
-  const insert = (token: string) => {
-    const next = insertAtCaret(urlRef.current, url, token);
-    setUrl(next.value);
-    setCaret(next.caret);
-  };
+  useEditorLifecycle({ dirty, canSave, save, focusRef: urlRef });
+  const insert = useCaretInsertion(urlRef, url, setUrl);
 
   return (
     <div className={styles.editor} onKeyDown={trapTab} data-testid="tool-editor">
@@ -138,25 +111,7 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
           fed by <Producers config={config} groups={needed} />
         </div>
       )}
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={classNames(w.btn, w.primary)}
-          disabled={!canSave}
-          onClick={save}
-          data-testid="tool-save"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          className={classNames(w.btn, w.ghost)}
-          onClick={onCancel}
-          data-testid="tool-cancel"
-        >
-          Cancel
-        </button>
-      </div>
+      <EditorActions prefix="tool" canSave={canSave} onSave={save} onCancel={onCancel} />
     </div>
   );
 }

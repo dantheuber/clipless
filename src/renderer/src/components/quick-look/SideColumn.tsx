@@ -5,7 +5,7 @@ import { pinKey } from '../../../../shared/readiness';
 import { useClipsPins } from '../../providers/clips';
 import { useScanIndex } from '../../providers/scan';
 import { Chip } from '../clips/clip/Chip';
-import { formatBytes, imageBytes, imageFormat } from '../clips/clip/ImageClip';
+import { formatBytes, imageBytes, imageFormat } from '../clips/clip/imageMeta';
 import type { QuickLookView } from '../../providers/clips/quickLook';
 import styles from './QuickLook.module.css';
 
@@ -17,7 +17,7 @@ interface SideColumnProps {
   onHover: (key: string | null) => void;
   imageInfo: { width: number; height: number } | null;
   removed: Record<string, number> | null;
-  /** Under 480px the column folds under the content as a strip that opens on click */
+
   folded: boolean;
   open: boolean;
   onToggle: () => void;
@@ -28,8 +28,7 @@ interface GroupEntry {
   values: { value: string; count: number }[];
 }
 
-/** Matches grouped by capture group in order of first appearance, each value once with its count */
-export function groupMatches(scan: ScanResult | null): GroupEntry[] {
+function groupMatches(scan: ScanResult | null): GroupEntry[] {
   if (!scan) return [];
   const groups: GroupEntry[] = [];
   for (const group of scan.groups) groups.push({ group, values: [] });
@@ -42,12 +41,6 @@ export function groupMatches(scan: ScanResult | null): GroupEntry[] {
   return groups;
 }
 
-/**
- * The reader's right column (spec 5, 16 rule 6): matches grouped by capture group with a
- * count and a per-group pin all; for an image its format, pixels, size and where it is
- * stored; for the source view why there are no chips; for the rendered view what the
- * sanitiser removed.
- */
 export function SideColumn({
   clip,
   view,

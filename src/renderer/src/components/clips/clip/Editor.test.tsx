@@ -79,7 +79,6 @@ describe('Editor', () => {
     fireEvent.scroll(textarea);
     expect(pre.scrollTop).toBe(40);
     expect(pre.scrollLeft).toBe(7);
-    // scroll without an overlay is harmless
     cleanup();
     const plain = setup({ value: 'a', size: 'reader' });
     fireEvent.scroll(plain.textarea);

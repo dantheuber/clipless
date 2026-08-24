@@ -1,11 +1,14 @@
-/* Context menu (spec 4, 16 rules 9 and 10) */
-.contextMenu {
+.contextMenu,
+.submenu {
   position: fixed;
   background: var(--cm-bg);
   border: 1px solid var(--line2);
   border-radius: 6px;
   box-shadow: 0 8px 24px var(--shadow);
   padding: 4px 0;
+}
+
+.contextMenu {
   min-width: 220px;
   width: max-content;
   max-width: 320px;
@@ -86,11 +89,6 @@
   position: absolute;
   left: 100%;
   top: -5px;
-  background: var(--cm-bg);
-  border: 1px solid var(--line2);
-  border-radius: 6px;
-  box-shadow: 0 8px 24px var(--shadow);
-  padding: 4px 0;
   min-width: 240px;
   max-width: 360px;
   z-index: 1;

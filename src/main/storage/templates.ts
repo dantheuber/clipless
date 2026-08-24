@@ -1,15 +1,9 @@
 import type { Template } from '../../shared/types';
 
-/**
- * Generate a unique ID for templates
- */
 export function generateTemplateId(): string {
   return 'template-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }
 
-/**
- * Create a new template object
- */
 export function createTemplateObject(name: string, content: string, order: number): Template {
   return {
     id: generateTemplateId(),
@@ -21,9 +15,6 @@ export function createTemplateObject(name: string, content: string, order: numbe
   };
 }
 
-/**
- * Update an existing template with new data
- */
 export function updateTemplateObject(template: Template, updates: Partial<Template>): Template {
   return {
     ...template,
@@ -32,16 +23,10 @@ export function updateTemplateObject(template: Template, updates: Partial<Templa
   };
 }
 
-/**
- * Sort templates by order
- */
 export function sortTemplatesByOrder(templates: Template[]): Template[] {
   return [...templates].sort((a, b) => a.order - b.order);
 }
 
-/**
- * Reorder templates array
- */
 export function reorderTemplatesArray(templates: Template[]): Template[] {
   return templates.map((template, index) => ({
     ...template,

@@ -33,7 +33,6 @@ describe('tokenizeLine', () => {
   });
 
   it('flattens nested tokens with their parents classes', () => {
-    // bash string interpolation produces nested tokens
     const runs = tokenizeLine('echo "a ${HOME} b"', 'bash');
     expect(runs.map((r) => r.text).join('')).toBe('echo "a ${HOME} b"');
     expect(runs.some((r) => r.classes.length > 1)).toBe(true);
@@ -53,7 +52,6 @@ describe('segmentLine with chips inside Prism tokens', () => {
     }));
     expect(texts).toContainEqual({ t: '"', cls: ['string'], hit: false });
     expect(texts).toContainEqual({ t: '10.0.0.1', cls: ['string'], hit: true });
-    // the closing quote is its own piece of the string token, after the chip
     const closing = texts.filter((x) => x.t === '"' && x.cls[0] === 'string');
     expect(closing).toHaveLength(2);
     expect(segments.map((s) => line.slice(s.start, s.end)).join('')).toBe(line);
@@ -119,7 +117,6 @@ describe('splitLines', () => {
     expect(lines[0].matches).toHaveLength(1);
     expect(lines[1].matches).toHaveLength(1);
     expect(splitLines('', [])).toEqual([{ start: 0, text: '', matches: [] }]);
-    // a match that ends on the line break belongs to the first line only
     const edge = splitLines('ab\ncd', [m('x', 'b\n', 1)]);
     expect(edge[0].matches).toHaveLength(1);
     expect(edge[1].matches).toHaveLength(0);

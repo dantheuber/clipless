@@ -5,28 +5,21 @@ import styles from './Editor.module.css';
 
 interface EditorProps {
   value: string;
-  /** Prism language for the overlay, or null for a plain textarea */
+
   language: string | null;
   onChange: (value: string) => void;
-  /** Enter (without Shift) or blur */
+
   onCommit: () => void;
-  /** Esc; the caller restores the pre-edit content */
+
   onCancel: () => void;
-  /** row: one row of the list, grows with multi-line content; reader: fills the content pane */
+
   size: 'row' | 'reader';
 }
 
-/**
- * The one inline editor (spec 4, 5, 17.8): a textarea, with a syntax overlay behind it for
- * code clips built from the same tokeniser as the reader. No chips while editing. Enter
- * commits, Shift+Enter inserts a newline, Esc cancels and restores; nothing is saved while
- * typing, so Esc can always revert.
- */
 export function Editor({ value, language, onChange, onCommit, onCancel, size }: EditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const overlayRef = useRef<HTMLPreElement>(null);
 
-  // Row mode: grow to the content when it has more than one line
   useEffect(() => {
     const textarea = textareaRef.current;
     if (!textarea || size !== 'row') return;
@@ -49,7 +42,7 @@ export function Editor({ value, language, onChange, onCommit, onCancel, size }: 
       onCommit();
     } else if (event.key === 'Escape') {
       event.preventDefault();
-      event.stopPropagation(); // edit is the innermost Esc level; the reader stays open
+      event.stopPropagation();
       onCancel();
     }
   };

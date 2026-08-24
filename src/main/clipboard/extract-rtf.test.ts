@@ -17,14 +17,12 @@ describe('rtfToText', () => {
   });
 
   it("decodes \\'hh through the document code page", () => {
-    // 0xE0 is à in cp1252 but а (Cyrillic a) in cp1251
-    expect(rtfToText("{\\rtf1\\ansi\\ansicpg1251 \\'e0}")).toBe('а');
+    expect(rtfToText("{\\rtf1\\ansi\\ansicpg1251 \\'e0}")).toBe('а'); // 0xE0 is à in cp1252 but а (Cyrillic a) in cp1251
     expect(rtfToText("{\\rtf1\\ansi\\ansicpg1252 \\'e0}")).toBe('à');
   });
 
   it('decodes multibyte sequences through a double-byte code page', () => {
-    // Shift_JIS bytes for 日本
-    expect(rtfToText("{\\rtf1\\ansicpg932 \\'93\\'fa\\'96\\'7b}")).toBe('日本');
+    expect(rtfToText("{\\rtf1\\ansicpg932 \\'93\\'fa\\'96\\'7b}")).toBe('日本'); // Shift_JIS bytes for 日本
   });
 
   it('falls back to cp1252 for an unknown code page', () => {
@@ -32,8 +30,7 @@ describe('rtfToText', () => {
   });
 
   it('falls back to cp1252 for a code page the runtime cannot decode', () => {
-    // 437 is in the table but no WHATWG decoder exists for it
-    expect(rtfToText("{\\rtf1\\ansicpg437 caf\\'e9}")).toBe('café');
+    expect(rtfToText("{\\rtf1\\ansicpg437 caf\\'e9}")).toBe('café'); // 437 is in the table but no WHATWG decoder exists for it
   });
 
   it('maps the remaining symbol and break control words', () => {
@@ -53,8 +50,7 @@ describe('rtfToText', () => {
   it('decodes \\uN and skips the fallback characters that follow it', () => {
     expect(rtfToText('{\\rtf1\\uc1 \\u8212? dash}')).toBe('— dash');
     expect(rtfToText("{\\rtf1\\uc2 \\u26085\\'93\\'fa x}")).toBe('日 x');
-    // The one space after a control word is its delimiter, not text
-    expect(rtfToText('{\\rtf1\\uc0 \\u26085 x}')).toBe('日x');
+    expect(rtfToText('{\\rtf1\\uc0 \\u26085 x}')).toBe('日x'); // the one space after a control word is its delimiter, not text
     expect(rtfToText('{\\rtf1\\uc0 \\u26085  x}')).toBe('日 x');
   });
 

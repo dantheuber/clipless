@@ -1,16 +1,5 @@
-/**
- * Shared types for the Clipless application
- * Used across main, renderer, and preload processes
- */
-
-/**
- * Supported clipboard types based on Electron's clipboard API
- */
 export type ClipType = 'text' | 'html' | 'image' | 'rtf' | 'bookmark';
 
-/**
- * Represents a single clipboard item with its content and type
- */
 export interface ClipItem {
   id: string; // assigned by the renderer's clip creators; backfilled by migrateData on load
   type: ClipType;
@@ -27,26 +16,17 @@ export interface ClipItem {
   text?: string; // extracted text for html and rtf clips; the scanner reads this, not the markup
 }
 
-/**
- * Stored clip with metadata
- */
 export interface StoredClip {
   clip: ClipItem;
   isLocked: boolean;
   timestamp: number;
 }
 
-/**
- * Hotkey configuration for specific actions
- */
-export interface HotkeyConfig {
+interface HotkeyConfig {
   enabled: boolean;
   key: string; // Key combination (e.g., 'CommandOrControl+Shift+C')
 }
 
-/**
- * All hotkey settings
- */
 export interface HotkeySettings {
   enabled: boolean; // Global enable/disable for all hotkeys
   focusWindow: HotkeyConfig;
@@ -59,9 +39,6 @@ export interface HotkeySettings {
   searchClips: HotkeyConfig;
 }
 
-/**
- * User settings and preferences
- */
 export interface UserSettings {
   maxClips: number;
   startMinimized: boolean;
@@ -81,9 +58,6 @@ export interface UserSettings {
   toolsSampleText?: string; // settings Tools tab sample; absent means "use the newest clip"
 }
 
-/**
- * Complete application data structure
- */
 export interface AppData {
   clips: StoredClip[];
   settings: UserSettings;
@@ -94,14 +68,8 @@ export interface AppData {
   version: string;
 }
 
-/**
- * Capture group name to colour bucket slot (0 to 11). Never a hex value.
- */
-export type GroupColours = Record<string, number>;
+export type GroupColours = Record<string, number>; // group name to colour slot index (0-11), never a hex
 
-/**
- * Domain-specific storage for templates, search terms, quick tools and group colours
- */
 export interface TemplatesData {
   templates: Template[];
   searchTerms: SearchTerm[];
@@ -109,34 +77,17 @@ export interface TemplatesData {
   groupColours?: GroupColours;
 }
 
-/**
- * Storage metadata tracked in unencrypted meta.json
- */
 export interface StorageMeta {
   version: string;
   storageVersion: number;
 }
 
-/**
- * Storage statistics
- */
 export interface StorageStats {
   clipCount: number;
   lockedCount: number;
   dataSize: number;
 }
 
-/**
- * Clipboard data as received from Electron API
- */
-export interface ClipboardData {
-  type: string;
-  content: string;
-}
-
-/**
- * Bookmark data for clipboard operations
- */
 export interface BookmarkData {
   text: string;
   html: string;
@@ -144,9 +95,6 @@ export interface BookmarkData {
   url?: string;
 }
 
-/**
- * Template for text generation with clipboard content
- */
 export interface Template {
   id: string; // UUID
   name: string;
@@ -156,9 +104,6 @@ export interface Template {
   order: number;
 }
 
-/**
- * Search term for extracting data from clipboard content
- */
 export interface SearchTerm {
   id: string; // UUID
   name: string;
@@ -169,9 +114,6 @@ export interface SearchTerm {
   order: number;
 }
 
-/**
- * Tool for opening web resources with extracted data
- */
 export interface QuickTool {
   id: string; // UUID
   name: string;
@@ -182,27 +124,16 @@ export interface QuickTool {
   order: number;
 }
 
-/**
- * Quick Clips configuration export/import format.
- * Version 2.0.0 adds groupColours; a version 1 file imports with none.
- */
 export interface QuickClipsConfig {
   searchTerms: SearchTerm[];
   tools: QuickTool[];
   templates?: Template[];
-  groupColours?: GroupColours;
+  groupColours?: GroupColours; // added in config version 2.0.0; a version 1 file imports with none
   version: string;
 }
 
-/**
- * How an imported Quick Clips config meets the existing one.
- * merge keeps existing colours and adds missing ones; replace takes the file's map.
- */
-export type QuickClipsImportMode = 'merge' | 'replace';
+export type QuickClipsImportMode = 'merge' | 'replace'; // merge keeps existing colours, adds missing; replace takes the file's map
 
-/**
- * One occurrence of a capture group value in a clip, with its position in the scanned text
- */
 export interface Match {
   group: string;
   value: string;
@@ -211,9 +142,6 @@ export interface Match {
   termId: string;
 }
 
-/**
- * Result of scanning one text with the enabled search terms
- */
 export interface ScanResult {
   matches: Match[]; // sorted by start
   groups: string[]; // in order of first appearance
@@ -221,10 +149,7 @@ export interface ScanResult {
   large: boolean; // text is above the on-demand scan threshold
 }
 
-/**
- * Auto-updater state held by the main process and pushed to every window
- */
-export type UpdateStatus =
+type UpdateStatus =
   | 'idle'
   | 'checking'
   | 'available'
@@ -240,19 +165,10 @@ export interface UpdateState {
   message?: string; // set when status is error
 }
 
-/**
- * What the main process answers to settings-changed. ok means the write landed and every
- * enabled shortcut registered. failed lists the accelerators the OS refused, so the
- * Hotkeys tab can say "not saved" on the right row. message says why ok is false when
- * no accelerator failed: the write itself, or the OS refusing the login item.
- */
 export interface SettingsApplyResult {
-  ok: boolean;
-  failed: string[];
-  message?: string;
+  ok: boolean; // the write landed and every enabled shortcut registered
+  failed: string[]; // accelerators the OS refused, so the Hotkeys tab can flag the right row
+  message?: string; // why ok is false when no accelerator failed: the write, or the login item
 }
 
-/**
- * Folders the About panel can open
- */
 export type AppPathName = 'data' | 'logs';

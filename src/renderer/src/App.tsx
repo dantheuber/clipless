@@ -10,10 +10,6 @@ import { Tray } from './components/tray/Tray';
 import { QuickLook } from './components/quick-look/QuickLook';
 import styles from './App.module.css';
 
-/**
- * The clips window. Stack order from the bottom: status bar, search bar, tray, list (spec
- * 16 rule 1). The reader draws over the list inside the main content area.
- */
 function AppContent(): React.JSX.Element {
   return (
     <div className={styles.app}>

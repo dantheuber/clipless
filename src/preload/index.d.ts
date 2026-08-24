@@ -46,7 +46,6 @@ declare global {
       openAppPath: (name: AppPathName) => Promise<string>;
       onSettingsUpdated: (callback: (settings: UserSettings) => void) => () => void;
       hotkeysGetDefaults: () => Promise<HotkeySettings>;
-      // Storage APIs
       onStorageReady: (callback: () => void) => () => void;
       storageGetClips: () => Promise<any[]>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
@@ -56,18 +55,15 @@ declare global {
       storageExportData: () => Promise<string>;
       storageImportData: (jsonData: string) => Promise<boolean>;
       storageClearAll: () => Promise<boolean>;
-      // Template APIs
       templatesGetAll: () => Promise<Template[]>;
       templatesCreate: (name: string, content: string) => Promise<any>;
       templatesUpdate: (id: string, updates: any) => Promise<any>;
       templatesDelete: (id: string) => Promise<void>;
       templatesReorder: (templates: any[]) => Promise<void>;
-      // Quick Clips - Search Terms APIs
       searchTermsGetAll: () => Promise<SearchTerm[]>;
       searchTermsCreate: (name: string, pattern: string) => Promise<any>;
       searchTermsUpdate: (id: string, updates: any) => Promise<any>;
       searchTermsDelete: (id: string) => Promise<void>;
-      // Quick Clips - Tools APIs
       quickToolsGetAll: () => Promise<QuickTool[]>;
       quickToolsCreate: (name: string, url: string, captureGroups: string[]) => Promise<any>;
       quickToolsUpdate: (id: string, updates: any) => Promise<any>;
@@ -79,7 +75,6 @@ declare global {
         mode?: QuickClipsImportMode
       ) => Promise<void>;
       onQuickClipsConfigChanged: (callback: () => void) => () => void;
-      // Group colours
       groupColoursGet: () => Promise<GroupColours>;
       groupColoursSet: (groupColours: GroupColours) => Promise<GroupColours>;
       onToggleSearch: (callback: () => void) => () => void;

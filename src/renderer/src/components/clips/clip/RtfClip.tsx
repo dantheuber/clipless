@@ -3,6 +3,7 @@ import { ClipItem, clipText } from '../../../providers/clips';
 import type { ScanResult } from '../../../../../shared/types';
 import { CollapsedLine } from './CollapsedLine';
 import styles from './Clip.module.css';
+import { ClipTag } from './ClipTag';
 
 interface RtfClipProps {
   clip: ClipItem;
@@ -10,13 +11,10 @@ interface RtfClipProps {
   searchTerm?: string;
 }
 
-/**
- * An rtf row (spec 16 rule 6): a type tag and the extracted text, never the markup.
- */
 export const RtfClip = memo(function RtfClip({ clip, scan, searchTerm }: RtfClipProps) {
   return (
     <span className={styles.editableText} data-testid="clip-line">
-      <span className={styles.lang}>rtf</span>
+      <ClipTag row>rtf</ClipTag>
       <CollapsedLine text={clipText(clip)} scan={scan} term={searchTerm} />
     </span>
   );

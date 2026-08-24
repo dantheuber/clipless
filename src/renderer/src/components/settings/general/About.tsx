@@ -1,24 +1,11 @@
 import type { AppPathName } from '../../../../../shared/types';
-import { useToast } from '../../Toast';
+import { useToast } from '../../useToast';
 import { Panel } from './Row';
 import { releaseNotesUrl } from './updateStatus';
+import { platformLine } from './platform';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
-const PLATFORM_NAMES: Record<string, string> = {
-  linux: 'Linux',
-  win32: 'Windows',
-  darwin: 'macOS',
-};
-
-export function platformLine(platform: string, arch: string): string {
-  return `${PLATFORM_NAMES[platform] ?? platform} ${arch}`;
-}
-
-/**
- * About (spec 15.4): the version, the Electron and Chromium versions and the platform on
- * two short monospace lines, then release notes, data folder and log as links.
- */
 export function About() {
   const toast = useToast();
   const versions = window.electron?.process?.versions ?? {};

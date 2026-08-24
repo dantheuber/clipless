@@ -1,21 +1,12 @@
-/**
- * Curated, non-sensitive demo data used to populate the app for documentation
- * screenshots. The content is themed around a security/IT analyst workflow so
- * the Quick Clips patterns, Quick Tools, and Templates all reinforce each other
- * in the captured images.
- *
- * All values are fictional (example.com / RFC 5737 documentation IP ranges).
- */
 import type { ClipItem } from '../../src/shared/types';
 
 export interface DemoClip {
   clip: ClipItem;
-  /** Locked clips are pinned; index 0 can never be locked. */
-  locked?: boolean;
+  locked?: boolean; // index 0 can never be locked
 }
 
-/** Clips ordered most-recent-first (index 0 is the live clipboard entry). */
 export const DEMO_CLIPS: DemoClip[] = [
+  // most-recent-first (index 0 is the live clipboard entry); all values fictional (example.com / RFC 5737 ranges)
   {
     clip: {
       id: 'demo-1',
@@ -84,7 +75,6 @@ export const DEMO_CLIPS: DemoClip[] = [
   },
 ];
 
-/** Quick Clips patterns (regex with named capture groups). */
 export const SEARCH_TERMS: { name: string; pattern: string }[] = [
   { name: 'Email Address', pattern: '(?<email>[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})' },
   { name: 'IPv4 Address', pattern: '(?<ip>(?:\\d{1,3}\\.){3}\\d{1,3})' },
@@ -92,7 +82,6 @@ export const SEARCH_TERMS: { name: string; pattern: string }[] = [
   { name: 'MAC Address', pattern: '(?<mac>(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2})' },
 ];
 
-/** Quick Tools — URL templates keyed off the capture groups above. */
 export const QUICK_TOOLS: { name: string; url: string; captureGroups: string[] }[] = [
   {
     name: 'VirusTotal — IP',
@@ -112,7 +101,6 @@ export const QUICK_TOOLS: { name: string; url: string; captureGroups: string[] }
   },
 ];
 
-/** Templates — mix of named-token (matched) and positional (clip) templates. */
 export const TEMPLATES: { name: string; content: string }[] = [
   {
     name: 'Incident Summary',
@@ -129,12 +117,6 @@ export const TEMPLATES: { name: string; content: string }[] = [
   },
 ];
 
-/**
- * The clip quick look opens on for the "patterns" screenshot. It is the newest
- * demo clip, so its IP, email, and ticket each match a search term above and
- * render as chips in the reader.
- */
-export const QUICK_LOOK_CONTENT = DEMO_CLIPS[0].clip.content;
+export const QUICK_LOOK_CONTENT = DEMO_CLIPS[0].clip.content; // newest clip: its ip, email and ticket each match a search term above
 
-/** Filter string typed into the clip search bar for the "search" screenshot. */
 export const SEARCH_FILTER = 'INC-4821';

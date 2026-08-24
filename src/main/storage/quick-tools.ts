@@ -1,9 +1,6 @@
 import type { QuickTool, SearchTerm } from '../../shared/types';
 import { generateId } from './search-terms';
 
-/**
- * Create a new quick tool object
- */
 export function createQuickToolObject(
   name: string,
   url: string,
@@ -21,9 +18,6 @@ export function createQuickToolObject(
   };
 }
 
-/**
- * Update an existing quick tool with new data
- */
 export function updateQuickToolObject(
   quickTool: QuickTool,
   updates: Partial<QuickTool>
@@ -35,16 +29,10 @@ export function updateQuickToolObject(
   };
 }
 
-/**
- * Sort quick tools by order
- */
 export function sortQuickToolsByOrder(quickTools: QuickTool[]): QuickTool[] {
   return [...quickTools].sort((a, b) => a.order - b.order);
 }
 
-/**
- * Reorder quick tools array
- */
 export function reorderQuickToolsArray(quickTools: QuickTool[]): QuickTool[] {
   return quickTools.map((quickTool, index) => ({
     ...quickTool,
@@ -52,9 +40,6 @@ export function reorderQuickToolsArray(quickTools: QuickTool[]): QuickTool[] {
   }));
 }
 
-/**
- * Import configuration data for quick clips
- */
 export function processQuickClipsConfig(config: unknown): {
   searchTerms: SearchTerm[];
   quickTools: QuickTool[];
@@ -64,17 +49,14 @@ export function processQuickClipsConfig(config: unknown): {
     quickTools: [] as QuickTool[],
   };
 
-  // Validate config structure
   if (!config || typeof config !== 'object') {
     throw new Error('Invalid config format');
   }
 
   const configObj = config as Record<string, unknown>;
 
-  // Process search terms
   if (configObj.searchTerms && Array.isArray(configObj.searchTerms)) {
     for (const searchTermData of configObj.searchTerms) {
-      // Skip invalid entries
       if (!searchTermData || typeof searchTermData !== 'object') {
         continue;
       }
@@ -94,10 +76,8 @@ export function processQuickClipsConfig(config: unknown): {
     }
   }
 
-  // Process quick tools
   if (configObj.tools && Array.isArray(configObj.tools)) {
     for (const toolData of configObj.tools) {
-      // Skip invalid entries
       if (!toolData || typeof toolData !== 'object') {
         continue;
       }

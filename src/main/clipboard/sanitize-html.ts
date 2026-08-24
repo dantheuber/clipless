@@ -1,19 +1,6 @@
 import sanitize from 'sanitize-html';
 import { Parser } from 'htmlparser2';
 
-/**
- * The rendered view of an HTML clip (spec 16.1 rule 6). Runs in the main process, only
- * when the user switches to the rendered view, never at capture. The renderer puts the
- * returned string into a sandboxed iframe's srcdoc with the CSP meta prepended and nothing
- * else: the untrusted source never reaches the live document.
- *
- * Formatting tags only; script, style, iframe, object, embed, link, meta, base, svg, math,
- * form and every input, video, audio and img are removed. An image leaves a
- * "[image removed]" marker; unknown tags are unwrapped with their text kept. Every
- * attribute is dropped except title and, on a, an href that starts with http:, https: or
- * mailto:.
- */
-
 export const ALLOWED_TAGS: readonly string[] = [
   'p',
   'br',
@@ -44,11 +31,8 @@ export const ALLOWED_TAGS: readonly string[] = [
   'a',
 ];
 
-/**
- * Tags whose text content goes with them. sanitize-html's default covers script and style;
- * the rest hold fallback text or markup that means nothing without the element.
- */
 const NON_TEXT_TAGS = [
+  // dropped with their text: fallback content that means nothing without the element
   'script',
   'style',
   'textarea',
@@ -72,19 +56,15 @@ export const IMAGE_REMOVED_TEXT = '[image removed]';
 
 export interface SanitizeResult {
   html: string;
-  /** Removed tag names and dropped attribute names, each with a count, for the side column */
-  removed: Record<string, number>;
+  removed: Record<string, number>; // removed tag names and dropped attribute names, each with a count, for the side column
 }
 
 function hrefAllowed(href: string | undefined): href is string {
   return typeof href === 'string' && SAFE_HREF.test(href.trim());
 }
 
-/**
- * First pass: count what the sanitiser will drop, over the same string it sanitises.
- */
 function countRemoved(html: string): Record<string, number> {
-  const removed: Record<string, number> = {};
+  const removed: Record<string, number> = {}; // first pass: counts what the sanitiser will drop, over the same string it sanitises
   const allowed = new Set(ALLOWED_TAGS);
   const bump = (name: string): void => {
     removed[name] = (removed[name] ?? 0) + 1;
@@ -108,7 +88,7 @@ function countRemoved(html: string): Record<string, number> {
 }
 
 export function sanitizeHtml(html: string): SanitizeResult {
-  const removed = countRemoved(html);
+  const removed = countRemoved(html); // spec 16.1 rule 6: the output goes only into a sandboxed iframe's srcdoc with the CSP meta prepended — the untrusted source never reaches the live document
   const clean = sanitize(html, {
     allowedTags: [...ALLOWED_TAGS],
     allowedAttributes: { '*': ['title'], a: ['href', 'title'] },
@@ -121,8 +101,7 @@ export function sanitizeHtml(html: string): SanitizeResult {
       img: () => ({ tagName: 'span', attribs: {}, text: IMAGE_REMOVED_TEXT }),
       a: (tagName, attribs) => {
         const kept: Record<string, string> = {};
-        // A relative or protocol-relative href has no scheme to check; drop it too
-        if (hrefAllowed(attribs.href)) kept.href = attribs.href;
+        if (hrefAllowed(attribs.href)) kept.href = attribs.href; // a relative or protocol-relative href has no scheme to check; drop it too
         if (typeof attribs.title === 'string') kept.title = attribs.title;
         return { tagName, attribs: kept };
       },
