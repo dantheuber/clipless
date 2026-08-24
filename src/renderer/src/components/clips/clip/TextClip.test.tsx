@@ -4,10 +4,12 @@ import type { ScanResult } from '../../../../../shared/types';
 import { TextClip } from './TextClip';
 
 let mockIsCodeDetectionEnabled = false;
+let mockIsLanguageLabelEnabled = false;
 
 vi.mock('../../../providers/languageDetection', () => ({
   useLanguageDetection: () => ({
     isCodeDetectionEnabled: mockIsCodeDetectionEnabled,
+    isLanguageLabelEnabled: mockIsLanguageLabelEnabled,
   }),
 }));
 
@@ -45,6 +47,7 @@ const scanOf = (text: string, group: string, value: string): ScanResult => {
 
 beforeEach(() => {
   mockIsCodeDetectionEnabled = false;
+  mockIsLanguageLabelEnabled = false;
   pinsState.togglePins.mockClear();
 });
 
@@ -66,6 +69,7 @@ describe('TextClip display', () => {
   });
 
   it('shows a language tag for code and a chip for every match', () => {
+    mockIsLanguageLabelEnabled = true;
     const text = 'ssh admin@10.0.0.1';
     render(
       <TextClip
@@ -77,6 +81,20 @@ describe('TextClip display', () => {
     expect(screen.getByText('bash')).toBeInTheDocument();
     const chip = screen.getByText('10.0.0.1').closest('[data-key]');
     expect(chip).toHaveAttribute('data-key', 'ip|10.0.0.1');
+  });
+
+  it('hides the language tag when the label setting is off', () => {
+    mockIsLanguageLabelEnabled = false;
+    const text = 'ssh admin@10.0.0.1';
+    render(
+      <TextClip
+        clip={clip(text, { isCode: true, language: 'bash' })}
+        scan={null}
+        onUpdate={vi.fn()}
+      />
+    );
+    expect(screen.queryByText('bash')).toBeNull();
+    expect(screen.getByText(text)).toBeInTheDocument();
   });
 
   it('clicking a chip pins and never enters edit', () => {

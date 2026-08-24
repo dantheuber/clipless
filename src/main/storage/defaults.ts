@@ -48,6 +48,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   alwaysOnTop: false,
   rememberWindowPosition: true,
   showNotifications: false,
+  showLanguageLabel: true,
   automaticUpdates: true,
   hotkeys: DEFAULT_HOTKEY_SETTINGS,
 };

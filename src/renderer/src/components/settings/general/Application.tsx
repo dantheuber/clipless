@@ -9,6 +9,7 @@ import w from '../shell/widgets.module.css';
  */
 export function Application() {
   const theme = useSetting('theme');
+  const codeDetection = useSetting('codeDetectionEnabled');
   return (
     <Panel title="Application">
       <ClipsToKeep />
@@ -51,6 +52,12 @@ export function Application() {
         id="codeDetectionEnabled"
         label="Code detection"
         description="Detect the language of text clips and colour them as code in the row tag, the editor and quick look."
+      />
+      <ToggleRow
+        id="showLanguageLabel"
+        label="Language label"
+        description="Show the detected language tag at the left of a code clip's row."
+        dimmed={codeDetection.value !== true}
       />
     </Panel>
   );
