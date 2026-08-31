@@ -45,6 +45,13 @@ export const Chip = memo(function Chip({
     togglePins([key]);
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.stopPropagation(); // the row's own Enter/Space shortcuts open or edit the clip
+    event.preventDefault();
+    togglePins([key]);
+  };
+
   const handleDoubleClick = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation();
     event.preventDefault();
@@ -68,7 +75,11 @@ export const Chip = memo(function Chip({
       data-key={key}
       data-pinned={pinned ? 'true' : undefined}
       title={pinned ? `Unpin ${group} ${value}` : `Pin ${group} ${value}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={pinned}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={onHover ? () => onHover(key) : undefined}
       onMouseLeave={onHover ? () => onHover(null) : undefined}

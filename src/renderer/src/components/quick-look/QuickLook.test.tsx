@@ -309,10 +309,15 @@ describe('QuickLook', () => {
     expect(screen.getByTestId('ql-wrap')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('Tab cycles the reader controls and never leaves the dialog', () => {
+  it('Tab cycles the reader controls, chips included, and never leaves the dialog', () => {
     render(<QuickLook />);
     const dialog = screen.getByTestId('quick-look');
-    const buttons = [...dialog.querySelectorAll<HTMLButtonElement>('button:not([disabled])')];
+    const buttons = [
+      ...dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])'
+      ),
+    ];
+    expect(buttons.some((el) => el.hasAttribute('data-key'))).toBe(true);
     fireEvent.keyDown(dialog, { key: 'Tab' });
     expect(buttons[0]).toHaveFocus();
     fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
