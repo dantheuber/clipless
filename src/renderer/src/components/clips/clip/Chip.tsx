@@ -20,8 +20,8 @@ interface ChipProps {
 
 /**
  * The clickable rendering of a match (spec 4): dashed outline in the group's colour with a
- * "+" suffix; pinned is a solid outline with a tick. Click toggles the pin and never enters
- * edit; double-click selects the text for people who want a substring. Colour comes from
+ * "+" suffix; pinned is a solid outline with a tick. Click, Enter or Space toggles the pin and
+ * never enters edit; double-click selects the text for people who want a substring. Colour comes from
  * --slot-N through --gc, never a hex.
  */
 export const Chip = memo(function Chip({
