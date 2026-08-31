@@ -20,8 +20,8 @@ interface ChipProps {
 
 /**
  * The clickable rendering of a match (spec 4): dashed outline in the group's colour with a
- * "+" suffix; pinned is a solid outline with a tick. Click toggles the pin and never enters
- * edit; double-click selects the text for people who want a substring. Colour comes from
+ * "+" suffix; pinned is a solid outline with a tick. Click, Enter or Space toggles the pin and
+ * never enters edit; double-click selects the text for people who want a substring. Colour comes from
  * --slot-N through --gc, never a hex.
  */
 export const Chip = memo(function Chip({
@@ -42,6 +42,13 @@ export const Chip = memo(function Chip({
     event.stopPropagation();
     event.preventDefault();
     if (event.detail >= 2) return; // the double-click selected text; leave the pin alone
+    togglePins([key]);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.stopPropagation(); // the row's own Enter/Space shortcuts open or edit the clip
+    event.preventDefault();
     togglePins([key]);
   };
 
@@ -68,7 +75,11 @@ export const Chip = memo(function Chip({
       data-key={key}
       data-pinned={pinned ? 'true' : undefined}
       title={pinned ? `Unpin ${group} ${value}` : `Pin ${group} ${value}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={pinned}
       onClick={handleClick}
+      onKeyDown={handleKeyDown}
       onDoubleClick={handleDoubleClick}
       onMouseEnter={onHover ? () => onHover(key) : undefined}
       onMouseLeave={onHover ? () => onHover(null) : undefined}
