@@ -131,6 +131,7 @@ export function Hotkeys() {
                       type="button"
                       className={styles.clickable}
                       title="click to change"
+                      disabled={!on}
                       onClick={() => on && setRecording(row.id)}
                       data-testid={`keys-${row.id}`}
                     >

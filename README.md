@@ -152,7 +152,7 @@ dropdown, done.
 
 The things you don't notice until you'd miss them.
 
-- **⌨️ Global hotkeys** — reach recent clips and quick look from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you.
+- **⌨️ Global hotkeys** — reach recent clips and quick look from anywhere, even when Clipless is minimized. Quick-clip hotkeys (1–5) grab your most recent items, and a focus hotkey snaps the window to you. Hotkeys are off by default — flip the master switch in Settings → Hotkeys to turn them on.
 - **🔒 Encrypted storage** — history is encrypted with your OS keystore (DPAPI, Keychain or Secret Service) and never leaves your machine. Data is split into domain-specific files for efficient saves, with images stored as separate encrypted files and fast-loading thumbnails.
 - **🚀 Non-blocking startup** — the window appears immediately while your history loads in the background.
 - **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background (auto-update works on Windows and Linux; macOS still needs a manual reinstall — see [Installing on macOS](#-installing-on-macos)).
