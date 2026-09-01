@@ -151,6 +151,7 @@ export function SideColumn({
                 count={n}
                 lit={litKey === pinKey(group, value)}
                 onHover={onHover}
+                tabbable
                 className={styles.sideChip}
               />
             </div>

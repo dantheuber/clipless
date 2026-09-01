@@ -115,11 +115,16 @@ describe('Chip', () => {
     expect(screen.queryByText(/x1/)).toBeNull();
   });
 
-  it('is exposed as a focusable toggle button with its pressed state', () => {
+  it('is exposed as a toggle button with its pressed state, out of the tab order by default', () => {
     render(<Chip group="ip" value="1.1.1.1" />);
     const chip = screen.getByRole('button');
-    expect(chip).toHaveAttribute('tabindex', '0');
+    expect(chip).toHaveAttribute('tabindex', '-1');
     expect(chip).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('tabbable puts it in the tab order (quick look)', () => {
+    render(<Chip group="ip" value="1.1.1.1" tabbable />);
+    expect(screen.getByRole('button')).toHaveAttribute('tabindex', '0');
   });
 
   it('reports aria-pressed true when the key is pinned', () => {

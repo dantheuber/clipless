@@ -21,7 +21,8 @@ import { RenderedView } from './RenderedView';
 import { prismLanguage } from './tokens';
 import styles from './QuickLook.module.css';
 
-const FOCUSABLE = 'button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])';
+export const FOCUSABLE =
+  'button:not([disabled]), input, textarea, [tabindex]:not([tabindex="-1"])';
 
 const isTypingTarget = (target: EventTarget | null): boolean =>
   target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement;

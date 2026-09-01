@@ -15,6 +15,11 @@ interface ChipProps {
   /** Outlined because the matching side column entry is hovered, or the reverse */
   lit?: boolean;
   onHover?: (key: string | null) => void;
+  /**
+   * Put the chip in the tab order. Quick look opts in: its dialog traps Tab, so the stops
+   * stay bounded. In the clip list the row is the single stop and chips stay out of it.
+   */
+  tabbable?: boolean;
   className?: string;
 }
 
@@ -31,6 +36,7 @@ export const Chip = memo(function Chip({
   count,
   lit,
   onHover,
+  tabbable = false,
   className,
 }: ChipProps) {
   const { isPinned, togglePins } = useClipsPins();
@@ -76,7 +82,7 @@ export const Chip = memo(function Chip({
       data-pinned={pinned ? 'true' : undefined}
       title={pinned ? `Unpin ${group} ${value}` : `Pin ${group} ${value}`}
       role="button"
-      tabIndex={0}
+      tabIndex={tabbable ? 0 : -1}
       aria-pressed={pinned}
       onClick={handleClick}
       onKeyDown={handleKeyDown}

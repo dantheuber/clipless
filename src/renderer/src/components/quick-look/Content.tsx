@@ -104,6 +104,7 @@ export function Content({ text, language, scan, wrap, litKey, onHover }: Content
                       value={group.match.value}
                       lit={litKey === key}
                       onHover={onHover}
+                      tabbable
                     >
                       {spans}
                     </Chip>

@@ -71,11 +71,11 @@ pulls out is a chip on the clip row, ready to pin.
 
 ### Pin a value. Open every tool.
 
-Every match Clipless finds is a chip on the clip row. Click a chip — or tab to it and press
-Enter — to pin it. The tray under
+Every match Clipless finds is a chip on the clip row. Click a chip to pin it. The tray under
 the list offers the tools that take your pins, and "Open all" turns them into browser tabs in
 one click. Quick look opens any clip in full inside the main window, with the same chips and
-pins, so nothing leaves the window you were already in.
+pins — there the chips are in the tab order, so Tab to one and press Enter to pin it without
+leaving the keyboard.
 
 - **Multi-token URLs** — drop values into any link, e.g. `https://tool.com/{ip}/{email}`
 - **Open in bulk** — pin several values; the tray states how many tabs it will open before you click
