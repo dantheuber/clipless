@@ -114,4 +114,54 @@ describe('Chip', () => {
     render(<Chip group="ip" value="1.1.1.1" count={1} />);
     expect(screen.queryByText(/x1/)).toBeNull();
   });
+
+  it('is exposed as a toggle button with its pressed state, out of the tab order by default', () => {
+    render(<Chip group="ip" value="1.1.1.1" />);
+    const chip = screen.getByRole('button');
+    expect(chip).toHaveAttribute('tabindex', '-1');
+    expect(chip).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('tabbable puts it in the tab order (quick look)', () => {
+    render(<Chip group="ip" value="1.1.1.1" tabbable />);
+    expect(screen.getByRole('button')).toHaveAttribute('tabindex', '0');
+  });
+
+  it('reports aria-pressed true when the key is pinned', () => {
+    pinsState.pinned = new Set(['ip|1.1.1.1']);
+    render(<Chip group="ip" value="1.1.1.1" />);
+    expect(screen.getByRole('button')).toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('Enter toggles the pin without reaching the row shortcuts', () => {
+    const rowKeyDown = vi.fn();
+    render(
+      <div onKeyDown={rowKeyDown}>
+        <Chip group="ip" value="1.1.1.1" />
+      </div>
+    );
+    fireEvent.keyDown(screen.getByRole('button'), { key: 'Enter' });
+    expect(pinsState.togglePins).toHaveBeenCalledWith(['ip|1.1.1.1']);
+    expect(rowKeyDown).not.toHaveBeenCalled();
+  });
+
+  it('Space toggles the pin and prevents the default scroll', () => {
+    render(<Chip group="ip" value="1.1.1.1" />);
+    const chip = screen.getByRole('button');
+    const notPrevented = fireEvent.keyDown(chip, { key: ' ' });
+    expect(pinsState.togglePins).toHaveBeenCalledWith(['ip|1.1.1.1']);
+    expect(notPrevented).toBe(false);
+  });
+
+  it('other keys leave the pin alone and bubble to the row', () => {
+    const rowKeyDown = vi.fn();
+    render(
+      <div onKeyDown={rowKeyDown}>
+        <Chip group="ip" value="1.1.1.1" />
+      </div>
+    );
+    fireEvent.keyDown(screen.getByRole('button'), { key: 'p' });
+    expect(pinsState.togglePins).not.toHaveBeenCalled();
+    expect(rowKeyDown).toHaveBeenCalled();
+  });
 });

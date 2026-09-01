@@ -131,7 +131,8 @@ export function Hotkeys() {
                       type="button"
                       className={styles.clickable}
                       title="click to change"
-                      onClick={() => on && setRecording(row.id)}
+                      disabled={!on}
+                      onClick={() => setRecording(row.id)}
                       data-testid={`keys-${row.id}`}
                     >
                       <Keycaps accelerator={row.key} platform={platform} off={!row.enabled} />

@@ -83,6 +83,7 @@ describe('Hotkeys', () => {
     expect(screen.getByTestId('hotkeys-master')).toHaveTextContent(
       'Off. Nothing below is registered'
     );
+    expect(screen.getByTestId('keys-focusWindow')).toBeDisabled();
     fireEvent.click(screen.getByTestId('keys-focusWindow'));
     expect(screen.queryByTestId('recorder')).toBeNull();
 
@@ -91,6 +92,7 @@ describe('Hotkeys', () => {
     expect(lastHotkeys().enabled).toBe(true);
     expect(screen.getByTestId('status-hk:enabled')).toHaveTextContent('saved');
     expect(screen.getByTestId('hotkeys-table')).toHaveAttribute('aria-disabled', 'false');
+    expect(screen.getByTestId('keys-focusWindow')).toBeEnabled();
   });
 
   it('records into the keycaps: nothing is written until the combination is accepted', async () => {

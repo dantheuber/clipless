@@ -349,7 +349,8 @@ https://tool.com/check?email={email}&amp;domain={domainName}</code></pre>
             <ul>
               <li>
                 Click a chip on the clip row to pin that value; the tray below the list offers the
-                tools that take it
+                tools that take it. In quick look, chips are also in the tab order: Tab to one and
+                press Enter or Space to pin it
               </li>
               <li>Press Ctrl+Shift+T to open quick look on the newest clip</li>
               <li>
@@ -410,8 +411,9 @@ Regards</code></pre>
           <section id="clip-quick-search">
             <h2>Clip Quick Search <span class="added-in">Added in v1.5</span></h2>
             <p>
-              Press Ctrl+Shift+F (default hotkey) to toggle a search bar in the main window. Type to
-              filter clips by content.
+              Press Ctrl+Shift+F (default hotkey, once
+              <a href="#global-hotkeys">global hotkeys</a> are enabled) to toggle a search bar in
+              the main window. Type to filter clips by content.
             </p>
           </section>
 
@@ -423,10 +425,15 @@ Regards</code></pre>
             </p>
             <ul>
               <li>
-                Open with Ctrl+Shift+T (default hotkey) on the newest clip, or from any row via the
-                eye icon, Space, or the right-click menu
+                Open with Ctrl+Shift+T (default hotkey, once
+                <a href="#global-hotkeys">global hotkeys</a> are enabled) on the newest clip, or
+                from any row via the eye icon, Space, or the right-click menu
               </li>
               <li>Shows the clip's matches grouped by capture group, with a pin-all per group</li>
+              <li>
+                Tab cycles the reader's controls, chips included; Enter or Space on a chip toggles
+                its pin <span class="added-in">Added in v2.2</span>
+              </li>
               <li>Up and Down walk to the previous and next clip without closing the reader</li>
               <li>Ready templates appear in the footer and copy their text to the clipboard</li>
               <li>Esc closes the reader and returns focus to the row</li>
@@ -443,8 +450,9 @@ Regards</code></pre>
           <section id="global-hotkeys">
             <h2>Global Hotkeys</h2>
             <p>
-              All hotkeys are configurable in Settings &gt; Hotkeys. Any hotkey can be rebound or
-              disabled.
+              Global hotkeys are off by default — nothing is registered with the OS until you turn
+              on the master switch in Settings &gt; Hotkeys. All hotkeys are configurable there.
+              Any hotkey can be rebound or disabled.
             </p>
             <div class="table-wrap">
               <table>
@@ -667,6 +675,18 @@ Regards</code></pre>
                 with your platform and steps to reproduce.
               </p>
             </div>
+
+            <h3>Hotkeys aren't working</h3>
+            <ul>
+              <li>
+                Global hotkeys are off by default — turn on the master switch in Settings &gt;
+                Hotkeys
+              </li>
+              <li>Check the individual hotkey's toggle and status in the same tab</li>
+              <li>
+                Another app may already own the shortcut; rebind it in Settings &gt; Hotkeys
+              </li>
+            </ul>
 
             <h3>Clipboard not detecting content</h3>
             <ul>

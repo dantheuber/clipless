@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, cleanup, act } from '@testing-library/react';
 import type { ClipItem, ScanResult } from '../../../../shared/types';
 import type { QuickLookState } from '../../providers/clips/quickLook';
-import { QuickLook, textMeta } from './QuickLook';
+import { FOCUSABLE, QuickLook, textMeta } from './QuickLook';
 
 vi.mock('@tanstack/react-virtual', () => ({
   useVirtualizer: (options: {
@@ -309,10 +309,11 @@ describe('QuickLook', () => {
     expect(screen.getByTestId('ql-wrap')).toHaveAttribute('aria-pressed', 'true');
   });
 
-  it('Tab cycles the reader controls and never leaves the dialog', () => {
+  it('Tab cycles the reader controls, chips included, and never leaves the dialog', () => {
     render(<QuickLook />);
     const dialog = screen.getByTestId('quick-look');
-    const buttons = [...dialog.querySelectorAll<HTMLButtonElement>('button:not([disabled])')];
+    const buttons = [...dialog.querySelectorAll<HTMLElement>(FOCUSABLE)];
+    expect(buttons.some((el) => el.hasAttribute('data-key'))).toBe(true);
     fireEvent.keyDown(dialog, { key: 'Tab' });
     expect(buttons[0]).toHaveFocus();
     fireEvent.keyDown(dialog, { key: 'Tab', shiftKey: true });
