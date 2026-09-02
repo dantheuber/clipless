@@ -98,3 +98,18 @@ const WEB_SCHEME = /^https?:\/\//i;
 export function hasWebScheme(url: string): boolean {
   return WEB_SCHEME.test(url.trim());
 }
+
+/**
+ * A leading scheme to drop before prefixing https://. The digit lookahead keeps a
+ * schemeless host:port ("localhost:3000/{ip}") intact, since no scheme is followed by a digit.
+ */
+const LEADING_SCHEME = /^[a-z][a-z0-9+.-]*:(?!\d)\/*/i;
+
+/**
+ * The template rewritten to start with https://, replacing any leading scheme (ftp://,
+ * mailto:, file:///, the https:/ typo) and dropping leading whitespace. Kept beside
+ * hasWebScheme so the editor's one-click fix always produces something it accepts.
+ */
+export function withWebScheme(url: string): string {
+  return 'https://' + url.trimStart().replace(LEADING_SCHEME, '');
+}

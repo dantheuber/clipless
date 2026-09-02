@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toolTokens, toolReady, buildToolUrls, hasWebScheme } from './tools';
+import { toolTokens, toolReady, buildToolUrls, hasWebScheme, withWebScheme } from './tools';
 
 const tool = (url: string) => ({ url });
 
@@ -190,5 +190,21 @@ describe('hasWebScheme', () => {
     expect(hasWebScheme('javascript:alert(1)')).toBe(false);
     expect(hasWebScheme('https:/example.com')).toBe(false);
     expect(hasWebScheme('')).toBe(false);
+  });
+});
+
+describe('withWebScheme', () => {
+  it.each([
+    ['example.com/{email}', 'https://example.com/{email}'],
+    ['  vt.example/{ip}', 'https://vt.example/{ip}'],
+    ['ftp://vt.internal/{ip}', 'https://vt.internal/{ip}'],
+    ['mailto:a@b.com', 'https://a@b.com'],
+    ['file:///x/{ip}', 'https://x/{ip}'],
+    ['https:/example.com/{ip}', 'https://example.com/{ip}'],
+    ['HTTP://example.com', 'https://example.com'],
+    ['localhost:3000/{ip}', 'https://localhost:3000/{ip}'],
+  ])('%s -> %s', (input, expected) => {
+    expect(withWebScheme(input)).toBe(expected);
+    expect(hasWebScheme(withWebScheme(input))).toBe(true);
   });
 });
