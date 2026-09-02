@@ -54,8 +54,8 @@ export const useClipsStorage = (
       if (loadState.error !== null) {
         // The history is unreadable, so the clips returned are not it: leave the window
         // as it is and leave saving disabled rather than write blank state over the file.
-        console.error('Stored clip history could not be loaded:', loadState.error);
-        setLoadError({ message: loadState.error, recoverable: loadState.recoverable });
+        console.error('Stored clip history could not be loaded:', loadState.error.message);
+        setLoadError(loadState.error);
         return;
       }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ClipItem } from '../../../../shared/types';
+import type { ClipItem, StorageLoadError } from '../../../../shared/types';
 import type { PinsByGroup } from '../../../../shared/tools';
 import type { PinMap } from './pins';
 import type { QuickLookPosition, QuickLookState, QuickLookView, VisibleClip } from './quickLook';
@@ -58,7 +58,7 @@ export type ClipsMetaContextType = {
  * read the history (the keystore was unavailable or the main process could not be reached)
  * and false when the file cannot be read under this keystore, so a restart would not help.
  */
-export type ClipsLoadError = { message: string; recoverable: boolean };
+export type ClipsLoadError = StorageLoadError;
 
 /**
  * Pins: memory only, keyed group|value (spec 17.1)

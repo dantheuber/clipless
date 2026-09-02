@@ -15,6 +15,7 @@ import type {
   GroupColours,
   TemplatesData,
   StorageMeta,
+  StorageLoadError,
   StorageLoadState,
   StoredClipsSnapshot,
 } from '../../shared/types';
@@ -79,9 +80,7 @@ class SecureStorage {
   private isInitialized = false;
   private isBackgroundLoadComplete = false;
   // Set when the stored history could not be read; saves stay refused so it is not overwritten
-  private loadError: string | null = null;
-  // True when the failure is one a later launch may clear (the keystore was unavailable)
-  private loadRecoverable = false;
+  private loadError: StorageLoadError | null = null;
 
   // Domain-specific data stores
   private settings: UserSettings = DEFAULT_SETTINGS;
@@ -133,8 +132,10 @@ class SecureStorage {
       // Check if safeStorage is available
       if (!isEncryptionAvailable()) {
         console.warn('Encryption not available, keeping default data');
-        this.loadError = 'Encryption is not available on this system';
-        this.loadRecoverable = true;
+        this.loadError = {
+          message: 'Encryption is not available on this system',
+          recoverable: true,
+        };
         this.isBackgroundLoadComplete = true;
         this.onBackgroundLoadComplete?.();
         return;
@@ -151,8 +152,10 @@ class SecureStorage {
       this.onBackgroundLoadComplete?.();
     } catch (error) {
       console.error('Failed to load data in background:', error);
-      // Keep using default data, but refuse to write over the unread history
-      this.loadError = errorMessage(error);
+      // Keep using default data, but refuse to write over the unread history. Nothing that
+      // lands here (a missing directory, a failed migration) is known to repeat on the next
+      // launch, so a restart is worth suggesting.
+      this.loadError = { message: errorMessage(error), recoverable: true };
       this.isBackgroundLoadComplete = true;
       this.onBackgroundLoadComplete?.();
     }
@@ -185,9 +188,10 @@ class SecureStorage {
     } catch (error) {
       if ((error as Error).message !== 'FILE_NOT_FOUND') {
         // A clips file exists but cannot be read (for example the keystore changed).
-        // Reporting the history as empty here would let the renderer save over it.
+        // Reporting the history as empty here would let the renderer save over it, and a
+        // decrypt failure repeats on every launch, so a restart will not clear it.
         console.error('Failed to load clips:', error);
-        this.loadError = errorMessage(error);
+        this.loadError = { message: errorMessage(error), recoverable: false };
       }
     }
 
@@ -322,7 +326,6 @@ class SecureStorage {
     return {
       complete: this.isBackgroundLoadComplete,
       error: this.loadError,
-      recoverable: this.loadRecoverable,
     };
   }
 
@@ -384,7 +387,7 @@ class SecureStorage {
       throw new Error(
         this.loadError === null
           ? 'Storage has not finished loading'
-          : `Storage could not be loaded: ${this.loadError}`
+          : `Storage could not be loaded: ${this.loadError.message}`
       );
     }
 

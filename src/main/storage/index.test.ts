@@ -92,13 +92,13 @@ describe('SecureStorage load state', () => {
     const done = new Promise<void>((resolve) => storage.setOnBackgroundLoadComplete(resolve));
     await storage.initialize();
 
-    expect(storage.getLoadState()).toEqual({ complete: false, error: null, recoverable: false });
+    expect(storage.getLoadState()).toEqual({ complete: false, error: null });
     expect(await storage.getClips()).toEqual([]);
 
     finishClips(history);
     await done;
 
-    expect(storage.getLoadState()).toEqual({ complete: true, error: null, recoverable: false });
+    expect(storage.getLoadState()).toEqual({ complete: true, error: null });
     expect((await storage.getClips()).map((c) => c.clip.id)).toEqual(['a', 'b']);
   });
 
@@ -111,7 +111,7 @@ describe('SecureStorage load state', () => {
     await storage.initialize();
 
     expect(await storage.getClipsSnapshot()).toEqual({
-      loadState: { complete: false, error: null, recoverable: false },
+      loadState: { complete: false, error: null },
       clips: [],
     });
 
@@ -119,7 +119,7 @@ describe('SecureStorage load state', () => {
     await done;
 
     const loaded = await storage.getClipsSnapshot();
-    expect(loaded.loadState).toEqual({ complete: true, error: null, recoverable: false });
+    expect(loaded.loadState).toEqual({ complete: true, error: null });
     expect(loaded.clips.map((c) => c.clip.id)).toEqual(['a', 'b']);
   });
 
@@ -127,7 +127,7 @@ describe('SecureStorage load state', () => {
     serveFiles(notFound);
     await initialiseAndWaitForLoad();
 
-    expect(storage.getLoadState()).toEqual({ complete: true, error: null, recoverable: false });
+    expect(storage.getLoadState()).toEqual({ complete: true, error: null });
   });
 
   it('reports a failed load when the clips file cannot be decrypted', async () => {
@@ -136,8 +136,10 @@ describe('SecureStorage load state', () => {
 
     const state = storage.getLoadState();
     expect(state.complete).toBe(true);
-    expect(state.error).toMatch(/decrypting/);
-    expect(state.recoverable).toBe(false);
+    expect(state.error).toEqual({
+      message: expect.stringMatching(/decrypting/),
+      recoverable: false,
+    });
   });
 
   it('reports a failed load when encryption is unavailable', async () => {
@@ -146,8 +148,7 @@ describe('SecureStorage load state', () => {
 
     expect(storage.getLoadState()).toEqual({
       complete: true,
-      error: expect.stringMatching(/Encryption is not available/),
-      recoverable: true,
+      error: { message: expect.stringMatching(/Encryption is not available/), recoverable: true },
     });
   });
 });

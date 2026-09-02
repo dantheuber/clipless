@@ -136,12 +136,15 @@ const LOAD_FAILED_PAUSED = 'Saving is paused so the stored history is not overwr
 const LOAD_FAILED_RETRY = 'Restart Clipless to try again.';
 const LOAD_FAILED_UNREADABLE =
   "The stored history can't be read with this computer's keystore, so it won't load.";
+const LOAD_FAILED_RESET = 'To use Clipless again, clear all data in Settings and restart.';
 
 /**
  * Shown above the list for as long as the stored history is unreadable. It stays because
  * saving is off for the whole session, and a hidden window would miss a passing toast.
  * A restart is only suggested when the main process says the failure may clear on the
- * next launch; a key mismatch repeats on every launch, so the banner says so instead.
+ * next launch; a key mismatch repeats on every launch, so the banner says so instead and
+ * points at the one way out: clearing the stored data removes the unreadable file, and a
+ * restart is needed because saving stays off for the rest of this session.
  */
 function LoadFailedBanner({ error }: { error: ClipsLoadError }): React.JSX.Element {
   return (
@@ -150,6 +153,7 @@ function LoadFailedBanner({ error }: { error: ClipsLoadError }): React.JSX.Eleme
       <ul className={styles.loadFailedDetail}>
         <li>{LOAD_FAILED_PAUSED}</li>
         <li>{error.recoverable ? LOAD_FAILED_RETRY : LOAD_FAILED_UNREADABLE}</li>
+        {!error.recoverable && <li>{LOAD_FAILED_RESET}</li>}
         <li className={styles.loadFailedError}>{error.message}</li>
       </ul>
     </div>

@@ -97,7 +97,7 @@ export function installConfig(
   });
   a.settingsChanged.mockResolvedValue({ ok: true, failed: [] });
   a.storageGetClipsSnapshot.mockResolvedValue({
-    loadState: { complete: true, error: null, recoverable: false },
+    loadState: { complete: true, error: null },
     clips: [
       {
         clip: { id: 'c1', type: 'text', content: 'newest clip text with 10.0.0.1' },

@@ -17,15 +17,15 @@ const DECRYPT_ERROR =
   'Error while decrypting the ciphertext provided to safeStorage.decryptString.';
 
 const notLoaded = (): StoredClipsSnapshot => ({
-  loadState: { complete: false, error: null, recoverable: false },
+  loadState: { complete: false, error: null },
   clips: [],
 });
 const loaded = (clips: StoredClip[] = []): StoredClipsSnapshot => ({
-  loadState: { complete: true, error: null, recoverable: false },
+  loadState: { complete: true, error: null },
   clips,
 });
 const failed = (): StoredClipsSnapshot => ({
-  loadState: { complete: true, error: DECRYPT_ERROR, recoverable: false },
+  loadState: { complete: true, error: { message: DECRYPT_ERROR, recoverable: false } },
   clips: [],
 });
 

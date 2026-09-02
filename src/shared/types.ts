@@ -118,17 +118,24 @@ export interface StorageMeta {
 }
 
 /**
+ * Why the stored history could not be read. `recoverable` is true when the next launch may
+ * read it (the keystore was locked or unavailable, or something else failed on the way) and
+ * false when the file cannot be read under this keystore at all, so a restart would only
+ * repeat the failure.
+ */
+export interface StorageLoadError {
+  message: string;
+  recoverable: boolean;
+}
+
+/**
  * Progress of the background load that runs after storage initialises. Clips read while
  * `complete` is false are the empty defaults, not the stored history; a non-null `error`
- * means the history could not be read and must not be overwritten. `recoverable` is true
- * when the next launch may read it (the keystore was locked or unavailable) and false when
- * the file cannot be read under this keystore at all, so a restart would only repeat the
- * failure.
+ * means the history could not be read and must not be overwritten.
  */
 export interface StorageLoadState {
   complete: boolean;
-  error: string | null;
-  recoverable: boolean;
+  error: StorageLoadError | null;
 }
 
 /**

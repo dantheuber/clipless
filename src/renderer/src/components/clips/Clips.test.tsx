@@ -228,11 +228,13 @@ describe('Clips load failure', () => {
     let banner = screen.getByTestId('load-failed-banner');
     expect(banner).toHaveTextContent(/can't be read with this computer's keystore/);
     expect(banner).not.toHaveTextContent(/Restart Clipless/);
+    expect(banner).toHaveTextContent(/clear all data in Settings and restart/);
 
     state.loadError = { message: 'Encryption is not available on this system', recoverable: true };
     rerender(<Clips />);
     banner = screen.getByTestId('load-failed-banner');
     expect(banner).toHaveTextContent(/Restart Clipless to try again/);
     expect(banner).not.toHaveTextContent(/keystore/);
+    expect(banner).not.toHaveTextContent(/clear all data/);
   });
 });
