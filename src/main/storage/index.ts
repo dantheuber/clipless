@@ -16,6 +16,7 @@ import type {
   TemplatesData,
   StorageMeta,
   StorageLoadState,
+  StoredClipsSnapshot,
 } from '../../shared/types';
 
 // Import utility modules
@@ -315,14 +316,7 @@ class SecureStorage {
    * Whether the background load has finished, and whether the stored history was readable.
    */
   getLoadState(): StorageLoadState {
-    const state: StorageLoadState = {
-      complete: this.isBackgroundLoadComplete,
-      failed: this.loadError !== null,
-    };
-    if (this.loadError !== null) {
-      state.error = this.loadError;
-    }
-    return state;
+    return { complete: this.isBackgroundLoadComplete, error: this.loadError };
   }
 
   /**
@@ -355,6 +349,17 @@ class SecureStorage {
       await this.initialize();
     }
     return [...this.clips];
+  }
+
+  /**
+   * The clips and the load state read in the same step, so a caller is told whether what it
+   * holds is the stored history or the placeholder served until that has loaded.
+   */
+  async getClipsSnapshot(): Promise<StoredClipsSnapshot> {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+    return { loadState: this.getLoadState(), clips: [...this.clips] };
   }
 
   /**

@@ -1,8 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, act, cleanup } from '@testing-library/react';
 import { useState } from 'react';
-import type { StoredClip, StorageLoadState } from '../../../../shared/types';
-import { ToastContext } from '../../components/Toast';
+import type { StoredClip, StoredClipsSnapshot } from '../../../../shared/types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { ClipItem } from './types';
 import { updateClipsLength } from './utils';
@@ -14,18 +13,27 @@ const stored = (id: string, content: string, isLocked = false): StoredClip => ({
   timestamp: 1,
 });
 
-const NOT_LOADED: StorageLoadState = { complete: false, failed: false };
-const LOADED: StorageLoadState = { complete: true, failed: false };
-const FAILED: StorageLoadState = {
-  complete: true,
-  failed: true,
-  error: 'Error while decrypting the ciphertext provided to safeStorage.decryptString.',
-};
+const DECRYPT_ERROR =
+  'Error while decrypting the ciphertext provided to safeStorage.decryptString.';
+
+const notLoaded = (): StoredClipsSnapshot => ({
+  loadState: { complete: false, error: null },
+  clips: [],
+});
+const loaded = (clips: StoredClip[] = []): StoredClipsSnapshot => ({
+  loadState: { complete: true, error: null },
+  clips,
+});
+const failed = (): StoredClipsSnapshot => ({
+  loadState: { complete: true, error: DECRYPT_ERROR },
+  clips: [],
+});
 
 let storageReady: (() => void) | null = null;
-let observed: { clips: ClipItem[]; isInitiallyLoading: boolean } = {
+let observed: { clips: ClipItem[]; isInitiallyLoading: boolean; loadError: string | null } = {
   clips: [],
   isInitiallyLoading: true,
+  loadError: null,
 };
 
 function Probe() {
@@ -33,7 +41,7 @@ function Probe() {
   const [lockedClips, setLockedClips] = useState<Record<number, boolean>>({});
   const [maxClips, setMaxClips] = useState(DEFAULT_MAX_CLIPS);
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
-  useClipsStorage(
+  const { loadError } = useClipsStorage(
     clips,
     lockedClips,
     maxClips,
@@ -43,19 +51,11 @@ function Probe() {
     setMaxClips,
     setIsInitiallyLoading
   );
-  observed = { clips, isInitiallyLoading };
+  observed = { clips, isInitiallyLoading, loadError };
   return null;
 }
 
-const toast = vi.fn();
-
-function mount() {
-  return render(
-    <ToastContext.Provider value={toast}>
-      <Probe />
-    </ToastContext.Provider>
-  );
-}
+const mount = () => render(<Probe />);
 
 const flush = async () => {
   await act(async () => {
@@ -75,11 +75,9 @@ const api = () => window.api as unknown as Record<string, ReturnType<typeof vi.f
 
 beforeEach(() => {
   vi.useFakeTimers();
-  toast.mockReset();
   storageReady = null;
-  api().storageGetClips.mockReset().mockResolvedValue([]);
+  api().storageGetClips.mockReset().mockResolvedValue(loaded());
   api().storageSaveClips.mockReset().mockResolvedValue(true);
-  api().storageGetLoadState.mockReset().mockResolvedValue(LOADED);
   api()
     .onStorageReady.mockReset()
     .mockImplementation((cb: () => void) => {
@@ -97,7 +95,7 @@ afterEach(() => {
 
 describe('useClipsStorage load guard', () => {
   it('never saves the blank list when clips read as empty before the background load completes', async () => {
-    api().storageGetLoadState.mockResolvedValueOnce(NOT_LOADED);
+    api().storageGetClips.mockResolvedValueOnce(notLoaded());
     mount();
     await settle();
 
@@ -105,7 +103,9 @@ describe('useClipsStorage load guard', () => {
     expect(observed.isInitiallyLoading).toBe(true);
 
     // The background decrypt finishes and the real history becomes available
-    api().storageGetClips.mockResolvedValue([stored('a', 'first'), stored('b', 'second', true)]);
+    api().storageGetClips.mockResolvedValue(
+      loaded([stored('a', 'first'), stored('b', 'second', true)])
+    );
     await act(async () => {
       storageReady?.();
     });
@@ -117,11 +117,11 @@ describe('useClipsStorage load guard', () => {
     for (const [saved] of api().storageSaveClips.mock.calls) {
       expect(saved.slice(0, 2).map((c: ClipItem) => c.content)).toEqual(['first', 'second']);
     }
-    expect(toast).not.toHaveBeenCalled();
+    expect(observed.loadError).toBeNull();
   });
 
   it('enables saving once the load is reported complete', async () => {
-    api().storageGetClips.mockResolvedValue([stored('a', 'kept')]);
+    api().storageGetClips.mockResolvedValue(loaded([stored('a', 'kept')]));
     mount();
     await settle();
 
@@ -130,8 +130,8 @@ describe('useClipsStorage load guard', () => {
     expect(api().storageSaveClips.mock.calls[0][0][0].content).toBe('kept');
   });
 
-  it('keeps saves disabled and tells the user when the background load failed', async () => {
-    api().storageGetLoadState.mockResolvedValue(FAILED);
+  it('keeps saves disabled and reports the error when the background load failed', async () => {
+    api().storageGetClips.mockResolvedValue(failed());
     mount();
     await settle();
     await act(async () => {
@@ -141,33 +141,33 @@ describe('useClipsStorage load guard', () => {
 
     expect(api().storageSaveClips).not.toHaveBeenCalled();
     expect(observed.isInitiallyLoading).toBe(true);
-    expect(toast).toHaveBeenCalledTimes(1);
-    expect(toast.mock.calls[0][0]).toMatch(/clip history/i);
+    expect(observed.loadError).toBe(DECRYPT_ERROR);
   });
 
-  it('keeps saves disabled and tells the user when reading storage throws', async () => {
+  it('keeps saves disabled and reports the error when reading storage throws', async () => {
     api().storageGetClips.mockRejectedValue(new Error('ipc down'));
     mount();
     await settle();
 
     expect(api().storageSaveClips).not.toHaveBeenCalled();
     expect(observed.isInitiallyLoading).toBe(true);
-    expect(toast).toHaveBeenCalledTimes(1);
+    expect(observed.loadError).toBe('ipc down');
   });
 
-  it('reads the load state before the clips so a load finishing in between cannot be mistaken for empty', async () => {
-    const order: string[] = [];
-    api().storageGetLoadState.mockImplementation(async () => {
-      order.push('state');
-      return LOADED;
-    });
-    api().storageGetClips.mockImplementation(async () => {
-      order.push('clips');
-      return [];
-    });
+  it('clears the error once a later load succeeds', async () => {
+    api().storageGetClips.mockResolvedValueOnce(failed());
     mount();
     await settle();
+    expect(observed.loadError).toBe(DECRYPT_ERROR);
 
-    expect(order.slice(0, 2)).toEqual(['state', 'clips']);
+    api().storageGetClips.mockResolvedValue(loaded([stored('a', 'back')]));
+    await act(async () => {
+      storageReady?.();
+    });
+    await settle();
+
+    expect(observed.loadError).toBeNull();
+    expect(observed.isInitiallyLoading).toBe(false);
+    expect(observed.clips[0].content).toBe('back');
   });
 });

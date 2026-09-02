@@ -13,4 +13,7 @@
   min-height: 0;
   overflow: hidden;
   position: relative;
+  /* A column so the storage banner can sit above the list without pushing it out of view */
+  display: flex;
+  flex-direction: column;
 }

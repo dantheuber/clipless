@@ -18,6 +18,7 @@ const { virtual, state } = vi.hoisted(() => ({
     isSearchVisible: false,
     setIsSearchVisible: vi.fn(),
     focusRequest: null as { index: number; seq: number } | null,
+    loadError: null as string | null,
   },
 }));
 
@@ -63,6 +64,7 @@ vi.mock('../../providers/clips', () => ({
     clipCopyId: null,
     isSearchVisible: state.isSearchVisible,
     setIsSearchVisible: state.setIsSearchVisible,
+    loadError: state.loadError,
   }),
   useQuickLook: () => ({ focusRequest: state.focusRequest }),
 }));
@@ -91,6 +93,7 @@ beforeEach(() => {
   state.pinnedOnly = false;
   state.isSearchVisible = false;
   state.focusRequest = null;
+  state.loadError = null;
 });
 
 afterEach(() => {
@@ -198,5 +201,21 @@ describe('Clips empty states', () => {
     state.pinnedOnly = true;
     render(<Clips />);
     expect(screen.getByText('No clips contain a pinned value')).toBeInTheDocument();
+  });
+});
+
+describe('Clips load failure', () => {
+  it('shows a banner with the reason for as long as the history is unreadable', () => {
+    state.loadError = 'Error while decrypting the ciphertext provided to safeStorage.';
+    const { rerender } = render(<Clips />);
+    const banner = screen.getByTestId('load-failed-banner');
+    expect(banner).toHaveTextContent(/clip history/i);
+    expect(banner).toHaveTextContent(/Saving is paused/);
+    expect(banner).toHaveTextContent(/decrypting/);
+    expect(screen.getByTestId('row-0')).toBeInTheDocument();
+
+    state.loadError = null;
+    rerender(<Clips />);
+    expect(screen.queryByTestId('load-failed-banner')).toBeNull();
   });
 });

@@ -49,6 +49,8 @@ export type ClipsMetaContextType = {
   setIsSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
   /** Close the bar and clear the filter with it, so an invisible filter cannot persist */
   hideSearch: () => void;
+  /** Why the stored history could not be read, or null; while set, saving stays off */
+  loadError: string | null;
 };
 
 /**

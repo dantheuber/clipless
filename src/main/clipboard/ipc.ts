@@ -14,7 +14,6 @@ import {
 } from './monitoring';
 import {
   getClips,
-  getStorageLoadState,
   saveClips,
   getSettings,
   saveSettings,
@@ -106,7 +105,6 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
 
   // Storage integration handlers
   ipcMain.handle('storage-get-clips', async () => getClips());
-  ipcMain.handle('storage-get-load-state', () => getStorageLoadState());
   ipcMain.handle(
     'storage-save-clips',
     async (_event, clips: ClipItem[], lockedIndices: Record<number, boolean>) =>

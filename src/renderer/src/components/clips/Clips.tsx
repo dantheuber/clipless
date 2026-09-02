@@ -16,7 +16,7 @@ const isTypingTarget = (target: EventTarget | null): boolean =>
  */
 export function Clips(): React.JSX.Element {
   const { filteredClips, searchTerm, isFiltering, pinnedOnly } = useClipsData();
-  const { clipCopyId, isSearchVisible, setIsSearchVisible } = useClipsMeta();
+  const { clipCopyId, isSearchVisible, setIsSearchVisible, loadError } = useClipsMeta();
   const { focusRequest } = useQuickLook();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -82,47 +82,74 @@ export function Clips(): React.JSX.Element {
       : `No clips match "${searchTerm.trim()}"`;
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className={styles.clipsContainer}
-      onKeyDown={handleKeyDown}
-      data-testid="clips-list"
-    >
-      {showEmpty ? (
-        <div className={styles.emptyState}>{emptyMessage}</div>
-      ) : (
-        <div
-          className={styles.clipsList}
-          style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
-        >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const { clip, originalIndex } = items[virtualRow.index];
-            return (
-              <div
-                key={virtualRow.key}
-                data-index={virtualRow.index}
-                ref={virtualizer.measureElement}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                <Clip
-                  clip={clip}
-                  index={originalIndex}
-                  visibleIndex={virtualRow.index}
-                  isCurrentCopiedClip={clipCopyId === clip.id}
-                  isEvenRow={virtualRow.index % 2 === 1}
-                  searchTerm={searchTerm}
-                />
-              </div>
-            );
-          })}
-        </div>
-      )}
+    <>
+      {loadError !== null && <LoadFailedBanner error={loadError} />}
+      <div
+        ref={scrollContainerRef}
+        className={styles.clipsContainer}
+        onKeyDown={handleKeyDown}
+        data-testid="clips-list"
+      >
+        {showEmpty ? (
+          <div className={styles.emptyState}>{emptyMessage}</div>
+        ) : (
+          <div
+            className={styles.clipsList}
+            style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const { clip, originalIndex } = items[virtualRow.index];
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <Clip
+                    clip={clip}
+                    index={originalIndex}
+                    visibleIndex={virtualRow.index}
+                    isCurrentCopiedClip={clipCopyId === clip.id}
+                    isEvenRow={virtualRow.index % 2 === 1}
+                    searchTerm={searchTerm}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+const LOAD_FAILED_TITLE = "Couldn't load your clip history";
+const LOAD_FAILED_DETAIL = [
+  'Saving is paused so the stored history is not overwritten.',
+  'Restart Clipless to try again.',
+];
+
+/**
+ * Shown above the list for as long as the stored history is unreadable. It stays because
+ * saving is off for the whole session, and a hidden window would miss a passing toast.
+ */
+function LoadFailedBanner({ error }: { error: string }): React.JSX.Element {
+  return (
+    <div className={styles.loadFailed} role="alert" data-testid="load-failed-banner">
+      <div className={styles.loadFailedTitle}>{LOAD_FAILED_TITLE}</div>
+      <ul className={styles.loadFailedDetail}>
+        {LOAD_FAILED_DETAIL.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+        <li>{error}</li>
+      </ul>
     </div>
   );
 }

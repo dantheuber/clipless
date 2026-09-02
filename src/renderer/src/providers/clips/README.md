@@ -19,7 +19,7 @@ This directory contains the modular implementation of the clips provider, which 
 
 - Hook for managing storage operations (`useClipsStorage`)
 - Handles loading clips and settings from storage on mount
-- Saving stays disabled until the main process reports its background load complete and successful, so the empty placeholder served during that load (or after a failed decrypt) is never written back over the stored history; a failed load is reported with a toast
+- Saving stays disabled until the main process reports its background load complete and successful, so the empty placeholder served during that load (or after a failed decrypt) is never written back over the stored history; a failed load is reported through `loadError`, which the list shows as a persistent banner
 - Manages saving clips and settings with debouncing
 - Listens for settings updates from other windows
 

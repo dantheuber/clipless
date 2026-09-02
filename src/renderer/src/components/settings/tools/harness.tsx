@@ -96,13 +96,16 @@ export function installConfig(
     ...settings,
   });
   a.settingsChanged.mockResolvedValue({ ok: true, failed: [] });
-  a.storageGetClips.mockResolvedValue([
-    {
-      clip: { id: 'c1', type: 'text', content: 'newest clip text with 10.0.0.1' },
-      isLocked: false,
-      timestamp: 1,
-    },
-  ]);
+  a.storageGetClips.mockResolvedValue({
+    loadState: { complete: true, error: null },
+    clips: [
+      {
+        clip: { id: 'c1', type: 'text', content: 'newest clip text with 10.0.0.1' },
+        isLocked: false,
+        timestamp: 1,
+      },
+    ],
+  });
   a.searchTermsGetAll.mockImplementation(async () => [...config.terms]);
   a.quickToolsGetAll.mockImplementation(async () => [...config.tools]);
   a.templatesGetAll.mockImplementation(async () => [...config.templates]);
