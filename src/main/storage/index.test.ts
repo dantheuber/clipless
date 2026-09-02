@@ -142,6 +142,19 @@ describe('SecureStorage load state', () => {
     });
   });
 
+  it('reports a failed load when the clips file does not hold a list', async () => {
+    serveFiles(() => Promise.resolve({ clips: history }));
+    await initialiseAndWaitForLoad();
+
+    const state = storage.getLoadState();
+    expect(state.complete).toBe(true);
+    expect(state.error).toEqual({
+      message: expect.stringMatching(/not a list/),
+      recoverable: false,
+    });
+    expect(await storage.getClips()).toEqual([]);
+  });
+
   it('reports a failed load when encryption is unavailable', async () => {
     vi.mocked(fileOperations.isEncryptionAvailable).mockReturnValue(false);
     await initialiseAndWaitForLoad();

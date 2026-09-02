@@ -184,6 +184,11 @@ class SecureStorage {
         // Validate clips through migrateData
         const validated = migrateData({ clips: loadedClips });
         this.clips = validated.clips;
+      } else {
+        // The file decrypted and parsed, but not to the shape we write. Treat it as unread
+        // rather than as an empty history, so the guard below keeps the next save from
+        // replacing it.
+        throw new Error('Stored clips are not a list');
       }
     } catch (error) {
       if ((error as Error).message !== 'FILE_NOT_FOUND') {
