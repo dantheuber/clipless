@@ -1,6 +1,6 @@
 import classNames from 'classnames';
 import { useEffect, useRef, useState } from 'react';
-import { buildToolUrls } from '../../../../../shared/tools';
+import { buildToolUrls, needsWebScheme, withWebScheme } from '../../../../../shared/tools';
 import { Readiness } from './Readiness';
 import { TokenPicker, insertAtCaret } from './TokenPicker';
 import { TokenText } from './TokenText';
@@ -44,6 +44,7 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
   const count = buildToolUrls({ url }, values).length;
   const resolved = resolveToolUrls(url, values);
   const needed = groupsNeeded({ url });
+  const schemeless = needsWebScheme(url);
 
   const save = async () => {
     setSaving(true);
@@ -79,6 +80,11 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
     setCaret(next.caret);
   };
 
+  const addScheme = () => {
+    setUrl(withWebScheme(url));
+    setCaret('https://'.length);
+  };
+
   return (
     <div className={styles.editor} onKeyDown={trapTab} data-testid="tool-editor">
       <label className={w.field} htmlFor="tool-name">
@@ -107,6 +113,21 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
         onChange={(e) => setUrl(e.target.value)}
         data-testid="tool-url"
       />
+      {schemeless && (
+        <div className={styles.meta}>
+          <span className={classNames(w.msg, w.msgWarn)} data-testid="tool-url-scheme">
+            only http and https links can open; this template starts with neither
+          </span>
+          <button
+            type="button"
+            className={w.link}
+            onClick={addScheme}
+            data-testid="tool-url-scheme-fix"
+          >
+            add https://
+          </button>
+        </div>
+      )}
       <TokenPicker onInsert={insert} />
       <div className={styles.meta}>
         <Readiness item={{ url }} terms={config.terms} scan={scan} />

@@ -78,6 +78,7 @@ pins — there the chips are in the tab order, so Tab to one and press Enter or 
 leaving the keyboard.
 
 - **Multi-token URLs** — drop values into any link, e.g. `https://tool.com/{ip}/{email}`
+- **Web links only** — the resolved link must be `http` or `https`, so a template starts with `http://`, `https://` or the `{url}` token; the editor warns when it does not and offers a one-click fix
 - **Open in bulk** — pin several values; the tray states how many tabs it will open before you click
 - **Only what fits** — a tool is offered only when every token in its URL has a pinned value
 - **Templates &amp; sharing** — ready templates copy their filled-in text to the clipboard, and configs export / import for your team

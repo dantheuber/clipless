@@ -175,6 +175,27 @@ describe('openTabs', () => {
     errSpy.mockRestore();
   });
 
+  it('names the cause when fewer tabs opened than were offered', async () => {
+    const toast = vi.fn();
+    const mock = window.api.openExternalUrls as unknown as ReturnType<typeof vi.fn>;
+    mock.mockResolvedValue(2);
+    await openTabs(['https://a', 'example.com/b', 'https://c'], toast);
+    expect(toast).toHaveBeenCalledWith('Opened 2 of 3 tabs; only http and https links can open', [
+      'https://a',
+      'example.com/b',
+      'https://c',
+    ]);
+    mock.mockResolvedValue(0);
+    await openTabs(['example.com/b'], toast);
+    expect(toast).toHaveBeenLastCalledWith(
+      'Opened 0 of 1 tab; only http and https links can open',
+      ['example.com/b']
+    );
+    mock.mockResolvedValue(1);
+    await openTabs(['https://a'], toast);
+    expect(toast).toHaveBeenLastCalledWith('Opened 1 tab', ['https://a']);
+  });
+
   it('tabCount pluralises', () => {
     expect(tabCount(1)).toBe('1 tab');
     expect(tabCount(0)).toBe('0 tabs');
