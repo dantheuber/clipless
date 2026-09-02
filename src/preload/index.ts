@@ -6,6 +6,7 @@ import type {
   UserSettings,
   HotkeySettings,
   StoredClip,
+  StorageLoadState,
   Template,
   SearchTerm,
   QuickTool,
@@ -86,6 +87,8 @@ const api = {
   // Storage APIs
   onStorageReady: (callback: () => void) => subscribe('storage-ready', () => callback()),
   storageGetClips: () => electronAPI.ipcRenderer.invoke('storage-get-clips'),
+  storageGetLoadState: (): Promise<StorageLoadState> =>
+    electronAPI.ipcRenderer.invoke('storage-get-load-state'),
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
     electronAPI.ipcRenderer.invoke('storage-save-clips', clips, lockedIndices),
   storageGetSettings: () => electronAPI.ipcRenderer.invoke('storage-get-settings'),

@@ -10,6 +10,7 @@ import type {
   Template,
   UpdateState,
   SettingsApplyResult,
+  StorageLoadState,
   StorageStats,
   UserSettings,
 } from '../shared/types';
@@ -49,6 +50,7 @@ declare global {
       // Storage APIs
       onStorageReady: (callback: () => void) => () => void;
       storageGetClips: () => Promise<any[]>;
+      storageGetLoadState: () => Promise<StorageLoadState>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<UserSettings>;
       storageSaveSettings: (settings: Partial<UserSettings>) => Promise<boolean>;

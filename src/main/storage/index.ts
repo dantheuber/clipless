@@ -15,6 +15,7 @@ import type {
   GroupColours,
   TemplatesData,
   StorageMeta,
+  StorageLoadState,
 } from '../../shared/types';
 
 // Import utility modules
@@ -72,6 +73,8 @@ class SecureStorage {
   private metaPath: string;
   private isInitialized = false;
   private isBackgroundLoadComplete = false;
+  // Set when the stored history could not be read; saves stay refused so it is not overwritten
+  private loadError: string | null = null;
 
   // Domain-specific data stores
   private settings: UserSettings = DEFAULT_SETTINGS;
@@ -123,6 +126,7 @@ class SecureStorage {
       // Check if safeStorage is available
       if (!isEncryptionAvailable()) {
         console.warn('Encryption not available, keeping default data');
+        this.loadError = 'Encryption is not available on this system';
         this.isBackgroundLoadComplete = true;
         this.onBackgroundLoadComplete?.();
         return;
@@ -139,7 +143,8 @@ class SecureStorage {
       this.onBackgroundLoadComplete?.();
     } catch (error) {
       console.error('Failed to load data in background:', error);
-      // Keep using default data
+      // Keep using default data, but refuse to write over the unread history
+      this.loadError = errorMessage(error);
       this.isBackgroundLoadComplete = true;
       this.onBackgroundLoadComplete?.();
     }
@@ -171,7 +176,10 @@ class SecureStorage {
       }
     } catch (error) {
       if ((error as Error).message !== 'FILE_NOT_FOUND') {
+        // A clips file exists but cannot be read (for example the keystore changed).
+        // Reporting the history as empty here would let the renderer save over it.
         console.error('Failed to load clips:', error);
+        this.loadError = errorMessage(error);
       }
     }
 
@@ -300,6 +308,25 @@ class SecureStorage {
   }
 
   /**
+   * Whether the background load has finished, and whether the stored history was readable.
+   */
+  getLoadState(): StorageLoadState {
+    return {
+      complete: this.isBackgroundLoadComplete,
+      failed: this.loadError !== null,
+      ...(this.loadError !== null && { error: this.loadError }),
+    };
+  }
+
+  /**
+   * True once the stored history has been read successfully, so a save cannot replace it
+   * with the empty defaults that stand in for it until then.
+   */
+  private get canSaveClips(): boolean {
+    return this.isBackgroundLoadComplete && this.loadError === null;
+  }
+
+  /**
    * Set callback to be called when background loading completes
    */
   setOnBackgroundLoadComplete(callback: () => void): void {
@@ -330,6 +357,16 @@ class SecureStorage {
   async saveClips(clips: ClipItem[], lockedIndices: Record<number, boolean>): Promise<void> {
     if (!this.isInitialized) {
       await this.initialize();
+    }
+
+    // Until the history has loaded successfully, this.clips is a placeholder; replacing it
+    // would overwrite the real history and delete every image it references.
+    if (!this.canSaveClips) {
+      throw new Error(
+        this.loadError === null
+          ? 'Storage has not finished loading'
+          : `Storage could not be loaded: ${this.loadError}`
+      );
     }
 
     // Collect image IDs from old clips for cleanup comparison
@@ -896,4 +933,8 @@ class SecureStorage {
 }
 
 // Export singleton instance
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export const storage = new SecureStorage();

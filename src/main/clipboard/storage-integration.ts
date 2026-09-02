@@ -1,6 +1,6 @@
 import { storage } from '../storage';
 import { DEFAULT_SETTINGS } from '../storage/defaults';
-import type { ClipItem, StoredClip, UserSettings } from '../../shared/types';
+import type { ClipItem, StoredClip, StorageLoadState, UserSettings } from '../../shared/types';
 
 // Storage integration functions
 export const getClips = async (): Promise<StoredClip[]> => {
@@ -11,6 +11,9 @@ export const getClips = async (): Promise<StoredClip[]> => {
     return [];
   }
 };
+
+// Whether the clips returned by getClips are the stored history yet, or still the defaults
+export const getStorageLoadState = (): StorageLoadState => storage.getLoadState();
 
 export const saveClips = async (
   clips: ClipItem[],
