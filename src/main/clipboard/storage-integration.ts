@@ -1,14 +1,17 @@
 import { storage } from '../storage';
 import { DEFAULT_SETTINGS } from '../storage/defaults';
-import type { ClipItem, StoredClip, UserSettings } from '../../shared/types';
+import type { ClipItem, StoredClipsSnapshot, UserSettings } from '../../shared/types';
 
 // Storage integration functions
-export const getClips = async (): Promise<StoredClip[]> => {
+
+// The clips come with the load state they were read under: until `loadState.complete` they
+// are the empty placeholder, and with `loadState.error` set they are not the stored history
+export const getClipsSnapshot = async (): Promise<StoredClipsSnapshot> => {
   try {
-    return await storage.getClips();
+    return await storage.getClipsSnapshot();
   } catch (error) {
     console.error('Failed to get clips from storage:', error);
-    return [];
+    return { loadState: storage.getLoadState(), clips: [] };
   }
 };
 

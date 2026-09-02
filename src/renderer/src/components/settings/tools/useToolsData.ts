@@ -58,9 +58,9 @@ export function useToolsDataValue(): ToolsData {
   useEffect(() => {
     let live = true;
     window.api
-      .storageGetClips()
-      .then((clips) => {
-        if (live) setClip(newestClipText(clips ?? []));
+      .storageGetClipsSnapshot()
+      .then((snapshot) => {
+        if (live) setClip(newestClipText(snapshot?.clips ?? []));
       })
       .catch((error) => console.error('Failed to read the newest clip:', error));
     return () => {

@@ -9,7 +9,7 @@ import {
   type RowStatus,
   type SettingsStore,
 } from './useSetting';
-import { errorText } from '../shell/errorText';
+import { errorText } from '../../../utils/errorText';
 
 /**
  * One load of the settings for the whole window (spec 15.2) and the one write path.

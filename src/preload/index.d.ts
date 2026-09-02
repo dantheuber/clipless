@@ -10,6 +10,7 @@ import type {
   Template,
   UpdateState,
   SettingsApplyResult,
+  StoredClipsSnapshot,
   StorageStats,
   UserSettings,
 } from '../shared/types';
@@ -48,7 +49,7 @@ declare global {
       hotkeysGetDefaults: () => Promise<HotkeySettings>;
       // Storage APIs
       onStorageReady: (callback: () => void) => () => void;
-      storageGetClips: () => Promise<any[]>;
+      storageGetClipsSnapshot: () => Promise<StoredClipsSnapshot>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<UserSettings>;
       storageSaveSettings: (settings: Partial<UserSettings>) => Promise<boolean>;

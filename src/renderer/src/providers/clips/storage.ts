@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useRef } from 'react';
-import { ClipItem } from './types';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ClipItem, ClipsLoadError } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { shrinkClips, updateClipsLength } from './utils';
+import { errorText } from '../../utils/errorText';
 import { UserSettings, StoredClip } from '../../../../shared/types';
 
 /**
- * Hook for managing storage operations for clips and settings
+ * Hook for managing storage operations for clips and settings.
+ *
+ * Returns `loadError`, the reason the stored history could not be read, or null. While it
+ * is set the list shows a banner and saving stays off for the rest of the session.
  */
 export const useClipsStorage = (
   clips: ClipItem[],
@@ -16,8 +20,13 @@ export const useClipsStorage = (
   setLockedClips: React.Dispatch<React.SetStateAction<Record<number, boolean>>>,
   setMaxClips: React.Dispatch<React.SetStateAction<number>>,
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
-) => {
-  // Shared function to load all stored data (clips + settings)
+): { loadError: ClipsLoadError | null } => {
+  const [loadError, setLoadError] = useState<ClipsLoadError | null>(null);
+
+  // Shared function to load all stored data (clips + settings).
+  // Saving stays disabled (isInitiallyLoading) until this has applied a successfully loaded
+  // history: the main process serves empty defaults while its background load runs, and a
+  // save of those would overwrite the real history and delete the images it references.
   const loadStoredData = useCallback(async () => {
     if (!window.api) {
       setIsInitiallyLoading(false);
@@ -32,8 +41,23 @@ export const useClipsStorage = (
       }
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
 
-      // Load clips from storage
-      const storedClips = await window.api.storageGetClips();
+      // The clips arrive with the load state they were read under, so the placeholder
+      // served during the background load cannot be mistaken for an empty history
+      const { loadState, clips: storedClips } = await window.api.storageGetClipsSnapshot();
+
+      if (!loadState.complete) {
+        // The storage-ready event triggers another load once the history is available
+        console.log('Storage still loading, waiting for storage-ready');
+        return;
+      }
+
+      if (loadState.error !== null) {
+        // The history is unreadable, so the clips returned are not it: leave the window
+        // as it is and leave saving disabled rather than write blank state over the file.
+        console.error('Stored clip history could not be loaded:', loadState.error.message);
+        setLoadError(loadState.error);
+        return;
+      }
 
       if (storedClips && storedClips.length > 0) {
         const loadedClips: ClipItem[] = [];
@@ -69,10 +93,14 @@ export const useClipsStorage = (
       } else {
         console.log('No stored clips found');
       }
+
+      // Only a load that got this far may enable saving
+      setLoadError(null);
+      setIsInitiallyLoading(false);
     } catch (error) {
       console.error('Failed to load data from storage:', error);
-    } finally {
-      setIsInitiallyLoading(false);
+      // The main process could not be reached or threw; a restart may well clear that
+      setLoadError({ message: errorText(error), recoverable: true });
     }
   }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]);
 
@@ -157,4 +185,6 @@ export const useClipsStorage = (
     const timeoutId = setTimeout(saveSettingsToStorage, 500);
     return () => clearTimeout(timeoutId);
   }, [maxClips, isInitiallyLoading]);
+
+  return { loadError };
 };

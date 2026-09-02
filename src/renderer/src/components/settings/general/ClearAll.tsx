@@ -7,7 +7,7 @@ import { HOTKEY_ROWS } from '../hotkeys/conflicts';
 import { useStats } from './stats';
 import { useSettingsStore } from './useSetting';
 import { formatBytes } from './backup';
-import { errorText } from '../shell/errorText';
+import { errorText } from '../../../utils/errorText';
 import w from '../shell/widgets.module.css';
 
 interface ClearAllProps {

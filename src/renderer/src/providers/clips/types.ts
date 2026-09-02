@@ -1,5 +1,5 @@
 import React from 'react';
-import type { ClipItem } from '../../../../shared/types';
+import type { ClipItem, StorageLoadError } from '../../../../shared/types';
 import type { PinsByGroup } from '../../../../shared/tools';
 import type { PinMap } from './pins';
 import type { QuickLookPosition, QuickLookState, QuickLookView, VisibleClip } from './quickLook';
@@ -49,7 +49,16 @@ export type ClipsMetaContextType = {
   setIsSearchVisible: React.Dispatch<React.SetStateAction<boolean>>;
   /** Close the bar and clear the filter with it, so an invisible filter cannot persist */
   hideSearch: () => void;
+  /** Why the stored history could not be read, or null; while set, saving stays off */
+  loadError: ClipsLoadError | null;
 };
+
+/**
+ * A failed history load as the list reports it. `recoverable` is true when a restart may
+ * read the history (the keystore was unavailable or the main process could not be reached)
+ * and false when the file cannot be read under this keystore, so a restart would not help.
+ */
+export type ClipsLoadError = StorageLoadError;
 
 /**
  * Pins: memory only, keyed group|value (spec 17.1)
