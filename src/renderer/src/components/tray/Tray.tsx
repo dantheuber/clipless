@@ -11,13 +11,22 @@ import styles from './Tray.module.css';
 
 /**
  * Open the tabs a tool or the tray produces through the main process, which accepts http
- * and https only. Every control states its count before it is clicked (spec 6).
+ * and https only. Every control states its count before it is clicked (spec 6). When the
+ * main process dropped some, the toast says how many of the offered count opened and why,
+ * rather than reporting the smaller number as a plain success.
  */
 export async function openTabs(urls: string[], toast: ToastFn): Promise<void> {
   if (urls.length === 0) return;
   try {
     const opened = await window.api.openExternalUrls(urls);
-    toast(`Opened ${opened} ${opened === 1 ? 'tab' : 'tabs'}`, urls);
+    if (opened < urls.length) {
+      toast(
+        `Opened ${opened} of ${tabCount(urls.length)}; only http and https links can open`,
+        urls
+      );
+    } else {
+      toast(`Opened ${tabCount(opened)}`, urls);
+    }
   } catch (error) {
     console.error('Failed to open tabs:', error);
     toast('Could not open the tabs', String(error));

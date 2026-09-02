@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { toolTokens, toolReady, buildToolUrls } from './tools';
+import { toolTokens, toolReady, buildToolUrls, hasWebScheme } from './tools';
 
 const tool = (url: string) => ({ url });
 
@@ -172,5 +172,23 @@ describe('buildToolUrls', () => {
     const pins = { ip: ['1.1.1.1', '2.2.2.2'], email: ['a@b.co'] };
     const urls = buildToolUrls(tool('https://x/{ip}/{email}'), pins);
     expect(urls).toHaveLength(2);
+  });
+});
+
+describe('hasWebScheme', () => {
+  it('accepts http and https in any case, ignoring surrounding whitespace', () => {
+    expect(hasWebScheme('https://example.com/{email}')).toBe(true);
+    expect(hasWebScheme('http://example.com')).toBe(true);
+    expect(hasWebScheme('  HTTPS://example.com ')).toBe(true);
+  });
+
+  it('rejects a schemeless template and every other scheme', () => {
+    expect(hasWebScheme('example.com/{email}')).toBe(false);
+    expect(hasWebScheme('www.example.com')).toBe(false);
+    expect(hasWebScheme('ftp://example.com')).toBe(false);
+    expect(hasWebScheme('file:///etc/hosts')).toBe(false);
+    expect(hasWebScheme('javascript:alert(1)')).toBe(false);
+    expect(hasWebScheme('https:/example.com')).toBe(false);
+    expect(hasWebScheme('')).toBe(false);
   });
 });

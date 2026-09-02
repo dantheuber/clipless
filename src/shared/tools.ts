@@ -87,3 +87,14 @@ export function buildToolUrls(tool: { url: string }, pins: PinsByGroup): string[
 
   return urls.filter((url, index) => urls.indexOf(url) === index);
 }
+
+const WEB_SCHEME = /^https?:\/\//i;
+
+/**
+ * Whether a tool URL template starts with http:// or https://. The main process opens
+ * nothing else (open-external.ts), so the editor warns on anything that fails this and the
+ * tray explains when fewer tabs opened than it offered.
+ */
+export function hasWebScheme(url: string): boolean {
+  return WEB_SCHEME.test(url.trim());
+}
