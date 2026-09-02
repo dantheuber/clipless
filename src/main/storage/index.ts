@@ -59,6 +59,10 @@ import { saveImage, deleteImage, deleteAllImages } from './image-store';
 
 const CURRENT_STORAGE_VERSION = 1;
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 const DEFAULT_TEMPLATES_DATA: TemplatesData = {
   templates: [],
   searchTerms: [],
@@ -311,11 +315,14 @@ class SecureStorage {
    * Whether the background load has finished, and whether the stored history was readable.
    */
   getLoadState(): StorageLoadState {
-    return {
+    const state: StorageLoadState = {
       complete: this.isBackgroundLoadComplete,
       failed: this.loadError !== null,
-      ...(this.loadError !== null && { error: this.loadError }),
     };
+    if (this.loadError !== null) {
+      state.error = this.loadError;
+    }
+    return state;
   }
 
   /**
@@ -933,8 +940,4 @@ class SecureStorage {
 }
 
 // Export singleton instance
-function errorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
-}
-
 export const storage = new SecureStorage();

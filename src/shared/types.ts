@@ -118,9 +118,6 @@ export interface StorageMeta {
 }
 
 /**
- * Storage statistics
- */
-/**
  * Progress of the background load that runs after storage initialises. Clips read while
  * `complete` is false are the empty defaults, not the stored history; `failed` means the
  * history could not be read and must not be overwritten.
@@ -131,6 +128,9 @@ export interface StorageLoadState {
   error?: string;
 }
 
+/**
+ * Storage statistics
+ */
 export interface StorageStats {
   clipCount: number;
   lockedCount: number;
