@@ -18,7 +18,7 @@ const { virtual, state } = vi.hoisted(() => ({
     isSearchVisible: false,
     setIsSearchVisible: vi.fn(),
     focusRequest: null as { index: number; seq: number } | null,
-    loadError: null as string | null,
+    loadError: null as { message: string; recoverable: boolean } | null,
   },
 }));
 
@@ -206,7 +206,10 @@ describe('Clips empty states', () => {
 
 describe('Clips load failure', () => {
   it('shows a banner with the reason for as long as the history is unreadable', () => {
-    state.loadError = 'Error while decrypting the ciphertext provided to safeStorage.';
+    state.loadError = {
+      message: 'Error while decrypting the ciphertext provided to safeStorage.',
+      recoverable: false,
+    };
     const { rerender } = render(<Clips />);
     const banner = screen.getByTestId('load-failed-banner');
     expect(banner).toHaveTextContent(/clip history/i);
@@ -217,5 +220,19 @@ describe('Clips load failure', () => {
     state.loadError = null;
     rerender(<Clips />);
     expect(screen.queryByTestId('load-failed-banner')).toBeNull();
+  });
+
+  it('only suggests a restart when the main process says the failure may clear', () => {
+    state.loadError = { message: 'Error while decrypting', recoverable: false };
+    const { rerender } = render(<Clips />);
+    let banner = screen.getByTestId('load-failed-banner');
+    expect(banner).toHaveTextContent(/can't be read with this computer's keystore/);
+    expect(banner).not.toHaveTextContent(/Restart Clipless/);
+
+    state.loadError = { message: 'Encryption is not available on this system', recoverable: true };
+    rerender(<Clips />);
+    banner = screen.getByTestId('load-failed-banner');
+    expect(banner).toHaveTextContent(/Restart Clipless to try again/);
+    expect(banner).not.toHaveTextContent(/keystore/);
   });
 });

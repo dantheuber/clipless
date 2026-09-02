@@ -85,8 +85,8 @@ const createMockApi = () => ({
   startClipboardMonitoring: vi.fn().mockResolvedValue(true),
   stopClipboardMonitoring: vi.fn().mockResolvedValue(true),
   getCurrentClipboardData: vi.fn().mockResolvedValue(null),
-  storageGetClips: vi.fn().mockResolvedValue({
-    loadState: { complete: true, error: null },
+  storageGetClipsSnapshot: vi.fn().mockResolvedValue({
+    loadState: { complete: true, error: null, recoverable: false },
     clips: [],
   }),
   storageSaveClips: vi.fn().mockResolvedValue(true),

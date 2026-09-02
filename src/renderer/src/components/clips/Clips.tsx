@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useClipsData, useClipsMeta, useQuickLook } from '../../providers/clips';
+import type { ClipsLoadError } from '../../providers/clips/types';
 import { Clip } from './clip';
 import { SEARCH_INPUT_ID } from '../SearchBar';
 import styles from './Clips.module.css';
@@ -82,7 +83,7 @@ export function Clips(): React.JSX.Element {
       : `No clips match "${searchTerm.trim()}"`;
 
   return (
-    <>
+    <div className={styles.clips}>
       {loadError !== null && <LoadFailedBanner error={loadError} />}
       <div
         ref={scrollContainerRef}
@@ -126,29 +127,30 @@ export function Clips(): React.JSX.Element {
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 }
 
 const LOAD_FAILED_TITLE = "Couldn't load your clip history";
-const LOAD_FAILED_DETAIL = [
-  'Saving is paused so the stored history is not overwritten.',
-  'Restart Clipless to try again.',
-];
+const LOAD_FAILED_PAUSED = 'Saving is paused so the stored history is not overwritten.';
+const LOAD_FAILED_RETRY = 'Restart Clipless to try again.';
+const LOAD_FAILED_UNREADABLE =
+  "The stored history can't be read with this computer's keystore, so it won't load.";
 
 /**
  * Shown above the list for as long as the stored history is unreadable. It stays because
  * saving is off for the whole session, and a hidden window would miss a passing toast.
+ * A restart is only suggested when the main process says the failure may clear on the
+ * next launch; a key mismatch repeats on every launch, so the banner says so instead.
  */
-function LoadFailedBanner({ error }: { error: string }): React.JSX.Element {
+function LoadFailedBanner({ error }: { error: ClipsLoadError }): React.JSX.Element {
   return (
     <div className={styles.loadFailed} role="alert" data-testid="load-failed-banner">
       <div className={styles.loadFailedTitle}>{LOAD_FAILED_TITLE}</div>
       <ul className={styles.loadFailedDetail}>
-        {LOAD_FAILED_DETAIL.map((line) => (
-          <li key={line}>{line}</li>
-        ))}
-        <li>{error}</li>
+        <li>{LOAD_FAILED_PAUSED}</li>
+        <li>{error.recoverable ? LOAD_FAILED_RETRY : LOAD_FAILED_UNREADABLE}</li>
+        <li className={styles.loadFailedError}>{error.message}</li>
       </ul>
     </div>
   );

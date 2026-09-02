@@ -50,8 +50,15 @@ export type ClipsMetaContextType = {
   /** Close the bar and clear the filter with it, so an invisible filter cannot persist */
   hideSearch: () => void;
   /** Why the stored history could not be read, or null; while set, saving stays off */
-  loadError: string | null;
+  loadError: ClipsLoadError | null;
 };
+
+/**
+ * A failed history load as the list reports it. `recoverable` is true when a restart may
+ * read the history (the keystore was unavailable or the main process could not be reached)
+ * and false when the file cannot be read under this keystore, so a restart would not help.
+ */
+export type ClipsLoadError = { message: string; recoverable: boolean };
 
 /**
  * Pins: memory only, keyed group|value (spec 17.1)

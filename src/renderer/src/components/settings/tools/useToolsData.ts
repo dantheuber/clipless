@@ -58,7 +58,7 @@ export function useToolsDataValue(): ToolsData {
   useEffect(() => {
     let live = true;
     window.api
-      .storageGetClips()
+      .storageGetClipsSnapshot()
       .then((snapshot) => {
         if (live) setClip(newestClipText(snapshot?.clips ?? []));
       })

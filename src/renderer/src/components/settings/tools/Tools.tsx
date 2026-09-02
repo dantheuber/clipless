@@ -18,7 +18,7 @@ import { TemplateEditor, type TemplateDraft } from './TemplateEditor';
 import { EditorHostContext, type EditorHost } from './editorHost';
 import type { FixActions } from './Fixes';
 import { KIND_LABEL, dependents, itemOf, listDot, type ToolsItem, type ToolsKind } from './model';
-import { errorText } from '../shell/errorText';
+import { errorText } from '../../../utils/errorText';
 import shell from '../shell/Shell.module.css';
 import styles from './Tools.module.css';
 

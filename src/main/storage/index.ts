@@ -80,6 +80,8 @@ class SecureStorage {
   private isBackgroundLoadComplete = false;
   // Set when the stored history could not be read; saves stay refused so it is not overwritten
   private loadError: string | null = null;
+  // True when the failure is one a later launch may clear (the keystore was unavailable)
+  private loadRecoverable = false;
 
   // Domain-specific data stores
   private settings: UserSettings = DEFAULT_SETTINGS;
@@ -132,6 +134,7 @@ class SecureStorage {
       if (!isEncryptionAvailable()) {
         console.warn('Encryption not available, keeping default data');
         this.loadError = 'Encryption is not available on this system';
+        this.loadRecoverable = true;
         this.isBackgroundLoadComplete = true;
         this.onBackgroundLoadComplete?.();
         return;
@@ -316,7 +319,11 @@ class SecureStorage {
    * Whether the background load has finished, and whether the stored history was readable.
    */
   getLoadState(): StorageLoadState {
-    return { complete: this.isBackgroundLoadComplete, error: this.loadError };
+    return {
+      complete: this.isBackgroundLoadComplete,
+      error: this.loadError,
+      recoverable: this.loadRecoverable,
+    };
   }
 
   /**

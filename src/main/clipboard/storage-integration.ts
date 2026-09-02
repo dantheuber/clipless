@@ -6,7 +6,7 @@ import type { ClipItem, StoredClipsSnapshot, UserSettings } from '../../shared/t
 
 // The clips come with the load state they were read under: until `loadState.complete` they
 // are the empty placeholder, and with `loadState.error` set they are not the stored history
-export const getClips = async (): Promise<StoredClipsSnapshot> => {
+export const getClipsSnapshot = async (): Promise<StoredClipsSnapshot> => {
   try {
     return await storage.getClipsSnapshot();
   } catch (error) {

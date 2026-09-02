@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ClipItem } from './types';
+import { ClipItem, ClipsLoadError } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { shrinkClips, updateClipsLength } from './utils';
+import { errorText } from '../../utils/errorText';
 import { UserSettings, StoredClip } from '../../../../shared/types';
 
 /**
@@ -19,8 +20,8 @@ export const useClipsStorage = (
   setLockedClips: React.Dispatch<React.SetStateAction<Record<number, boolean>>>,
   setMaxClips: React.Dispatch<React.SetStateAction<number>>,
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
-): { loadError: string | null } => {
-  const [loadError, setLoadError] = useState<string | null>(null);
+): { loadError: ClipsLoadError | null } => {
+  const [loadError, setLoadError] = useState<ClipsLoadError | null>(null);
 
   // Shared function to load all stored data (clips + settings).
   // Saving stays disabled (isInitiallyLoading) until this has applied a successfully loaded
@@ -42,7 +43,7 @@ export const useClipsStorage = (
 
       // The clips arrive with the load state they were read under, so the placeholder
       // served during the background load cannot be mistaken for an empty history
-      const { loadState, clips: storedClips } = await window.api.storageGetClips();
+      const { loadState, clips: storedClips } = await window.api.storageGetClipsSnapshot();
 
       if (!loadState.complete) {
         // The storage-ready event triggers another load once the history is available
@@ -54,7 +55,7 @@ export const useClipsStorage = (
         // The history is unreadable, so the clips returned are not it: leave the window
         // as it is and leave saving disabled rather than write blank state over the file.
         console.error('Stored clip history could not be loaded:', loadState.error);
-        setLoadError(loadState.error);
+        setLoadError({ message: loadState.error, recoverable: loadState.recoverable });
         return;
       }
 
@@ -98,7 +99,8 @@ export const useClipsStorage = (
       setIsInitiallyLoading(false);
     } catch (error) {
       console.error('Failed to load data from storage:', error);
-      setLoadError(error instanceof Error ? error.message : String(error));
+      // The main process could not be reached or threw; a restart may well clear that
+      setLoadError({ message: errorText(error), recoverable: true });
     }
   }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]);
 
