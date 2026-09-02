@@ -44,7 +44,12 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
   const count = buildToolUrls({ url }, values).length;
   const resolved = resolveToolUrls(url, values);
   const needed = groupsNeeded({ url });
-  const schemeless = url.trim().length > 0 && !hasWebScheme(url);
+  // A template that leads with the url token takes its scheme from the captured value
+  // (the built-in url pattern captures http:// or https:// and buildToolUrls substitutes
+  // it unencoded), so it opens a valid web link without a literal prefix. The group name
+  // is matched exactly, as toolTokens does, since an unknown group never substitutes.
+  const leadsWithUrlToken = /^\s*\{\s*url\s*\}/.test(url);
+  const schemeless = url.trim().length > 0 && !leadsWithUrlToken && !hasWebScheme(url);
 
   const save = async () => {
     setSaving(true);

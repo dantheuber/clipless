@@ -150,6 +150,20 @@ describe('ToolEditor', () => {
     expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
   });
 
+  it('does not warn when the template leads with the url token, which supplies its own scheme', async () => {
+    await renderTools(
+      <ToolEditor initial={{ name: 'Open', url: '{url}' }} onSave={onSave} onCancel={onCancel} />
+    );
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tool-url-scheme-fix')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: ' { url }/extra' } });
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: '{url|domain}' } });
+    expect(screen.getByTestId('tool-url-scheme')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: 'x/{url}' } });
+    expect(screen.getByTestId('tool-url-scheme')).toBeInTheDocument();
+  });
+
   it('the https:// fix strips leading whitespace and leaves the caret after the prefix', async () => {
     await renderTools(
       <ToolEditor
