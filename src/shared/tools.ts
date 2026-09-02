@@ -92,11 +92,30 @@ const WEB_SCHEME = /^https?:\/\//i;
 
 /**
  * Whether a tool URL template starts with http:// or https://. The main process opens
- * nothing else (open-external.ts), so the editor warns on anything that fails this and the
- * tray explains when fewer tabs opened than it offered.
+ * nothing else (open-external.ts), so the tray explains when fewer tabs opened than it
+ * offered. The editor's warning is needsWebScheme, which also exempts a leading url token.
  */
 export function hasWebScheme(url: string): boolean {
   return WEB_SCHEME.test(url.trim());
+}
+
+/**
+ * Whether the editor should warn that this template will not open as a web link. A template
+ * that leads with a url-only token takes its scheme from the captured value (the built-in
+ * url pattern captures http:// or https://), which buildToolUrls substitutes unencoded, so
+ * it opens without a literal prefix. The token is read through toolTokens so {url|} and
+ * { url } count the same way there as here. An empty template gets no warning.
+ */
+export function needsWebScheme(url: string): boolean {
+  const trimmed = url.trim();
+  if (trimmed.length === 0 || hasWebScheme(trimmed)) return false;
+  const first = toolTokens(trimmed)[0];
+  const leadsWithUrl =
+    first !== undefined &&
+    trimmed.startsWith(first.token) &&
+    first.groups.length > 0 &&
+    first.groups.every((group) => group === 'url');
+  return !leadsWithUrl;
 }
 
 /**

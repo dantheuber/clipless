@@ -156,12 +156,6 @@ describe('ToolEditor', () => {
     );
     expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tool-url-scheme-fix')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: ' { url }/extra' } });
-    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
-    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: '{url|domain}' } });
-    expect(screen.getByTestId('tool-url-scheme')).toBeInTheDocument();
-    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: 'x/{url}' } });
-    expect(screen.getByTestId('tool-url-scheme')).toBeInTheDocument();
   });
 
   it('the https:// fix strips leading whitespace and leaves the caret after the prefix', async () => {

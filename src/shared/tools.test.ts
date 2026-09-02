@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { toolTokens, toolReady, buildToolUrls, hasWebScheme, withWebScheme } from './tools';
+import {
+  toolTokens,
+  toolReady,
+  buildToolUrls,
+  hasWebScheme,
+  needsWebScheme,
+  withWebScheme,
+} from './tools';
 
 const tool = (url: string) => ({ url });
 
@@ -191,6 +198,38 @@ describe('hasWebScheme', () => {
     expect(hasWebScheme('https:/example.com')).toBe(false);
     expect(hasWebScheme('')).toBe(false);
   });
+});
+
+describe('needsWebScheme', () => {
+  it.each([
+    ['example.com/{email}'],
+    ['www.example.com'],
+    ['ftp://example.com'],
+    ['https:/example.com'],
+    ['{url|domain}'],
+    ['{ip}/{url}'],
+    ['x/{url}'],
+    ['{URL}'],
+  ])('warns on %s', (input) => {
+    expect(needsWebScheme(input)).toBe(true);
+  });
+
+  it.each([
+    [''],
+    ['   '],
+    ['https://example.com/{email}'],
+    ['  HTTP://example.com'],
+    ['{url}'],
+    [' { url }/extra'],
+    ['{url|}'],
+    ['{|url}'],
+    ['{url|url}'],
+  ])(
+    'does not warn on %s, which toolTokens reads as a leading url-only token or a web link',
+    (input) => {
+      expect(needsWebScheme(input)).toBe(false);
+    }
+  );
 });
 
 describe('withWebScheme', () => {
