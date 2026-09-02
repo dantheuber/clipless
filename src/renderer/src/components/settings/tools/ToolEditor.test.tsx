@@ -164,6 +164,21 @@ describe('ToolEditor', () => {
     expect(url.selectionStart).toBe('https://'.length);
     expect(document.activeElement).toBe(url);
   });
+
+  it.each([
+    ['ftp://vt.internal/{ip}', 'https://vt.internal/{ip}'],
+    ['mailto:a@b.com', 'https://a@b.com'],
+    ['file:///x/{ip}', 'https://x/{ip}'],
+    ['https:/example.com/{ip}', 'https://example.com/{ip}'],
+    ['localhost:3000/{ip}', 'https://localhost:3000/{ip}'],
+  ])('the https:// fix replaces an existing scheme: %s', async (initial, expected) => {
+    await renderTools(
+      <ToolEditor initial={{ name: 'x', url: initial }} onSave={onSave} onCancel={onCancel} />
+    );
+    fireEvent.click(screen.getByTestId('tool-url-scheme-fix'));
+    expect(screen.getByTestId('tool-url')).toHaveValue(expected);
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+  });
 });
 
 describe('TemplateEditor', () => {

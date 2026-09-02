@@ -25,6 +25,11 @@ interface ToolEditorProps {
 
 const PREVIEW_LIMIT = 4;
 const WEB_PREFIX = 'https://';
+/**
+ * A leading scheme to drop before prefixing https://. The digit lookahead keeps a
+ * schemeless host:port ("localhost:3000/{ip}") intact, since no scheme is followed by a digit.
+ */
+const LEADING_SCHEME = /^[a-z][a-z0-9+.-]*:(?!\d)\/*/i;
 
 /**
  * The tool editor (spec 14.3): name, URL, token picker, readiness line, a preview titled
@@ -82,7 +87,7 @@ export function ToolEditor({ initial, onSave, onCancel }: ToolEditorProps) {
   };
 
   const addScheme = () => {
-    setUrl(WEB_PREFIX + url.trimStart());
+    setUrl(WEB_PREFIX + url.trimStart().replace(LEADING_SCHEME, ''));
     setCaret(WEB_PREFIX.length);
   };
 
