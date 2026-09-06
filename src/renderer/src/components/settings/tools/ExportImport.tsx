@@ -5,7 +5,7 @@ import { patternGroups } from '../../../../../shared/readiness';
 import { ConfirmDialog } from '../../ConfirmDialog';
 import { useToast } from '../../Toast';
 import { downloadText, readFileText } from '../general/backup';
-import { errorText } from '../shell/errorText';
+import { errorText } from '../../../utils/errorText';
 import { GroupPill } from './GroupPill';
 import { useToolsData } from './useToolsData';
 import w from '../shell/widgets.module.css';

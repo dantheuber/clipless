@@ -10,7 +10,7 @@ import { About } from './About';
 import { ClearAll } from './ClearAll';
 import { ImportPreview } from './ImportPreview';
 import { backupFileName, downloadText, formatBytes } from './backup';
-import { errorText } from '../shell/errorText';
+import { errorText } from '../../../utils/errorText';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 

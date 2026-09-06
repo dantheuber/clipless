@@ -151,7 +151,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
   const toast = useToast();
 
   // Use storage hook for loading/saving data
-  useClipsStorage(
+  const { loadError } = useClipsStorage(
     clips,
     lockedClips,
     maxClips,
@@ -413,8 +413,9 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       isSearchVisible,
       setIsSearchVisible,
       hideSearch,
+      loadError,
     }),
-    [clipCopyId, maxClips, isSearchVisible, hideSearch]
+    [clipCopyId, maxClips, isSearchVisible, hideSearch, loadError]
   );
 
   const pinsValue = useMemo(
