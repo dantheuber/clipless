@@ -127,6 +127,51 @@ describe('ToolEditor', () => {
     expect(screen.getByTestId('readiness')).toHaveTextContent('no tokens');
     expect(screen.getByTestId('tool-preview-caption')).toHaveTextContent('Would open 1 tab');
   });
+
+  it('warns beneath the URL field when the template has no http or https scheme and prefixes https:// on click', async () => {
+    await renderTools(
+      <ToolEditor
+        initial={{ name: 'Lookup', url: 'example.com/{email}' }}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+    const warning = screen.getByTestId('tool-url-scheme');
+    expect(warning).toHaveTextContent('only http and https links can open');
+    expect(screen.getByTestId('tool-preview-caption')).toHaveTextContent('Would open 1 tab');
+    fireEvent.click(screen.getByTestId('tool-url-scheme-fix'));
+    expect(screen.getByTestId('tool-url')).toHaveValue('https://example.com/{email}');
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: 'ftp://x/{email}' } });
+    expect(screen.getByTestId('tool-url-scheme')).toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: 'HTTP://x/{email}' } });
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+    fireEvent.change(screen.getByTestId('tool-url'), { target: { value: '' } });
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+  });
+
+  it('does not warn when the template leads with the url token, which supplies its own scheme', async () => {
+    await renderTools(
+      <ToolEditor initial={{ name: 'Open', url: '{url}' }} onSave={onSave} onCancel={onCancel} />
+    );
+    expect(screen.queryByTestId('tool-url-scheme')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('tool-url-scheme-fix')).not.toBeInTheDocument();
+  });
+
+  it('the https:// fix strips leading whitespace and leaves the caret after the prefix', async () => {
+    await renderTools(
+      <ToolEditor
+        initial={{ name: 'x', url: '  vt.example/{ip}' }}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
+    );
+    fireEvent.click(screen.getByTestId('tool-url-scheme-fix'));
+    const url = screen.getByTestId('tool-url') as HTMLInputElement;
+    expect(url).toHaveValue('https://vt.example/{ip}');
+    expect(url.selectionStart).toBe('https://'.length);
+    expect(document.activeElement).toBe(url);
+  });
 });
 
 describe('TemplateEditor', () => {
