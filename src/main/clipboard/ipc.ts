@@ -13,7 +13,7 @@ import {
   setSkipNextImageChange,
 } from './monitoring';
 import {
-  getClips,
+  getClipsSnapshot,
   saveClips,
   getSettings,
   saveSettings,
@@ -104,7 +104,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('stop-clipboard-monitoring', () => stopClipboardMonitoring());
 
   // Storage integration handlers
-  ipcMain.handle('storage-get-clips', async () => getClips());
+  ipcMain.handle('storage-get-clips-snapshot', async () => getClipsSnapshot());
   ipcMain.handle(
     'storage-save-clips',
     async (_event, clips: ClipItem[], lockedIndices: Record<number, boolean>) =>

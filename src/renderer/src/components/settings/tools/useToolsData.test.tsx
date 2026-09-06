@@ -95,7 +95,7 @@ describe('useToolsData', () => {
 
   it('copes with no clips at all, and a blur with the saved text writes nothing', async () => {
     installConfig(defaultConfig(), { toolsSampleText: 'same' });
-    api().storageGetClips.mockResolvedValue(undefined);
+    api().storageGetClipsSnapshot.mockResolvedValue(undefined);
     await renderTools(<Probe />);
     const box = screen.getByTestId('sample-text');
     fireEvent.change(box, { target: { value: 'other' } });
@@ -108,7 +108,7 @@ describe('useToolsData', () => {
   it('reset with no saved text is a no-op, and a clip read failure is logged', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
     installConfig(defaultConfig());
-    api().storageGetClips.mockRejectedValue(new Error('no clips'));
+    api().storageGetClipsSnapshot.mockRejectedValue(new Error('no clips'));
     await renderTools(<Probe />);
     expect(error).toHaveBeenCalledWith('Failed to read the newest clip:', expect.any(Error));
     expect(screen.getByTestId('sample-text')).toHaveValue('');
@@ -123,7 +123,7 @@ describe('useToolsData', () => {
   it('ignores the clips when unmounted before they arrive', async () => {
     installConfig(defaultConfig());
     let resolve: (v: unknown) => void = () => {};
-    api().storageGetClips.mockReturnValue(new Promise((r) => (resolve = r)));
+    api().storageGetClipsSnapshot.mockReturnValue(new Promise((r) => (resolve = r)));
     const { unmount } = await renderTools(<Probe />);
     unmount();
     await act(async () => resolve([]));

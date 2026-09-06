@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useClipsData, useClipsMeta, useQuickLook } from '../../providers/clips';
+import type { ClipsLoadError } from '../../providers/clips/types';
 import { Clip } from './clip';
 import { SEARCH_INPUT_ID } from '../SearchBar';
 import styles from './Clips.module.css';
@@ -16,7 +17,7 @@ const isTypingTarget = (target: EventTarget | null): boolean =>
  */
 export function Clips(): React.JSX.Element {
   const { filteredClips, searchTerm, isFiltering, pinnedOnly } = useClipsData();
-  const { clipCopyId, isSearchVisible, setIsSearchVisible } = useClipsMeta();
+  const { clipCopyId, isSearchVisible, setIsSearchVisible, loadError } = useClipsMeta();
   const { focusRequest } = useQuickLook();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -82,47 +83,79 @@ export function Clips(): React.JSX.Element {
       : `No clips match "${searchTerm.trim()}"`;
 
   return (
-    <div
-      ref={scrollContainerRef}
-      className={styles.clipsContainer}
-      onKeyDown={handleKeyDown}
-      data-testid="clips-list"
-    >
-      {showEmpty ? (
-        <div className={styles.emptyState}>{emptyMessage}</div>
-      ) : (
-        <div
-          className={styles.clipsList}
-          style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
-        >
-          {virtualizer.getVirtualItems().map((virtualRow) => {
-            const { clip, originalIndex } = items[virtualRow.index];
-            return (
-              <div
-                key={virtualRow.key}
-                data-index={virtualRow.index}
-                ref={virtualizer.measureElement}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                <Clip
-                  clip={clip}
-                  index={originalIndex}
-                  visibleIndex={virtualRow.index}
-                  isCurrentCopiedClip={clipCopyId === clip.id}
-                  isEvenRow={virtualRow.index % 2 === 1}
-                  searchTerm={searchTerm}
-                />
-              </div>
-            );
-          })}
-        </div>
-      )}
+    <div className={styles.clips}>
+      {loadError !== null && <LoadFailedBanner error={loadError} />}
+      <div
+        ref={scrollContainerRef}
+        className={styles.clipsContainer}
+        onKeyDown={handleKeyDown}
+        data-testid="clips-list"
+      >
+        {showEmpty ? (
+          <div className={styles.emptyState}>{emptyMessage}</div>
+        ) : (
+          <div
+            className={styles.clipsList}
+            style={{ height: `${virtualizer.getTotalSize()}px`, position: 'relative' }}
+          >
+            {virtualizer.getVirtualItems().map((virtualRow) => {
+              const { clip, originalIndex } = items[virtualRow.index];
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <Clip
+                    clip={clip}
+                    index={originalIndex}
+                    visibleIndex={virtualRow.index}
+                    isCurrentCopiedClip={clipCopyId === clip.id}
+                    isEvenRow={virtualRow.index % 2 === 1}
+                    searchTerm={searchTerm}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+const LOAD_FAILED_TITLE = "Couldn't load your clip history";
+const LOAD_FAILED_PAUSED = 'Saving is paused so the stored history is not overwritten.';
+const LOAD_FAILED_RETRY = 'Restart Clipless to try again.';
+const LOAD_FAILED_UNREADABLE =
+  "The stored history can't be read with this computer's keystore, so it won't load.";
+const LOAD_FAILED_RESET = 'To use Clipless again, clear all data in Settings and restart.';
+
+/**
+ * Shown above the list for as long as the stored history is unreadable. It stays because
+ * saving is off for the whole session, and a hidden window would miss a passing toast.
+ * A restart is only suggested when the main process says the failure may clear on the
+ * next launch; a key mismatch repeats on every launch, so the banner says so instead and
+ * points at the one way out: clearing the stored data removes the unreadable file, and a
+ * restart is needed because saving stays off for the rest of this session.
+ */
+function LoadFailedBanner({ error }: { error: ClipsLoadError }): React.JSX.Element {
+  return (
+    <div className={styles.loadFailed} role="alert" data-testid="load-failed-banner">
+      <div className={styles.loadFailedTitle}>{LOAD_FAILED_TITLE}</div>
+      <ul className={styles.loadFailedDetail}>
+        <li>{LOAD_FAILED_PAUSED}</li>
+        <li>{error.recoverable ? LOAD_FAILED_RETRY : LOAD_FAILED_UNREADABLE}</li>
+        {!error.recoverable && <li>{LOAD_FAILED_RESET}</li>}
+        <li className={styles.loadFailedError}>{error.message}</li>
+      </ul>
     </div>
   );
 }

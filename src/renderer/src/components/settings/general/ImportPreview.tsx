@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { ConfirmDialog } from '../../ConfirmDialog';
 import { useToast } from '../../Toast';
 import { formatBytes, readFileText, summarizeBackup, type BackupSummary } from './backup';
-import { errorText } from '../shell/errorText';
+import { errorText } from '../../../utils/errorText';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
