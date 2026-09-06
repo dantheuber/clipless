@@ -277,10 +277,6 @@ class SecureStorage {
    * always reaches disk (see SaveQueue).
    */
   private async saveDomain(key: string, data: unknown, filePath: string): Promise<void> {
-    if (!this.isInitialized) {
-      throw new Error('Storage not initialized');
-    }
-
     await this.saveQueue.run(key, () => saveEncryptedJson(data, filePath));
   }
 
@@ -723,7 +719,8 @@ class SecureStorage {
     }
     this.templatesData = { ...this.templatesData, groupColours: { ...groupColours } };
     await this.saveTemplatesData();
-    return { ...(this.templatesData.groupColours ?? {}) };
+    // The save may have pruned the map, so read it back rather than echo the argument
+    return { ...this.templatesData.groupColours };
   }
 
   /**

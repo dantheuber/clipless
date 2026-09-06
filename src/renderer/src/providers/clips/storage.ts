@@ -76,11 +76,6 @@ export const useClipsStorage = (
           }
         });
 
-        // Ensure the first clip (index 0) is never locked
-        if (loadedLocks[0]) {
-          delete loadedLocks[0];
-        }
-
         // Always update clips state, even if empty, to ensure proper initialization
         const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
         const paddedClips = updateClipsLength(loadedClips, currentMaxClips);

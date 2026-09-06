@@ -30,12 +30,20 @@ const failed = (): StoredClipsSnapshot => ({
 });
 
 let storageReady: (() => void) | null = null;
-let observed: { clips: ClipItem[]; isInitiallyLoading: boolean; loadError: ClipsLoadError | null } =
-  {
-    clips: [],
-    isInitiallyLoading: true,
-    loadError: null,
-  };
+let settingsUpdated: ((settings: unknown) => void) | null = null;
+let observed: {
+  clips: ClipItem[];
+  lockedClips: Record<number, boolean>;
+  maxClips: number;
+  isInitiallyLoading: boolean;
+  loadError: ClipsLoadError | null;
+} = {
+  clips: [],
+  lockedClips: {},
+  maxClips: DEFAULT_MAX_CLIPS,
+  isInitiallyLoading: true,
+  loadError: null,
+};
 
 function Probe() {
   const [clips, setClips] = useState<ClipItem[]>(updateClipsLength([], DEFAULT_MAX_CLIPS));
@@ -52,7 +60,7 @@ function Probe() {
     setMaxClips,
     setIsInitiallyLoading
   );
-  observed = { clips, isInitiallyLoading, loadError };
+  observed = { clips, lockedClips, maxClips, isInitiallyLoading, loadError };
   return null;
 }
 
@@ -79,6 +87,17 @@ beforeEach(() => {
   storageReady = null;
   api().storageGetClipsSnapshot.mockReset().mockResolvedValue(loaded());
   api().storageSaveClips.mockReset().mockResolvedValue(true);
+  api().storageSaveSettings.mockReset().mockResolvedValue(undefined);
+  api().storageGetSettings.mockReset().mockResolvedValue({ maxClips: DEFAULT_MAX_CLIPS });
+  settingsUpdated = null;
+  api()
+    .onSettingsUpdated.mockReset()
+    .mockImplementation((cb: (settings: unknown) => void) => {
+      settingsUpdated = cb;
+      return () => {
+        settingsUpdated = null;
+      };
+    });
   api()
     .onStorageReady.mockReset()
     .mockImplementation((cb: () => void) => {
@@ -170,5 +189,136 @@ describe('useClipsStorage load guard', () => {
     expect(observed.loadError).toBeNull();
     expect(observed.isInitiallyLoading).toBe(false);
     expect(observed.clips[0].content).toBe('back');
+  });
+});
+
+describe('useClipsStorage without the preload api', () => {
+  it('finishes loading at once and never tries to save', async () => {
+    const preload = window.api;
+    (window as unknown as { api: unknown }).api = undefined;
+    try {
+      mount();
+      await settle();
+      expect(observed.isInitiallyLoading).toBe(false);
+      expect(observed.loadError).toBeNull();
+    } finally {
+      window.api = preload;
+    }
+
+    expect(preload.storageSaveClips).not.toHaveBeenCalled();
+    expect(preload.storageSaveSettings).not.toHaveBeenCalled();
+  });
+});
+
+describe('useClipsStorage stored data', () => {
+  it('keeps the default limit when the settings carry none', async () => {
+    api().storageGetSettings.mockResolvedValue({});
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'one')]));
+    mount();
+    await settle();
+
+    expect(observed.maxClips).toBe(DEFAULT_MAX_CLIPS);
+    expect(observed.clips).toHaveLength(DEFAULT_MAX_CLIPS);
+    expect(observed.clips[0].content).toBe('one');
+  });
+
+  it('copes with settings that are missing altogether', async () => {
+    api().storageGetSettings.mockResolvedValue(null);
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'one')]));
+    mount();
+    await settle();
+
+    expect(observed.clips[0].content).toBe('one');
+    expect(observed.isInitiallyLoading).toBe(false);
+  });
+
+  it('applies the stored limit and restores locks for every clip but the newest', async () => {
+    api().storageGetSettings.mockResolvedValue({ maxClips: 5 });
+    api().storageGetClipsSnapshot.mockResolvedValue(
+      loaded([stored('a', 'one', true), stored('b', 'two', true), stored('c', 'three')])
+    );
+    mount();
+    await settle();
+
+    expect(observed.maxClips).toBe(5);
+    expect(observed.clips).toHaveLength(5);
+    expect(observed.clips.slice(0, 3).map((c) => c.content)).toEqual(['one', 'two', 'three']);
+    expect(observed.lockedClips).toEqual({ 1: true });
+  });
+
+  it('skips stored entries without usable content', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(
+      loaded([
+        stored('a', '   '),
+        stored('b', ''),
+        { clip: undefined, isLocked: false, timestamp: 1 } as unknown as StoredClip,
+      ])
+    );
+    mount();
+    await settle();
+
+    expect(observed.clips.every((c) => c.content === '')).toBe(true);
+    expect(observed.isInitiallyLoading).toBe(false);
+    expect(log).not.toHaveBeenCalledWith(expect.stringMatching(/Successfully loaded/));
+    expect(log).not.toHaveBeenCalledWith('No stored clips found');
+  });
+
+  it('treats a snapshot without a clip list as an empty history', async () => {
+    api().storageGetClipsSnapshot.mockResolvedValue({
+      loadState: { complete: true, error: null },
+      clips: undefined as unknown as StoredClip[],
+    });
+    mount();
+    await settle();
+
+    expect(observed.isInitiallyLoading).toBe(false);
+    expect(observed.loadError).toBeNull();
+  });
+});
+
+describe('useClipsStorage settings updates from another window', () => {
+  it('applies a lower limit by dropping the oldest unlocked clips', async () => {
+    api().storageGetClipsSnapshot.mockResolvedValue(
+      loaded([stored('a', 'one'), stored('b', 'two', true), stored('c', 'three')])
+    );
+    mount();
+    await settle();
+    expect(observed.lockedClips).toEqual({ 1: true });
+
+    await act(async () => {
+      settingsUpdated?.({ maxClips: 2 });
+    });
+
+    expect(observed.maxClips).toBe(2);
+    expect(observed.clips.map((c) => c.content)).toEqual(['one', 'two']);
+    expect(observed.lockedClips).toEqual({ 1: true });
+  });
+
+  it('ignores an update that carries no numeric limit', async () => {
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'one')]));
+    mount();
+    await settle();
+
+    await act(async () => {
+      settingsUpdated?.({ theme: 'dark' });
+      settingsUpdated?.(null);
+    });
+
+    expect(observed.maxClips).toBe(DEFAULT_MAX_CLIPS);
+    expect(observed.clips).toHaveLength(DEFAULT_MAX_CLIPS);
+  });
+});
+
+describe('useClipsStorage save failures', () => {
+  it('logs a refused clip save and a failed settings save', async () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageSaveClips.mockRejectedValue(new Error('Storage could not be loaded'));
+    api().storageSaveSettings.mockRejectedValue(new Error('no disk'));
+    mount();
+    await settle();
+
+    expect(error).toHaveBeenCalledWith('Failed to save clips to storage:', expect.any(Error));
+    expect(error).toHaveBeenCalledWith('Failed to save settings to storage:', expect.any(Error));
   });
 });
