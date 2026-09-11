@@ -12,6 +12,7 @@ import {
   watchSystemThemeForWindowBackground,
 } from '../window/background';
 import { applyAutoStart } from '../autoStart';
+import { initializeAnalytics } from '../analytics';
 
 export async function initializeApp(): Promise<void> {
   // Playwright launches Electron with --password-store=basic, and with that store Linux
@@ -131,6 +132,7 @@ export function setupAppEvents(): void {
 }
 
 export function initializeServices(): void {
+  initializeAnalytics();
   // Setup IPC handlers
   setupMainIPC();
 

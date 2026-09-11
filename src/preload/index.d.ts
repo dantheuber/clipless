@@ -52,6 +52,8 @@ declare global {
       storageGetClipsSnapshot: () => Promise<StoredClipsSnapshot>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<UserSettings>;
+      analyticsPreference: () => Promise<{ enabled: boolean; available: boolean }>;
+      analyticsSetEnabled: (enabled: boolean) => Promise<{ enabled: boolean; available: boolean }>;
       storageSaveSettings: (settings: Partial<UserSettings>) => Promise<boolean>;
       storageGetStats: () => Promise<StorageStats>;
       storageExportData: () => Promise<string>;

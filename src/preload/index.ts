@@ -91,6 +91,9 @@ const api = {
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
     electronAPI.ipcRenderer.invoke('storage-save-clips', clips, lockedIndices),
   storageGetSettings: () => electronAPI.ipcRenderer.invoke('storage-get-settings'),
+  analyticsPreference: () => electronAPI.ipcRenderer.invoke('analytics-preference'),
+  analyticsSetEnabled: (enabled: boolean) =>
+    electronAPI.ipcRenderer.invoke('analytics-set-enabled', enabled),
   storageSaveSettings: (settings: UserSettings) =>
     electronAPI.ipcRenderer.invoke('storage-save-settings', settings),
   storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),

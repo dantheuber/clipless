@@ -248,6 +248,7 @@ snippets and open them in your documentation.
 - **Add tools** — Settings → Quick Clips → Tools
 - **Set hotkeys** — Settings → Hotkeys
 - **Adjust preferences** — Settings → General
+- **Optional usage counts** — Settings → General → Application → Share usage counts (off by default). Sends active days and a random installation ID to PostHog; no clipboard contents, configured tools, session recordings, or error reports. PostHog sees the connection's IP address. [What is collected and how to opt out](src/main/analytics/README.md).
 - **Auto start with system** — Settings → General (Windows &amp; macOS)
 - **Start minimized** — Settings → General (start hidden in the tray)
 

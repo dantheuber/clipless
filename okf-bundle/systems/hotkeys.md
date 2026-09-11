@@ -5,8 +5,8 @@ tags:
   - hotkeys
   - main-process
 generated:
-  by: human:dantheuber
-  at: 2026-08-23T05:47:02.151Z
+  by: okf-mcp/2.0.0
+  at: 2026-09-11T23:05:12.522Z
 ---
 
 Global hotkeys (`src/main/hotkeys/`) use Electron's `globalShortcut` and work even when Clipless is minimized. The module uses a registry/actions/manager pattern:
@@ -29,3 +29,5 @@ Defaults (verified in `src/main/storage/defaults.ts`): the hotkey system is **gl
 The registry/actions/manager split is the house pattern for main-process modules: separate low-level OS binding from action logic from coordination, exposing a singleton with a stable public API. `hotkeyManager.cleanup()` runs on `before-quit`.
 
 The OS-reserved combinations the recorder warns about (spec 15.6) are a hand-maintained per-platform list in `src/shared/osReservedShortcuts.ts`.
+
+After a successful quick-clip copy, `HotkeyActions` calls the no-argument `recordAppActivity()` hook for [opt-in usage counts](opt-in-usage-analytics.md). It sends no clip, index, hotkey binding or tool information; disabled analytics makes the hook a no-op.
