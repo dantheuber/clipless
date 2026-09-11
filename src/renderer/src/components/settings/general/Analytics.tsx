@@ -3,7 +3,7 @@ import type { AnalyticsPreference } from '../../../../../shared/types';
 import { errorText } from '../../../utils/errorText';
 import { ToggleSwitch } from '../usersettings/ToggleSwitch';
 import { Row } from './Row';
-import type { RowStatus } from './useSetting';
+import { SAVED_LABEL_MS, type RowStatus } from './useSetting';
 import styles from './General.module.css';
 
 export function Analytics() {
@@ -18,6 +18,12 @@ export function Analytics() {
       .catch(() => setUnreadable(true));
   }, []);
 
+  useEffect(() => {
+    if (status?.kind !== 'saved') return;
+    const timer = setTimeout(() => setStatus(undefined), SAVED_LABEL_MS);
+    return () => clearTimeout(timer);
+  }, [status]);
+
   const change = async (enabled: boolean) => {
     setStatus({ kind: 'saving' });
     try {
@@ -25,8 +31,7 @@ export function Analytics() {
       setStatus({ kind: 'saved', label: true });
     } catch (e) {
       // The main process drops the ID before writing, so a failed opt-out is paused in memory
-      // but the consent file still says on. Re-read so the switch shows what is on disk.
-      setPreference(await window.api.analyticsPreference().catch(() => preference));
+      // but the consent file is unchanged. Keep the previous value so the switch shows the file.
       setStatus({
         kind: 'error',
         retry: () => void change(enabled),
