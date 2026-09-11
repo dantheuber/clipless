@@ -1,29 +1,39 @@
 import { useEffect, useState } from 'react';
+import type { AnalyticsPreference } from '../../../../../shared/types';
+import { errorText } from '../../../utils/errorText';
 import { ToggleSwitch } from '../usersettings/ToggleSwitch';
 import { Row } from './Row';
+import type { RowStatus } from './useSetting';
 import styles from './General.module.css';
 
 export function Analytics() {
-  const [preference, setPreference] = useState<{ enabled: boolean; available: boolean }>();
-  const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [preference, setPreference] = useState<AnalyticsPreference>();
+  const [unreadable, setUnreadable] = useState(false);
+  const [status, setStatus] = useState<RowStatus>();
 
   useEffect(() => {
     window.api
       .analyticsPreference()
       .then(setPreference)
-      .catch(() => setFailed(true));
+      .catch(() => setUnreadable(true));
   }, []);
 
   const change = async (enabled: boolean) => {
-    setBusy(true);
-    setFailed(false);
+    setStatus({ kind: 'saving' });
     try {
       setPreference(await window.api.analyticsSetEnabled(enabled));
-    } catch {
-      setFailed(true);
-    } finally {
-      setBusy(false);
+      setStatus({ kind: 'saved', label: true });
+    } catch (e) {
+      // The main process drops the ID before writing, so a failed opt-out is paused in memory
+      // but the consent file still says on. Re-read so the switch shows what is on disk.
+      setPreference(await window.api.analyticsPreference().catch(() => preference));
+      setStatus({
+        kind: 'error',
+        retry: () => void change(enabled),
+        message: enabled
+          ? errorText(e)
+          : 'Could not save your choice. Reporting is paused now but may resume next launch.',
+      });
     }
   };
 
@@ -33,11 +43,16 @@ export function Analytics() {
         id="usageAnalytics"
         label="Share usage counts"
         description="Optional. Off by default. Applies only to this installation."
+        status={status}
       >
         <ToggleSwitch
           checked={preference?.enabled === true}
           onChange={(enabled) => void change(enabled)}
-          disabled={busy || !preference || (!preference.available && !preference.enabled)}
+          disabled={
+            status?.kind === 'saving' ||
+            !preference ||
+            (!preference.available && !preference.enabled)
+          }
           label="Share usage counts"
           testId="toggle-usageAnalytics"
         />
@@ -50,7 +65,7 @@ export function Analytics() {
       {preference && !preference.available && (
         <p className={styles.detail}>Usage reporting is unavailable in this build.</p>
       )}
-      {failed && <p role="alert">Could not read or save your usage reporting preference.</p>}
+      {unreadable && <p role="alert">Could not read your usage reporting preference.</p>}
     </div>
   );
 }

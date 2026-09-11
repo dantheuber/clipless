@@ -6,7 +6,8 @@ import w from '../shell/widgets.module.css';
 
 /**
  * Application (spec 15.4): Clips to keep, Start minimized, Start with the system (hidden on
- * Linux, where login items are not managed), Theme, Notifications, Code detection.
+ * Linux, where login items are not managed), Theme, Notifications, Code detection, Language
+ * label, Share usage counts.
  */
 export function Application() {
   const theme = useSetting('theme');

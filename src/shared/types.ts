@@ -270,6 +270,12 @@ export interface UpdateState {
   message?: string; // set when status is error
 }
 
+/** Usage reporting consent for this installation, and whether the build can report at all. */
+export interface AnalyticsPreference {
+  enabled: boolean;
+  available: boolean;
+}
+
 /**
  * What the main process answers to settings-changed. ok means the write landed and every
  * enabled shortcut registered. failed lists the accelerators the OS refused, so the

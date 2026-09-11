@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { promises as fs } from 'node:fs';
+import type { AnalyticsPreference } from '../../shared/types';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
@@ -36,7 +37,7 @@ export class UsageAnalytics {
     }
   }
 
-  async preference(): Promise<{ enabled: boolean; available: boolean }> {
+  async preference(): Promise<AnalyticsPreference> {
     await this.ready;
     return { enabled: !!this.id, available: !!this.endpoint };
   }
