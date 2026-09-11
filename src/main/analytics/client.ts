@@ -6,7 +6,10 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{1
 
 /** No event/property arguments: application data must never enter this boundary. */
 export class UsageAnalytics {
+  /** Sending ID. Cleared before an opt-out is written so a failed write never keeps sending. */
   private id: string | undefined;
+  /** Consent as last written to disk. Reported to the renderer, and unchanged by a failed write. */
+  private persisted = false;
   private ready: Promise<void>;
   private writes: Promise<void> = Promise.resolve();
   private lastDay = '';
@@ -31,6 +34,7 @@ export class UsageAnalytics {
       const state = JSON.parse(await fs.readFile(this.statePath, 'utf8'));
       if (state.enabled === true && typeof state.id === 'string' && UUID.test(state.id)) {
         this.id = state.id;
+        this.persisted = true;
       }
     } catch {
       // Missing, corrupt or unreadable consent always means off.
@@ -39,7 +43,7 @@ export class UsageAnalytics {
 
   async preference(): Promise<AnalyticsPreference> {
     await this.ready;
-    return { enabled: !!this.id, available: !!this.endpoint };
+    return { enabled: this.persisted, available: !!this.endpoint };
   }
 
   setEnabled(enabled: boolean): Promise<void> {
@@ -55,6 +59,7 @@ export class UsageAnalytics {
       await fs.writeFile(temporaryPath, JSON.stringify({ enabled, id: nextId }), { mode: 0o600 });
       await fs.rename(temporaryPath, this.statePath);
       this.id = nextId;
+      this.persisted = enabled;
     });
     this.writes = change.catch(() => {});
     return change;

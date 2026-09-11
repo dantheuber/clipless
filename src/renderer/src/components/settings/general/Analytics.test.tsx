@@ -21,13 +21,11 @@ describe('analytics consent', () => {
     expect(window.api.analyticsSetEnabled).toHaveBeenLastCalledWith(false);
   });
 
-  it('shows the switch as still on when an opt-out cannot be saved', async () => {
-    // After a failed opt-out the main process reports off even though the file still says on.
-    vi.mocked(window.api.analyticsPreference)
-      .mockResolvedValueOnce({ enabled: true, available: true })
-      .mockResolvedValue({ enabled: false, available: true });
+  it('keeps the switch on when an opt-out cannot be saved, including after a remount', async () => {
+    // After a failed opt-out the main process keeps reporting the on-disk consent, which is on.
+    vi.mocked(window.api.analyticsPreference).mockResolvedValue({ enabled: true, available: true });
     vi.mocked(window.api.analyticsSetEnabled).mockRejectedValueOnce(new Error('EROFS'));
-    render(<Analytics />);
+    const { unmount } = render(<Analytics />);
     const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
     await waitFor(() => expect(toggle).toBeChecked());
     const reads = vi.mocked(window.api.analyticsPreference).mock.calls.length;
@@ -38,6 +36,11 @@ describe('analytics consent', () => {
     expect(toggle).toBeChecked();
     expect(window.api.analyticsPreference).toHaveBeenCalledTimes(reads);
     expect(screen.queryByRole('alert')).toBeNull();
+    unmount();
+    render(<Analytics />);
+    const remounted = screen.getByRole('switch', { name: 'Share usage counts' });
+    await waitFor(() => expect(remounted).toBeEnabled());
+    expect(remounted).toBeChecked();
   });
 
   it('clears the saved label after the shared delay', async () => {

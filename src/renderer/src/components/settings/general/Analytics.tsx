@@ -30,8 +30,8 @@ export function Analytics() {
       setPreference(await window.api.analyticsSetEnabled(enabled));
       setStatus({ kind: 'saved', label: true });
     } catch (e) {
-      // The main process drops the ID before writing, so a failed opt-out is paused in memory
-      // but the consent file is unchanged. Keep the previous value so the switch shows the file.
+      // The main process drops the sending ID before writing, so a failed opt-out is paused in
+      // memory but the consent file is unchanged. Keep the previous value so the switch shows the file.
       setStatus({
         kind: 'error',
         retry: () => void change(enabled),

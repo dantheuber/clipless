@@ -118,6 +118,20 @@ describe('usage analytics privacy boundary', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
+  it('reports the on-disk consent after a failed opt-out while sending nothing', async () => {
+    const client = new UsageAnalytics(path, token, 'us', true);
+    await client.setEnabled(true);
+    const rename = vi.spyOn(fs, 'rename').mockRejectedValueOnce(new Error('EROFS'));
+    await expect(client.setEnabled(false)).rejects.toThrow('EROFS');
+    rename.mockRestore();
+    expect(await client.preference()).toEqual({ enabled: true, available: true });
+    expect(JSON.parse(await fs.readFile(path, 'utf8')).enabled).toBe(true);
+    await client.recordActivity();
+    expect(send).not.toHaveBeenCalled();
+    await client.setEnabled(false);
+    expect(await client.preference()).toEqual({ enabled: false, available: true });
+  });
+
   it('swallows network failures without retrying and stops at shutdown', async () => {
     const client = new UsageAnalytics(path, token, 'eu', true);
     await client.setEnabled(true);
