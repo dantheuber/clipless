@@ -73,12 +73,15 @@ export function AnalyticsPrompt() {
         </p>
         <p>
           Your clipboard content, tool configurations and search term details are never sent. There
-          are no screen recordings. We only count activity and how often features like search, Quick
-          Look, copying clips, templates and tool launching are used.
+          are no screen recordings.
         </p>
         <p>You can change your choice anytime in Settings → General → Privacy.</p>
         <details>
-          <summary>What is shared?</summary>
+          <summary>What is sent?</summary>
+          <p>
+            We count activity and how often features like search, Quick Look, copying clips,
+            templates and tool launching are used.
+          </p>
           <p>
             PostHog receives activity and feature counts with a random installation ID. It also sees
             the connection’s IP address.
@@ -104,7 +107,7 @@ export function AnalyticsPrompt() {
         </button>
         <button
           type="button"
-          className={styles.button}
+          className={`${styles.button} ${styles.confirmButton} ${styles.info}`}
           disabled={busy}
           onClick={() => void choose(true)}
         >

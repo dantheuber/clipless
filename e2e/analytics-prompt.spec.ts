@@ -31,6 +31,10 @@ test.describe('Analytics consent', () => {
         await expect(prompt).toContainText('100% opt-in');
         await expect(prompt).toContainText('search term details are never sent');
         await expect(prompt.getByRole('button', { name: 'No thanks' })).toBeFocused();
+        const recordingDetails = prompt.getByText(/We count activity and how often/);
+        await expect(recordingDetails).toBeHidden();
+        await prompt.getByText('What is sent?', { exact: true }).click();
+        await expect(recordingDetails).toBeVisible();
         await prompt.getByRole('button', { name: choice }).click();
         await expect(prompt).toHaveCount(0);
         await main.reload();
