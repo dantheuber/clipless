@@ -4,6 +4,8 @@ import { Footer } from '../shell/Footer';
 import { StatsProvider } from './stats';
 import { Application } from './Application';
 import { Window } from './Window';
+import { Analytics } from './Analytics';
+import { Panel } from './Row';
 import { Storage } from './Storage';
 import { Updates } from './Updates';
 import { About } from './About';
@@ -15,7 +17,7 @@ import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
 
 /**
- * General (spec 15.4): two panels side by side, three short panels across the bottom, and
+ * General (spec 15.4): Application beside Window and Privacy, three panels across the bottom, and
  * the rare data actions as footer links. Every control applies as it is changed.
  */
 export function General() {
@@ -48,7 +50,12 @@ export function General() {
       >
         <div className={styles.grid2} data-testid="general-grid">
           <Application />
-          <Window />
+          <div className={styles.windowAndPrivacy}>
+            <Window />
+            <Panel title="Privacy">
+              <Analytics />
+            </Panel>
+          </div>
         </div>
         <div className={styles.grid3}>
           <Storage />

@@ -43,7 +43,7 @@ export function Analytics() {
   };
 
   return (
-    <div>
+    <div className={styles.analytics}>
       <Row
         id="usageAnalytics"
         label="Share usage counts"

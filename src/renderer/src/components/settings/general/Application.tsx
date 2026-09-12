@@ -1,5 +1,4 @@
 import { ClipsToKeep } from './ClipsToKeep';
-import { Analytics } from './Analytics';
 import { Panel, Row, ToggleRow } from './Row';
 import { useSetting } from './useSetting';
 import w from '../shell/widgets.module.css';
@@ -61,7 +60,6 @@ export function Application() {
         description="Show the detected language tag at the left of a code clip's row."
         dimmed={codeDetection.value !== true}
       />
-      <Analytics />
     </Panel>
   );
 }

@@ -80,7 +80,7 @@ test.describe('Settings window', () => {
     await expect(settings.locator('text=Versions')).toHaveCount(0);
   });
 
-  test('General shows all five panels without scrolling at 900 x 600', async () => {
+  test('General shows all six panels and the privacy disclosure without scrolling at 900 x 600', async () => {
     const size = await app.evaluate(({ BrowserWindow }) => {
       const win = BrowserWindow.getAllWindows().find((w) => w.webContents.getURL().includes('settings.html'));
       return { min: win?.getMinimumSize(), resizable: win?.isResizable() };
@@ -91,9 +91,11 @@ test.describe('Settings window', () => {
     // window at its minimum, so the default size is set here rather than trusted
     await setSettingsSize(app, 900, 600);
     await expect.poll(() => settings.evaluate(() => window.innerWidth)).toBe(900);
-    for (const name of ['application', 'window', 'storage', 'updates', 'about']) {
+    for (const name of ['application', 'window', 'privacy', 'storage', 'updates', 'about']) {
       await expect(settings.getByTestId(`panel-${name}`)).toBeVisible();
     }
+    await expect(settings.getByTestId('toggle-usageAnalytics')).toBeInViewport();
+    await expect(settings.getByText(/PostHog sees your connection/)).toBeInViewport();
     const scrolls = await settings.getByTestId('general-grid').evaluate((grid) => {
       const pane = grid.parentElement as HTMLElement;
       return pane.scrollHeight > pane.clientHeight;

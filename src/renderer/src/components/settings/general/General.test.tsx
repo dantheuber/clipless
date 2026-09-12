@@ -66,9 +66,9 @@ afterEach(() => {
 });
 
 describe('General', () => {
-  it('shows the five panels and the footer links', async () => {
+  it('shows the six panels and the footer links', async () => {
     await mount();
-    for (const name of ['application', 'window', 'storage', 'updates', 'about']) {
+    for (const name of ['application', 'window', 'privacy', 'storage', 'updates', 'about']) {
       expect(screen.getByTestId(`panel-${name}`)).toBeInTheDocument();
     }
     expect(screen.getByTestId('footer')).toHaveTextContent('Changes apply as you make them.');
