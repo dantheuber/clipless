@@ -608,10 +608,11 @@ Regards</code></pre>
               <li>All clipboard data is encrypted at rest using OS-native encryption</li>
               <li>Clipboard data is stored locally only — no cloud sync, no remote servers</li>
               <li>
-                Optional usage counts (Settings &gt; General &gt; Application &gt; Share usage
-                counts) are off by default. When turned on, Clipless sends an active-day ping and a
-                random installation ID to PostHog; it never sends clipboard contents, configured
-                tools, session recordings or error reports. PostHog sees the connection's IP
+                Send analytics (Settings &gt; General &gt; Privacy) is off by default. Clipless
+                asks once on first launch whether to participate and remembers either choice.
+                When enabled, it sends active-day and feature-use events with a random installation
+                ID to PostHog; it never sends clipboard contents, tool configurations, search term
+                details, session recordings or error reports. PostHog sees the connection's IP
                 address. See
                 <a
                   href="https://github.com/dantheuber/clipless/blob/main/src/main/analytics/README.md"
