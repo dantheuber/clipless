@@ -75,8 +75,9 @@ export function AnalyticsPrompt() {
         <details>
           <summary>What is sent?</summary>
           <p>
-            We count activity and how often features like search, Quick Look, copying clips,
-            templates and tool launching are used.
+            We send only usage metrics: how often Clipless and its features are used. No actual
+            content is sent—no clipboard text or images, search queries, tool configurations or
+            template content.
           </p>
           <p>
             PostHog receives activity and feature counts with a random installation ID. It also sees

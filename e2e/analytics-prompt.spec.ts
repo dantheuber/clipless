@@ -30,7 +30,7 @@ test.describe('Analytics consent', () => {
         await expect(prompt).toBeVisible();
         await expect(prompt).toContainText('100% opt-in');
         await expect(prompt.getByRole('button', { name: 'No thanks' })).toBeFocused();
-        const recordingDetails = prompt.getByText(/We count activity and how often/);
+        const recordingDetails = prompt.getByText(/We send only usage metrics/);
         await expect(recordingDetails).toBeHidden();
         await prompt.getByText('What is sent?', { exact: true }).click();
         await expect(recordingDetails).toBeVisible();
