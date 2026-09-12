@@ -94,12 +94,14 @@ describe('TemplatePills', () => {
       fireEvent.click(pill);
     });
     expect(window.api.setClipboardText).toHaveBeenCalledWith('Block 1.1.1.1 now, see row one');
+    expect(window.api.analyticsFeatureUsed).toHaveBeenCalledExactlyOnceWith('template_copy');
     expect(state.toast).toHaveBeenCalledWith('Copied "IP block" to the clipboard (30 chars)', [
       'ip 1.1.1.1 (first of 2)',
     ]);
   });
 
   it('toasts the failure when the clipboard write rejects', async () => {
+    vi.mocked(window.api.analyticsFeatureUsed).mockClear();
     const api = window.api as unknown as Record<string, ReturnType<typeof vi.fn>>;
     api.setClipboardText.mockRejectedValue(new Error('nope'));
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -109,6 +111,7 @@ describe('TemplatePills', () => {
       fireEvent.click(screen.getByText('IP block'));
     });
     expect(state.toast).toHaveBeenCalledWith('Could not copy "IP block"', 'Error: nope');
+    expect(window.api.analyticsFeatureUsed).not.toHaveBeenCalled();
     errSpy.mockRestore();
   });
 

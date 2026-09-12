@@ -1,0 +1,7 @@
+.prompt {
+  margin: auto;
+}
+
+.prompt::backdrop {
+  background: var(--dimmer);
+}

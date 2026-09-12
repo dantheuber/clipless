@@ -59,6 +59,18 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('SearchBar', () => {
+  it('counts one search per opening, without sending query text or every keystroke', () => {
+    const { rerender } = render(<SearchBar />);
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'private search' } });
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'another private query' } });
+    expect(window.api.analyticsFeatureUsed).toHaveBeenCalledExactlyOnceWith('history_search');
+    state.isSearchVisible = false;
+    rerender(<SearchBar />);
+    state.isSearchVisible = true;
+    rerender(<SearchBar />);
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'new search' } });
+    expect(window.api.analyticsFeatureUsed).toHaveBeenCalledTimes(2);
+  });
   it('renders nothing while hidden', () => {
     state.isSearchVisible = false;
     const { container } = render(<SearchBar />);

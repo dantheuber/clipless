@@ -8,6 +8,7 @@ import { StatusBar } from './components/StatusBar';
 import { SearchBar } from './components/SearchBar';
 import { Tray } from './components/tray/Tray';
 import { QuickLook } from './components/quick-look/QuickLook';
+import { AnalyticsPrompt } from './components/AnalyticsPrompt';
 import styles from './App.module.css';
 
 /**
@@ -39,6 +40,7 @@ function App(): React.JSX.Element {
     <ThemeProvider>
       <ToastProvider>
         <AppContent />
+        <AnalyticsPrompt />
       </ToastProvider>
     </ThemeProvider>
   );

@@ -30,4 +30,4 @@ The registry/actions/manager split is the house pattern for main-process modules
 
 The OS-reserved combinations the recorder warns about (spec 15.6) are a hand-maintained per-platform list in `src/shared/osReservedShortcuts.ts`.
 
-After a successful quick-clip copy, `HotkeyActions` calls the no-argument `recordAppActivity()` hook for [opt-in usage counts](opt-in-usage-analytics.md). It sends no clip, index, hotkey binding or tool information; disabled analytics makes the hook a no-op.
+After a successful quick-clip copy, `HotkeyActions` calls `recordFeatureUsage('quick_clip_hotkey')` for [opt-in usage counts](opt-in-usage-analytics.md). It sends no clip, index, hotkey binding or tool information; disabled analytics makes the hook a no-op.

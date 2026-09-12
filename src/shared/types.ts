@@ -274,6 +274,8 @@ export interface UpdateState {
 export interface AnalyticsPreference {
   enabled: boolean;
   available: boolean;
+  /** No saved accept/decline choice yet. */
+  needsPrompt: boolean;
 }
 
 /**

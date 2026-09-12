@@ -95,6 +95,7 @@ describe('Tray', () => {
       'https://vt.example/2.2.2.2',
     ]);
     expect(state.toast).toHaveBeenCalledWith('Opened 3 tabs', expect.any(Array));
+    expect(window.api.analyticsFeatureUsed).toHaveBeenCalledExactlyOnceWith('tool_launch');
     await act(async () => {
       fireEvent.click(screen.getByTestId('open-all'));
     });
@@ -103,6 +104,8 @@ describe('Tray', () => {
       'https://vt.example/2.2.2.2',
       'https://sn.example/INC-1',
     ]);
+    expect(window.api.analyticsFeatureUsed).toHaveBeenCalledTimes(2);
+    expect(window.api.analyticsFeatureUsed).toHaveBeenLastCalledWith('tool_launch');
   });
 
   it('removes a value, clears everything, and dismisses the dropped notice', () => {

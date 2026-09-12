@@ -23,7 +23,11 @@ describe('analytics consent', () => {
 
   it('keeps the switch on when an opt-out cannot be saved, including after a remount', async () => {
     // After a failed opt-out the main process keeps reporting the on-disk consent, which is on.
-    vi.mocked(window.api.analyticsPreference).mockResolvedValue({ enabled: true, available: true });
+    vi.mocked(window.api.analyticsPreference).mockResolvedValue({
+      enabled: true,
+      available: true,
+      needsPrompt: false,
+    });
     vi.mocked(window.api.analyticsSetEnabled).mockRejectedValueOnce(new Error('EROFS'));
     const { unmount } = render(<Privacy />);
     const toggle = screen.getByRole('switch', { name: 'Send analytics' });

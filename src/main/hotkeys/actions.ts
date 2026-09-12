@@ -5,7 +5,7 @@ import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
 import { checkClipboardNow, setSkipNextImageChange } from '../clipboard/monitoring';
 import type { ClipItem, StoredClip } from '../../shared/types';
-import { recordAppActivity } from '../analytics';
+import { recordFeatureUsage } from '../analytics';
 
 /**
  * What the OS notification for a hotkey copy says: the clip's first line, since the window
@@ -93,7 +93,7 @@ export class HotkeyActions {
 
       // Copy the clip content with the appropriate format based on its type
       await this.copyClipToClipboard(clipToCopy);
-      recordAppActivity();
+      recordFeatureUsage('quick_clip_hotkey');
 
       console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
       showNotification('Clip copied', clipSummary(clipToCopy.clip));

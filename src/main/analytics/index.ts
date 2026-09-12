@@ -1,11 +1,16 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { join } from 'node:path';
 import { UsageAnalytics } from './client';
+import { isAnalyticsFeature, type AnalyticsFeature } from '../../shared/analytics';
 
 let analytics: UsageAnalytics | undefined;
 
 export function recordAppActivity(): void {
   void analytics?.recordActivity();
+}
+
+export function recordFeatureUsage(feature: AnalyticsFeature): void {
+  void analytics?.recordFeature(feature);
 }
 
 export function initializeAnalytics(): void {
@@ -16,6 +21,9 @@ export function initializeAnalytics(): void {
     app.isPackaged
   );
   ipcMain.handle('analytics-preference', () => analytics!.preference());
+  ipcMain.handle('analytics-feature-used', (_event, feature: unknown) => {
+    if (isAnalyticsFeature(feature)) recordFeatureUsage(feature);
+  });
   ipcMain.handle('analytics-set-enabled', async (_event, enabled: boolean) => {
     await analytics!.setEnabled(enabled);
     // Choosing to participate is itself an interaction with Clipless.

@@ -3,6 +3,7 @@ import { promises as fs } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { UsageAnalytics } from './client';
+import { ANALYTICS_FEATURES } from '../../shared/analytics';
 
 let directory: string;
 let path: string;
@@ -23,10 +24,89 @@ afterEach(async () => {
 });
 
 describe('usage analytics privacy boundary', () => {
+  it.each([true, false])(
+    'remembers the first-launch choice across restarts: %s',
+    async (enabled) => {
+      const client = new UsageAnalytics(path, token, 'us', true);
+      expect((await client.preference()).needsPrompt).toBe(true);
+      await client.setEnabled(enabled);
+      const restarted = new UsageAnalytics(path, token, 'us', true);
+      expect(await restarted.preference()).toEqual({
+        enabled,
+        available: true,
+        needsPrompt: false,
+      });
+    }
+  );
+
+  it.each([true, false])('recognizes pre-prompt stored choices: %s', async (enabled) => {
+    await fs.writeFile(
+      path,
+      JSON.stringify({ enabled, id: enabled ? '7548166e-7b14-4e0c-a1dc-7b7bc722b167' : undefined })
+    );
+    const client = new UsageAnalytics(path, token, 'us', true);
+    expect((await client.preference()).needsPrompt).toBe(false);
+  });
+
+  it('sends every feature use with only its allowlisted category, including repeat uses', async () => {
+    const client = new UsageAnalytics(path, token, 'us', true);
+    await client.setEnabled(true);
+    await client.recordActivity();
+    send.mockClear();
+    for (const feature of [...ANALYTICS_FEATURES, 'clip_copy'] as const) {
+      await Reflect.apply(client.recordFeature, client, [
+        feature,
+        { content: 'private', tool: 'secret' },
+      ]);
+    }
+    expect(send).toHaveBeenCalledTimes(7);
+    expect(
+      send.mock.calls.map(([, options]) => JSON.parse(options.body).properties.feature)
+    ).toEqual([...ANALYTICS_FEATURES, 'clip_copy']);
+    for (const [, options] of send.mock.calls) {
+      expect(JSON.parse(options.body)).toEqual({
+        api_key: token,
+        event: 'feature_used',
+        distinct_id: expect.stringMatching(/^[0-9a-f-]{36}$/),
+        properties: {
+          $process_person_profile: false,
+          $geoip_disable: true,
+          $ip: '0.0.0.0',
+          feature: expect.any(String),
+        },
+      });
+      expect(options.body).not.toContain('private');
+      expect(options.body).not.toContain('secret');
+    }
+  });
+
+  it('rejects arbitrary feature names and objects at runtime', async () => {
+    const client = new UsageAnalytics(path, token, 'us', true);
+    await client.setEnabled(true);
+    for (const value of ['private tool name', { feature: 'tool_launch', url: 'private' }, null]) {
+      await Reflect.apply(client.recordFeature, client, [value]);
+    }
+    expect(send).not.toHaveBeenCalled();
+  });
+
+  it('does not send feature events before consent, after decline, or in development', async () => {
+    const client = new UsageAnalytics(path, token, 'us', true);
+    await client.recordFeature('clip_copy');
+    await client.setEnabled(false);
+    await client.recordFeature('clip_copy');
+    const development = new UsageAnalytics(path, token, 'us', false);
+    await development.setEnabled(true);
+    await development.recordFeature('clip_copy');
+    expect(send).not.toHaveBeenCalled();
+  });
   it('sends nothing and creates no ID until explicit opt-in', async () => {
     const client = new UsageAnalytics(path, token, 'us', true);
     await client.recordActivity();
-    expect(await client.preference()).toEqual({ enabled: false, available: true });
+    expect(await client.preference()).toEqual({
+      enabled: false,
+      available: true,
+      needsPrompt: true,
+    });
     expect(send).not.toHaveBeenCalled();
     await expect(fs.readFile(path)).rejects.toThrow();
   });
@@ -124,12 +204,20 @@ describe('usage analytics privacy boundary', () => {
     const rename = vi.spyOn(fs, 'rename').mockRejectedValueOnce(new Error('EROFS'));
     await expect(client.setEnabled(false)).rejects.toThrow('EROFS');
     rename.mockRestore();
-    expect(await client.preference()).toEqual({ enabled: true, available: true });
+    expect(await client.preference()).toEqual({
+      enabled: true,
+      available: true,
+      needsPrompt: false,
+    });
     expect(JSON.parse(await fs.readFile(path, 'utf8')).enabled).toBe(true);
     await client.recordActivity();
     expect(send).not.toHaveBeenCalled();
     await client.setEnabled(false);
-    expect(await client.preference()).toEqual({ enabled: false, available: true });
+    expect(await client.preference()).toEqual({
+      enabled: false,
+      available: true,
+      needsPrompt: false,
+    });
   });
 
   it('swallows network failures without retrying and stops at shutdown', async () => {

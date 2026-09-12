@@ -1,4 +1,5 @@
 import { ElectronAPI } from '@electron-toolkit/preload';
+import type { AnalyticsFeature } from '../shared/analytics';
 import type {
   AnalyticsPreference,
   AppPathName,
@@ -54,6 +55,7 @@ declare global {
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<UserSettings>;
       analyticsPreference: () => Promise<AnalyticsPreference>;
+      analyticsFeatureUsed: (feature: AnalyticsFeature) => Promise<void>;
       analyticsSetEnabled: (enabled: boolean) => Promise<AnalyticsPreference>;
       storageSaveSettings: (settings: Partial<UserSettings>) => Promise<boolean>;
       storageGetStats: () => Promise<StorageStats>;
