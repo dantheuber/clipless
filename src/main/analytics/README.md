@@ -29,7 +29,7 @@ Preventing PostHog from seeing the originating IP would require a separately ope
 
 ## Consent and lifecycle
 
-Settings → General → Privacy → **Share usage counts** is off by default for new
+Settings → General → Privacy → **Send analytics** is off by default for new
 and existing installations. Consent is saved with the random ID in
 `<userData>/usage-analytics.json`, separate from encrypted clipboard storage and
 excluded from all backup export/import paths. Neither importing a backup nor

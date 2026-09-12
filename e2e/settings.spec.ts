@@ -95,7 +95,7 @@ test.describe('Settings window', () => {
       await expect(settings.getByTestId(`panel-${name}`)).toBeVisible();
     }
     await expect(settings.getByTestId('toggle-usageAnalytics')).toBeInViewport();
-    await expect(settings.getByText(/PostHog sees your connection/)).toBeInViewport();
+    await expect(settings.getByText(/Help improve Clipless/)).toBeInViewport();
     const scrolls = await settings.getByTestId('general-grid').evaluate((grid) => {
       const pane = grid.parentElement as HTMLElement;
       return pane.scrollHeight > pane.clientHeight;

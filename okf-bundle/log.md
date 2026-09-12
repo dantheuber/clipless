@@ -2,6 +2,7 @@
 
 ## 2026-09-12
 * **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+* **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
 
 ## 2026-09-11
 * **Update**: Updated [Global Hotkeys](/systems/hotkeys.md).

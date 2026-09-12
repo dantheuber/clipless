@@ -51,7 +51,7 @@ export function Privacy() {
       <div className={styles.analytics}>
         <Row
           id="usageAnalytics"
-          label="Share usage counts"
+          label="Send analytics"
           description="Optional. Off by default. Applies only to this installation."
           status={status}
         >
@@ -63,14 +63,13 @@ export function Privacy() {
               !preference ||
               (!preference.available && !preference.enabled)
             }
-            label="Share usage counts"
+            label="Send analytics"
             testId="toggle-usageAnalytics"
           />
         </Row>
         <p className={styles.detail}>
-          Sends active days and a random installation ID to PostHog. No clipboard content,
-          configured tools, screen recordings or error reports. PostHog sees your connection’s IP
-          address. Turning this off stops future reports and resets the ID.
+          Help improve Clipless by sharing basic usage statistics. Clipboard content and configured
+          tools are never sent.
         </p>
         {preference && !preference.available && (
           <p className={styles.detail}>Usage reporting is unavailable in this build.</p>

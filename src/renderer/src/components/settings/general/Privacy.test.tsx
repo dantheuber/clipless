@@ -8,10 +8,10 @@ afterEach(cleanup);
 describe('analytics consent', () => {
   it('explains the data sent and requires an explicit toggle to participate', async () => {
     render(<Privacy />);
-    const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
+    const toggle = screen.getByRole('switch', { name: 'Send analytics' });
     await waitFor(() => expect(toggle).toBeEnabled());
     expect(toggle).not.toBeChecked();
-    expect(screen.getByText(/PostHog sees your connection/)).toBeVisible();
+    expect(screen.getByText(/Help improve Clipless/)).toBeVisible();
     expect(window.api.analyticsSetEnabled).not.toHaveBeenCalled();
     fireEvent.click(toggle);
     await waitFor(() => expect(toggle).toBeChecked());
@@ -26,7 +26,7 @@ describe('analytics consent', () => {
     vi.mocked(window.api.analyticsPreference).mockResolvedValue({ enabled: true, available: true });
     vi.mocked(window.api.analyticsSetEnabled).mockRejectedValueOnce(new Error('EROFS'));
     const { unmount } = render(<Privacy />);
-    const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
+    const toggle = screen.getByRole('switch', { name: 'Send analytics' });
     await waitFor(() => expect(toggle).toBeChecked());
     const reads = vi.mocked(window.api.analyticsPreference).mock.calls.length;
     fireEvent.click(toggle);
@@ -38,7 +38,7 @@ describe('analytics consent', () => {
     expect(screen.queryByRole('alert')).toBeNull();
     unmount();
     render(<Privacy />);
-    const remounted = screen.getByRole('switch', { name: 'Share usage counts' });
+    const remounted = screen.getByRole('switch', { name: 'Send analytics' });
     await waitFor(() => expect(remounted).toBeEnabled());
     expect(remounted).toBeChecked();
   });
@@ -47,7 +47,7 @@ describe('analytics consent', () => {
     vi.useFakeTimers();
     try {
       render(<Privacy />);
-      const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
+      const toggle = screen.getByRole('switch', { name: 'Send analytics' });
       await act(() => vi.advanceTimersByTimeAsync(0));
       fireEvent.click(toggle);
       await act(() => vi.advanceTimersByTimeAsync(0));
