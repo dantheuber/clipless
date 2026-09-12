@@ -371,8 +371,8 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       setPinnedOnly(false);
       toast('Filter cleared', 'Quick look opened on row 1');
     }
-    setQuickLook((current) => openOn(current, first.id, 0));
-  }, [toast]);
+    openQuickLook(first.id, 0);
+  }, [toast, openQuickLook]);
 
   // open-quick-look from the main process, after any pending clipboard change has landed
   useOpenQuickLookSignal(openNewest);
