@@ -4,8 +4,7 @@ import { Footer } from '../shell/Footer';
 import { StatsProvider } from './stats';
 import { Application } from './Application';
 import { Window } from './Window';
-import { Analytics } from './Analytics';
-import { Panel } from './Row';
+import { Privacy } from './Privacy';
 import { Storage } from './Storage';
 import { Updates } from './Updates';
 import { About } from './About';
@@ -52,9 +51,7 @@ export function General() {
           <Application />
           <div className={styles.windowAndPrivacy}>
             <Window />
-            <Panel title="Privacy">
-              <Analytics />
-            </Panel>
+            <Privacy />
           </div>
         </div>
         <div className={styles.grid3}>

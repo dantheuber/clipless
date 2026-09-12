@@ -2,11 +2,15 @@ import { useEffect, useState } from 'react';
 import type { AnalyticsPreference } from '../../../../../shared/types';
 import { errorText } from '../../../utils/errorText';
 import { ToggleSwitch } from '../usersettings/ToggleSwitch';
-import { Row } from './Row';
+import { Panel, Row } from './Row';
 import { SAVED_LABEL_MS, type RowStatus } from './useSetting';
 import styles from './General.module.css';
 
-export function Analytics() {
+/**
+ * Privacy (spec 15.4): the opt-in usage reporting switch and its disclosure. The panel title is
+ * owned here so General stays a list of self-contained panels.
+ */
+export function Privacy() {
   const [preference, setPreference] = useState<AnalyticsPreference>();
   const [unreadable, setUnreadable] = useState(false);
   const [status, setStatus] = useState<RowStatus>();
@@ -43,34 +47,36 @@ export function Analytics() {
   };
 
   return (
-    <div className={styles.analytics}>
-      <Row
-        id="usageAnalytics"
-        label="Share usage counts"
-        description="Optional. Off by default. Applies only to this installation."
-        status={status}
-      >
-        <ToggleSwitch
-          checked={preference?.enabled === true}
-          onChange={(enabled) => void change(enabled)}
-          disabled={
-            status?.kind === 'saving' ||
-            !preference ||
-            (!preference.available && !preference.enabled)
-          }
+    <Panel title="Privacy">
+      <div className={styles.analytics}>
+        <Row
+          id="usageAnalytics"
           label="Share usage counts"
-          testId="toggle-usageAnalytics"
-        />
-      </Row>
-      <p className={styles.detail}>
-        Sends active days and a random installation ID to PostHog. No clipboard content, configured
-        tools, screen recordings or error reports. PostHog sees your connection’s IP address.
-        Turning this off stops future reports and resets the ID.
-      </p>
-      {preference && !preference.available && (
-        <p className={styles.detail}>Usage reporting is unavailable in this build.</p>
-      )}
-      {unreadable && <p role="alert">Could not read your usage reporting preference.</p>}
-    </div>
+          description="Optional. Off by default. Applies only to this installation."
+          status={status}
+        >
+          <ToggleSwitch
+            checked={preference?.enabled === true}
+            onChange={(enabled) => void change(enabled)}
+            disabled={
+              status?.kind === 'saving' ||
+              !preference ||
+              (!preference.available && !preference.enabled)
+            }
+            label="Share usage counts"
+            testId="toggle-usageAnalytics"
+          />
+        </Row>
+        <p className={styles.detail}>
+          Sends active days and a random installation ID to PostHog. No clipboard content,
+          configured tools, screen recordings or error reports. PostHog sees your connection’s IP
+          address. Turning this off stops future reports and resets the ID.
+        </p>
+        {preference && !preference.available && (
+          <p className={styles.detail}>Usage reporting is unavailable in this build.</p>
+        )}
+        {unreadable && <p role="alert">Could not read your usage reporting preference.</p>}
+      </div>
+    </Panel>
   );
 }

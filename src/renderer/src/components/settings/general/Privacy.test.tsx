@@ -1,13 +1,13 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { Analytics } from './Analytics';
+import { Privacy } from './Privacy';
 import { SAVED_LABEL_MS } from './useSetting';
 
 afterEach(cleanup);
 
 describe('analytics consent', () => {
   it('explains the data sent and requires an explicit toggle to participate', async () => {
-    render(<Analytics />);
+    render(<Privacy />);
     const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
     await waitFor(() => expect(toggle).toBeEnabled());
     expect(toggle).not.toBeChecked();
@@ -25,7 +25,7 @@ describe('analytics consent', () => {
     // After a failed opt-out the main process keeps reporting the on-disk consent, which is on.
     vi.mocked(window.api.analyticsPreference).mockResolvedValue({ enabled: true, available: true });
     vi.mocked(window.api.analyticsSetEnabled).mockRejectedValueOnce(new Error('EROFS'));
-    const { unmount } = render(<Analytics />);
+    const { unmount } = render(<Privacy />);
     const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
     await waitFor(() => expect(toggle).toBeChecked());
     const reads = vi.mocked(window.api.analyticsPreference).mock.calls.length;
@@ -37,7 +37,7 @@ describe('analytics consent', () => {
     expect(window.api.analyticsPreference).toHaveBeenCalledTimes(reads);
     expect(screen.queryByRole('alert')).toBeNull();
     unmount();
-    render(<Analytics />);
+    render(<Privacy />);
     const remounted = screen.getByRole('switch', { name: 'Share usage counts' });
     await waitFor(() => expect(remounted).toBeEnabled());
     expect(remounted).toBeChecked();
@@ -46,7 +46,7 @@ describe('analytics consent', () => {
   it('clears the saved label after the shared delay', async () => {
     vi.useFakeTimers();
     try {
-      render(<Analytics />);
+      render(<Privacy />);
       const toggle = screen.getByRole('switch', { name: 'Share usage counts' });
       await act(() => vi.advanceTimersByTimeAsync(0));
       fireEvent.click(toggle);
@@ -61,7 +61,7 @@ describe('analytics consent', () => {
 
   it('keeps the control disabled if reading consent fails', async () => {
     vi.mocked(window.api.analyticsPreference).mockRejectedValueOnce(new Error('unreadable'));
-    render(<Analytics />);
+    render(<Privacy />);
     expect(await screen.findByRole('alert')).toBeVisible();
     expect(screen.getByRole('switch')).toBeDisabled();
   });
