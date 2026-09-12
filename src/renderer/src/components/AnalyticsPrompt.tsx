@@ -71,10 +71,6 @@ export function AnalyticsPrompt() {
         <p>
           <b>100% opt-in.</b> Analytics is off unless you choose “Send analytics”.
         </p>
-        <p>
-          Your clipboard content, tool configurations and search term details are never sent. There
-          are no screen recordings.
-        </p>
         <p>You can change your choice anytime in Settings → General → Privacy.</p>
         <details>
           <summary>What is sent?</summary>

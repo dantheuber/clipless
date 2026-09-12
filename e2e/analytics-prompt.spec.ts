@@ -29,7 +29,6 @@ test.describe('Analytics consent', () => {
         const prompt = main.getByRole('dialog', { name: 'Help improve Clipless?' });
         await expect(prompt).toBeVisible();
         await expect(prompt).toContainText('100% opt-in');
-        await expect(prompt).toContainText('search term details are never sent');
         await expect(prompt.getByRole('button', { name: 'No thanks' })).toBeFocused();
         const recordingDetails = prompt.getByText(/We count activity and how often/);
         await expect(recordingDetails).toBeHidden();

@@ -40,7 +40,6 @@ describe('first-launch analytics choice', () => {
     render(<AnalyticsPrompt />);
     const dialog = await screen.findByRole('dialog');
     expect(dialog).toHaveTextContent('100% opt-in');
-    expect(dialog).toHaveTextContent('tool configurations and search term details are never sent');
     expect(window.api.analyticsSetEnabled).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: label }));
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

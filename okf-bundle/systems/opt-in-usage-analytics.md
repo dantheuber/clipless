@@ -31,4 +31,4 @@ The first main-window load of a configured packaged build prompts for opt-in. Ac
 
 Feature categories are quick_look (open action), history_search (first query input per search-bar opening), clip_copy (successful window copy), quick_clip_hotkey (successful hotkey copy), template_copy (successful output copy) and tool_launch (one successful launch action, not one per tab). No names, queries, URLs, clip data or configuration are sent. Use feature_used broken down by feature with unique users for adoption and total events for frequency. Feature usage also contributes to the daily activity count.
 
-The main-window consent prompt keeps the opt-in explanation and sensitive-data exclusions visible. Recording specifics sit inside the collapsed What is sent? disclosure. Send analytics uses the shared primary/info confirmation styling; No thanks remains available and initially focused.
+The main-window consent prompt keeps the opt-in explanation visible. Recording specifics sit inside the collapsed What is sent? disclosure. Send analytics uses the shared primary/info confirmation styling; No thanks remains available and initially focused.
