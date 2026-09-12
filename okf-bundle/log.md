@@ -1,5 +1,18 @@
 # Update Log
 
+## 2026-09-12
+* **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+* **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+* **Update**: Updated [Global Hotkeys](/systems/hotkeys.md).
+* **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+* **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+* **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+
+## 2026-09-11
+* **Update**: Updated [Global Hotkeys](/systems/hotkeys.md).
+* **Update**: Updated [Secure Storage](/systems/secure-storage.md).
+* **Creation**: Created [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
+
 ## 2026-08-24
 * Record the prose-as-python false positive and the showLanguageLabel mitigation
 

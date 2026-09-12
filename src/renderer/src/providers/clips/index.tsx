@@ -1,3 +1,4 @@
+import { recordFeatureUsage } from '../../utils/analytics';
 import {
   createContext,
   useContext,
@@ -192,7 +193,10 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
   const copyClipToClipboard = useCallback(
     async (index: number): Promise<void> => {
       const copied = await writeClipToClipboard(index);
-      if (copied) toast(`Copied clip ${index + 1} to the clipboard`);
+      if (copied) {
+        recordFeatureUsage('clip_copy');
+        toast(`Copied clip ${index + 1} to the clipboard`);
+      }
     },
     [writeClipToClipboard, toast]
   );
@@ -318,6 +322,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     setFocusRequest((request) => ({ index, seq: (request?.seq ?? 0) + 1 }));
   }, []);
   const openQuickLook = useCallback((clipId: string, returnFocusIndex: number | null) => {
+    recordFeatureUsage('quick_look');
     setQuickLook((current) => openOn(current, clipId, returnFocusIndex));
   }, []);
   const closeQuickLook = useCallback(() => {
@@ -366,8 +371,8 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       setPinnedOnly(false);
       toast('Filter cleared', 'Quick look opened on row 1');
     }
-    setQuickLook((current) => openOn(current, first.id, 0));
-  }, [toast]);
+    openQuickLook(first.id, 0);
+  }, [toast, openQuickLook]);
 
   // open-quick-look from the main process, after any pending clipboard change has landed
   useOpenQuickLookSignal(openNewest);

@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import type { ScanResult, Template } from '../../../shared/types';
 import { listTokens, templateReadiness, type TemplateReadiness } from '../../../shared/readiness';
 import { generateTextFromTemplate } from '../../../shared/templates';
+import { recordFeatureUsage } from '../utils/analytics';
 import { clipText, useClipsData, useClipsPins } from '../providers/clips';
 import { useScanIndex } from '../providers/scan';
 import { useToast } from './Toast';
@@ -47,6 +48,7 @@ export function useTemplatePills(openClipScan?: ScanResult | null): {
       const text = generateTextFromTemplate(template, clips.map(clipText), readiness.values);
       try {
         await window.api.setClipboardText(text);
+        recordFeatureUsage('template_copy');
         toast(
           `Copied "${template.name}" to the clipboard (${text.length} chars)`,
           usedValues(readiness)

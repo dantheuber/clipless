@@ -5,6 +5,7 @@ import { useScanIndex } from '../../providers/scan';
 import { useToast, type ToastFn } from '../Toast';
 import { NARROW_WINDOW, SHORT_WINDOW, useMediaQuery } from '../../hooks/useMediaQuery';
 import { useToolUrls } from './useToolUrls';
+import { recordFeatureUsage } from '../../utils/analytics';
 import { TrayGroup } from './TrayGroup';
 import { TrayFooter } from './TrayFooter';
 import styles from './Tray.module.css';
@@ -19,6 +20,7 @@ export async function openTabs(urls: string[], toast: ToastFn): Promise<void> {
   if (urls.length === 0) return;
   try {
     const opened = await window.api.openExternalUrls(urls);
+    if (opened > 0) recordFeatureUsage('tool_launch');
     if (opened < urls.length) {
       toast(
         `Opened ${opened} of ${tabCount(urls.length)}; only http and https links can open`,

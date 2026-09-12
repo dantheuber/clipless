@@ -20,6 +20,15 @@ Object.defineProperty(window, 'matchMedia', {
 const createMockApi = () => ({
   platform: 'win32' as NodeJS.Platform,
   arch: 'x64',
+  analyticsPreference: vi
+    .fn()
+    .mockResolvedValue({ enabled: false, available: true, needsPrompt: false }),
+  analyticsFeatureUsed: vi.fn().mockResolvedValue(undefined),
+  analyticsSetEnabled: vi.fn().mockImplementation(async (enabled: boolean) => ({
+    enabled,
+    available: true,
+    needsPrompt: false,
+  })),
   storageGetSettings: vi.fn().mockResolvedValue({
     maxClips: 100,
     startMinimized: false,

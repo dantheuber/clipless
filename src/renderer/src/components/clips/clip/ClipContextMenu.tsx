@@ -8,6 +8,7 @@ import { hasContent } from '../../../providers/clips/quickLook';
 import { useScanIndex } from '../../../providers/scan';
 import { useToast } from '../../Toast';
 import { extractTemplateTokens, generateTextFromTemplate } from '../../../../../shared/templates';
+import { recordFeatureUsage } from '../../../utils/analytics';
 import styles from './ClipContextMenu.module.css';
 
 interface ClipContextMenuProps {
@@ -147,6 +148,7 @@ export function ClipContextMenu({ index, x, y, onClose }: ClipContextMenuProps) 
     onClose();
     try {
       await window.api.setClipboardText(text);
+      recordFeatureUsage('template_copy');
       toast(`Copied "${name}" to the clipboard (${text.length} chars)`, text.split('\n'));
     } catch (error) {
       console.error('Failed to copy template text:', error);

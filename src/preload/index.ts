@@ -1,4 +1,5 @@
 import { contextBridge } from 'electron';
+import type { AnalyticsFeature } from '../shared/analytics';
 import { electronAPI } from '@electron-toolkit/preload';
 import type {
   BookmarkData,
@@ -91,6 +92,11 @@ const api = {
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
     electronAPI.ipcRenderer.invoke('storage-save-clips', clips, lockedIndices),
   storageGetSettings: () => electronAPI.ipcRenderer.invoke('storage-get-settings'),
+  analyticsPreference: () => electronAPI.ipcRenderer.invoke('analytics-preference'),
+  analyticsFeatureUsed: (feature: AnalyticsFeature) =>
+    electronAPI.ipcRenderer.invoke('analytics-feature-used', feature),
+  analyticsSetEnabled: (enabled: boolean) =>
+    electronAPI.ipcRenderer.invoke('analytics-set-enabled', enabled),
   storageSaveSettings: (settings: UserSettings) =>
     electronAPI.ipcRenderer.invoke('storage-save-settings', settings),
   storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),

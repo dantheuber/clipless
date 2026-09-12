@@ -7,14 +7,14 @@ tags:
   - main-process
 status: stable
 generated:
-  by: claude-code/fable-5
-  at: 2026-08-23T16:44:37.570Z
+  by: okf-mcp/2.0.0
+  at: 2026-09-11T23:05:12.504Z
 verified:
-  by: claude-code/fable-5
-  at: 2026-08-23T14:00:00Z
+  - by: claude-code/fable-5
+    at: 2026-08-23T14:00:00Z
 ---
 
-`SecureStorage` (singleton in `src/main/storage/index.ts`) persists all app data encrypted with Electron's `safeStorage` API -- DPAPI on Windows, Keychain on macOS, Secret Service/libsecret on Linux. No key management in app code; keys belong to the OS user account.
+`SecureStorage` (singleton in `src/main/storage/index.ts`) persists clipboard content and configuration encrypted with Electron's `safeStorage` API -- DPAPI on Windows, Keychain on macOS, Secret Service/libsecret on Linux. No key management in app code; keys belong to the OS user account.
 
 Data lives in `<userData>/clipless-data/`, split into domain-specific files (see [Domain-split storage decision](../decisions/domain-split-storage.md)):
 
@@ -32,3 +32,5 @@ Behaviors verified in source (`file-operations.ts`, `index.ts`):
 - Internal JSON is compact (no pretty-printing) to minimize encrypted payload; user-facing export IS pretty-printed.
 - If `safeStorage.isEncryptionAvailable()` is false, background load stops and the app keeps default in-memory data -- nothing persists and the only signal is a console warning; **the user is not notified**. The test-only `CLIPLESS_PLAINTEXT_STORAGE=1` switch (Linux only) bypasses encryption for the e2e suites, see [E2E on Linux](../gotchas/e2e-on-linux-playwright-forces-the-basic-password-store.md).
 - Export/import round-trips all domains as unencrypted JSON for backup.
+
+[Usage analytics](opt-in-usage-analytics.md) stores consent and a random installation ID separately in `<userData>/usage-analytics.json`. That file is not managed by SecureStorage and is excluded from backups/imports; it contains no clipboard content or tool settings.

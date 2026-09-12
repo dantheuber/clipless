@@ -1,5 +1,5 @@
 /*
- * General (spec 15.4): Application and Window side by side, Storage, Updates and About as
+ * General (spec 15.4): Application beside Window and Privacy, Storage, Updates and About as
  * three short panels across the bottom. Nothing scrolls at 900 x 600; below 760 wide the
  * grid collapses to one column and scrolls inside the pane.
  */
@@ -15,6 +15,17 @@
   grid-template-columns: 1.3fr 1fr 1fr;
   gap: 10px;
   margin-top: 10px;
+}
+
+.windowAndPrivacy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.analytics p {
+  margin: 6px 0;
 }
 
 @media (max-width: 759px) {

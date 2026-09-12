@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import { recordFeatureUsage } from '../utils/analytics';
 import { useClipsData, useClipsMeta, useClipsPins, useQuickLook } from '../providers/clips';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import classNames from 'classnames';
@@ -18,8 +19,10 @@ export const SearchBar: React.FC = () => {
   const { pins } = useClipsPins();
   const { requestRowFocus } = useQuickLook();
   const inputRef = useRef<HTMLInputElement>(null);
+  const countedSearch = useRef(false);
 
   useEffect(() => {
+    if (!isSearchVisible) countedSearch.current = false;
     if (isSearchVisible && inputRef.current) {
       inputRef.current.focus();
     }
@@ -66,7 +69,13 @@ export const SearchBar: React.FC = () => {
         className={styles.searchInput}
         placeholder="Filter clips"
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={(e) => {
+          if (e.target.value.trim() && !countedSearch.current) {
+            countedSearch.current = true;
+            recordFeatureUsage('history_search');
+          }
+          setSearchTerm(e.target.value);
+        }}
         onKeyDown={handleKeyDown}
         aria-label="Filter clips"
       />
