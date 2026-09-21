@@ -7,4 +7,17 @@ describe('errorText', () => {
     expect(errorText('plain')).toBe('plain');
     expect(errorText(42)).toBe('42');
   });
+
+  it("strips Electron's wrapper from a rejected IPC handler", () => {
+    expect(
+      errorText(
+        new Error(
+          "Error invoking remote method 'storage-save-clips': Error: Storage could not be loaded: no keystore"
+        )
+      )
+    ).toBe('Storage could not be loaded: no keystore');
+    expect(errorText(new Error("Error invoking remote method 'x': ENOSPC: no space left"))).toBe(
+      'ENOSPC: no space left'
+    );
+  });
 });
