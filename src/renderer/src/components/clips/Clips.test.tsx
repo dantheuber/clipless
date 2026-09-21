@@ -19,6 +19,7 @@ const { virtual, state } = vi.hoisted(() => ({
     setIsSearchVisible: vi.fn(),
     focusRequest: null as { index: number; seq: number } | null,
     loadError: null as { message: string; recoverable: boolean } | null,
+    saveError: null as { source: 'clips' | 'settings'; message: string } | null,
   },
 }));
 
@@ -65,6 +66,7 @@ vi.mock('../../providers/clips', () => ({
     isSearchVisible: state.isSearchVisible,
     setIsSearchVisible: state.setIsSearchVisible,
     loadError: state.loadError,
+    saveError: state.saveError,
   }),
   useQuickLook: () => ({ focusRequest: state.focusRequest }),
 }));
@@ -94,6 +96,7 @@ beforeEach(() => {
   state.isSearchVisible = false;
   state.focusRequest = null;
   state.loadError = null;
+  state.saveError = null;
 });
 
 afterEach(() => {
@@ -236,5 +239,42 @@ describe('Clips load failure', () => {
     expect(banner).toHaveTextContent(/Restart Clipless to try again/);
     expect(banner).not.toHaveTextContent(/keystore/);
     expect(banner).not.toHaveTextContent(/clear all data/);
+  });
+});
+
+describe('Clips save failure', () => {
+  it('shows a banner with the reason for as long as saves keep failing', () => {
+    state.saveError = { source: 'clips', message: 'Storage could not be loaded' };
+    const { rerender } = render(<Clips />);
+    const banner = screen.getByTestId('save-failed-banner');
+    expect(banner).toHaveTextContent(/save your clips/i);
+    expect(banner).toHaveTextContent(/Storage could not be loaded/);
+    // Nothing is disabled or dropped: the list is still there and still the truth
+    expect(banner).not.toHaveTextContent(/Saving is paused/);
+    expect(screen.getByTestId('row-0')).toBeInTheDocument();
+
+    state.saveError = null;
+    rerender(<Clips />);
+    expect(screen.queryByTestId('save-failed-banner')).toBeNull();
+  });
+
+  it('says the clip limit is unsaved, not the clips, when only the settings save fails', () => {
+    state.saveError = { source: 'settings', message: 'no disk' };
+    render(<Clips />);
+    const banner = screen.getByTestId('save-failed-banner');
+    expect(banner).toHaveTextContent(/save your settings/i);
+    expect(banner).toHaveTextContent(/clip limit/i);
+    expect(banner).toHaveTextContent(/no disk/);
+    // The clips are on disk: no clip-loss warning and no advice to copy them elsewhere
+    expect(banner).not.toHaveTextContent(/save your clips/i);
+    expect(banner).not.toHaveTextContent(/lose them/);
+    expect(banner).not.toHaveTextContent(/Copy anything/);
+  });
+
+  it('shows the load banner alone while the history is unreadable', () => {
+    state.loadError = { message: 'Error while decrypting', recoverable: false };
+    render(<Clips />);
+    expect(screen.getByTestId('load-failed-banner')).toBeInTheDocument();
+    expect(screen.queryByTestId('save-failed-banner')).toBeNull();
   });
 });

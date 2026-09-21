@@ -3,7 +3,7 @@ import { render, act, cleanup } from '@testing-library/react';
 import { useState } from 'react';
 import type { StoredClip, StoredClipsSnapshot } from '../../../../shared/types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
-import { ClipItem, ClipsLoadError } from './types';
+import { ClipItem, ClipsLoadError, ClipsSaveError } from './types';
 import { updateClipsLength } from './utils';
 import { useClipsStorage } from './storage';
 
@@ -37,12 +37,14 @@ let observed: {
   maxClips: number;
   isInitiallyLoading: boolean;
   loadError: ClipsLoadError | null;
+  saveError: ClipsSaveError | null;
 } = {
   clips: [],
   lockedClips: {},
   maxClips: DEFAULT_MAX_CLIPS,
   isInitiallyLoading: true,
   loadError: null,
+  saveError: null,
 };
 
 function Probe() {
@@ -50,7 +52,7 @@ function Probe() {
   const [lockedClips, setLockedClips] = useState<Record<number, boolean>>({});
   const [maxClips, setMaxClips] = useState(DEFAULT_MAX_CLIPS);
   const [isInitiallyLoading, setIsInitiallyLoading] = useState(true);
-  const { loadError } = useClipsStorage(
+  const { loadError, saveError } = useClipsStorage(
     clips,
     lockedClips,
     maxClips,
@@ -60,7 +62,7 @@ function Probe() {
     setMaxClips,
     setIsInitiallyLoading
   );
-  observed = { clips, lockedClips, maxClips, isInitiallyLoading, loadError };
+  observed = { clips, lockedClips, maxClips, isInitiallyLoading, loadError, saveError };
   return null;
 }
 
@@ -320,5 +322,89 @@ describe('useClipsStorage save failures', () => {
 
     expect(error).toHaveBeenCalledWith('Failed to save clips to storage:', expect.any(Error));
     expect(error).toHaveBeenCalledWith('Failed to save settings to storage:', expect.any(Error));
+  });
+
+  it('reports the reason a clip save was refused', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'kept')]));
+    api().storageSaveClips.mockRejectedValue(new Error('Storage could not be loaded'));
+    mount();
+    await settle();
+
+    expect(observed.saveError).toEqual({ source: 'clips', message: 'Storage could not be loaded' });
+  });
+
+  it('reports the reason without the wrapper a rejected IPC handler arrives in', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'kept')]));
+    // The main-process wrapper rethrows the storage error and Electron wraps it on the way
+    // over; only the storage error's own words belong in the banner
+    api().storageSaveClips.mockRejectedValue(
+      new Error(
+        "Error invoking remote method 'storage-save-clips': Error: ENOSPC: no space left on device"
+      )
+    );
+    mount();
+    await settle();
+
+    expect(observed.saveError).toEqual({
+      source: 'clips',
+      message: 'ENOSPC: no space left on device',
+    });
+  });
+
+  it('reports the reason a settings save failed', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'kept')]));
+    api().storageSaveSettings.mockRejectedValue(new Error('no disk'));
+    mount();
+    await settle();
+
+    expect(observed.saveError).toEqual({ source: 'settings', message: 'no disk' });
+  });
+
+  it('keeps saving and clears the report once a save succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'kept')]));
+    api().storageSaveClips.mockRejectedValue(new Error('Storage could not be loaded'));
+    mount();
+    await settle();
+    expect(observed.saveError).toEqual({ source: 'clips', message: 'Storage could not be loaded' });
+    const refused = api().storageSaveClips.mock.calls.length;
+
+    // The in-memory list is still the truth, so the next change is saved as usual
+    api().storageSaveClips.mockResolvedValue(true);
+    await act(async () => {
+      settingsUpdated?.({ maxClips: DEFAULT_MAX_CLIPS - 1 });
+    });
+    await settle();
+
+    expect(api().storageSaveClips.mock.calls.length).toBeGreaterThan(refused);
+    expect(observed.saveError).toBeNull();
+  });
+
+  it('leaves a failed clip save reported when only the settings save succeeds', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'kept')]));
+    api().storageSaveClips.mockRejectedValue(new Error('Storage could not be loaded'));
+    mount();
+    await settle();
+
+    await act(async () => {
+      settingsUpdated?.({ maxClips: DEFAULT_MAX_CLIPS - 1 });
+    });
+    await settle();
+
+    expect(api().storageSaveSettings).toHaveBeenCalled();
+    expect(observed.saveError).toEqual({ source: 'clips', message: 'Storage could not be loaded' });
+  });
+
+  it('never reports a save failure while the history is unreadable', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    api().storageGetClipsSnapshot.mockResolvedValue(failed());
+    mount();
+    await settle();
+
+    expect(observed.saveError).toBeNull();
   });
 });

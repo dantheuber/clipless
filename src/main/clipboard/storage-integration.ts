@@ -15,6 +15,9 @@ export const getClipsSnapshot = async (): Promise<StoredClipsSnapshot> => {
   }
 };
 
+// A refused save is logged and rethrown, like exportData and importData: the handler then
+// rejects and the renderer gets the reason, which is what its save-failed banner shows.
+// A swallowed `false` would carry no reason and the window would look healthy.
 export const saveClips = async (
   clips: ClipItem[],
   lockedIndices: Record<number, boolean>
@@ -24,7 +27,7 @@ export const saveClips = async (
     return true;
   } catch (error) {
     console.error('Failed to save clips to storage:', error);
-    return false;
+    throw error;
   }
 };
 
@@ -44,7 +47,7 @@ export const saveSettings = async (settings: UserSettings): Promise<boolean> => 
     return true;
   } catch (error) {
     console.error('Failed to save settings to storage:', error);
-    return false;
+    throw error;
   }
 };
 

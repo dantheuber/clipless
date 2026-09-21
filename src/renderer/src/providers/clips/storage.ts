@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ClipItem, ClipsLoadError } from './types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ClipItem, ClipsLoadError, ClipsSaveError } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { shrinkClips, updateClipsLength } from './utils';
 import { errorText } from '../../utils/errorText';
@@ -10,6 +10,10 @@ import { UserSettings, StoredClip } from '../../../../shared/types';
  *
  * Returns `loadError`, the reason the stored history could not be read, or null. While it
  * is set the list shows a banner and saving stays off for the rest of the session.
+ *
+ * Returns `saveError`, which write is still being refused and why, or null. Unlike a failed
+ * load a failed save changes nothing: the in-memory list is still the truth, so the debounced
+ * saves keep running and the next one that succeeds clears it.
  */
 export const useClipsStorage = (
   clips: ClipItem[],
@@ -20,8 +24,28 @@ export const useClipsStorage = (
   setLockedClips: React.Dispatch<React.SetStateAction<Record<number, boolean>>>,
   setMaxClips: React.Dispatch<React.SetStateAction<number>>,
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
-): { loadError: ClipsLoadError | null } => {
+): { loadError: ClipsLoadError | null; saveError: ClipsSaveError | null } => {
   const [loadError, setLoadError] = useState<ClipsLoadError | null>(null);
+
+  // The two save paths fail independently, so each reports its own outcome and the list
+  // shows the clip history first: a settings write that lands does not imply the clip
+  // history did too, and a lost history matters more than a lost clip limit.
+  const [saveFailures, setSaveFailures] = useState<{
+    clips: string | null;
+    settings: string | null;
+  }>({ clips: null, settings: null });
+  const reportSave = useCallback((source: 'clips' | 'settings', message: string | null) => {
+    setSaveFailures((current) =>
+      current[source] === message ? current : { ...current, [source]: message }
+    );
+  }, []);
+  const saveError = useMemo<ClipsSaveError | null>(() => {
+    if (saveFailures.clips !== null) return { source: 'clips', message: saveFailures.clips };
+    if (saveFailures.settings !== null) {
+      return { source: 'settings', message: saveFailures.settings };
+    }
+    return null;
+  }, [saveFailures]);
 
   // Shared function to load all stored data (clips + settings).
   // Saving stays disabled (isInitiallyLoading) until this has applied a successfully loaded
@@ -151,15 +175,18 @@ export const useClipsStorage = (
         // Save all clips, including empty ones to preserve array structure
         // Filter will be done on the storage side if needed
         await window.api.storageSaveClips(clips, lockedClips);
+        reportSave('clips', null);
       } catch (error) {
         console.error('Failed to save clips to storage:', error);
+        // Nothing is dropped and the next change retries; the list says so meanwhile
+        reportSave('clips', errorText(error));
       }
     };
 
     // Debounce saves to avoid excessive writes
     const timeoutId = setTimeout(saveClipsToStorage, 1000);
     return () => clearTimeout(timeoutId);
-  }, [clips, lockedClips, isInitiallyLoading]);
+  }, [clips, lockedClips, isInitiallyLoading, reportSave]);
 
   // Save settings whenever maxClips changes
   useEffect(() => {
@@ -171,15 +198,17 @@ export const useClipsStorage = (
 
       try {
         await window.api.storageSaveSettings({ maxClips });
+        reportSave('settings', null);
       } catch (error) {
         console.error('Failed to save settings to storage:', error);
+        reportSave('settings', errorText(error));
       }
     };
 
     // Debounce saves
     const timeoutId = setTimeout(saveSettingsToStorage, 500);
     return () => clearTimeout(timeoutId);
-  }, [maxClips, isInitiallyLoading]);
+  }, [maxClips, isInitiallyLoading, reportSave]);
 
-  return { loadError };
+  return { loadError, saveError };
 };
