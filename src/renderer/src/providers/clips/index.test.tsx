@@ -24,7 +24,9 @@ function Probe() {
       <div data-testid="load-error">
         {loadError === null ? 'none' : `${loadError.recoverable}:${loadError.message}`}
       </div>
-      <div data-testid="save-error">{saveError ?? 'no save error'}</div>
+      <div data-testid="save-error">
+        {saveError === null ? 'no save error' : `${saveError.source}:${saveError.message}`}
+      </div>
     </>
   );
 }
@@ -148,7 +150,7 @@ describe('ClipsProvider save error', () => {
     mountWithToastSpy();
     await settle();
 
-    expect(screen.getByTestId('save-error')).toHaveTextContent(SAVE_REFUSED);
+    expect(screen.getByTestId('save-error')).toHaveTextContent(`clips:${SAVE_REFUSED}`);
     expect(toast).toHaveBeenCalledTimes(1);
     expect(toast).toHaveBeenCalledWith(expect.stringMatching(/could not be saved/i), SAVE_REFUSED);
 
@@ -173,7 +175,7 @@ describe('ClipsProvider save error', () => {
     api().storageSaveClips.mockRejectedValue(new Error('no disk'));
     await changeLimit(30);
 
-    expect(screen.getByTestId('save-error')).toHaveTextContent('no disk');
+    expect(screen.getByTestId('save-error')).toHaveTextContent('clips:no disk');
     expect(toast).toHaveBeenCalledTimes(2);
   });
 

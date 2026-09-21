@@ -51,9 +51,16 @@ export type ClipsMetaContextType = {
   hideSearch: () => void;
   /** Why the stored history could not be read, or null; while set, saving stays off */
   loadError: ClipsLoadError | null;
-  /** Why the last save was refused, or null; saving keeps retrying while it is set */
-  saveError: string | null;
+  /** The save still being refused and why, or null */
+  saveError: ClipsSaveError | null;
 };
+
+/**
+ * A refused save as the list reports it. `source` says which file was refused: the clip
+ * history, which is retried on every change and is lost on restart until a save lands, or
+ * the settings file, which holds only the clip limit and is retried when the limit changes.
+ */
+export type ClipsSaveError = { source: 'clips' | 'settings'; message: string };
 
 /**
  * A failed history load as the list reports it. `recoverable` is true when a restart may

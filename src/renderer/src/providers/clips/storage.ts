@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ClipItem, ClipsLoadError } from './types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ClipItem, ClipsLoadError, ClipsSaveError } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
 import { shrinkClips, updateClipsLength } from './utils';
 import { errorText } from '../../utils/errorText';
@@ -11,8 +11,8 @@ import { UserSettings, StoredClip } from '../../../../shared/types';
  * Returns `loadError`, the reason the stored history could not be read, or null. While it
  * is set the list shows a banner and saving stays off for the rest of the session.
  *
- * Returns `saveError`, the reason the last write was refused, or null. Unlike a failed load
- * a failed save changes nothing: the in-memory list is still the truth, so the debounced
+ * Returns `saveError`, which write is still being refused and why, or null. Unlike a failed
+ * load a failed save changes nothing: the in-memory list is still the truth, so the debounced
  * saves keep running and the next one that succeeds clears it.
  */
 export const useClipsStorage = (
@@ -24,21 +24,28 @@ export const useClipsStorage = (
   setLockedClips: React.Dispatch<React.SetStateAction<Record<number, boolean>>>,
   setMaxClips: React.Dispatch<React.SetStateAction<number>>,
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
-): { loadError: ClipsLoadError | null; saveError: string | null } => {
+): { loadError: ClipsLoadError | null; saveError: ClipsSaveError | null } => {
   const [loadError, setLoadError] = useState<ClipsLoadError | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
 
   // The two save paths fail independently, so each reports its own outcome and the list
-  // shows the first one still failing: a settings write that lands does not imply the
-  // clip history did too.
-  const saveFailures = useRef<{ clips: string | null; settings: string | null }>({
-    clips: null,
-    settings: null,
-  });
+  // shows the clip history first: a settings write that lands does not imply the clip
+  // history did too, and a lost history matters more than a lost clip limit.
+  const [saveFailures, setSaveFailures] = useState<{
+    clips: string | null;
+    settings: string | null;
+  }>({ clips: null, settings: null });
   const reportSave = useCallback((source: 'clips' | 'settings', message: string | null) => {
-    saveFailures.current = { ...saveFailures.current, [source]: message };
-    setSaveError(saveFailures.current.clips ?? saveFailures.current.settings);
+    setSaveFailures((current) =>
+      current[source] === message ? current : { ...current, [source]: message }
+    );
   }, []);
+  const saveError = useMemo<ClipsSaveError | null>(() => {
+    if (saveFailures.clips !== null) return { source: 'clips', message: saveFailures.clips };
+    if (saveFailures.settings !== null) {
+      return { source: 'settings', message: saveFailures.settings };
+    }
+    return null;
+  }, [saveFailures]);
 
   // Shared function to load all stored data (clips + settings).
   // Saving stays disabled (isInitiallyLoading) until this has applied a successfully loaded

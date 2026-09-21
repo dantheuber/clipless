@@ -174,7 +174,10 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     }
     if (saveErrorNotified.current) return;
     saveErrorNotified.current = true;
-    toast('Clips could not be saved', saveError);
+    toast(
+      saveError.source === 'clips' ? 'Clips could not be saved' : 'Settings could not be saved',
+      saveError.message
+    );
   }, [saveError, toast]);
 
   // Use state management hook for clip operations

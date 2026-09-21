@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useClipsData, useClipsMeta, useQuickLook } from '../../providers/clips';
-import type { ClipsLoadError } from '../../providers/clips/types';
+import type { ClipsLoadError, ClipsSaveError } from '../../providers/clips/types';
 import { Clip } from './clip';
 import { SEARCH_INPUT_ID } from '../SearchBar';
 import styles from './Clips.module.css';
@@ -142,6 +142,11 @@ const SAVE_FAILED_KEPT = 'Every clip is still in the list, and Clipless keeps tr
 const SAVE_FAILED_RISK = 'Until a save lands, a restart will lose them—locked clips included.';
 const SAVE_FAILED_ADVICE =
   'Copy anything you need elsewhere, and check disk space and permissions.';
+const SETTINGS_SAVE_FAILED_TITLE = "Couldn't save your settings";
+const SETTINGS_SAVE_FAILED_KEPT = 'Your clips are saved. Only the clip limit is not.';
+const SETTINGS_SAVE_FAILED_RISK =
+  'The limit may go back to its old value after a restart. Changing it tries the save again.';
+const SETTINGS_SAVE_FAILED_ADVICE = 'Check disk space and permissions.';
 
 /**
  * Picks which storage banner the list shows, if any. An unreadable history takes precedence:
@@ -152,13 +157,13 @@ function StorageBanner({
   saveError,
 }: {
   loadError: ClipsLoadError | null;
-  saveError: string | null;
+  saveError: ClipsSaveError | null;
 }): React.JSX.Element | null {
   if (loadError !== null) {
     return <LoadFailedBanner error={loadError} />;
   }
   if (saveError !== null) {
-    return <SaveFailedBanner reason={saveError} />;
+    return <SaveFailedBanner error={saveError} />;
   }
   return null;
 }
@@ -192,18 +197,33 @@ function StorageFailedBanner({
 }
 
 /**
- * Shown above the list for as long as writes keep being refused. A toast announces the
- * first failure, but the debounced save retries on every change, so the condition can last
- * for hours: the banner is what still says so when the toast has gone. Nothing is paused
- * or dropped: the list in the window is the truth until a save lands.
+ * Shown above the list for as long as a write keeps being refused. A toast announces the
+ * first failure, but the condition can last for hours: the banner is what still says so
+ * when the toast has gone. Nothing is paused or dropped: the list in the window is the
+ * truth until a save lands.
+ *
+ * The copy follows the file that was refused. The clip history is retried on every change
+ * and a restart loses it until a save lands, so that banner warns of clip loss. The
+ * settings file holds only the clip limit and is retried when the limit changes, so that
+ * banner says exactly that and does not claim the clips are at risk: they are on disk.
  */
-function SaveFailedBanner({ reason }: { reason: string }): React.JSX.Element {
+function SaveFailedBanner({ error }: { error: ClipsSaveError }): React.JSX.Element {
+  if (error.source === 'settings') {
+    return (
+      <StorageFailedBanner
+        testId="save-failed-banner"
+        title={SETTINGS_SAVE_FAILED_TITLE}
+        lines={[SETTINGS_SAVE_FAILED_KEPT, SETTINGS_SAVE_FAILED_RISK, SETTINGS_SAVE_FAILED_ADVICE]}
+        reason={error.message}
+      />
+    );
+  }
   return (
     <StorageFailedBanner
       testId="save-failed-banner"
       title={SAVE_FAILED_TITLE}
       lines={[SAVE_FAILED_KEPT, SAVE_FAILED_RISK, SAVE_FAILED_ADVICE]}
-      reason={reason}
+      reason={error.message}
     />
   );
 }

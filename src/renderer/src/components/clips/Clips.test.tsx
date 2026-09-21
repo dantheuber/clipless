@@ -19,7 +19,7 @@ const { virtual, state } = vi.hoisted(() => ({
     setIsSearchVisible: vi.fn(),
     focusRequest: null as { index: number; seq: number } | null,
     loadError: null as { message: string; recoverable: boolean } | null,
-    saveError: null as string | null,
+    saveError: null as { source: 'clips' | 'settings'; message: string } | null,
   },
 }));
 
@@ -244,7 +244,7 @@ describe('Clips load failure', () => {
 
 describe('Clips save failure', () => {
   it('shows a banner with the reason for as long as saves keep failing', () => {
-    state.saveError = 'Storage could not be loaded';
+    state.saveError = { source: 'clips', message: 'Storage could not be loaded' };
     const { rerender } = render(<Clips />);
     const banner = screen.getByTestId('save-failed-banner');
     expect(banner).toHaveTextContent(/save your clips/i);
@@ -256,6 +256,19 @@ describe('Clips save failure', () => {
     state.saveError = null;
     rerender(<Clips />);
     expect(screen.queryByTestId('save-failed-banner')).toBeNull();
+  });
+
+  it('says the clip limit is unsaved, not the clips, when only the settings save fails', () => {
+    state.saveError = { source: 'settings', message: 'no disk' };
+    render(<Clips />);
+    const banner = screen.getByTestId('save-failed-banner');
+    expect(banner).toHaveTextContent(/save your settings/i);
+    expect(banner).toHaveTextContent(/clip limit/i);
+    expect(banner).toHaveTextContent(/no disk/);
+    // The clips are on disk: no clip-loss warning and no advice to copy them elsewhere
+    expect(banner).not.toHaveTextContent(/save your clips/i);
+    expect(banner).not.toHaveTextContent(/lose them/);
+    expect(banner).not.toHaveTextContent(/Copy anything/);
   });
 
   it('shows the load banner alone while the history is unreadable', () => {
