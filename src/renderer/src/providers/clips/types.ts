@@ -51,6 +51,8 @@ export type ClipsMetaContextType = {
   hideSearch: () => void;
   /** Why the stored history could not be read, or null; while set, saving stays off */
   loadError: ClipsLoadError | null;
+  /** Why the last save was refused, or null; saving keeps retrying while it is set */
+  saveError: string | null;
 };
 
 /**

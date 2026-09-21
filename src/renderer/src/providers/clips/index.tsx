@@ -152,7 +152,7 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
   const toast = useToast();
 
   // Use storage hook for loading/saving data
-  const { loadError } = useClipsStorage(
+  const { loadError, saveError } = useClipsStorage(
     clips,
     lockedClips,
     maxClips,
@@ -162,6 +162,20 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     setMaxClips,
     setIsInitiallyLoading
   );
+
+  // A refused save leaves the window looking healthy, so it gets a toast the moment it
+  // starts failing. The debounced save retries on every change, so only the transition
+  // into failing toasts; the list's banner carries the state for as long as it lasts.
+  const saveErrorNotified = useRef(false);
+  useEffect(() => {
+    if (saveError === null) {
+      saveErrorNotified.current = false;
+      return;
+    }
+    if (saveErrorNotified.current) return;
+    saveErrorNotified.current = true;
+    toast('Clips could not be saved', saveError);
+  }, [saveError, toast]);
 
   // Use state management hook for clip operations
   const {
@@ -419,8 +433,9 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       setIsSearchVisible,
       hideSearch,
       loadError,
+      saveError,
     }),
-    [clipCopyId, maxClips, isSearchVisible, hideSearch, loadError]
+    [clipCopyId, maxClips, isSearchVisible, hideSearch, loadError, saveError]
   );
 
   const pinsValue = useMemo(

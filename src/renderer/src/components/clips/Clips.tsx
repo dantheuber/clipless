@@ -17,7 +17,7 @@ const isTypingTarget = (target: EventTarget | null): boolean =>
  */
 export function Clips(): React.JSX.Element {
   const { filteredClips, searchTerm, isFiltering, pinnedOnly } = useClipsData();
-  const { clipCopyId, isSearchVisible, setIsSearchVisible, loadError } = useClipsMeta();
+  const { clipCopyId, isSearchVisible, setIsSearchVisible, loadError, saveError } = useClipsMeta();
   const { focusRequest } = useQuickLook();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -84,7 +84,11 @@ export function Clips(): React.JSX.Element {
 
   return (
     <div className={styles.clips}>
-      {loadError !== null && <LoadFailedBanner error={loadError} />}
+      {loadError !== null ? (
+        <LoadFailedBanner error={loadError} />
+      ) : (
+        saveError !== null && <SaveFailedBanner reason={saveError} />
+      )}
       <div
         ref={scrollContainerRef}
         className={styles.clipsContainer}
@@ -137,6 +141,56 @@ const LOAD_FAILED_RETRY = 'Restart Clipless to try again.';
 const LOAD_FAILED_UNREADABLE =
   "The stored history can't be read with this computer's keystore, so it won't load.";
 const LOAD_FAILED_RESET = 'To use Clipless again, clear all data in Settings and restart.';
+const SAVE_FAILED_TITLE = "Couldn't save your clips";
+const SAVE_FAILED_KEPT = 'Every clip is still in the list, and Clipless keeps trying to save.';
+const SAVE_FAILED_RISK = 'Until a save lands, a restart will lose them—locked clips included.';
+const SAVE_FAILED_ADVICE =
+  'Copy anything you need elsewhere, and check disk space and permissions.';
+
+/**
+ * The shell both banners share: a title, a line per thing the reader should know, and the
+ * reason underneath in the error's own words.
+ */
+function StorageFailedBanner({
+  testId,
+  title,
+  lines,
+  reason,
+}: {
+  testId: string;
+  title: string;
+  lines: string[];
+  reason: string;
+}): React.JSX.Element {
+  return (
+    <div className={styles.loadFailed} role="alert" data-testid={testId}>
+      <div className={styles.loadFailedTitle}>{title}</div>
+      <ul className={styles.loadFailedDetail}>
+        {lines.map((line) => (
+          <li key={line}>{line}</li>
+        ))}
+        <li className={styles.loadFailedError}>{reason}</li>
+      </ul>
+    </div>
+  );
+}
+
+/**
+ * Shown above the list for as long as writes keep being refused. A toast announces the
+ * first failure, but the debounced save retries on every change, so the condition can last
+ * for hours: the banner is what still says so when the toast has gone. Nothing is paused
+ * or dropped: the list in the window is the truth until a save lands.
+ */
+function SaveFailedBanner({ reason }: { reason: string }): React.JSX.Element {
+  return (
+    <StorageFailedBanner
+      testId="save-failed-banner"
+      title={SAVE_FAILED_TITLE}
+      lines={[SAVE_FAILED_KEPT, SAVE_FAILED_RISK, SAVE_FAILED_ADVICE]}
+      reason={reason}
+    />
+  );
+}
 
 /**
  * Shown above the list for as long as the stored history is unreadable. It stays because
@@ -148,14 +202,15 @@ const LOAD_FAILED_RESET = 'To use Clipless again, clear all data in Settings and
  */
 function LoadFailedBanner({ error }: { error: ClipsLoadError }): React.JSX.Element {
   return (
-    <div className={styles.loadFailed} role="alert" data-testid="load-failed-banner">
-      <div className={styles.loadFailedTitle}>{LOAD_FAILED_TITLE}</div>
-      <ul className={styles.loadFailedDetail}>
-        <li>{LOAD_FAILED_PAUSED}</li>
-        <li>{error.recoverable ? LOAD_FAILED_RETRY : LOAD_FAILED_UNREADABLE}</li>
-        {!error.recoverable && <li>{LOAD_FAILED_RESET}</li>}
-        <li className={styles.loadFailedError}>{error.message}</li>
-      </ul>
-    </div>
+    <StorageFailedBanner
+      testId="load-failed-banner"
+      title={LOAD_FAILED_TITLE}
+      lines={[
+        LOAD_FAILED_PAUSED,
+        error.recoverable ? LOAD_FAILED_RETRY : LOAD_FAILED_UNREADABLE,
+        ...(error.recoverable ? [] : [LOAD_FAILED_RESET]),
+      ]}
+      reason={error.message}
+    />
   );
 }
