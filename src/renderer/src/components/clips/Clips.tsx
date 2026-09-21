@@ -84,11 +84,7 @@ export function Clips(): React.JSX.Element {
 
   return (
     <div className={styles.clips}>
-      {loadError !== null ? (
-        <LoadFailedBanner error={loadError} />
-      ) : (
-        saveError !== null && <SaveFailedBanner reason={saveError} />
-      )}
+      <StorageBanner loadError={loadError} saveError={saveError} />
       <div
         ref={scrollContainerRef}
         className={styles.clipsContainer}
@@ -148,6 +144,26 @@ const SAVE_FAILED_ADVICE =
   'Copy anything you need elsewhere, and check disk space and permissions.';
 
 /**
+ * Picks which storage banner the list shows, if any. An unreadable history takes precedence:
+ * saving is off for the session, so a stale save failure would only confuse.
+ */
+function StorageBanner({
+  loadError,
+  saveError,
+}: {
+  loadError: ClipsLoadError | null;
+  saveError: string | null;
+}): React.JSX.Element | null {
+  if (loadError !== null) {
+    return <LoadFailedBanner error={loadError} />;
+  }
+  if (saveError !== null) {
+    return <SaveFailedBanner reason={saveError} />;
+  }
+  return null;
+}
+
+/**
  * The shell both banners share: a title, a line per thing the reader should know, and the
  * reason underneath in the error's own words.
  */
@@ -201,15 +217,14 @@ function SaveFailedBanner({ reason }: { reason: string }): React.JSX.Element {
  * restart is needed because saving stays off for the rest of this session.
  */
 function LoadFailedBanner({ error }: { error: ClipsLoadError }): React.JSX.Element {
+  const lines = error.recoverable
+    ? [LOAD_FAILED_PAUSED, LOAD_FAILED_RETRY]
+    : [LOAD_FAILED_PAUSED, LOAD_FAILED_UNREADABLE, LOAD_FAILED_RESET];
   return (
     <StorageFailedBanner
       testId="load-failed-banner"
       title={LOAD_FAILED_TITLE}
-      lines={[
-        LOAD_FAILED_PAUSED,
-        error.recoverable ? LOAD_FAILED_RETRY : LOAD_FAILED_UNREADABLE,
-        ...(error.recoverable ? [] : [LOAD_FAILED_RESET]),
-      ]}
+      lines={lines}
       reason={error.message}
     />
   );
