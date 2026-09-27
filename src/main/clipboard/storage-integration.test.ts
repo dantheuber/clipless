@@ -73,14 +73,12 @@ describe('saveClips', () => {
     expect(mocked.saveClips).toHaveBeenCalledWith(clips, { 0: true });
   });
 
-  it('returns false when the save is refused', async () => {
-    mocked.saveClips.mockRejectedValue(new Error('Storage has not finished loading'));
+  it('logs and rethrows when the save is refused, so the reason reaches the renderer', async () => {
+    const refused = new Error('Storage has not finished loading');
+    mocked.saveClips.mockRejectedValue(refused);
 
-    expect(await saveClips([], {})).toBe(false);
-    expect(consoleError).toHaveBeenCalledWith(
-      'Failed to save clips to storage:',
-      expect.any(Error)
-    );
+    await expect(saveClips([], {})).rejects.toBe(refused);
+    expect(consoleError).toHaveBeenCalledWith('Failed to save clips to storage:', refused);
   });
 });
 
@@ -110,10 +108,10 @@ describe('saveSettings', () => {
     expect(mocked.saveSettings).toHaveBeenCalledWith(DEFAULT_SETTINGS);
   });
 
-  it('returns false when the save throws', async () => {
+  it('logs and rethrows when the save throws', async () => {
     mocked.saveSettings.mockRejectedValue(failure);
 
-    expect(await saveSettings(DEFAULT_SETTINGS)).toBe(false);
+    await expect(saveSettings(DEFAULT_SETTINGS)).rejects.toBe(failure);
     expect(consoleError).toHaveBeenCalledWith('Failed to save settings to storage:', failure);
   });
 });
