@@ -56,7 +56,7 @@ import {
   reorderQuickToolsArray,
   processQuickClipsConfig,
 } from './quick-tools';
-import { saveWindowBounds, getWindowBounds } from './window-bounds';
+import { saveWindowBounds, getWindowBounds, deleteWindowBounds } from './window-bounds';
 import { saveImage, deleteImage, deleteAllImages } from './image-store';
 
 const CURRENT_STORAGE_VERSION = 1;
@@ -823,6 +823,13 @@ class SecureStorage {
    */
   async getWindowBounds(): Promise<{ x: number; y: number; width: number; height: number } | null> {
     return await getWindowBounds(this.dataPath);
+  }
+
+  /**
+   * Forget the saved window bounds (Remember position turned off)
+   */
+  async clearWindowBounds(): Promise<void> {
+    await deleteWindowBounds(this.dataPath);
   }
 
   // ===== UTILITY METHODS =====

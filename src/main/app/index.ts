@@ -5,7 +5,7 @@ import { hotkeyManager } from '../hotkeys';
 import { getTray, setIsQuitting } from '../tray';
 import { configureAutoUpdater, setupAutoUpdaterEvents, runAutomaticUpdateCheck } from '../updater';
 import { setupMainIPC } from '../ipc';
-import { initializeWindowSystem, getMainWindow, getWindowBounds } from '../window';
+import { initializeWindowSystem, getMainWindow, syncWindowBoundsWithSetting } from '../window';
 import { applyWindowSettings } from '../window/settings';
 import {
   applyWindowBackgroundTheme,
@@ -62,6 +62,9 @@ export async function initializeApp(): Promise<void> {
     try {
       const settings = await storage.getSettings();
       applyAutoStart(settings.autoStart);
+      // The window opened before the setting could be read; make sure a position saved
+      // while Remember position was on is not kept once it is off.
+      await syncWindowBoundsWithSetting(settings);
       // Windows were created before storage was ready, so their background
       // still reflects the OS preference — correct it to the stored theme.
       applyWindowBackgroundTheme(settings.theme);
@@ -74,13 +77,6 @@ export async function initializeApp(): Promise<void> {
     // builds) never surface failures to the user.
     runAutomaticUpdateCheck();
   });
-
-  // Apply window bounds if available after initialization
-  const mainWindow = getMainWindow();
-  const windowBounds = getWindowBounds();
-  if (mainWindow && windowBounds) {
-    mainWindow.setBounds(windowBounds);
-  }
 }
 
 export function setupAppEvents(): void {

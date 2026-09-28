@@ -753,6 +753,16 @@ describe('SecureStorage window bounds', () => {
     vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify(bounds) as never);
     expect(await storage.getWindowBounds()).toEqual(bounds);
   });
+
+  it('deletes the bounds file when cleared and tolerates it already being gone', async () => {
+    await storage.clearWindowBounds();
+    expect(fs.unlink).toHaveBeenCalledWith(expect.stringMatching(/window-bounds\.json$/));
+
+    vi.mocked(fs.unlink).mockRejectedValueOnce(
+      Object.assign(new Error('gone'), { code: 'ENOENT' })
+    );
+    await expect(storage.clearWindowBounds()).resolves.toBeUndefined();
+  });
 });
 
 describe('SecureStorage.clearAllData', () => {

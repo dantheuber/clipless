@@ -1,13 +1,18 @@
-import { app, BrowserWindow } from 'electron';
+import { app, screen, BrowserWindow } from 'electron';
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import { storage } from '../storage';
+import type { UserSettings } from '../../shared/types';
+import { resolveWindowPlacement, type Rect, type WindowPlacement } from './placement';
 
-let windowBounds: { x: number; y: number; width: number; height: number } | null = null;
+let windowBounds: Rect | null = null;
 
 /**
  * Load window bounds directly from window-bounds.json — no SecureStorage dependency.
- * The rememberWindowPosition setting is checked later when storage is ready.
+ * Settings are decrypted in the background after the window exists, so the
+ * rememberWindowPosition setting cannot gate this read; instead the file is removed
+ * whenever that setting is off (see syncWindowBoundsWithSetting), so a saved position
+ * only exists while the user wants it remembered.
  */
 export async function loadWindowBounds(): Promise<void> {
   try {
@@ -35,15 +40,36 @@ export async function saveWindowBounds(mainWindow: BrowserWindow): Promise<void>
   }
 }
 
-export function getWindowBounds(): { x: number; y: number; width: number; height: number } | null {
+/**
+ * Forget the saved position, in memory and on disk, when Remember position is off.
+ * Called whenever settings are saved and once they finish loading at startup, so a
+ * position saved before the setting was turned off is not restored on the next launch.
+ */
+export async function syncWindowBoundsWithSetting(
+  settings: Pick<UserSettings, 'rememberWindowPosition'>
+): Promise<void> {
+  if (settings.rememberWindowPosition !== false || windowBounds === null) return;
+
+  try {
+    await storage.clearWindowBounds();
+    windowBounds = null;
+  } catch (error) {
+    console.error('Failed to clear window bounds:', error);
+  }
+}
+
+export function getWindowBounds(): Rect | null {
   return windowBounds;
 }
 
-export function setWindowBounds(bounds: {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}): void {
+/**
+ * The bounds to open the main window with: the saved ones checked against the displays
+ * attached right now, so a position left on an unplugged monitor is not reused.
+ */
+export function getStartupWindowBounds(): WindowPlacement | null {
+  return resolveWindowPlacement(windowBounds, screen.getAllDisplays(), screen.getPrimaryDisplay());
+}
+
+export function setWindowBounds(bounds: Rect): void {
   windowBounds = bounds;
 }

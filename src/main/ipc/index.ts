@@ -6,6 +6,7 @@ import { DEFAULT_HOTKEY_SETTINGS } from '../storage/defaults';
 import { hotkeyManager } from '../hotkeys';
 import { getMainWindow, getSettingsWindow, createSettingsWindow } from '../window/creation';
 import { applyWindowSettings } from '../window/settings';
+import { syncWindowBoundsWithSetting } from '../window/bounds';
 import { applyWindowBackgroundTheme } from '../window/background';
 import {
   checkForUpdatesWithRetry,
@@ -35,6 +36,8 @@ export function setupMainIPC(): void {
       try {
         const previous = await storage.getSettings();
         await storage.saveSettings(settings);
+        // Turning Remember position off also forgets the position saved so far
+        await syncWindowBoundsWithSetting(settings);
 
         // The one expected refusal on General: the OS declining the login item (15.5)
         const autoStartApplied = applyAutoStart(settings.autoStart);

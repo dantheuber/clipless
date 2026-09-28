@@ -10,7 +10,7 @@ import {
   handleWindowBlur,
   calculateWindowPosition,
 } from './settings';
-import { saveWindowBounds, getWindowBounds } from './bounds';
+import { saveWindowBounds, getStartupWindowBounds } from './bounds';
 import { resolveWindowBackground } from './background';
 import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
@@ -113,11 +113,12 @@ export async function createWindow(): Promise<void> {
     },
   };
 
-  // Apply saved window bounds if available
-  const windowBounds = getWindowBounds();
+  // Reopen where the window was closed, if that spot is still on a display. When it is
+  // not (a monitor was unplugged) only the size is kept and Electron centres the window.
+  const windowBounds = getStartupWindowBounds();
   if (windowBounds) {
-    windowOptions.x = windowBounds.x;
-    windowOptions.y = windowBounds.y;
+    if (windowBounds.x !== undefined) windowOptions.x = windowBounds.x;
+    if (windowBounds.y !== undefined) windowOptions.y = windowBounds.y;
     windowOptions.width = windowBounds.width;
     windowOptions.height = windowBounds.height;
   }
