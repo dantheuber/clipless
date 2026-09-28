@@ -251,6 +251,7 @@ snippets and open them in your documentation.
 - **Optional usage counts** — Settings → General → Privacy → Send analytics (off by default). Prompts once on first launch. Sends active days, feature-use counts and a random installation ID to PostHog; no clipboard contents, configured tools, session recordings, or error reports. PostHog sees the connection's IP address. [What is collected and how to opt out](src/main/analytics/README.md).
 - **Auto start with system** — Settings → General (Windows &amp; macOS)
 - **Start minimized** — Settings → General (start hidden in the tray)
+- **Remember position** — Settings → General → Window (reopen where you left the window; if that screen is gone, Clipless centres it instead)
 
 📖 Full reference at **[clipless.app/docs](https://clipless.app/docs/)**.
 

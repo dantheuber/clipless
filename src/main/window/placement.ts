@@ -27,14 +27,15 @@ export interface WindowPlacement {
  */
 export const MIN_VISIBLE = { width: 100, height: 40 };
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
 function isRect(value: unknown): value is Rect {
   if (typeof value !== 'object' || value === null) return false;
   const { x, y, width, height } = value as Record<string, unknown>;
-  return (
-    [x, y, width, height].every((n) => typeof n === 'number' && Number.isFinite(n)) &&
-    (width as number) > 0 &&
-    (height as number) > 0
-  );
+  if (!isFiniteNumber(x) || !isFiniteNumber(y)) return false;
+  return isFiniteNumber(width) && width > 0 && isFiniteNumber(height) && height > 0;
 }
 
 function intersection(a: Rect, b: Rect): { width: number; height: number } {
