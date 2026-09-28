@@ -57,7 +57,7 @@ import {
   processQuickClipsConfig,
 } from './quick-tools';
 import { saveWindowBounds, getWindowBounds } from './window-bounds';
-import { saveImage, deleteImage, deleteAllImages } from './image-store';
+import { saveImage, loadImage, deleteImage, deleteAllImages } from './image-store';
 
 const CURRENT_STORAGE_VERSION = 1;
 
@@ -863,9 +863,26 @@ class SecureStorage {
       await this.initialize();
     }
 
+    const clips = await Promise.all(
+      this.clips.map(async (storedClip) => {
+        if (storedClip.clip.type === 'image' && storedClip.clip.imageId) {
+          try {
+            const content = await loadImage(storedClip.clip.imageId, this.dataPath);
+            const clip = { ...storedClip.clip, content };
+            delete clip.imageId;
+            delete clip.thumbnailDataUrl;
+            return { ...storedClip, clip };
+          } catch (error) {
+            console.error('Failed to load image for export:', error);
+          }
+        }
+        return storedClip;
+      })
+    );
+
     // Reconstruct AppData for export compatibility
     const data: AppData = {
-      clips: this.clips,
+      clips,
       settings: this.settings,
       templates: this.templatesData.templates,
       searchTerms: this.templatesData.searchTerms,

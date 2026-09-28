@@ -99,6 +99,7 @@ export class HotkeyActions {
       showNotification('Clip copied', clipSummary(clipToCopy.clip));
     } catch (error) {
       console.error(`Error copying quick clip ${index}:`, error);
+      showNotification('Could not copy clip', 'The clip could not be copied to the clipboard.');
     }
   }
 
@@ -145,6 +146,10 @@ export class HotkeyActions {
         dataUrl = await loadImage(imageId, dataPath);
       }
 
+      if (!dataUrl.startsWith('data:image/')) {
+        throw new Error('Full image is unavailable');
+      }
+
       setSkipNextImageChange();
       const image = nativeImage.createFromDataURL(dataUrl);
       if (!image.isEmpty()) {
@@ -154,6 +159,9 @@ export class HotkeyActions {
         clipboard.writeText(dataUrl);
       }
     } catch (error) {
+      if (!content.startsWith('data:image/')) {
+        throw error;
+      }
       console.error('Failed to copy image, falling back to text:', error);
       clipboard.writeText(content);
     }

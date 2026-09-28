@@ -148,6 +148,9 @@ export const useClipboardOperations = (
                 imageData = fullImage;
               }
             }
+            if (!imageData.startsWith('data:image/')) {
+              throw new Error('Full image is unavailable');
+            }
             await window.api.setClipboardImage(imageData);
             console.log('Copied image to clipboard');
             break;
@@ -186,6 +189,12 @@ export const useClipboardOperations = (
       } catch (error) {
         console.error('Failed to copy clip to clipboard:', error);
         setIsHotkeyOperation(false);
+
+        if (clip.type === 'image' && !clip.content.startsWith('data:image/')) {
+          setLastCopiedContent(null);
+          setClipCopyId(null);
+          return false;
+        }
 
         // Fallback: try to copy as plain text if the specific format failed
         try {
