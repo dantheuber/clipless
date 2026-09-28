@@ -240,6 +240,10 @@ describe('HotkeyActions', () => {
         expect(clipboard.writeImage).not.toHaveBeenCalled();
         expect(clipboard.writeText).not.toHaveBeenCalled();
         expect(setSkipNextImageChange).not.toHaveBeenCalled();
+        expect(mockWindow.webContents.send).not.toHaveBeenCalledWith(
+          'hotkey-clip-copied',
+          expect.anything()
+        );
         expect(showNotification).toHaveBeenCalledWith('Could not copy clip', expect.any(String));
         expect(showNotification).not.toHaveBeenCalledWith('Clip copied', expect.any(String));
       }

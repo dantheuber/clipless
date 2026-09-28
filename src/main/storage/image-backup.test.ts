@@ -105,29 +105,34 @@ describe('image backups', () => {
     expect(JSON.parse(await storage.exportData()).clips).toEqual(JSON.parse(backup).clips);
   });
 
-  it.each(['missing', 'corrupt'])('keeps a %s image clip and exports the rest', async (state) => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    await saveImage('image-2', fullImage, dataPath);
-    if (state === 'corrupt') {
-      await fs.writeFile(join(dataPath, 'images', 'image-1.enc'), 'not json');
+  it.each(['missing', 'corrupt', 'invalid'])(
+    'rejects the export when an image is %s so no ID-only backup is saved',
+    async (state) => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      await saveImage('image-2', fullImage, dataPath);
+      if (state === 'corrupt') {
+        await fs.writeFile(join(dataPath, 'images', 'image-1.enc'), 'not json');
+      } else if (state === 'invalid') {
+        await saveImage('image-1', 'image-1', dataPath);
+      }
+      const availableClip: StoredClip = {
+        ...imageClip,
+        clip: { ...imageClip.clip, id: 'clip-2', content: 'image-2', imageId: 'image-2' },
+      };
+      await storage.importData(JSON.stringify({ clips: [imageClip, availableClip] }));
+
+      await expect(storage.exportData()).rejects.toThrow(/Image for clip clip-1/);
+      expect(await storage.getClips()).toEqual([imageClip, availableClip]);
     }
-    const availableClip: StoredClip = {
-      ...imageClip,
-      clip: { ...imageClip.clip, id: 'clip-2', content: 'image-2', imageId: 'image-2' },
-    };
+  );
+
+  it('exports an inline image clip that has no image ID as-is', async () => {
     const inlineClip: StoredClip = {
       ...imageClip,
       clip: { id: 'clip-3', type: 'image', content: fullImage },
     };
-    await storage.importData(JSON.stringify({ clips: [imageClip, availableClip, inlineClip] }));
+    await storage.importData(JSON.stringify({ clips: [inlineClip] }));
 
-    const backup: AppData = JSON.parse(await storage.exportData());
-
-    expect(backup.clips).toEqual([
-      imageClip,
-      { ...availableClip, clip: { id: 'clip-2', type: 'image', content: fullImage } },
-      inlineClip,
-    ]);
-    expect(await storage.getClips()).toEqual([imageClip, availableClip, inlineClip]);
+    expect(JSON.parse(await storage.exportData()).clips).toEqual([inlineClip]);
   });
 });

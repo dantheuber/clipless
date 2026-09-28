@@ -882,7 +882,9 @@ class SecureStorage {
 
   /**
    * Replace an image clip's ID and thumbnail with the full image from the image store,
-   * so a backup carries the original image. Clips whose image can't be loaded are exported as-is.
+   * so a backup carries the original image. An image ID only means something to this
+   * installation, so a clip whose image can't be loaded fails the whole export rather than
+   * producing a backup that reports as saved but can't be restored elsewhere.
    */
   private async inlineFullImage(storedClip: StoredClip): Promise<StoredClip> {
     const { imageId } = storedClip.clip;
@@ -890,16 +892,21 @@ class SecureStorage {
       return storedClip;
     }
 
+    let content: string;
     try {
-      const content = await loadImage(imageId, this.dataPath);
-      const clip = { ...storedClip.clip, content };
-      delete clip.imageId;
-      delete clip.thumbnailDataUrl;
-      return { ...storedClip, clip };
+      content = await loadImage(imageId, this.dataPath);
     } catch (error) {
       console.error('Failed to load image for export:', error);
-      return storedClip;
+      throw new Error(`Image for clip ${storedClip.clip.id} could not be read`);
     }
+    if (typeof content !== 'string' || !content.startsWith('data:image/')) {
+      throw new Error(`Image for clip ${storedClip.clip.id} is not a valid image`);
+    }
+
+    const clip = { ...storedClip.clip, content };
+    delete clip.imageId;
+    delete clip.thumbnailDataUrl;
+    return { ...storedClip, clip };
   }
 
   /**
