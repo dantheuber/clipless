@@ -864,20 +864,7 @@ class SecureStorage {
     }
 
     const clips = await Promise.all(
-      this.clips.map(async (storedClip) => {
-        if (storedClip.clip.type === 'image' && storedClip.clip.imageId) {
-          try {
-            const content = await loadImage(storedClip.clip.imageId, this.dataPath);
-            const clip = { ...storedClip.clip, content };
-            delete clip.imageId;
-            delete clip.thumbnailDataUrl;
-            return { ...storedClip, clip };
-          } catch (error) {
-            console.error('Failed to load image for export:', error);
-          }
-        }
-        return storedClip;
-      })
+      this.clips.map((storedClip) => this.inlineFullImage(storedClip))
     );
 
     // Reconstruct AppData for export compatibility
@@ -891,6 +878,28 @@ class SecureStorage {
       version: this.meta.version,
     };
     return JSON.stringify(data, null, 2);
+  }
+
+  /**
+   * Replace an image clip's ID and thumbnail with the full image from the image store,
+   * so a backup carries the original image. Clips whose image can't be loaded are exported as-is.
+   */
+  private async inlineFullImage(storedClip: StoredClip): Promise<StoredClip> {
+    const { imageId } = storedClip.clip;
+    if (storedClip.clip.type !== 'image' || !imageId) {
+      return storedClip;
+    }
+
+    try {
+      const content = await loadImage(imageId, this.dataPath);
+      const clip = { ...storedClip.clip, content };
+      delete clip.imageId;
+      delete clip.thumbnailDataUrl;
+      return { ...storedClip, clip };
+    } catch (error) {
+      console.error('Failed to load image for export:', error);
+      return storedClip;
+    }
   }
 
   /**
