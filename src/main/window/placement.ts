@@ -22,8 +22,9 @@ export interface WindowPlacement {
 }
 
 /**
- * How much of the window must sit inside one display's work area for its saved position to
- * count as on-screen: enough of the title bar to grab, not a sliver in a corner.
+ * How much of the window's title bar must sit inside one display's work area for its saved
+ * position to count as on-screen: `height` is the strip along the top of the window that the
+ * user drags by, and at least `width` of that strip has to be reachable.
  */
 export const MIN_VISIBLE = { width: 100, height: 40 };
 
@@ -45,14 +46,27 @@ function intersection(a: Rect, b: Rect): { width: number; height: number } {
   };
 }
 
+/** The saved size, no larger than the work area it will be shown on. */
+function clampSize(saved: Rect, workArea: Rect): { width: number; height: number } {
+  return {
+    width: Math.min(saved.width, workArea.width),
+    height: Math.min(saved.height, workArea.height),
+  };
+}
+
 /**
  * Decide where the main window opens given the bounds saved on the last close and the
  * displays attached now. Returns null when there is nothing usable to restore.
  *
- * - On a display (at least MIN_VISIBLE of it inside some work area): keep x and y.
- * - Off every display (a monitor that was unplugged): drop x and y; Electron centres the
- *   window on the primary display.
+ * - On a display (at least MIN_VISIBLE of the title bar inside some work area, once the
+ *   size is clamped to that display): keep x and y.
+ * - Off every display (a monitor that was unplugged, or only a bottom or right edge left
+ *   on screen): drop x and y; Electron centres the window on the primary display.
  * - Either way the saved size is kept, clamped to the work area of the display it lands on.
+ *
+ * The size is clamped before the check so an oversized window cannot pass on a part that the
+ * clamp then cuts off: `{ x: -2900, width: 3000 }` overlaps a 1920-wide display by 100px, but
+ * clamped to 1920 wide it ends at -980 and is unreachable.
  */
 export function resolveWindowPlacement(
   saved: Rect | null | undefined,
@@ -64,7 +78,9 @@ export function resolveWindowPlacement(
   let target: DisplayLike | null = null;
   let best = 0;
   for (const display of displays) {
-    const overlap = intersection(saved, display.workArea);
+    const { width } = clampSize(saved, display.workArea);
+    const titleBar = { x: saved.x, y: saved.y, width, height: MIN_VISIBLE.height };
+    const overlap = intersection(titleBar, display.workArea);
     if (overlap.width < MIN_VISIBLE.width || overlap.height < MIN_VISIBLE.height) continue;
     const area = overlap.width * overlap.height;
     if (area > best) {
@@ -73,11 +89,6 @@ export function resolveWindowPlacement(
     }
   }
 
-  const workArea = (target ?? primary).workArea;
-  const size = {
-    width: Math.min(saved.width, workArea.width),
-    height: Math.min(saved.height, workArea.height),
-  };
-
+  const size = clampSize(saved, (target ?? primary).workArea);
   return target ? { x: saved.x, y: saved.y, ...size } : size;
 }

@@ -39,6 +39,21 @@ describe('resolveWindowPlacement', () => {
     expect(resolveWindowPlacement(saved, [laptop], laptop)).toEqual({ width: 900, height: 670 });
   });
 
+  it('drops a position whose on-screen part the size clamp would remove', () => {
+    // Overlaps the laptop by 100px before clamping, but clamped to 1920 wide it ends at -980
+    const saved = { x: -2900, y: 10, width: 3000, height: 670 };
+    expect(resolveWindowPlacement(saved, [laptop], laptop)).toEqual({
+      width: 1920,
+      height: 670,
+    });
+  });
+
+  it('drops a position whose title bar is above the display', () => {
+    // Only the bottom 40px are on screen; the title bar is not
+    const saved = { x: 100, y: -630, width: 900, height: 670 };
+    expect(resolveWindowPlacement(saved, [laptop], laptop)).toEqual({ width: 900, height: 670 });
+  });
+
   it('clamps the saved size to the work area of the display it lands on', () => {
     const saved = { x: 10, y: 10, width: 3000, height: 2000 };
     expect(resolveWindowPlacement(saved, [laptop], laptop)).toEqual({

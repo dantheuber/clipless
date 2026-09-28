@@ -67,7 +67,31 @@ export function getWindowBounds(): Rect | null {
  * attached right now, so a position left on an unplugged monitor is not reused.
  */
 export function getStartupWindowBounds(): WindowPlacement | null {
-  return resolveWindowPlacement(windowBounds, screen.getAllDisplays(), screen.getPrimaryDisplay());
+  const placement = resolveWindowPlacement(
+    windowBounds,
+    screen.getAllDisplays(),
+    screen.getPrimaryDisplay()
+  );
+  restoredSavedPosition = placement?.x !== undefined;
+  return placement;
+}
+
+/** Whether the last getStartupWindowBounds call handed out a saved x and y. */
+let restoredSavedPosition = false;
+
+/**
+ * The window opens at the saved position before the encrypted settings can be read, so a
+ * bounds file left behind by a build that did not delete it (see loadWindowBounds) still
+ * places the window on the first launch with Remember position off. Once the settings are
+ * in, move such a window to where it would have opened without the file: centred.
+ */
+export function applyRememberPositionSetting(
+  mainWindow: BrowserWindow,
+  settings: Pick<UserSettings, 'rememberWindowPosition'>
+): void {
+  if (settings.rememberWindowPosition !== false || !restoredSavedPosition) return;
+  restoredSavedPosition = false;
+  mainWindow.center();
 }
 
 export function setWindowBounds(bounds: Rect): void {

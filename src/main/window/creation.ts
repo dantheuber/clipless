@@ -10,7 +10,7 @@ import {
   handleWindowBlur,
   calculateWindowPosition,
 } from './settings';
-import { saveWindowBounds, getStartupWindowBounds } from './bounds';
+import { saveWindowBounds, getStartupWindowBounds, applyRememberPositionSetting } from './bounds';
 import { resolveWindowBackground } from './background';
 import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
@@ -137,6 +137,9 @@ export async function createWindow(): Promise<void> {
     try {
       const settings = await storage.getSettings();
       startMinimized = settings.startMinimized;
+      // The saved position was applied before this setting could be read; undo it now,
+      // before the window is shown, if the user does not want it remembered.
+      applyRememberPositionSetting(mainWindow, settings);
     } catch (error) {
       console.error('Failed to read startMinimized setting:', error);
     }

@@ -88,6 +88,33 @@ describe('syncWindowBoundsWithSetting', () => {
   });
 });
 
+describe('applyRememberPositionSetting', () => {
+  const win = { center: vi.fn() } as unknown as Electron.BrowserWindow;
+
+  it('centres a window opened at a saved position once the setting turns out to be off', async () => {
+    vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify(saved) as never);
+    await bounds.loadWindowBounds();
+    bounds.getStartupWindowBounds();
+
+    bounds.applyRememberPositionSetting(win, { rememberWindowPosition: true });
+    expect(win.center).not.toHaveBeenCalled();
+
+    bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
+    bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
+    expect(win.center).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves a window alone that Electron already centred', async () => {
+    const offscreen = { ...saved, x: 4000, y: 4000 };
+    vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify(offscreen) as never);
+    await bounds.loadWindowBounds();
+    bounds.getStartupWindowBounds();
+
+    bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
+    expect(win.center).not.toHaveBeenCalled();
+  });
+});
+
 describe('saveWindowBounds', () => {
   it('writes only while remembering is on', async () => {
     const win = { getBounds: () => saved } as unknown as Electron.BrowserWindow;
