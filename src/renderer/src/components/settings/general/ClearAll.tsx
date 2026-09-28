@@ -11,8 +11,16 @@ import { errorText } from '../../../utils/errorText';
 import w from '../shell/widgets.module.css';
 
 interface ClearAllProps {
-  onExportFirst: () => void;
+  /** Saves a backup; resolves to whether one was written */
+  onExportFirst: () => Promise<boolean>;
 }
+
+/**
+ * Where "export first" stands. Deletion is off while a backup is being written and after
+ * one fails: the export reads every image file, so a deletion running alongside it would
+ * remove the images first and the backup would fail after the history was already gone.
+ */
+type BackupState = 'none' | 'pending' | 'failed' | 'saved';
 
 /**
  * Clear all data (spec 15.5): names the clip count and locked count, every setting, the
@@ -26,6 +34,13 @@ export function ClearAll({ onExportFirst }: ClearAllProps) {
   const { terms, tools, templates } = useScanIndex();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [backup, setBackup] = useState<BackupState>('none');
+
+  const exportFirst = async () => {
+    setBackup('pending');
+    const saved = await onExportFirst();
+    setBackup(saved ? 'saved' : 'failed');
+  };
 
   const clear = async () => {
     setError(null);
@@ -53,6 +68,7 @@ export function ClearAll({ onExportFirst }: ClearAllProps) {
         className={classNames(w.link, w.linkDanger)}
         onClick={() => {
           setError(null);
+          setBackup('none');
           setOpen(true);
         }}
         data-testid="clear-all"
@@ -72,15 +88,26 @@ export function ClearAll({ onExportFirst }: ClearAllProps) {
               {formatBytes(stats?.dataSize ?? 0)} on disk.
             </p>
             <p>There is no undo. Export first if you might want any of it back.</p>
+            {backup === 'failed' && (
+              <p className={w.warn} data-testid="clear-all-backup-failed">
+                The backup was not saved, so nothing is deleted. Export again, or cancel.
+              </p>
+            )}
             {error && <p className={w.warn}>{error}</p>}
           </>
         }
         extra={
-          <button type="button" className={w.link} onClick={onExportFirst}>
-            export first
+          <button
+            type="button"
+            className={w.link}
+            onClick={exportFirst}
+            disabled={backup === 'pending'}
+          >
+            {backup === 'pending' ? 'exporting…' : 'export first'}
           </button>
         }
         confirmText="Delete everything"
+        confirmDisabled={backup === 'pending' || backup === 'failed'}
         onConfirm={clear}
         onCancel={() => setOpen(false)}
       />

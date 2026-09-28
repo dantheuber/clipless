@@ -370,6 +370,63 @@ describe('General', () => {
     vi.unstubAllGlobals();
   });
 
+  it('holds deletion while export first runs, and keeps it off after a failed backup', async () => {
+    let finish: (data: string) => void = () => {};
+    let fail: (error: Error) => void = () => {};
+    api().storageExportData.mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve, reject) => {
+          finish = resolve;
+          fail = reject;
+        })
+    );
+    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    await mount();
+    fireEvent.click(screen.getByTestId('clear-all'));
+    const dialog = screen.getByRole('dialog');
+    expect(screen.getByText('Delete everything')).not.toBeDisabled();
+
+    fireEvent.click(within(dialog).getByText('export first'));
+    await flush();
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    expect(within(dialog).getByText('exporting…')).toBeDisabled();
+    fireEvent.click(screen.getByText('Delete everything'));
+    expect(api().storageClearAll).not.toHaveBeenCalled();
+
+    await act(async () => fail(new Error('image missing')));
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    expect(screen.getByTestId('clear-all-backup-failed')).toHaveTextContent('not saved');
+    expect(screen.getAllByTestId('toast').pop()).toHaveTextContent('image missing');
+
+    api().storageExportData.mockImplementationOnce(
+      () =>
+        new Promise<string>((resolve) => {
+          finish = resolve;
+        })
+    );
+    fireEvent.click(within(dialog).getByText('export first'));
+    await flush();
+    expect(screen.queryByTestId('clear-all-backup-failed')).toBeNull();
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    await act(async () => finish('{}'));
+    expect(screen.getByText('Delete everything')).not.toBeDisabled();
+    fireEvent.click(screen.getByText('Delete everything'));
+    await flush();
+    expect(api().storageClearAll).toHaveBeenCalled();
+
+    // reopening after a failed backup offers deletion again: export first is optional
+    api().storageExportData.mockRejectedValueOnce(new Error('disk'));
+    fireEvent.click(screen.getByTestId('clear-all'));
+    fireEvent.click(within(screen.getByRole('dialog')).getByText('export first'));
+    await flush();
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByTestId('clear-all'));
+    expect(screen.getByText('Delete everything')).not.toBeDisabled();
+    vi.unstubAllGlobals();
+  });
+
   it('keeps a failed clear inline, and cancel closes it', async () => {
     api().storageClearAll.mockResolvedValueOnce(false);
     await mount();
