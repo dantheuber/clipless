@@ -5,7 +5,12 @@ import { hotkeyManager } from '../hotkeys';
 import { getTray, setIsQuitting } from '../tray';
 import { configureAutoUpdater, setupAutoUpdaterEvents, runAutomaticUpdateCheck } from '../updater';
 import { setupMainIPC } from '../ipc';
-import { initializeWindowSystem, getMainWindow, syncWindowBoundsWithSetting } from '../window';
+import {
+  initializeWindowSystem,
+  getMainWindow,
+  syncWindowBoundsWithSetting,
+  applyRememberPositionSetting,
+} from '../window';
 import { applyWindowSettings } from '../window/settings';
 import {
   applyWindowBackgroundTheme,
@@ -62,8 +67,12 @@ export async function initializeApp(): Promise<void> {
     try {
       const settings = await storage.getSettings();
       applyAutoStart(settings.autoStart);
-      // The window opened before the setting could be read; make sure a position saved
-      // while Remember position was on is not kept once it is off.
+      // The window opened before the setting could be read: ready-to-show may have seen
+      // the defaults, which enable Remember position. Now the persisted value is known,
+      // move the live window off a stale saved position and drop the saved bounds.
+      if (mainWindow) {
+        applyRememberPositionSetting(mainWindow, settings);
+      }
       await syncWindowBoundsWithSetting(settings);
       // Windows were created before storage was ready, so their background
       // still reflects the OS preference — correct it to the stored theme.

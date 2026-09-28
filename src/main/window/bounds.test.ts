@@ -89,16 +89,21 @@ describe('syncWindowBoundsWithSetting', () => {
 });
 
 describe('applyRememberPositionSetting', () => {
-  const win = { center: vi.fn() } as unknown as Electron.BrowserWindow;
+  const win = {
+    center: vi.fn(),
+    getPosition: vi.fn().mockReturnValue([saved.x, saved.y]),
+  } as unknown as Electron.BrowserWindow;
 
   it('centres a window opened at a saved position once the setting turns out to be off', async () => {
     vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify(saved) as never);
     await bounds.loadWindowBounds();
     bounds.getStartupWindowBounds();
 
+    // ready-to-show sees the defaults while the settings are still decrypting
     bounds.applyRememberPositionSetting(win, { rememberWindowPosition: true });
     expect(win.center).not.toHaveBeenCalled();
 
+    // the background-load callback then passes the persisted value
     bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
     bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
     expect(win.center).toHaveBeenCalledTimes(1);
@@ -110,6 +115,20 @@ describe('applyRememberPositionSetting', () => {
     await bounds.loadWindowBounds();
     bounds.getStartupWindowBounds();
 
+    bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
+    expect(win.center).not.toHaveBeenCalled();
+  });
+
+  it('leaves a window alone that the user dragged before the settings loaded', async () => {
+    vi.mocked(fs.readFile).mockResolvedValueOnce(JSON.stringify(saved) as never);
+    await bounds.loadWindowBounds();
+    bounds.getStartupWindowBounds();
+    vi.mocked(win.getPosition).mockReturnValueOnce([saved.x + 50, saved.y]);
+
+    bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
+    expect(win.center).not.toHaveBeenCalled();
+
+    // and a later call does not move it either
     bounds.applyRememberPositionSetting(win, { rememberWindowPosition: false });
     expect(win.center).not.toHaveBeenCalled();
   });

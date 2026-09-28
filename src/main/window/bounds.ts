@@ -72,25 +72,37 @@ export function getStartupWindowBounds(): WindowPlacement | null {
     screen.getAllDisplays(),
     screen.getPrimaryDisplay()
   );
-  restoredSavedPosition = placement?.x !== undefined;
+  restoredPosition =
+    placement?.x !== undefined && placement.y !== undefined
+      ? { x: placement.x, y: placement.y }
+      : null;
   return placement;
 }
 
-/** Whether the last getStartupWindowBounds call handed out a saved x and y. */
-let restoredSavedPosition = false;
+/** The saved x and y the last getStartupWindowBounds call handed out, if any. */
+let restoredPosition: { x: number; y: number } | null = null;
 
 /**
  * The window opens at the saved position before the encrypted settings can be read, so a
  * bounds file left behind by a build that did not delete it (see loadWindowBounds) still
  * places the window on the first launch with Remember position off. Once the settings are
  * in, move such a window to where it would have opened without the file: centred.
+ *
+ * Settings decrypt in the background, so this runs twice: from ready-to-show, where
+ * storage.getSettings still returns the defaults if the load has not finished, and again
+ * from the background-load callback once the persisted value is known. Whichever call
+ * sees the setting off does the move. A window the user has already dragged elsewhere
+ * is left where they put it.
  */
 export function applyRememberPositionSetting(
   mainWindow: BrowserWindow,
   settings: Pick<UserSettings, 'rememberWindowPosition'>
 ): void {
-  if (settings.rememberWindowPosition !== false || !restoredSavedPosition) return;
-  restoredSavedPosition = false;
+  if (settings.rememberWindowPosition !== false || restoredPosition === null) return;
+  const { x, y } = restoredPosition;
+  restoredPosition = null;
+  const [currentX, currentY] = mainWindow.getPosition();
+  if (currentX !== x || currentY !== y) return;
   mainWindow.center();
 }
 

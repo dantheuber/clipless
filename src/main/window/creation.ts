@@ -138,7 +138,9 @@ export async function createWindow(): Promise<void> {
       const settings = await storage.getSettings();
       startMinimized = settings.startMinimized;
       // The saved position was applied before this setting could be read; undo it now,
-      // before the window is shown, if the user does not want it remembered.
+      // before the window is shown, if the user does not want it remembered. While the
+      // settings are still decrypting this sees the defaults and does nothing, and the
+      // background-load callback (see app/index.ts) repeats it with the persisted value.
       applyRememberPositionSetting(mainWindow, settings);
     } catch (error) {
       console.error('Failed to read startMinimized setting:', error);
