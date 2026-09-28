@@ -68,7 +68,8 @@ export function ClearAll({ onExportFirst }: ClearAllProps) {
         className={classNames(w.link, w.linkDanger)}
         onClick={() => {
           setError(null);
-          setBackup('none');
+          // A backup still being written stays pending across reopen, so deletion stays off
+          setBackup((b) => (b === 'pending' ? b : 'none'));
           setOpen(true);
         }}
         data-testid="clear-all"

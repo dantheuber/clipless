@@ -91,6 +91,9 @@ class SecureStorage {
   // One write at a time per domain file; a save arriving mid-write waits and then writes
   private saveQueue = new SaveQueue();
 
+  // Exports still reading image files; clearAllData waits for these before it deletes
+  private pendingExports = new Set<Promise<string>>();
+
   private onBackgroundLoadComplete?: () => void;
 
   constructor() {
@@ -835,6 +838,12 @@ class SecureStorage {
       await this.initialize();
     }
 
+    // An export reads every image file, so deleting under it would fail the backup after
+    // the history was already gone. Let in-flight exports settle either way, then delete.
+    while (this.pendingExports.size > 0) {
+      await Promise.allSettled([...this.pendingExports]);
+    }
+
     this.settings = { ...DEFAULT_SETTINGS };
     this.clips = [];
     this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
@@ -859,6 +868,16 @@ class SecureStorage {
    * Export data (unencrypted for backup purposes)
    */
   async exportData(): Promise<string> {
+    const pending = this.buildExport();
+    this.pendingExports.add(pending);
+    try {
+      return await pending;
+    } finally {
+      this.pendingExports.delete(pending);
+    }
+  }
+
+  private async buildExport(): Promise<string> {
     if (!this.isInitialized) {
       await this.initialize();
     }

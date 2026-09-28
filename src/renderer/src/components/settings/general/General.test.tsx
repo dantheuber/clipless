@@ -427,6 +427,35 @@ describe('General', () => {
     vi.unstubAllGlobals();
   });
 
+  it('keeps deletion off when the dialog is reopened while export first is still running', async () => {
+    let finish: (data: string) => void = () => {};
+    api().storageExportData.mockImplementationOnce(
+      () => new Promise<string>((resolve) => (finish = resolve))
+    );
+    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    await mount();
+    fireEvent.click(screen.getByTestId('clear-all'));
+    fireEvent.click(within(screen.getByRole('dialog')).getByText('export first'));
+    await flush();
+
+    fireEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByTestId('clear-all'));
+    const dialog = screen.getByRole('dialog');
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    expect(within(dialog).getByText('exporting…')).toBeDisabled();
+    fireEvent.click(screen.getByText('Delete everything'));
+    expect(api().storageClearAll).not.toHaveBeenCalled();
+
+    await act(async () => finish('{}'));
+    expect(screen.getByText('Delete everything')).not.toBeDisabled();
+    expect(within(dialog).getByText('export first')).not.toBeDisabled();
+    fireEvent.click(screen.getByText('Delete everything'));
+    await flush();
+    expect(api().storageClearAll).toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
   it('keeps a failed clear inline, and cancel closes it', async () => {
     api().storageClearAll.mockResolvedValueOnce(false);
     await mount();

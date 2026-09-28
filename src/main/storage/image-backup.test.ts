@@ -18,6 +18,18 @@ vi.mock('electron', () => ({
   },
 }));
 
+// Lets a test hold every image read open, so an export can be caught mid-flight
+let imageGate: Promise<void> = Promise.resolve();
+vi.mock('./image-store', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('./image-store')>();
+  return {
+    ...actual,
+    loadImage: async (...args: Parameters<typeof actual.loadImage>) => {
+      await imageGate;
+      return actual.loadImage(...args);
+    },
+  };
+});
 import { app } from 'electron';
 import type { AppData, StoredClip } from '../../shared/types';
 import { loadImage, saveImage } from './image-store';
@@ -52,6 +64,7 @@ beforeEach(async () => {
   userDataPath = await fs.mkdtemp(join(tmpdir(), 'clipless-backup-'));
   dataPath = join(userDataPath, 'clipless-data');
   vi.mocked(app.getPath).mockReturnValue(userDataPath);
+  imageGate = Promise.resolve();
   storage = await loadStorage();
 });
 
@@ -134,5 +147,45 @@ describe('image backups', () => {
     await storage.importData(JSON.stringify({ clips: [inlineClip] }));
 
     expect(JSON.parse(await storage.exportData()).clips).toEqual([inlineClip]);
+  });
+
+  it('clear all waits for an export that is still reading images, so the backup is whole', async () => {
+    await saveImage('image-1', fullImage, dataPath);
+    await storage.importData(JSON.stringify({ clips: [imageClip] }));
+    let release: () => void = () => {};
+    imageGate = new Promise<void>((resolve) => (release = resolve));
+
+    const exporting = storage.exportData();
+    let cleared = false;
+    const clearing = storage.clearAllData().then(() => (cleared = true));
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(cleared).toBe(false);
+    await expect(fs.access(join(dataPath, 'images', 'image-1.enc'))).resolves.toBeUndefined();
+
+    release();
+    const backup: AppData = JSON.parse(await exporting);
+    await clearing;
+
+    expect(backup.clips).toEqual([
+      { ...imageClip, clip: { id: 'clip-1', type: 'image', content: fullImage } },
+    ]);
+    expect(cleared).toBe(true);
+    expect(await storage.getClips()).toEqual([]);
+    await expect(loadImage('image-1', dataPath)).rejects.toThrow('FILE_NOT_FOUND');
+  });
+
+  it('clear all goes ahead once a pending export has failed', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    await storage.importData(JSON.stringify({ clips: [imageClip] }));
+    let release: () => void = () => {};
+    imageGate = new Promise<void>((resolve) => (release = resolve));
+
+    const exporting = storage.exportData();
+    const clearing = storage.clearAllData();
+    release();
+
+    await expect(exporting).rejects.toThrow(/could not be read/);
+    await clearing;
+    expect(await storage.getClips()).toEqual([]);
   });
 });
