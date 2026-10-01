@@ -10,7 +10,7 @@ import {
   handleWindowBlur,
   calculateWindowPosition,
 } from './settings';
-import { saveWindowBounds, getWindowBounds } from './bounds';
+import { saveWindowBounds, getStartupWindowBounds, applyRememberPositionSetting } from './bounds';
 import { resolveWindowBackground } from './background';
 import { storage } from '../storage';
 import icon from '../../../resources/icon.png?asset';
@@ -113,11 +113,12 @@ export async function createWindow(): Promise<void> {
     },
   };
 
-  // Apply saved window bounds if available
-  const windowBounds = getWindowBounds();
+  // Reopen where the window was closed, if that spot is still on a display. When it is
+  // not (a monitor was unplugged) only the size is kept and Electron centres the window.
+  const windowBounds = getStartupWindowBounds();
   if (windowBounds) {
-    windowOptions.x = windowBounds.x;
-    windowOptions.y = windowBounds.y;
+    if (windowBounds.x !== undefined) windowOptions.x = windowBounds.x;
+    if (windowBounds.y !== undefined) windowOptions.y = windowBounds.y;
     windowOptions.width = windowBounds.width;
     windowOptions.height = windowBounds.height;
   }
@@ -136,6 +137,11 @@ export async function createWindow(): Promise<void> {
     try {
       const settings = await storage.getSettings();
       startMinimized = settings.startMinimized;
+      // The saved position was applied before this setting could be read; undo it now,
+      // before the window is shown, if the user does not want it remembered. While the
+      // settings are still decrypting this sees the defaults and does nothing, and the
+      // background-load callback (see app/index.ts) repeats it with the persisted value.
+      applyRememberPositionSetting(mainWindow, settings);
     } catch (error) {
       console.error('Failed to read startMinimized setting:', error);
     }

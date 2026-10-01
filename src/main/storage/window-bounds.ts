@@ -31,3 +31,15 @@ export async function getWindowBounds(
     return null;
   }
 }
+
+/**
+ * Remove the saved window bounds. A missing file is fine: there was nothing to forget.
+ */
+export async function deleteWindowBounds(dataPath: string): Promise<void> {
+  const boundsPath = join(dataPath, 'window-bounds.json');
+  try {
+    await fs.unlink(boundsPath);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
+}
