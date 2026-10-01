@@ -86,26 +86,36 @@ export class HotkeyActions {
         return;
       }
 
+      // Resolve an image before telling the renderer anything: a missing or invalid stored
+      // image fails here, so the renderer never marks the row as copied for a copy that
+      // did not happen.
+      const imageDataUrl =
+        clipToCopy.clip.type === 'image' ? await this.loadImageDataUrl(clipToCopy.clip) : null;
+
       // Notify renderer BEFORE copying to clipboard so it can set up duplicate detection
       if (this.mainWindow && !this.mainWindow.isDestroyed()) {
         this.mainWindow.webContents.send('hotkey-clip-copied', index);
       }
 
       // Copy the clip content with the appropriate format based on its type
-      await this.copyClipToClipboard(clipToCopy);
+      await this.copyClipToClipboard(clipToCopy, imageDataUrl);
       recordFeatureUsage('quick_clip_hotkey');
 
       console.log(`Hotkey: Copied clip ${index + 1} to clipboard`);
       showNotification('Clip copied', clipSummary(clipToCopy.clip));
     } catch (error) {
       console.error(`Error copying quick clip ${index}:`, error);
+      showNotification('Could not copy clip', 'The clip could not be copied to the clipboard.');
     }
   }
 
   /**
    * Copy a clip to the system clipboard based on its type
    */
-  private async copyClipToClipboard(clipToCopy: StoredClip): Promise<void> {
+  private async copyClipToClipboard(
+    clipToCopy: StoredClip,
+    imageDataUrl: string | null
+  ): Promise<void> {
     switch (clipToCopy.clip.type) {
       case 'text':
         clipboard.writeText(clipToCopy.clip.content);
@@ -124,7 +134,7 @@ export class HotkeyActions {
         }
         break;
       case 'image':
-        await this.copyImageClip(clipToCopy.clip.content, clipToCopy.clip.imageId);
+        this.copyImageClip(imageDataUrl ?? clipToCopy.clip.content, clipToCopy.clip.content);
         break;
       default:
         clipboard.writeText(clipToCopy.clip.content);
@@ -132,19 +142,31 @@ export class HotkeyActions {
   }
 
   /**
-   * Handle copying image clips with fallback.
-   * If imageId is present, loads full image from image store.
+   * Resolve the full image data URL for an image clip. If imageId is present, loads the
+   * full image from the image store; otherwise the clip content is the image itself.
+   * Throws when the image is missing or is not an image data URL, so the caller can
+   * report the failure without copying an installation-local image ID.
    */
-  private async copyImageClip(content: string, imageId?: string): Promise<void> {
+  private async loadImageDataUrl(clip: StoredClip['clip']): Promise<string> {
+    let dataUrl = clip.content;
+
+    if (clip.imageId) {
+      const dataPath = join(app.getPath('userData'), 'clipless-data');
+      dataUrl = await loadImage(clip.imageId, dataPath);
+    }
+
+    if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/')) {
+      throw new Error('Full image is unavailable');
+    }
+    return dataUrl;
+  }
+
+  /**
+   * Write an already-loaded image to the clipboard, falling back to the inline data URL
+   * as text when the native image can't be built.
+   */
+  private copyImageClip(dataUrl: string, content: string): void {
     try {
-      let dataUrl = content;
-
-      // Load full image from image store if imageId is present
-      if (imageId) {
-        const dataPath = join(app.getPath('userData'), 'clipless-data');
-        dataUrl = await loadImage(imageId, dataPath);
-      }
-
       setSkipNextImageChange();
       const image = nativeImage.createFromDataURL(dataUrl);
       if (!image.isEmpty()) {
@@ -154,6 +176,9 @@ export class HotkeyActions {
         clipboard.writeText(dataUrl);
       }
     } catch (error) {
+      if (!content.startsWith('data:image/')) {
+        throw error;
+      }
       console.error('Failed to copy image, falling back to text:', error);
       clipboard.writeText(content);
     }

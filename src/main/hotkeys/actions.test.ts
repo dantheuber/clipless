@@ -198,16 +198,56 @@ describe('HotkeyActions', () => {
       expect(clipboard.writeText).toHaveBeenCalledWith('data:image/png;base64,abc');
     });
 
-    it('falls back to text when image copy throws', async () => {
+    it('falls back to the inline data URL when image copy throws', async () => {
       vi.mocked(nativeImage.createFromDataURL).mockImplementation(() => {
         throw new Error('bad image');
       });
       vi.mocked(storage.getClips).mockResolvedValue([
-        { clip: { id: 'c1', type: 'image', content: 'bad-data' }, isLocked: false, timestamp: 1 },
+        {
+          clip: { id: 'c1', type: 'image', content: 'data:image/png;base64,abc' },
+          isLocked: false,
+          timestamp: 1,
+        },
       ]);
       await actions.copyQuickClip(0);
-      expect(clipboard.writeText).toHaveBeenCalledWith('bad-data');
+      expect(clipboard.writeText).toHaveBeenCalledWith('data:image/png;base64,abc');
     });
+
+    it.each(['missing file', 'invalid data', 'missing imageId'])(
+      'reports failure without copying an ID for an image with %s',
+      async (state) => {
+        if (state === 'missing file') {
+          vi.mocked(loadImage).mockRejectedValueOnce(new Error('FILE_NOT_FOUND'));
+        } else if (state === 'invalid data') {
+          vi.mocked(loadImage).mockResolvedValueOnce('img-missing');
+        }
+        vi.mocked(storage.getClips).mockResolvedValue([
+          {
+            clip: {
+              id: 'c1',
+              type: 'image',
+              content: 'img-missing',
+              imageId: state === 'missing imageId' ? undefined : 'img-missing',
+              thumbnailDataUrl: 'data:image/png;base64,thumbnail',
+            },
+            isLocked: false,
+            timestamp: 1,
+          },
+        ]);
+
+        await actions.copyQuickClip(0);
+
+        expect(clipboard.writeImage).not.toHaveBeenCalled();
+        expect(clipboard.writeText).not.toHaveBeenCalled();
+        expect(setSkipNextImageChange).not.toHaveBeenCalled();
+        expect(mockWindow.webContents.send).not.toHaveBeenCalledWith(
+          'hotkey-clip-copied',
+          expect.anything()
+        );
+        expect(showNotification).toHaveBeenCalledWith('Could not copy clip', expect.any(String));
+        expect(showNotification).not.toHaveBeenCalledWith('Clip copied', expect.any(String));
+      }
+    );
 
     it('loads full image from image store when imageId is present', async () => {
       vi.mocked(loadImage).mockResolvedValue('data:image/png;base64,fullimage');
@@ -220,7 +260,7 @@ describe('HotkeyActions', () => {
           clip: {
             id: 'c1',
             type: 'image',
-            content: 'data:image/png;base64,thumbnail',
+            content: 'img-123',
             imageId: 'img-123',
           },
           isLocked: false,

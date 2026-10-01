@@ -158,7 +158,7 @@ The things you don't notice until you'd miss them.
 - **🔒 Encrypted storage** — history is encrypted with your OS keystore (DPAPI, Keychain or Secret Service) and never leaves your machine. Data is split into domain-specific files for efficient saves, with images stored as separate encrypted files and fast-loading thumbnails.
 - **🚀 Non-blocking startup** — the window appears immediately while your history loads in the background. Nothing is written back until that load succeeds, and if the history can't be read, a banner tells you saving is paused so the stored history isn't overwritten. If a save is refused later (disk full, permissions), a toast and a banner say so while every clip stays in the list and saving keeps retrying.
 - **🖥️ Starts with you** — auto-launch on boot, start minimized to the tray, and update quietly in the background (auto-update works on Windows and Linux; macOS still needs a manual reinstall — see [Installing on macOS](#-installing-on-macos)).
-- **💾 Backup-friendly** — export and import your clips, patterns, tools and templates.
+- **💾 Backup-friendly** — export and import your clips, patterns, tools and templates. Backups carry full-size images, so image clips survive a clear or a move to another machine.
 
 ---
 

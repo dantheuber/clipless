@@ -22,14 +22,17 @@ import styles from './General.module.css';
 export function General() {
   const toast = useToast();
 
-  const exportData = async () => {
+  /** Saves a backup and says so; resolves to whether one was written. */
+  const exportData = async (): Promise<boolean> => {
     try {
       const data = await window.api.storageExportData();
       const name = backupFileName(new Date());
       const size = downloadText(name, data);
       toast('Saved', `${name} · ${formatBytes(size)}`);
+      return true;
     } catch (error) {
       toast('Export failed', errorText(error));
+      return false;
     }
   };
 
