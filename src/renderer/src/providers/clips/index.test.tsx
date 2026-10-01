@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, act, cleanup } from '@testing-library/react';
+import { render, renderHook, screen, act, cleanup, waitFor } from '@testing-library/react';
 import type { StoredClipsSnapshot } from '../../../../shared/types';
 import { ToastContext, ToastProvider, type ToastFn } from '../../components/Toast';
 import { LanguageDetectionProvider } from '../languageDetection';
 import { ScanIndexProvider } from '../scan';
-import { ClipsProvider, useClipsMeta } from './index';
+import { ClipsProvider, useClipsActions, useClipsData, useClipsMeta } from './index';
 
 const DECRYPT_ERROR = 'Error while decrypting the ciphertext provided to safeStorage.';
 
@@ -83,6 +83,47 @@ describe('ClipsProvider load error', () => {
 });
 
 const SAVE_REFUSED = 'Storage could not be loaded';
+
+describe('ClipsProvider image copy feedback', () => {
+  it.each([false, true])(
+    'reports the actual copy result when the full image is available: %s',
+    async (available) => {
+      const toast = vi.fn<ToastFn>();
+      api().storageGetClipsSnapshot.mockResolvedValue({
+        loadState: { complete: true, error: null },
+        clips: [
+          {
+            clip: { id: 'image-clip', type: 'image', content: 'image-1', imageId: 'image-1' },
+            isLocked: false,
+            timestamp: 1,
+          },
+        ],
+      });
+      api().storageSaveClips.mockReset().mockResolvedValue(true);
+      api().getFullImage.mockResolvedValue(available ? 'data:image/png;base64,fullimage' : null);
+      const { result } = renderHook(() => ({ actions: useClipsActions(), data: useClipsData() }), {
+        wrapper: ({ children }) => (
+          <ToastContext.Provider value={toast}>
+            <LanguageDetectionProvider>
+              <ScanIndexProvider>
+                <ClipsProvider>{children}</ClipsProvider>
+              </ScanIndexProvider>
+            </LanguageDetectionProvider>
+          </ToastContext.Provider>
+        ),
+      });
+      await waitFor(() => expect(result.current.data.clips[0]?.id).toBe('image-clip'));
+
+      await act(async () => {
+        await result.current.actions.copyClipToClipboard(0);
+      });
+
+      expect(toast).toHaveBeenCalledExactlyOnceWith(
+        available ? 'Copied clip 1 to the clipboard' : 'Could not copy clip 1 to the clipboard'
+      );
+    }
+  );
+});
 
 const loadedEmpty = (): StoredClipsSnapshot => ({
   loadState: { complete: true, error: null },

@@ -213,6 +213,8 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
       if (copied) {
         recordFeatureUsage('clip_copy');
         toast(`Copied clip ${index + 1} to the clipboard`);
+      } else {
+        toast(`Could not copy clip ${index + 1} to the clipboard`);
       }
     },
     [writeClipToClipboard, toast]

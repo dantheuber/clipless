@@ -57,7 +57,7 @@ import {
   processQuickClipsConfig,
 } from './quick-tools';
 import { saveWindowBounds, getWindowBounds, deleteWindowBounds } from './window-bounds';
-import { saveImage, deleteImage, deleteAllImages } from './image-store';
+import { saveImage, loadImage, deleteImage, deleteAllImages } from './image-store';
 
 const CURRENT_STORAGE_VERSION = 1;
 
@@ -90,6 +90,9 @@ class SecureStorage {
 
   // One write at a time per domain file; a save arriving mid-write waits and then writes
   private saveQueue = new SaveQueue();
+
+  // Exports still reading image files; clearAllData waits for these before it deletes
+  private pendingExports = new Set<Promise<string>>();
 
   private onBackgroundLoadComplete?: () => void;
 
@@ -842,6 +845,12 @@ class SecureStorage {
       await this.initialize();
     }
 
+    // An export reads every image file, so deleting under it would fail the backup after
+    // the history was already gone. Let in-flight exports settle either way, then delete.
+    while (this.pendingExports.size > 0) {
+      await Promise.allSettled([...this.pendingExports]);
+    }
+
     this.settings = { ...DEFAULT_SETTINGS };
     this.clips = [];
     this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
@@ -866,13 +875,27 @@ class SecureStorage {
    * Export data (unencrypted for backup purposes)
    */
   async exportData(): Promise<string> {
+    const pending = this.buildExport();
+    this.pendingExports.add(pending);
+    try {
+      return await pending;
+    } finally {
+      this.pendingExports.delete(pending);
+    }
+  }
+
+  private async buildExport(): Promise<string> {
     if (!this.isInitialized) {
       await this.initialize();
     }
 
+    const clips = await Promise.all(
+      this.clips.map((storedClip) => this.inlineFullImage(storedClip))
+    );
+
     // Reconstruct AppData for export compatibility
     const data: AppData = {
-      clips: this.clips,
+      clips,
       settings: this.settings,
       templates: this.templatesData.templates,
       searchTerms: this.templatesData.searchTerms,
@@ -881,6 +904,35 @@ class SecureStorage {
       version: this.meta.version,
     };
     return JSON.stringify(data, null, 2);
+  }
+
+  /**
+   * Replace an image clip's ID and thumbnail with the full image from the image store,
+   * so a backup carries the original image. An image ID only means something to this
+   * installation, so a clip whose image can't be loaded fails the whole export rather than
+   * producing a backup that reports as saved but can't be restored elsewhere.
+   */
+  private async inlineFullImage(storedClip: StoredClip): Promise<StoredClip> {
+    const { imageId } = storedClip.clip;
+    if (storedClip.clip.type !== 'image' || !imageId) {
+      return storedClip;
+    }
+
+    let content: string;
+    try {
+      content = await loadImage(imageId, this.dataPath);
+    } catch (error) {
+      console.error('Failed to load image for export:', error);
+      throw new Error(`Image for clip ${storedClip.clip.id} could not be read`);
+    }
+    if (typeof content !== 'string' || !content.startsWith('data:image/')) {
+      throw new Error(`Image for clip ${storedClip.clip.id} is not a valid image`);
+    }
+
+    const clip = { ...storedClip.clip, content };
+    delete clip.imageId;
+    delete clip.thumbnailDataUrl;
+    return { ...storedClip, clip };
   }
 
   /**

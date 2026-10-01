@@ -34,6 +34,7 @@ vi.mock('./file-operations', () => ({
 
 vi.mock('./image-store', () => ({
   saveImage: vi.fn(),
+  loadImage: vi.fn().mockResolvedValue('data:image/png;base64,fullimage'),
   deleteImage: vi.fn().mockResolvedValue(undefined),
   deleteAllImages: vi.fn().mockResolvedValue(undefined),
 }));
