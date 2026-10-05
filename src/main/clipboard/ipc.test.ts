@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import type { IpcMainInvokeEvent } from 'electron';
+import { BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 
 type InvokeHandler = (event: IpcMainInvokeEvent, ...args: unknown[]) => unknown;
 
@@ -71,7 +71,7 @@ vi.mock('../storage', () => ({
   storage: { getGroupColours: vi.fn(), setGroupColours: vi.fn() },
 }));
 
-import { saveSettings } from './storage-integration';
+import { clearAllData, saveSettings } from './storage-integration';
 import { applyAutoStart } from '../autoStart';
 import { setupClipboardIPC } from './ipc';
 
@@ -123,5 +123,44 @@ describe('storage-save-settings', () => {
 
     await expect(invokeSaveSettings({ autoStart: true })).rejects.toBe(failure);
     expect(applyAutoStart).not.toHaveBeenCalled();
+  });
+});
+
+describe('storage-clear-all', () => {
+  const invokeClear = () => {
+    const handler = handlers.get('storage-clear-all');
+    if (!handler) throw new Error('storage-clear-all handler was not registered');
+    return Promise.resolve(handler(event));
+  };
+
+  it('notifies live windows after clearing succeeds and before replying', async () => {
+    const send = vi.fn();
+    const destroyedSend = vi.fn();
+    vi.mocked(BrowserWindow.getAllWindows).mockReturnValue([
+      { isDestroyed: () => false, webContents: { send } },
+      { isDestroyed: () => true, webContents: { send: destroyedSend } },
+    ] as unknown as BrowserWindow[]);
+    let finish: (cleared: boolean) => void = () => {};
+    vi.mocked(clearAllData).mockImplementationOnce(
+      () => new Promise<boolean>((resolve) => (finish = resolve))
+    );
+
+    const clear = invokeClear();
+    expect(send).not.toHaveBeenCalled();
+    finish(true);
+    expect(await clear).toBe(true);
+    expect(send).toHaveBeenCalledExactlyOnceWith('storage-cleared');
+    expect(destroyedSend).not.toHaveBeenCalled();
+  });
+
+  it('leaves the renderer history alone when clearing fails', async () => {
+    const send = vi.fn();
+    vi.mocked(BrowserWindow.getAllWindows).mockReturnValue([
+      { isDestroyed: () => false, webContents: { send } },
+    ] as unknown as BrowserWindow[]);
+    vi.mocked(clearAllData).mockResolvedValueOnce(false);
+
+    expect(await invokeClear()).toBe(false);
+    expect(send).not.toHaveBeenCalled();
   });
 });

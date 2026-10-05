@@ -87,6 +87,7 @@ const api = {
 
   // Storage APIs
   onStorageReady: (callback: () => void) => subscribe('storage-ready', () => callback()),
+  onStorageCleared: (callback: () => void) => subscribe('storage-cleared', () => callback()),
   storageGetClipsSnapshot: (): Promise<StoredClipsSnapshot> =>
     electronAPI.ipcRenderer.invoke('storage-get-clips-snapshot'),
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>

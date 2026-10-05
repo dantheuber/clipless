@@ -26,6 +26,8 @@ export const useClipsStorage = (
   setIsInitiallyLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): { loadError: ClipsLoadError | null; saveError: ClipsSaveError | null } => {
   const [loadError, setLoadError] = useState<ClipsLoadError | null>(null);
+  // A clear invalidates work that captured the previous history, including pending loads.
+  const storageGeneration = useRef(0);
 
   // The two save paths fail independently, so each reports its own outcome and the list
   // shows the clip history first: a settings write that lands does not imply the clip
@@ -52,6 +54,7 @@ export const useClipsStorage = (
   // history: the main process serves empty defaults while its background load runs, and a
   // save of those would overwrite the real history and delete the images it references.
   const loadStoredData = useCallback(async () => {
+    const generation = storageGeneration.current;
     if (!window.api) {
       setIsInitiallyLoading(false);
       return;
@@ -60,14 +63,16 @@ export const useClipsStorage = (
     try {
       // Load settings first
       const settings = await window.api.storageGetSettings();
-      if (settings && typeof settings.maxClips === 'number') {
-        setMaxClips(settings.maxClips);
-      }
       // Note: codeDetectionEnabled is now handled by LanguageDetectionProvider
 
       // The clips arrive with the load state they were read under, so the placeholder
       // served during the background load cannot be mistaken for an empty history
       const { loadState, clips: storedClips } = await window.api.storageGetClipsSnapshot();
+      if (generation !== storageGeneration.current) return;
+
+      if (settings && typeof settings.maxClips === 'number') {
+        setMaxClips(settings.maxClips);
+      }
 
       if (!loadState.complete) {
         // The storage-ready event triggers another load once the history is available
@@ -117,6 +122,7 @@ export const useClipsStorage = (
       setLoadError(null);
       setIsInitiallyLoading(false);
     } catch (error) {
+      if (generation !== storageGeneration.current) return;
       console.error('Failed to load data from storage:', error);
       // The main process could not be reached or threw; a restart may well clear that
       setLoadError({ message: errorText(error), recoverable: true });
@@ -141,6 +147,22 @@ export const useClipsStorage = (
   // The latest list and locks, for the settings listener below
   const latest = useRef({ clips, lockedClips });
   latest.current = { clips, lockedClips };
+
+  useEffect(() => {
+    if (!window.api?.onStorageCleared) return;
+    return window.api.onStorageCleared(() => {
+      storageGeneration.current++;
+      const emptyClips = updateClipsLength([], DEFAULT_MAX_CLIPS);
+      // Settings may arrive before React renders this reset; shrink the empty list then.
+      latest.current = { clips: emptyClips, lockedClips: {} };
+      setClips(emptyClips);
+      setLockedClips({});
+      setMaxClips(DEFAULT_MAX_CLIPS);
+      setLoadError(null);
+      setSaveFailures({ clips: null, settings: null });
+      setIsInitiallyLoading(false);
+    });
+  }, [setClips, setLockedClips, setMaxClips, setIsInitiallyLoading]);
 
   // Listen for settings updates from other windows (like settings window)
   useEffect(() => {
@@ -168,15 +190,19 @@ export const useClipsStorage = (
     // Don't save during initial loading
     if (isInitiallyLoading) return;
 
+    const generation = storageGeneration.current;
+
     const saveClipsToStorage = async () => {
-      if (!window.api) return;
+      if (!window.api || generation !== storageGeneration.current) return;
 
       try {
         // Save all clips, including empty ones to preserve array structure
         // Filter will be done on the storage side if needed
         await window.api.storageSaveClips(clips, lockedClips);
+        if (generation !== storageGeneration.current) return;
         reportSave('clips', null);
       } catch (error) {
+        if (generation !== storageGeneration.current) return;
         console.error('Failed to save clips to storage:', error);
         // Nothing is dropped and the next change retries; the list says so meanwhile
         reportSave('clips', errorText(error));
@@ -193,13 +219,17 @@ export const useClipsStorage = (
     // Don't save during initial loading
     if (isInitiallyLoading) return;
 
+    const generation = storageGeneration.current;
+
     const saveSettingsToStorage = async () => {
-      if (!window.api) return;
+      if (!window.api || generation !== storageGeneration.current) return;
 
       try {
         await window.api.storageSaveSettings({ maxClips });
+        if (generation !== storageGeneration.current) return;
         reportSave('settings', null);
       } catch (error) {
+        if (generation !== storageGeneration.current) return;
         console.error('Failed to save settings to storage:', error);
         reportSave('settings', errorText(error));
       }

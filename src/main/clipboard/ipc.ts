@@ -127,7 +127,15 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('storage-get-stats', async () => getStorageStats());
   ipcMain.handle('storage-export-data', async () => exportData());
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
-  ipcMain.handle('storage-clear-all', async () => clearAllData());
+  ipcMain.handle('storage-clear-all', async () => {
+    const cleared = await clearAllData();
+    if (cleared) {
+      for (const window of BrowserWindow.getAllWindows()) {
+        if (!window.isDestroyed()) window.webContents.send('storage-cleared');
+      }
+    }
+    return cleared;
+  });
 
   // Rendered view of an html clip: sanitised here, shown only in a sandboxed iframe.
   // Called when the user switches to the rendered view, never at capture.
