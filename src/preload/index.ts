@@ -97,7 +97,7 @@ const api = {
     electronAPI.ipcRenderer.invoke('analytics-feature-used', feature),
   analyticsSetEnabled: (enabled: boolean) =>
     electronAPI.ipcRenderer.invoke('analytics-set-enabled', enabled),
-  storageSaveSettings: (settings: UserSettings) =>
+  storageSaveSettings: (settings: Partial<UserSettings>) =>
     electronAPI.ipcRenderer.invoke('storage-save-settings', settings),
   storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),
   storageExportData: () => electronAPI.ipcRenderer.invoke('storage-export-data'),

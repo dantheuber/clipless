@@ -111,9 +111,14 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       saveClips(clips, lockedIndices)
   );
   ipcMain.handle('storage-get-settings', async () => getSettings());
-  ipcMain.handle('storage-save-settings', async (_event, settings: UserSettings) => {
+  // Renderers save partial patches here (the clips window saves `{ maxClips }` on every
+  // launch). Only re-apply the OS login item when the patch actually carries autoStart:
+  // `setLoginItemSettings({ openAtLogin: undefined })` would silently remove it.
+  ipcMain.handle('storage-save-settings', async (_event, settings: Partial<UserSettings>) => {
     const result = await saveSettings(settings);
-    applyAutoStart(settings.autoStart);
+    if (typeof settings.autoStart === 'boolean') {
+      applyAutoStart(settings.autoStart);
+    }
     return result;
   });
   // Actual OS login-item state, so the renderer can reflect reality rather than
