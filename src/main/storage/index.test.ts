@@ -828,6 +828,58 @@ describe('SecureStorage.clearAllData', () => {
     expect(await storage.getClips()).toEqual([]);
   });
 
+  it('refuses a save arriving while the files are being deleted', async () => {
+    serveFiles(() => Promise.resolve(history));
+    await initialiseAndWaitForLoad();
+    // clips.enc is gone; the templates.enc delete is still waiting on the disk
+    let finishUnlink!: () => void;
+    vi.mocked(fs.unlink)
+      .mockResolvedValueOnce(undefined)
+      .mockReturnValueOnce(new Promise<void>((resolve) => (finishUnlink = resolve)));
+
+    const clear = storage.clearAllData();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(fs.unlink).toHaveBeenCalledTimes(2);
+
+    // The renderer's debounced save fires with the history it still holds. Letting it through
+    // would rename a fresh clips.enc into place once the clear has returned.
+    const late = storage.saveClips(
+      history.map((c) => c.clip),
+      {}
+    );
+    await expect(late).rejects.toThrow(/being cleared/);
+
+    finishUnlink();
+    await clear;
+    expect(fileOperations.saveEncryptedJson).not.toHaveBeenCalled();
+    expect(imageStore.deleteImage).not.toHaveBeenCalled();
+    expect(await storage.getClips()).toEqual([]);
+
+    // Once the clear has settled, saves work again
+    await storage.saveClips([{ id: 'c', type: 'text', content: 'new' }], {});
+    expect(fileOperations.saveEncryptedJson).toHaveBeenCalledTimes(1);
+  });
+
+  it('refuses every other write while a clear is running', async () => {
+    serveFiles(() => Promise.resolve(history));
+    await initialiseAndWaitForLoad();
+    let finishUnlink!: () => void;
+    vi.mocked(fs.unlink).mockReturnValueOnce(
+      new Promise<void>((resolve) => (finishUnlink = resolve))
+    );
+    const clear = storage.clearAllData();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await expect(storage.saveSettings({ maxClips: 5 })).rejects.toThrow(/being cleared/);
+    await expect(storage.createTemplate('t', 'body')).rejects.toThrow(/being cleared/);
+    await expect(storage.importData('{}')).rejects.toThrow(/being cleared/);
+
+    finishUnlink();
+    await clear;
+    expect(fileOperations.saveEncryptedJson).not.toHaveBeenCalled();
+    expect(await storage.getTemplates()).toEqual([]);
+  });
+
   it('clears a failed load so fresh clips can be saved in the same session', async () => {
     serveFiles(decryptFailure);
     await initialiseAndWaitForLoad();
