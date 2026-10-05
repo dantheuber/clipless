@@ -60,9 +60,13 @@ let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registration
  * window's scan cache can clear. Wraps a handler so the broadcast follows its write.
  */
 function broadcastConfigChanged(): void {
+  broadcastToWindows('quick-clips-config-changed');
+}
+
+function broadcastToWindows(channel: string): void {
   for (const window of BrowserWindow.getAllWindows()) {
     if (!window.isDestroyed()) {
-      window.webContents.send('quick-clips-config-changed');
+      window.webContents.send(channel);
     }
   }
 }
@@ -129,11 +133,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('storage-import-data', async (_event, jsonData: string) => importData(jsonData));
   ipcMain.handle('storage-clear-all', async () => {
     const cleared = await clearAllData();
-    if (cleared) {
-      for (const window of BrowserWindow.getAllWindows()) {
-        if (!window.isDestroyed()) window.webContents.send('storage-cleared');
-      }
-    }
+    if (cleared) broadcastToWindows('storage-cleared');
     return cleared;
   });
 

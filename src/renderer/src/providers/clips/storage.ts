@@ -28,6 +28,7 @@ export const useClipsStorage = (
   const [loadError, setLoadError] = useState<ClipsLoadError | null>(null);
   // A clear invalidates work that captured the previous history, including pending loads.
   const storageGeneration = useRef(0);
+  const isStale = (generation: number) => generation !== storageGeneration.current;
 
   // The two save paths fail independently, so each reports its own outcome and the list
   // shows the clip history first: a settings write that lands does not imply the clip
@@ -68,7 +69,7 @@ export const useClipsStorage = (
       // The clips arrive with the load state they were read under, so the placeholder
       // served during the background load cannot be mistaken for an empty history
       const { loadState, clips: storedClips } = await window.api.storageGetClipsSnapshot();
-      if (generation !== storageGeneration.current) return;
+      if (isStale(generation)) return;
 
       if (settings && typeof settings.maxClips === 'number') {
         setMaxClips(settings.maxClips);
@@ -122,7 +123,7 @@ export const useClipsStorage = (
       setLoadError(null);
       setIsInitiallyLoading(false);
     } catch (error) {
-      if (generation !== storageGeneration.current) return;
+      if (isStale(generation)) return;
       console.error('Failed to load data from storage:', error);
       // The main process could not be reached or threw; a restart may well clear that
       setLoadError({ message: errorText(error), recoverable: true });
@@ -193,16 +194,16 @@ export const useClipsStorage = (
     const generation = storageGeneration.current;
 
     const saveClipsToStorage = async () => {
-      if (!window.api || generation !== storageGeneration.current) return;
+      if (!window.api || isStale(generation)) return;
 
       try {
         // Save all clips, including empty ones to preserve array structure
         // Filter will be done on the storage side if needed
         await window.api.storageSaveClips(clips, lockedClips);
-        if (generation !== storageGeneration.current) return;
+        if (isStale(generation)) return;
         reportSave('clips', null);
       } catch (error) {
-        if (generation !== storageGeneration.current) return;
+        if (isStale(generation)) return;
         console.error('Failed to save clips to storage:', error);
         // Nothing is dropped and the next change retries; the list says so meanwhile
         reportSave('clips', errorText(error));
@@ -222,14 +223,14 @@ export const useClipsStorage = (
     const generation = storageGeneration.current;
 
     const saveSettingsToStorage = async () => {
-      if (!window.api || generation !== storageGeneration.current) return;
+      if (!window.api || isStale(generation)) return;
 
       try {
         await window.api.storageSaveSettings({ maxClips });
-        if (generation !== storageGeneration.current) return;
+        if (isStale(generation)) return;
         reportSave('settings', null);
       } catch (error) {
-        if (generation !== storageGeneration.current) return;
+        if (isStale(generation)) return;
         console.error('Failed to save settings to storage:', error);
         reportSave('settings', errorText(error));
       }
