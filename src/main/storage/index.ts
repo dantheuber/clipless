@@ -90,6 +90,9 @@ class SecureStorage {
 
   // One write at a time per domain file; a save arriving mid-write waits and then writes
   private saveQueue = new SaveQueue();
+  // Bumped by clearAllData. A write queued under an older value carries the deleted history
+  // and is refused instead of written, so a clear cannot be undone by a save it overtook.
+  private clearGeneration = 0;
 
   // Exports still reading image files; clearAllData waits for these before it deletes
   private pendingExports = new Set<Promise<string>>();
@@ -280,7 +283,13 @@ class SecureStorage {
    * always reaches disk (see SaveQueue).
    */
   private async saveDomain(key: string, data: unknown, filePath: string): Promise<void> {
-    await this.saveQueue.run(key, () => saveEncryptedJson(data, filePath));
+    const generation = this.clearGeneration;
+    await this.saveQueue.run(key, () => {
+      if (generation !== this.clearGeneration) {
+        throw new Error('Storage was cleared before this save could be written');
+      }
+      return saveEncryptedJson(data, filePath);
+    });
   }
 
   /**
@@ -851,10 +860,20 @@ class SecureStorage {
       await Promise.allSettled([...this.pendingExports]);
     }
 
+    // A write already in flight cannot be stopped: its temp file would be renamed into place
+    // after the delete below and bring the history back. Refuse every write still queued,
+    // then let the in-flight ones land so the delete is the last thing to touch the files.
+    this.clearGeneration++;
+    await this.saveQueue.idle();
+
     this.settings = { ...DEFAULT_SETTINGS };
     this.clips = [];
     this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
     this.meta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
+    // The unreadable history the load error guarded is about to be deleted, and the empty
+    // defaults are now the history, so saves may resume once this returns.
+    this.loadError = null;
+    this.isBackgroundLoadComplete = true;
 
     // Delete all domain files
     const filesToDelete = [this.settingsPath, this.clipsPath, this.templatesPath, this.metaPath];
