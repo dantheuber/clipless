@@ -90,6 +90,13 @@ class SecureStorage {
 
   // One write at a time per domain file; a save arriving mid-write waits and then writes
   private saveQueue = new SaveQueue();
+  // Bumped by clearAllData. A write queued under an older value carries the deleted history
+  // and is refused instead of written, so a clear cannot be undone by a save it overtook.
+  private clearGeneration = 0;
+  // True from the moment clearAllData starts refusing writes until the files are gone. A save
+  // arriving mid-delete would otherwise capture the new generation and write the history it
+  // still holds into place after the delete, undoing the clear.
+  private clearing = false;
 
   // Exports still reading image files; clearAllData waits for these before it deletes
   private pendingExports = new Set<Promise<string>>();
@@ -280,7 +287,24 @@ class SecureStorage {
    * always reaches disk (see SaveQueue).
    */
   private async saveDomain(key: string, data: unknown, filePath: string): Promise<void> {
-    await this.saveQueue.run(key, () => saveEncryptedJson(data, filePath));
+    this.assertNotClearing();
+    const generation = this.clearGeneration;
+    await this.saveQueue.run(key, () => {
+      if (generation !== this.clearGeneration) {
+        throw new Error('Storage was cleared before this save could be written');
+      }
+      return saveEncryptedJson(data, filePath);
+    });
+  }
+
+  /**
+   * Every write calls this before touching the in-memory state, so a write arriving while
+   * clearAllData runs is refused instead of carrying the pre-clear history past the delete.
+   */
+  private assertNotClearing(): void {
+    if (this.clearing) {
+      throw new Error('Storage is being cleared');
+    }
   }
 
   /**
@@ -384,6 +408,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     // Until the history has loaded successfully, this.clips is a placeholder; replacing it
     // would overwrite the real history and delete every image it references.
@@ -448,6 +473,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     this.settings = mergeSettings(this.settings, settings);
     await this.saveSettingsData();
@@ -479,6 +505,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const template = createTemplateObject(name, content, this.templatesData.templates.length);
     this.templatesData.templates.push(template);
@@ -493,6 +520,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const templateIndex = this.templatesData.templates.findIndex((t) => t.id === id);
     if (templateIndex === -1) {
@@ -515,6 +543,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const templateIndex = this.templatesData.templates.findIndex((t) => t.id === id);
     if (templateIndex === -1) {
@@ -533,6 +562,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     // Update order for each template
     templates.forEach((template, index) => {
@@ -586,6 +616,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const searchTerm = createSearchTermObject(name, pattern, this.templatesData.searchTerms.length);
     this.templatesData.searchTerms.push(searchTerm);
@@ -600,6 +631,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const searchTermIndex = this.templatesData.searchTerms.findIndex((t) => t.id === id);
     if (searchTermIndex === -1) {
@@ -622,6 +654,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const searchTermIndex = this.templatesData.searchTerms.findIndex((t) => t.id === id);
     if (searchTermIndex === -1) {
@@ -652,6 +685,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const quickTool = createQuickToolObject(
       name,
@@ -671,6 +705,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const quickToolIndex = this.templatesData.quickTools.findIndex((t) => t.id === id);
     if (quickToolIndex === -1) {
@@ -693,6 +728,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const quickToolIndex = this.templatesData.quickTools.findIndex((t) => t.id === id);
     if (quickToolIndex === -1) {
@@ -720,6 +756,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
     this.templatesData = { ...this.templatesData, groupColours: { ...groupColours } };
     await this.saveTemplatesData();
     // The save may have pruned the map, so read it back rather than echo the argument
@@ -737,6 +774,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     const { searchTerms, quickTools } = processQuickClipsConfig(config);
 
@@ -851,24 +889,41 @@ class SecureStorage {
       await Promise.allSettled([...this.pendingExports]);
     }
 
-    this.settings = { ...DEFAULT_SETTINGS };
-    this.clips = [];
-    this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
-    this.meta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
+    // A write already in flight cannot be stopped: its temp file would be renamed into place
+    // after the delete below and bring the history back. Refuse every write still queued,
+    // then let the in-flight ones land so the delete is the last thing to touch the files.
+    // New writes are refused outright until the delete has finished: one arriving mid-delete
+    // would carry the pre-clear history and could land after the file it replaces is gone.
+    this.clearing = true;
+    try {
+      this.clearGeneration++;
+      await this.saveQueue.idle();
 
-    // Delete all domain files
-    const filesToDelete = [this.settingsPath, this.clipsPath, this.templatesPath, this.metaPath];
+      this.settings = { ...DEFAULT_SETTINGS };
+      this.clips = [];
+      this.templatesData = { ...DEFAULT_TEMPLATES_DATA };
+      this.meta = { version: __APP_VERSION__, storageVersion: CURRENT_STORAGE_VERSION };
+      // The unreadable history the load error guarded is about to be deleted, and the empty
+      // defaults are now the history, so saves may resume once this returns.
+      this.loadError = null;
+      this.isBackgroundLoadComplete = true;
 
-    for (const filePath of filesToDelete) {
-      try {
-        await fs.unlink(filePath);
-      } catch {
-        // File might not exist, that's okay
+      // Delete all domain files
+      const filesToDelete = [this.settingsPath, this.clipsPath, this.templatesPath, this.metaPath];
+
+      for (const filePath of filesToDelete) {
+        try {
+          await fs.unlink(filePath);
+        } catch {
+          // File might not exist, that's okay
+        }
       }
-    }
 
-    // Delete all image files
-    await deleteAllImages(this.dataPath);
+      // Delete all image files
+      await deleteAllImages(this.dataPath);
+    } finally {
+      this.clearing = false;
+    }
   }
 
   /**
@@ -942,6 +997,7 @@ class SecureStorage {
     if (!this.isInitialized) {
       await this.initialize();
     }
+    this.assertNotClearing();
 
     try {
       const importedData = JSON.parse(jsonData);

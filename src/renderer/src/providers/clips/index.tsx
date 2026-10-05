@@ -163,6 +163,16 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     setIsInitiallyLoading
   );
 
+  useEffect(() => {
+    if (!window.api?.onStorageCleared) return;
+    return window.api.onStorageCleared(() => {
+      setPinMap(EMPTY_PINS);
+      setDroppedNotice(null);
+      setQuickLook(INITIAL_QUICK_LOOK);
+      setClipCopyId(null);
+    });
+  }, []);
+
   // A refused save leaves the window looking healthy, so it gets a toast the moment it
   // starts failing. The debounced save retries on every change, so only the transition
   // into failing toasts; the list's banner carries the state for as long as it lasts.

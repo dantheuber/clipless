@@ -29,6 +29,7 @@ const failed = (): StoredClipsSnapshot => ({
   clips: [],
 });
 
+let storageCleared: (() => void) | null = null;
 let storageReady: (() => void) | null = null;
 let settingsUpdated: ((settings: unknown) => void) | null = null;
 let observed: {
@@ -87,6 +88,13 @@ const api = () => window.api as unknown as Record<string, ReturnType<typeof vi.f
 beforeEach(() => {
   vi.useFakeTimers();
   storageReady = null;
+  storageCleared = null;
+  api().onStorageCleared = vi.fn((cb: () => void) => {
+    storageCleared = cb;
+    return () => {
+      storageCleared = null;
+    };
+  });
   api().storageGetClipsSnapshot.mockReset().mockResolvedValue(loaded());
   api().storageSaveClips.mockReset().mockResolvedValue(true);
   api().storageSaveSettings.mockReset().mockResolvedValue(undefined);
@@ -191,6 +199,57 @@ describe('useClipsStorage load guard', () => {
     expect(observed.loadError).toBeNull();
     expect(observed.isInitiallyLoading).toBe(false);
     expect(observed.clips[0].content).toBe('back');
+  });
+});
+
+describe('useClipsStorage clear all', () => {
+  it('cancels the old history save and resets locks before default settings arrive', async () => {
+    api().storageGetClipsSnapshot.mockResolvedValue(
+      loaded([stored('a', 'sensitive'), stored('b', 'locked sensitive', true)])
+    );
+    mount();
+    await flush();
+    expect(observed.clips[0].content).toBe('sensitive');
+    expect(observed.lockedClips).toEqual({ 1: true });
+    expect(api().storageSaveClips).not.toHaveBeenCalled();
+
+    await act(async () => {
+      storageCleared?.();
+      // ClearAll re-applies defaults, even if the cleared list has not rendered yet.
+      settingsUpdated?.({ maxClips: DEFAULT_MAX_CLIPS });
+      await vi.advanceTimersByTimeAsync(1500);
+    });
+    await settle();
+
+    expect(observed.clips.every((clip) => clip.content === '')).toBe(true);
+    expect(observed.lockedClips).toEqual({});
+    expect(api().storageSaveClips).toHaveBeenCalled();
+    for (const [saved, locks] of api().storageSaveClips.mock.calls) {
+      expect(saved.every((clip: ClipItem) => clip.content === '')).toBe(true);
+      expect(locks).toEqual({});
+    }
+  });
+
+  it('ignores a history load that finishes after the clear', async () => {
+    let finishLoad: (snapshot: StoredClipsSnapshot) => void = () => {};
+    api().storageGetClipsSnapshot.mockImplementationOnce(
+      () => new Promise<StoredClipsSnapshot>((resolve) => (finishLoad = resolve))
+    );
+    mount();
+    await flush();
+
+    await act(async () => {
+      storageCleared?.();
+      finishLoad(loaded([stored('a', 'sensitive'), stored('b', 'locked sensitive', true)]));
+    });
+    await settle();
+
+    expect(observed.clips.every((clip) => clip.content === '')).toBe(true);
+    expect(observed.lockedClips).toEqual({});
+    expect(observed.isInitiallyLoading).toBe(false);
+    for (const [saved] of api().storageSaveClips.mock.calls) {
+      expect(saved.every((clip: ClipItem) => clip.content === '')).toBe(true);
+    }
   });
 });
 

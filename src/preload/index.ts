@@ -87,6 +87,7 @@ const api = {
 
   // Storage APIs
   onStorageReady: (callback: () => void) => subscribe('storage-ready', () => callback()),
+  onStorageCleared: (callback: () => void) => subscribe('storage-cleared', () => callback()),
   storageGetClipsSnapshot: (): Promise<StoredClipsSnapshot> =>
     electronAPI.ipcRenderer.invoke('storage-get-clips-snapshot'),
   storageSaveClips: (clips: StoredClip[], lockedIndices: Record<number, boolean>) =>
@@ -97,7 +98,7 @@ const api = {
     electronAPI.ipcRenderer.invoke('analytics-feature-used', feature),
   analyticsSetEnabled: (enabled: boolean) =>
     electronAPI.ipcRenderer.invoke('analytics-set-enabled', enabled),
-  storageSaveSettings: (settings: UserSettings) =>
+  storageSaveSettings: (settings: Partial<UserSettings>) =>
     electronAPI.ipcRenderer.invoke('storage-save-settings', settings),
   storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),
   storageExportData: () => electronAPI.ipcRenderer.invoke('storage-export-data'),
