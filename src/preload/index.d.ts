@@ -51,6 +51,7 @@ declare global {
       hotkeysGetDefaults: () => Promise<HotkeySettings>;
       // Storage APIs
       onStorageReady: (callback: () => void) => () => void;
+      onStorageCleared: (callback: () => void) => () => void;
       storageGetClipsSnapshot: () => Promise<StoredClipsSnapshot>;
       storageSaveClips: (clips: any[], lockedIndices: Record<number, boolean>) => Promise<boolean>;
       storageGetSettings: () => Promise<UserSettings>;
