@@ -41,7 +41,7 @@ export const getSettings = async (): Promise<UserSettings> => {
   }
 };
 
-export const saveSettings = async (settings: UserSettings): Promise<boolean> => {
+export const saveSettings = async (settings: Partial<UserSettings>): Promise<boolean> => {
   try {
     await storage.saveSettings(settings);
     return true;

@@ -4,7 +4,14 @@ import type { StoredClipsSnapshot } from '../../../../shared/types';
 import { ToastContext, ToastProvider, type ToastFn } from '../../components/Toast';
 import { LanguageDetectionProvider } from '../languageDetection';
 import { ScanIndexProvider } from '../scan';
-import { ClipsProvider, useClipsActions, useClipsData, useClipsMeta } from './index';
+import {
+  ClipsProvider,
+  useClipsActions,
+  useClipsData,
+  useClipsMeta,
+  useClipsPins,
+  useQuickLook,
+} from './index';
 
 const DECRYPT_ERROR = 'Error while decrypting the ciphertext provided to safeStorage.';
 
@@ -128,6 +135,88 @@ describe('ClipsProvider image copy feedback', () => {
 const loadedEmpty = (): StoredClipsSnapshot => ({
   loadState: { complete: true, error: null },
   clips: [],
+});
+
+describe('ClipsProvider clear all', () => {
+  it('clears history, locks, pins and the reader, then saves only newly copied clips', async () => {
+    vi.useFakeTimers();
+    const clearedListeners = new Set<() => void>();
+    api().onStorageCleared.mockImplementation((cb: () => void) => {
+      clearedListeners.add(cb);
+      return () => clearedListeners.delete(cb);
+    });
+    api().storageGetClipsSnapshot.mockResolvedValue({
+      loadState: { complete: true, error: null },
+      clips: [
+        { clip: { id: 'a', type: 'text', content: 'back' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'b', type: 'text', content: 'back' }, isLocked: true, timestamp: 1 },
+      ],
+    });
+    api().searchTermsGetAll.mockResolvedValue([
+      { id: 'secret', name: 'Secret', pattern: '(?<secret>back)', enabled: true },
+    ]);
+    api().storageSaveClips.mockReset().mockResolvedValue(true);
+    try {
+      const { result, unmount } = renderHook(
+        () => ({
+          data: useClipsData(),
+          actions: useClipsActions(),
+          pins: useClipsPins(),
+          reader: useQuickLook(),
+        }),
+        {
+          wrapper: ({ children }) => (
+            <ToastProvider>
+              <LanguageDetectionProvider>
+                <ScanIndexProvider>
+                  <ClipsProvider>{children}</ClipsProvider>
+                </ScanIndexProvider>
+              </LanguageDetectionProvider>
+            </ToastProvider>
+          ),
+        }
+      );
+      await act(async () => {});
+      act(() => {
+        result.current.pins.setPins(['secret|back'], true);
+        result.current.reader.openQuickLook('a', 0);
+      });
+      expect(result.current.pins.pins.size).toBe(1);
+      expect(result.current.actions.isClipLocked(1)).toBe(true);
+      expect(result.current.reader.openClip?.id).toBe('a');
+
+      act(() => clearedListeners.forEach((listener) => listener()));
+      await act(async () => vi.advanceTimersByTimeAsync(1500));
+      expect(result.current.data.clips.every((clip) => clip.content === '')).toBe(true);
+      expect(result.current.actions.isClipLocked(1)).toBe(false);
+      expect(result.current.pins.pins.size).toBe(0);
+      expect(result.current.reader.openClip).toBeNull();
+      for (const [saved] of api().storageSaveClips.mock.calls) {
+        expect(saved.every((clip: { content: string }) => clip.content === '')).toBe(true);
+      }
+
+      api().storageSaveClips.mockClear();
+      act(() =>
+        result.current.actions.clipboardUpdated({ id: 'new', type: 'text', content: 'fresh' })
+      );
+      await act(async () => vi.advanceTimersByTimeAsync(1500));
+      expect(api().storageSaveClips).toHaveBeenCalledTimes(1);
+      const [saved, locks] = api().storageSaveClips.mock.calls[0];
+      expect(saved.filter((clip: { content: string }) => clip.content !== '')).toEqual([
+        { id: 'new', type: 'text', content: 'fresh' },
+      ]);
+      expect(locks).toEqual({});
+      unmount();
+      expect(clearedListeners.size).toBe(0);
+    } finally {
+      cleanup();
+      vi.useRealTimers();
+      api()
+        .onStorageCleared.mockReset()
+        .mockReturnValue(() => {});
+      api().searchTermsGetAll.mockResolvedValue([]);
+    }
+  });
 });
 
 describe('ClipsProvider save error', () => {
