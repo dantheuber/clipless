@@ -135,6 +135,7 @@ class SecureStorage {
    * Load data in the background without blocking initialization
    */
   private async loadDataInBackground(): Promise<void> {
+    const generation = this.clearGeneration;
     try {
       // Ensure data directory exists
       await ensureDataDirectory(this.dataPath);
@@ -164,8 +165,12 @@ class SecureStorage {
       console.error('Failed to load data in background:', error);
       // Keep using default data, but refuse to write over the unread history. Nothing that
       // lands here (a missing directory, a failed migration) is known to repeat on the next
-      // launch, so a restart is worth suggesting.
-      this.loadError = { message: errorMessage(error), recoverable: true };
+      // launch, so a restart is worth suggesting. A clear during the load refuses the load's
+      // own writes (the inline-image migration's save); that history is deleted, so the
+      // refusal is not a load failure, and recording it would block every save after the clear.
+      if (generation === this.clearGeneration) {
+        this.loadError = { message: errorMessage(error), recoverable: true };
+      }
       this.isBackgroundLoadComplete = true;
       this.onBackgroundLoadComplete?.();
     }

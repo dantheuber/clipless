@@ -880,6 +880,46 @@ describe('SecureStorage.clearAllData', () => {
     expect(await storage.getTemplates()).toEqual([]);
   });
 
+  it('does not turn an inline-image migration refused by a clear into a load error', async () => {
+    // The background load is still moving an inline image when the clear starts
+    let finishImage!: (thumb: string) => void;
+    vi.mocked(imageStore.saveImage).mockReturnValueOnce(
+      new Promise<string>((resolve) => (finishImage = resolve))
+    );
+    serveFiles(() =>
+      Promise.resolve([
+        {
+          clip: { id: 'inline', type: 'image', content: 'data:image/png;base64,AAAA' },
+          isLocked: false,
+          timestamp: 1,
+        },
+      ])
+    );
+    const loaded = new Promise<void>((resolve) => storage.setOnBackgroundLoadComplete(resolve));
+    await storage.initialize();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(imageStore.saveImage).toHaveBeenCalledTimes(1);
+
+    let finishUnlink!: () => void;
+    vi.mocked(fs.unlink).mockReturnValueOnce(
+      new Promise<void>((resolve) => (finishUnlink = resolve))
+    );
+    const clear = storage.clearAllData();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    // The migration's save of the converted history lands mid-clear and is refused
+    finishImage('thumb');
+    await loaded;
+    finishUnlink();
+    await clear;
+
+    expect(storage.getLoadState()).toEqual({ complete: true, error: null });
+    await storage.saveClips([{ id: 'c', type: 'text', content: 'new' }], {});
+    const mockedSave = vi.mocked(fileOperations.saveEncryptedJson);
+    expect(mockedSave).toHaveBeenCalledTimes(1);
+    expect((mockedSave.mock.calls[0][0] as StoredClip[]).map((c) => c.clip.id)).toEqual(['c']);
+  });
+
   it('clears a failed load so fresh clips can be saved in the same session', async () => {
     serveFiles(decryptFailure);
     await initialiseAndWaitForLoad();
