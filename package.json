@@ -77,5 +77,10 @@
     "typescript": "^5.8.3",
     "vite": "^6.4.4",
     "vitest": "^4.1.8"
+  },
+  "overrides": {
+    "app-builder-lib": {
+      "@electron/get": "^5.0.0"
+    }
   }
 }
