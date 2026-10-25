@@ -91,6 +91,7 @@ const createMockApi = () => ({
   onClipboardChanged: vi.fn().mockReturnValue(() => {}),
   onHotkeyClipCopied: vi.fn().mockReturnValue(() => {}),
   onStorageReady: vi.fn().mockReturnValue(() => {}),
+  onStorageCleared: vi.fn().mockReturnValue(() => {}),
   startClipboardMonitoring: vi.fn().mockResolvedValue(true),
   stopClipboardMonitoring: vi.fn().mockResolvedValue(true),
   getCurrentClipboardData: vi.fn().mockResolvedValue(null),
