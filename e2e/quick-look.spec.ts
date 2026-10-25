@@ -30,7 +30,40 @@ async function launchApp(): Promise<{ app: ElectronApplication; window: Page }> 
   });
   const window = await app.firstWindow();
   await window.waitForSelector('#root > *');
+  // History loads in the background and replaces the list when it lands, dropping any clip
+  // copied before then
+  await expect
+    .poll(
+      () =>
+        window.evaluate(
+          async () => (await (window as any).api.storageGetClipsSnapshot()).loadState.complete
+        ),
+      { timeout: 15000 }
+    )
+    .toBe(true);
+  await waitForCapture(app, window);
   return { app, window };
+}
+
+/**
+ * Copy fresh probes until one lands in the list and stays: that proves the renderer is
+ * subscribed and its history reload has applied. A missed change is never replayed, so each
+ * try needs new text. Probes leave out UNIQUE so the filter counts are untouched.
+ */
+async function waitForCapture(app: ElectronApplication, window: Page): Promise<void> {
+  let attempt = 0;
+  await expect
+    .poll(
+      async () => {
+        const probe = `probe ${Math.random().toString(36).slice(2, 10)}-${attempt++}`;
+        await copyText(app, window, probe);
+        if ((await rowWith(window, probe).count()) === 0) return false;
+        await window.waitForTimeout(500);
+        return (await rowWith(window, probe).count()) > 0;
+      },
+      { timeout: 20000, intervals: [0] }
+    )
+    .toBe(true);
 }
 
 async function seedConfig(window: Page): Promise<void> {
@@ -58,7 +91,7 @@ async function copyText(app: ElectronApplication, window: Page, text: string): P
 const rowWith = (window: Page, text: string) =>
   window.locator('[data-testid="clip-row"]', { hasText: text }).first();
 
-test.describe('Quick look', () => {
+test.describe.serial('Quick look', () => {
   let app: ElectronApplication;
   let window: Page;
 
@@ -163,11 +196,16 @@ test.describe('Quick look', () => {
     await expect(reader.getByTestId('ql-position')).toHaveText('1 / 2 filtered');
     await window.keyboard.press('Escape');
     await expect(reader).toBeHidden();
+    // Closing the reader focuses the row on the next frame; let that land before taking focus back
+    await expect
+      .poll(() => window.evaluate(() => document.activeElement?.getAttribute('data-testid')))
+      .toBe('clip-row');
     // Esc on the input clears the text, a second hides the bar
     await input.focus();
-    await window.keyboard.press('Escape');
+    await expect(input).toBeFocused();
+    await input.press('Escape');
     await expect(input).toHaveValue('');
-    await window.keyboard.press('Escape');
+    await input.press('Escape');
     await expect(window.getByTestId('search-bar')).toBeHidden();
   });
 
