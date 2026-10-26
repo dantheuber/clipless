@@ -116,6 +116,37 @@ describe('HotkeyActions', () => {
       expect(clipboard.writeText).not.toHaveBeenCalled();
     });
 
+    it('copies nothing for the blank row a deleted clip leaves behind', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.mocked(storage.getClips).mockResolvedValue([
+        { clip: { id: 'a', type: 'text', content: 'A' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'blank', type: 'text', content: '' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c', type: 'text', content: 'C' }, isLocked: false, timestamp: 1 },
+      ]);
+
+      await actions.copyQuickClip(1);
+
+      expect(clipboard.writeText).not.toHaveBeenCalled();
+      expect(mockWindow.webContents.send).not.toHaveBeenCalled();
+      expect(showNotification).not.toHaveBeenCalled();
+      expect(warn).toHaveBeenCalledWith(expect.stringMatching(/index 1/));
+      warn.mockRestore();
+    });
+
+    it('copies the clip shown in the row below a deleted one', async () => {
+      vi.mocked(storage.getClips).mockResolvedValue([
+        { clip: { id: 'a', type: 'text', content: 'A' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'blank', type: 'text', content: '' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'c', type: 'text', content: 'C' }, isLocked: false, timestamp: 1 },
+        { clip: { id: 'd', type: 'text', content: 'D' }, isLocked: false, timestamp: 1 },
+      ]);
+
+      await actions.copyQuickClip(2);
+
+      expect(clipboard.writeText).toHaveBeenCalledWith('C');
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith('hotkey-clip-copied', 2);
+    });
+
     it('sends hotkey-clip-copied event to renderer', async () => {
       vi.mocked(storage.getClips).mockResolvedValue([
         { clip: { id: 'c1', type: 'text', content: 'hello' }, isLocked: false, timestamp: 1 },

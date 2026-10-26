@@ -3,6 +3,7 @@ import { join } from 'path';
 import { storage } from '../storage';
 import { showNotification } from '../notifications';
 import { loadImage } from '../storage/image-store';
+import { isStoredSlotEmpty } from '../storage/clips';
 import { checkClipboardNow, setSkipNextImageChange } from '../clipboard/monitoring';
 import type { ClipItem, StoredClip } from '../../shared/types';
 import { recordFeatureUsage } from '../analytics';
@@ -80,8 +81,10 @@ export class HotkeyActions {
         return;
       }
 
+      // Stored positions match the rows on screen, so a deleted clip leaves an empty slot
+      // here. That row shows nothing, so the hotkey copies nothing rather than a later row.
       const clipToCopy = clips[index];
-      if (!clipToCopy) {
+      if (!clipToCopy || isStoredSlotEmpty(clipToCopy)) {
         console.warn(`No clip found at index ${index}`);
         return;
       }

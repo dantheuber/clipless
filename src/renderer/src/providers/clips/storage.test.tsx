@@ -307,6 +307,25 @@ describe('useClipsStorage stored data', () => {
     expect(observed.lockedClips).toEqual({ 1: true });
   });
 
+  it('restores clips and locks at their stored positions when a slot is blank', async () => {
+    api().storageGetSettings.mockResolvedValue({ maxClips: 5 });
+    api().storageGetClipsSnapshot.mockResolvedValue(
+      loaded([
+        stored('a', 'one'),
+        stored('blank', ''),
+        stored('c', 'three', true),
+        stored('d', 'four'),
+      ])
+    );
+    mount();
+    await settle();
+
+    expect(observed.clips).toHaveLength(5);
+    expect(observed.clips.map((c) => c.content)).toEqual(['one', '', 'three', 'four', '']);
+    expect(observed.clips[2].id).toBe('c');
+    expect(observed.lockedClips).toEqual({ 2: true });
+  });
+
   it('skips stored entries without usable content', async () => {
     const log = vi.spyOn(console, 'log').mockImplementation(() => {});
     api().storageGetClipsSnapshot.mockResolvedValue(
