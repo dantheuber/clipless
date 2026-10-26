@@ -289,7 +289,7 @@ describe('General', () => {
     const file = new File(
       [
         JSON.stringify({
-          clips: [{ isLocked: true }, {}],
+          clips: [{ clip: { content: 'a' }, isLocked: true }, { clip: { content: 'b' } }],
           settings: { hotkeys: { a: {}, b: {} } },
           searchTerms: [{}],
         }),
