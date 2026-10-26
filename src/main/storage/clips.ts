@@ -5,7 +5,10 @@ import type { ClipItem, StoredClip } from '../../shared/types';
  * is stored as a blank slot so later rows keep their positions.
  */
 export function isStoredSlotEmpty(storedClip: StoredClip | null | undefined): boolean {
-  const content = storedClip?.clip?.content;
+  return isBlankContent(storedClip?.clip?.content);
+}
+
+function isBlankContent(content: unknown): boolean {
   return typeof content !== 'string' || content.trim() === '';
 }
 
@@ -22,16 +25,16 @@ export function convertToStoredClips(
   lockedIndices: Record<number, boolean>
 ): StoredClip[] {
   const timestamp = Date.now();
-  const stored = clips.map((clip, index) => {
-    const storedClip: StoredClip = { clip, isLocked: false, timestamp };
-    if (!isStoredSlotEmpty(storedClip) && lockedIndices[index] === true) {
-      storedClip.isLocked = true;
-    }
-    return storedClip;
-  });
+  const stored: StoredClip[] = clips.map((clip, index) => ({
+    clip,
+    isLocked: !isBlankContent(clip.content) && lockedIndices[index] === true,
+    timestamp,
+  }));
 
   let end = stored.length;
-  while (end > 0 && isStoredSlotEmpty(stored[end - 1])) end--;
+  while (end > 0 && isStoredSlotEmpty(stored[end - 1])) {
+    end--;
+  }
   return stored.slice(0, end);
 }
 

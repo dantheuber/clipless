@@ -107,7 +107,9 @@ export const useClipsStorage = (
           }
         });
         for (let index = 0; index < loadedClips.length; index++) {
-          if (!loadedClips[index]) loadedClips[index] = createEmptyClip();
+          if (!loadedClips[index]) {
+            loadedClips[index] = createEmptyClip();
+          }
         }
         const loadedCount = loadedClips.filter((clip) => clip.content.trim() !== '').length;
 
