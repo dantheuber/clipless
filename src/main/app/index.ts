@@ -1,4 +1,4 @@
-import { app, BrowserWindow, safeStorage } from 'electron';
+import { app, safeStorage } from 'electron';
 import { electronApp, optimizer } from '@electron-toolkit/utils';
 import { storage } from '../storage';
 import { hotkeyManager } from '../hotkeys';
@@ -88,27 +88,41 @@ export async function initializeApp(): Promise<void> {
   });
 }
 
+/**
+ * Bring the existing main window back in front of the user: un-minimize it, show it if
+ * close-to-tray hid it, and give it focus. Returns false when there is no live window
+ * to surface so the caller can decide whether to create one.
+ */
+function surfaceMainWindow(): boolean {
+  const mainWindow = getMainWindow();
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    return false;
+  }
+  if (mainWindow.isMinimized()) {
+    mainWindow.restore();
+  }
+  if (!mainWindow.isVisible()) {
+    mainWindow.show();
+  }
+  mainWindow.focus();
+  return true;
+}
+
 export function setupAppEvents(): void {
   // When a second launch is attempted, the new process quits itself via the
   // single-instance lock (see index.ts) and fires this event on the primary
   // instance — surface the existing window instead of starting over.
   app.on('second-instance', () => {
-    const mainWindow = getMainWindow();
-    if (mainWindow) {
-      if (mainWindow.isMinimized()) {
-        mainWindow.restore();
-      }
-      if (!mainWindow.isVisible()) {
-        mainWindow.show();
-      }
-      mainWindow.focus();
-    }
+    surfaceMainWindow();
   });
 
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
+  // macOS fires this when the Dock icon is clicked or the running app is reopened
+  // from Finder/Spotlight. Closing the main window only hides it (see the close
+  // handler in window/creation.ts), so BrowserWindow.getAllWindows() still counts
+  // it and the window must be shown again rather than treated as open. Only create
+  // a fresh window when there is no usable one.
+  app.on('activate', () => {
+    if (!surfaceMainWindow()) {
       initializeWindowSystem();
     }
   });
