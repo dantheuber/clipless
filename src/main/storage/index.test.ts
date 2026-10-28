@@ -207,6 +207,29 @@ describe('SecureStorage.saveClips guard', () => {
     // The image the replaced history referenced is cleaned up as before
     expect(imageStore.deleteImage).toHaveBeenCalledWith('img-1', expect.any(String));
   });
+
+  it('keeps a locked clip below a deleted row at its index across save and read', async () => {
+    serveFiles(() => Promise.resolve(history));
+    await initialiseAndWaitForLoad();
+
+    await storage.saveClips(
+      [
+        { id: 'a', type: 'text', content: 'A' },
+        { id: 'blank', type: 'text', content: '' },
+        { id: 'c', type: 'text', content: 'C' },
+        { id: 'd', type: 'text', content: 'D' },
+        { id: 'trailing', type: 'text', content: '' },
+      ],
+      { 2: true }
+    );
+
+    const saved = vi.mocked(fileOperations.saveEncryptedJson).mock.calls[0][0] as StoredClip[];
+    expect(saved.map((c) => c.clip.id)).toEqual(['a', 'blank', 'c', 'd']);
+    const read = await storage.getClips();
+    expect(read.map((c) => c.clip.content)).toEqual(['A', '', 'C', 'D']);
+    expect(read.map((c) => c.isLocked)).toEqual([false, false, true, false]);
+    expect(await storage.getStorageStats()).toMatchObject({ clipCount: 3, lockedCount: 1 });
+  });
 });
 
 // ===== The rest of the class: every domain the load feeds and every write that follows =====

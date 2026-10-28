@@ -4,7 +4,11 @@ import { backupFileName, downloadText, formatBytes, readFileText, summarizeBacku
 describe('summarizeBackup', () => {
   it('counts what a backup holds', () => {
     const text = JSON.stringify({
-      clips: [{ isLocked: true }, { isLocked: false }, {}],
+      clips: [
+        { clip: { content: 'a' }, isLocked: true },
+        { clip: { content: 'b' }, isLocked: false },
+        { clip: { content: 'c' } },
+      ],
       settings: { maxClips: 50, hotkeys: { enabled: true, focusWindow: {}, quickLook: {} } },
       searchTerms: [{}, {}],
       quickTools: [{}],
@@ -21,6 +25,19 @@ describe('summarizeBackup', () => {
         templates: 0,
       },
     });
+  });
+
+  it('counts clips, not the blank slots that hold their positions', () => {
+    const text = JSON.stringify({
+      clips: [
+        { clip: { content: 'A' }, isLocked: false },
+        { clip: { content: '' }, isLocked: false },
+        { clip: { content: '   ' }, isLocked: true },
+        {},
+        { clip: { content: 'C' }, isLocked: true },
+      ],
+    });
+    expect(summarizeBackup(text)).toMatchObject({ summary: { clips: 2, locked: 1 } });
   });
 
   it('copes with a backup that has only settings, or no hotkeys', () => {

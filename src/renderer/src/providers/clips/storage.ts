@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ClipItem, ClipsLoadError, ClipsSaveError } from './types';
 import { DEFAULT_MAX_CLIPS } from '../constants';
-import { shrinkClips, updateClipsLength } from './utils';
+import { createEmptyClip, shrinkClips, updateClipsLength } from './utils';
 import { errorText } from '../../utils/errorText';
 import { UserSettings, StoredClip } from '../../../../shared/types';
 
@@ -93,18 +93,25 @@ export const useClipsStorage = (
         const loadedClips: ClipItem[] = [];
         const loadedLocks: Record<number, boolean> = {};
 
-        // Process stored clips and rebuild the array properly
-        let clipIndex = 0;
-        storedClips.forEach((storedClip: StoredClip) => {
+        // Each clip goes back at its stored position: a blank slot above a clip is kept as
+        // an empty row so the clip, its lock and the quick-clip hotkey bound to that row
+        // still line up after a restart. Files written before blank slots were stored
+        // carry no gaps, so they load unchanged.
+        storedClips.forEach((storedClip: StoredClip, index: number) => {
           if (storedClip.clip?.content && storedClip.clip.content.trim() !== '') {
-            loadedClips.push(storedClip.clip); // Use push instead of index assignment
+            loadedClips[index] = storedClip.clip;
             // Only allow locking for clips at index 1 and higher
-            if (storedClip.isLocked && clipIndex > 0) {
-              loadedLocks[clipIndex] = true;
+            if (storedClip.isLocked && index > 0) {
+              loadedLocks[index] = true;
             }
-            clipIndex++;
           }
         });
+        for (let index = 0; index < loadedClips.length; index++) {
+          if (!loadedClips[index]) {
+            loadedClips[index] = createEmptyClip();
+          }
+        }
+        const loadedCount = loadedClips.filter((clip) => clip.content.trim() !== '').length;
 
         // Always update clips state, even if empty, to ensure proper initialization
         const currentMaxClips = settings?.maxClips || DEFAULT_MAX_CLIPS;
@@ -112,8 +119,8 @@ export const useClipsStorage = (
         setClips(paddedClips);
         setLockedClips(loadedLocks);
 
-        if (loadedClips.length > 0) {
-          console.log(`Successfully loaded ${loadedClips.length} clips from storage`);
+        if (loadedCount > 0) {
+          console.log(`Successfully loaded ${loadedCount} clips from storage`);
         }
       } else {
         console.log('No stored clips found');

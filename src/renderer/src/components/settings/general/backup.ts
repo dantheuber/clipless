@@ -16,6 +16,15 @@ export interface BackupSummary {
 const count = (value: unknown): number => (Array.isArray(value) ? value.length : 0);
 
 /**
+ * Whether a backup entry holds a clip. A deleted row is kept in the backup as a blank slot so
+ * the clips below it restore to their positions; that slot is a position, not a clip.
+ */
+const holdsClip = (entry: unknown): boolean => {
+  const content = (entry as { clip?: { content?: unknown } } | null)?.clip?.content;
+  return typeof content === 'string' && content.trim() !== '';
+};
+
+/**
  * What a backup holds, or the reason it cannot be read.
  */
 export function summarizeBackup(text: string): { summary: BackupSummary } | { error: string } {
@@ -32,7 +41,7 @@ export function summarizeBackup(text: string): { summary: BackupSummary } | { er
   if (!Array.isArray(record.clips) && !record.settings) {
     return { error: 'Not a Clipless backup: it has neither clips nor settings.' };
   }
-  const clips = Array.isArray(record.clips) ? record.clips : [];
+  const clips = (Array.isArray(record.clips) ? record.clips : []).filter(holdsClip);
   const settings =
     record.settings && typeof record.settings === 'object'
       ? (record.settings as Record<string, unknown>)
