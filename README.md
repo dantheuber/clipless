@@ -53,7 +53,7 @@ flags it. Every value it pulls out is a chip on the clip row, ready to pin.
 - **Detection you choose** — add patterns from the built-in library (emails, IPs, URLs, phone numbers, UUIDs…) or write your own regex, e.g. for ticket IDs like `INC-4821`
 - **Pick exactly what you need** — each extracted value is individually selectable
 - **Named capture groups** — build a pattern once and reuse it across every clip
-- **Built-in library** — ready-made patterns for common data types, one click away in Settings → Tools. New installs start with no active patterns, so adding a search term is the first step
+- **Built-in library** — ready-made patterns for common data types, a couple of clicks away in Settings → Tools. New installs start with no active patterns, so saving a search term is the first step
 
 <div align="center">
 
@@ -232,7 +232,7 @@ you throw at it.
 
 ### Quick Clips workflow
 
-1. **Add a search term first** — Settings → Tools → press **+** next to Search terms, then pick a library pattern or write your own regex. A fresh install has no active patterns, so nothing is detected until you add one
+1. **Add a search term first** — Settings → Tools → press **+** next to Search terms, pick a library pattern or write your own regex, then press **Save**. A fresh install has no active patterns, so nothing is detected until you save one
 2. **Copy content** containing patterns (emails, URLs, etc.)
 3. **Look for the chips** — every match is highlighted on the clip row, one colour per capture group
 4. **Pin what you need** — click a chip, or open quick look to read the clip in full and pin from there
