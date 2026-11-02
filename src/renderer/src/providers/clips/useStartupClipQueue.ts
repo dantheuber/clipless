@@ -45,44 +45,58 @@ export const useStartupClipQueue = (
   // depends on it is not torn down and restarted when the history lands; the mode is read here
   const holdingRef = useRef(holding);
   holdingRef.current = holding;
+  // Read after an await, so a replayed clip sees the locks and limit of that moment
+  const clipboardUpdatedRef = useRef(clipboardUpdated);
+  clipboardUpdatedRef.current = clipboardUpdated;
+  // Comparing an image with the stored one takes a round trip. Clips captured meanwhile join
+  // the queue, so they stay newer than the clips still being replayed
+  const replaying = useRef(false);
+  // Moves on a clear or an unmount, which abandons a replay waiting on that round trip
+  const replayRun = useRef(0);
 
   useEffect(() => {
-    if (holding || pending.current.length === 0) return;
-    const queued = pending.current;
-    pending.current = [];
+    if (holding || replaying.current || pending.current.length === 0) return;
+    const run = replayRun.current;
+    replaying.current = true;
     // clipboardUpdated reads the list inside its state update, so each replayed clip
     // builds on the one before it
     const replay = async () => {
-      for (const clip of queued) {
+      while (pending.current.length > 0) {
+        const clip = pending.current.shift() as ClipItem;
         const inlineImage = clip.type === 'image' && clip.content.startsWith('data:image/');
-        if (inlineImage && (await isCopyOfStoredImage(clip, clipsRef.current[0]))) continue;
-        clipboardUpdated(clip);
+        const duplicate = inlineImage && (await isCopyOfStoredImage(clip, clipsRef.current[0]));
+        if (run !== replayRun.current) return;
+        if (!duplicate) clipboardUpdatedRef.current(clip);
       }
+      replaying.current = false;
     };
     void replay();
-  }, [holding, clipboardUpdated, clipsRef]);
+  }, [holding, clipsRef]);
 
   // A clear ends the load, which would replay clips that were copied before it onto the
   // emptied list and save them again. They are part of what was cleared.
   useEffect(() => {
-    if (!window.api?.onStorageCleared) return;
-    return window.api.onStorageCleared(() => {
+    const cancelReplay = () => {
+      replayRun.current++;
+      replaying.current = false;
       pending.current = [];
-    });
+    };
+    const unsubscribe = window.api?.onStorageCleared?.(cancelReplay);
+    return () => {
+      unsubscribe?.();
+      cancelReplay();
+    };
   }, []);
 
-  return useCallback(
-    (clip: ClipItem) => {
-      if (holdingRef.current) {
-        console.log(
-          'Holding clip until the stored history has loaded:',
-          clip.content.substring(0, 50)
-        );
-        pending.current.push(clip);
-        return;
-      }
-      clipboardUpdated(clip);
-    },
-    [clipboardUpdated]
-  );
+  return useCallback((clip: ClipItem) => {
+    if (holdingRef.current || replaying.current) {
+      console.log(
+        'Holding clip until the stored history has loaded:',
+        clip.content.substring(0, 50)
+      );
+      pending.current.push(clip);
+      return;
+    }
+    clipboardUpdatedRef.current(clip);
+  }, []);
 };

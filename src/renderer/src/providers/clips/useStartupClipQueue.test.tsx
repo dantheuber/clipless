@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { useStartupClipQueue } from './useStartupClipQueue';
 import type { ClipItem, ClipsLoadError } from './types';
@@ -79,5 +79,98 @@ describe('useStartupClipQueue', () => {
     });
     expect(clipboardUpdated).toHaveBeenLastCalledWith(text('after'));
     expect(clipboardUpdated).toHaveBeenCalledTimes(2);
+  });
+
+  describe('while an image is compared with the stored row 1', () => {
+    const DATA_URL = 'data:image/png;base64,AAAA';
+    const inlineImage: ClipItem = { id: 'startup', type: 'image', content: DATA_URL };
+    const storedImage: ClipItem = {
+      id: 'stored',
+      type: 'image',
+      content: 'img-1',
+      imageId: 'img-1',
+    };
+    const api = () => window.api as unknown as Record<string, ReturnType<typeof vi.fn>>;
+
+    let finishLookup: (image: string | null) => void;
+    let clearStorage: () => void;
+
+    beforeEach(() => {
+      api()
+        .getFullImage.mockReset()
+        .mockImplementation(
+          () => new Promise<string | null>((resolve) => (finishLookup = resolve))
+        );
+      api()
+        .onStorageCleared.mockReset()
+        .mockImplementation((cb: () => void) => {
+          clearStorage = cb;
+          return () => {};
+        });
+    });
+
+    afterEach(() => {
+      api().getFullImage.mockReset().mockResolvedValue(null);
+      api()
+        .onStorageCleared.mockReset()
+        .mockReturnValue(() => {});
+    });
+
+    /** Holds the image, then lands the history so the comparison starts and waits. */
+    function startComparison() {
+      const first = vi.fn();
+      const hook = renderHook(
+        (props: { isInitiallyLoading: boolean; clipboardUpdated: (clip: ClipItem) => void }) =>
+          useStartupClipQueue(props.isInitiallyLoading, null, props.clipboardUpdated, {
+            current: [storedImage],
+          }),
+        { initialProps: { isInitiallyLoading: true, clipboardUpdated: first } }
+      );
+      act(() => hook.result.current(inlineImage));
+      hook.rerender({ isInitiallyLoading: false, clipboardUpdated: first });
+      expect(api().getFullImage).toHaveBeenCalledWith('img-1');
+      return { ...hook, first };
+    }
+
+    it('drops the image when all data is cleared before the comparison returns', async () => {
+      const { first } = startComparison();
+
+      clearStorage();
+      await act(async () => finishLookup(null));
+
+      expect(first).not.toHaveBeenCalled();
+    });
+
+    it('holds clips captured meanwhile, so they stay newer than the image', async () => {
+      const { result, first } = startComparison();
+
+      act(() => result.current(text('later')));
+      expect(first).not.toHaveBeenCalled();
+      await act(async () => finishLookup('data:image/png;base64,BBBB'));
+
+      expect(first.mock.calls.map(([clip]) => clip.id)).toEqual(['startup', 'later']);
+      act(() => result.current(text('after')));
+      expect(first).toHaveBeenLastCalledWith(text('after'));
+    });
+
+    it('inserts through the current clipboardUpdated, with the locks made meanwhile', async () => {
+      const { rerender, first } = startComparison();
+      const afterLock = vi.fn();
+
+      rerender({ isInitiallyLoading: false, clipboardUpdated: afterLock });
+      await act(async () => finishLookup(null));
+
+      expect(first).not.toHaveBeenCalled();
+      expect(afterLock).toHaveBeenCalledWith(inlineImage);
+    });
+
+    it('stops comparing once the provider has gone', async () => {
+      const { unmount, first } = startComparison();
+
+      unmount();
+      await act(async () => finishLookup(null));
+
+      expect(first).not.toHaveBeenCalled();
+    });
   });
 });
