@@ -25,7 +25,8 @@ export const useStartupClipQueue = (
 ): ((clip: ClipItem) => void) => {
   const pending = useRef<ClipItem[]>([]);
   const holding = isInitiallyLoading && loadError === null;
-  // The clipboard listener captures the gate once; it reads the current mode from here
+  // The gate keeps one identity across mode changes, so the clipboard monitoring effect that
+  // depends on it is not torn down and restarted when the history lands; the mode is read here
   const holdingRef = useRef(holding);
   holdingRef.current = holding;
 
