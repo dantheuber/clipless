@@ -6,8 +6,8 @@
 
 ### The clipboard that reads between the lines.
 
-Clipless quietly remembers everything you copy, then **reads it** — spotting emails, IPs,
-tickets and URLs in what you copy and turning them into one-click actions.
+Clipless quietly remembers everything you copy, then **reads it** — spotting the emails, IPs,
+URLs and other patterns you choose in what you copy and turning them into one-click actions.
 
 <br />
 
@@ -47,13 +47,13 @@ tickets and URLs in what you copy and turning them into one-click actions.
 
 ### It reads what you copy.
 
-The moment something useful lands in your clipboard, Clipless flags it. Every value it
-pulls out is a chip on the clip row, ready to pin.
+Tell Clipless which patterns matter to you, and the moment one lands in your clipboard it
+flags it. Every value it pulls out is a chip on the clip row, ready to pin.
 
-- **Automatic detection** — emails, IPs, URLs, phone numbers, ticket IDs and your own custom regex
+- **Detection you choose** — add patterns from the built-in library (emails, IPs, URLs, phone numbers, UUIDs…) or write your own regex, e.g. for ticket IDs like `INC-4821`
 - **Pick exactly what you need** — each extracted value is individually selectable
 - **Named capture groups** — build a pattern once and reuse it across every clip
-- **Built-in library** — common data types work out of the box, with a clear visual indicator when patterns are found
+- **Built-in library** — ready-made patterns for common data types, one click away in Settings → Tools. New installs start with no active patterns, so adding a search term is the first step
 
 <div align="center">
 
@@ -228,14 +228,15 @@ you throw at it.
 1. **Install and run** — start Clipless and it begins monitoring your clipboard automatically
 2. **Copy content** — anything you copy appears in the Clipless window
 3. **Click to reuse** — click a row number to copy that item back to your clipboard
-4. **Context menu actions** — right-click a clip for Copy, Scan, Lock and Delete
+4. **Context menu actions** — right-click a clip for Copy, Quick look, Fill clip template, Lock / Unlock and Delete
 
 ### Quick Clips workflow
 
-1. **Copy content** containing patterns (emails, URLs, etc.)
-2. **Look for the chips** — every match is highlighted on the clip row, one colour per capture group
-3. **Pin what you need** — click a chip, or open quick look to read the clip in full and pin from there
-4. **Open tools** — the tray lists the tools that take your pins; "Open all" opens every tab at once
+1. **Add a search term first** — Settings → Tools → press **+** next to Search terms, then pick a library pattern or write your own regex. A fresh install has no active patterns, so nothing is detected until you add one
+2. **Copy content** containing patterns (emails, URLs, etc.)
+3. **Look for the chips** — every match is highlighted on the clip row, one colour per capture group
+4. **Pin what you need** — click a chip, or open quick look to read the clip in full and pin from there
+5. **Open tools** — the tray lists the tools that take your pins; "Open all" opens every tab at once
 
 **Example uses:** extract emails and open them in validation tools · pull domains and run them
 through security scanners · gather multiple data points to research across tools · grab code
@@ -244,8 +245,8 @@ snippets and open them in your documentation.
 ### Settings &amp; customization
 
 - **Access settings** — right-click the system tray icon → Settings
-- **Configure patterns** — Settings → Quick Clips → Search Terms
-- **Add tools** — Settings → Quick Clips → Tools
+- **Configure patterns** — Settings → Tools → Search terms (start from the built-in library or write your own regex)
+- **Add tools** — Settings → Tools → Tools
 - **Set hotkeys** — Settings → Hotkeys
 - **Adjust preferences** — Settings → General
 - **Optional usage counts** — Settings → General → Privacy → Send analytics (off by default). Prompts once on first launch. Sends active days, feature-use counts and a random installation ID to PostHog; no clipboard contents, configured tools, session recordings, or error reports. PostHog sees the connection's IP address. [What is collected and how to opt out](src/main/analytics/README.md).
