@@ -217,6 +217,26 @@ describe('useStartupClipQueue', () => {
       ]);
     });
 
+    it('still skips the comparison after a render that did not include the insert', () => {
+      const clipboardUpdated = vi.fn();
+      const clipsRef = { current: [storedImage] };
+      const { result, rerender } = renderHook(() =>
+        useStartupClipQueue(false, null, clipboardUpdated, clipsRef)
+      );
+
+      act(() => result.current(text('latest-text')));
+      rerender();
+      act(() => result.current(inlineImage));
+      expect(api().getFullImage).not.toHaveBeenCalled();
+
+      clipsRef.current = [text('latest-text'), storedImage];
+      rerender();
+      clipsRef.current = [storedImage];
+      rerender();
+      act(() => result.current(inlineImage));
+      expect(api().getFullImage).toHaveBeenCalledWith('img-1');
+    });
+
     it('recovers when an insert throws, so captures are not held forever', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => {});
       const clipboardUpdated = vi.fn().mockImplementationOnce(() => {

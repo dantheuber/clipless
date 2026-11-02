@@ -56,10 +56,15 @@ export const useStartupClipQueue = (
   const replaying = useRef(false);
   // Moves on a clear or an unmount, which abandons a replay waiting on that round trip
   const replayRun = useRef(0);
-  // Row 1 only shows what is stored until a clip is inserted, and clipsRef catches up on the
-  // next render. An image captured in between is not compared with it
+  // Row 1 only shows what is stored until a clip is inserted, and clipsRef catches up when the
+  // list next renders, which a render for something else does not prove. An image captured in
+  // between is not compared with it
   const insertedSinceRender = useRef(false);
-  insertedSinceRender.current = false;
+  const renderedClips = useRef(clipsRef.current);
+  if (renderedClips.current !== clipsRef.current) {
+    renderedClips.current = clipsRef.current;
+    insertedSinceRender.current = false;
+  }
 
   const insert = useCallback((clip: ClipItem) => {
     insertedSinceRender.current = true;
