@@ -23,6 +23,7 @@ vi.mock('./data', () => ({
   setClipboardBookmark: vi.fn(),
 }));
 vi.mock('./monitoring', () => ({
+  readClipboardForRenderer: vi.fn(),
   startClipboardMonitoring: vi.fn(),
   stopClipboardMonitoring: vi.fn(),
   setSkipNextImageChange: vi.fn(),
