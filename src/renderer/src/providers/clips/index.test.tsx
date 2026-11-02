@@ -318,3 +318,166 @@ describe('ClipsProvider save error', () => {
     expect(toast).not.toHaveBeenCalled();
   });
 });
+
+describe('ClipsProvider clips captured during startup', () => {
+  type ClipboardListener = (clip: { type: string; content: string }) => void;
+  let clipboardListeners: ClipboardListener[];
+  let finishLoad: (snapshot: StoredClipsSnapshot) => void;
+
+  const history = (...contents: string[]): StoredClipsSnapshot => ({
+    loadState: { complete: true, error: null },
+    clips: contents.map((content, index) => ({
+      clip: { id: `stored-${index}`, type: 'text', content },
+      isLocked: false,
+      timestamp: 1,
+    })),
+  });
+  const notLoaded = (): StoredClipsSnapshot => ({
+    loadState: { complete: false, error: null },
+    clips: [],
+  });
+
+  const mountProbe = () =>
+    renderHook(() => ({ data: useClipsData(), meta: useClipsMeta() }), {
+      wrapper: ({ children }) => (
+        <ToastProvider>
+          <LanguageDetectionProvider>
+            <ScanIndexProvider>
+              <ClipsProvider>{children}</ClipsProvider>
+            </ScanIndexProvider>
+          </LanguageDetectionProvider>
+        </ToastProvider>
+      ),
+    });
+
+  const flush = async () => {
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+  };
+  const settle = async () => {
+    await flush();
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1500);
+    });
+  };
+  const contents = (clips: { content: string }[]) =>
+    clips.filter((clip) => clip.content !== '').map((clip) => clip.content);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    clipboardListeners = [];
+    finishLoad = () => {};
+    api().getCurrentClipboardData.mockResolvedValue({ type: 'text', content: 'startup' });
+    // The history takes two round trips to arrive; the test decides when it lands
+    api().storageGetClipsSnapshot.mockImplementation(
+      () => new Promise<StoredClipsSnapshot>((resolve) => (finishLoad = resolve))
+    );
+    api().storageSaveClips.mockReset().mockResolvedValue(true);
+    api().onClipboardChanged.mockImplementation((cb: ClipboardListener) => {
+      clipboardListeners.push(cb);
+      return () => {
+        clipboardListeners = clipboardListeners.filter((listener) => listener !== cb);
+      };
+    });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    api().getCurrentClipboardData.mockReset().mockResolvedValue(null);
+    api()
+      .onClipboardChanged.mockReset()
+      .mockReturnValue(() => {});
+    api().storageGetClipsSnapshot.mockReset().mockResolvedValue(failed());
+  });
+
+  it('keeps the clipboard read at row 1 above the history that loads after it', async () => {
+    const { result } = mountProbe();
+    await flush();
+    expect(api().getCurrentClipboardData).toHaveBeenCalled();
+
+    await act(async () => {
+      finishLoad(history('older', 'oldest'));
+    });
+    await settle();
+
+    expect(contents(result.current.data.clips)).toEqual(['startup', 'older', 'oldest']);
+    expect(result.current.meta.loadError).toBeNull();
+    const saved = api().storageSaveClips.mock.calls.at(-1)?.[0];
+    expect(contents(saved)).toEqual(['startup', 'older', 'oldest']);
+  });
+
+  it('does not duplicate a clipboard read that equals the stored row 1', async () => {
+    api().getCurrentClipboardData.mockResolvedValue({ type: 'text', content: 'older' });
+    const { result } = mountProbe();
+    await flush();
+
+    await act(async () => {
+      finishLoad(history('older', 'oldest'));
+    });
+    await settle();
+
+    expect(contents(result.current.data.clips)).toEqual(['older', 'oldest']);
+  });
+
+  it('keeps a clip copied while the background load is pending above the reloaded history', async () => {
+    let storageReady: (() => void) | null = null;
+    api().onStorageReady.mockImplementation((cb: () => void) => {
+      storageReady = cb;
+      return () => {
+        storageReady = null;
+      };
+    });
+    const { result } = mountProbe();
+    await flush();
+    await act(async () => {
+      finishLoad(notLoaded());
+    });
+    await flush();
+    expect(api().startClipboardMonitoring).toHaveBeenCalled();
+    expect(clipboardListeners.length).toBeGreaterThan(0);
+
+    // Copied after monitoring started and before the history arrived
+    act(() => {
+      clipboardListeners.forEach((listener) => listener({ type: 'text', content: 'copied' }));
+    });
+    expect(api().storageSaveClips).not.toHaveBeenCalled();
+
+    await act(async () => {
+      storageReady?.();
+    });
+    await flush();
+    await act(async () => {
+      finishLoad(history('older', 'oldest'));
+    });
+    await settle();
+
+    expect(contents(result.current.data.clips)).toEqual(['copied', 'startup', 'older', 'oldest']);
+    const saved = api().storageSaveClips.mock.calls.at(-1)?.[0];
+    expect(contents(saved)).toEqual(['copied', 'startup', 'older', 'oldest']);
+  });
+
+  it('shows the captured clips without saving them when the history cannot be loaded', async () => {
+    const { result } = mountProbe();
+    await flush();
+
+    await act(async () => {
+      finishLoad(failed());
+    });
+    await settle();
+
+    expect(contents(result.current.data.clips)).toEqual(['startup']);
+    expect(result.current.meta.loadError).not.toBeNull();
+    expect(api().storageSaveClips).not.toHaveBeenCalled();
+
+    // Something copied while the history is unreadable is shown at once, unsaved
+    act(() => {
+      clipboardListeners.forEach((listener) => listener({ type: 'text', content: 'later' }));
+    });
+    await settle();
+    expect(contents(result.current.data.clips)).toEqual(['later', 'startup']);
+    expect(api().storageSaveClips).not.toHaveBeenCalled();
+  });
+});

@@ -38,6 +38,7 @@ import {
 } from './pins';
 import { usePinPruning } from './usePinPruning';
 import { useOpenQuickLookSignal } from './useOpenQuickLookSignal';
+import { useStartupClipQueue } from './useStartupClipQueue';
 import {
   INITIAL_QUICK_LOOK,
   type QuickLookState,
@@ -198,8 +199,12 @@ export function ClipsProvider({ children }: { children: React.ReactNode }) {
     toggleClipLock,
     isClipLocked,
     isDuplicateOfMostRecent,
-    clipboardUpdated,
+    clipboardUpdated: applyClipboardUpdate,
   } = useClipState(clips, setClips, maxClips, lockedClips, setLockedClips);
+
+  // A clip captured before the stored history is applied waits for it instead of being
+  // overwritten by it; the queue is replayed onto the loaded list
+  const clipboardUpdated = useStartupClipQueue(isInitiallyLoading, loadError, applyClipboardUpdate);
 
   // Use clipboard operations hook
   const { readCurrentClipboard, copyClipToClipboard: writeClipToClipboard } =

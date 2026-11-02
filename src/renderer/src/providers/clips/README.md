@@ -30,6 +30,12 @@ This directory contains the modular implementation of the clips provider, which 
 - Handles copying clips to clipboard with proper format handling
 - Implements hotkey operation tracking and duplicate prevention
 
+### `useStartupClipQueue.ts`
+
+- Hook that gates `clipboardUpdated` while the stored history is still loading (`useStartupClipQueue`)
+- The clipboard is read once at mount and monitored from then on, while the history arrives later and replaces the whole list; clips captured before it is applied are held in a queue and replayed, in arrival order, once the load has landed
+- A failed load applies no history, so held clips are shown then too, unsaved
+
 ### `state.ts`
 
 - Hook for clip state management (`useClipState`)
@@ -71,5 +77,6 @@ providers/
     ├── utils.ts           # Utility functions
     ├── storage.ts         # Storage operations
     ├── clipboard.ts       # Clipboard operations
-    └── state.ts           # State management
+    ├── state.ts           # State management
+    └── useStartupClipQueue.ts # Clips captured before the history loads
 ```
