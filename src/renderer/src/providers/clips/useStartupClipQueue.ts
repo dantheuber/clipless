@@ -62,6 +62,15 @@ export const useStartupClipQueue = (
     void replay();
   }, [holding, clipboardUpdated, clipsRef]);
 
+  // A clear ends the load, which would replay clips that were copied before it onto the
+  // emptied list and save them again. They are part of what was cleared.
+  useEffect(() => {
+    if (!window.api?.onStorageCleared) return;
+    return window.api.onStorageCleared(() => {
+      pending.current = [];
+    });
+  }, []);
+
   return useCallback(
     (clip: ClipItem) => {
       if (holdingRef.current) {

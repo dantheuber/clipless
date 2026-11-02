@@ -35,6 +35,7 @@ This directory contains the modular implementation of the clips provider, which 
 - Hook that gates `clipboardUpdated` while the stored history is still loading (`useStartupClipQueue`)
 - The clipboard is read once at mount and monitored from then on, while the history arrives later and replaces the whole list; clips captured before it is applied are held in a queue and replayed, in arrival order, once the load has landed
 - A failed load applies no history, so held clips are shown then too, unsaved
+- Clearing all data drops the queue: a clear ends the load, and held clips are part of what was cleared
 - The startup read carries an image as a data URL, so an image left on the clipboard is compared with the stored row 1 through the image store rather than gaining a row on every launch
 
 ### `state.ts`

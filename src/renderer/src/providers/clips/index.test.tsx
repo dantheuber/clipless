@@ -472,6 +472,31 @@ describe('ClipsProvider clips captured during startup', () => {
     });
   });
 
+  it('drops held clips when all data is cleared before the history loads', async () => {
+    let storageCleared: () => void = () => {};
+    api().onStorageCleared.mockImplementation((cb: () => void) => {
+      const previous = storageCleared;
+      storageCleared = () => {
+        previous();
+        cb();
+      };
+      return () => {};
+    });
+    const { result } = mountProbe();
+    await flush();
+
+    await act(async () => {
+      storageCleared();
+    });
+    await settle();
+
+    expect(contents(result.current.data.clips)).toEqual([]);
+    expect(api().storageSaveClips.mock.calls.flatMap(([clips]) => contents(clips))).toEqual([]);
+    api()
+      .onStorageCleared.mockReset()
+      .mockReturnValue(() => {});
+  });
+
   it('keeps a clip copied while the background load is pending above the reloaded history', async () => {
     let storageReady: (() => void) | null = null;
     api().onStorageReady.mockImplementation((cb: () => void) => {
