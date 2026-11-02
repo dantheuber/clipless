@@ -164,6 +164,59 @@ describe('useStartupClipQueue', () => {
       expect(afterLock).toHaveBeenCalledWith(inlineImage);
     });
 
+    it('keeps an image that follows another held clip, since row 1 is no longer the stored one', async () => {
+      const clipboardUpdated = vi.fn();
+      const hook = renderHook(
+        (props: { isInitiallyLoading: boolean }) =>
+          useStartupClipQueue(props.isInitiallyLoading, null, clipboardUpdated, {
+            current: [storedImage],
+          }),
+        { initialProps: { isInitiallyLoading: true } }
+      );
+      act(() => {
+        hook.result.current(text('first'));
+        hook.result.current(inlineImage);
+      });
+
+      hook.rerender({ isInitiallyLoading: false });
+
+      expect(api().getFullImage).not.toHaveBeenCalled();
+      expect(clipboardUpdated.mock.calls.map(([clip]) => clip.id)).toEqual(['first', 'startup']);
+    });
+
+    it('compares an image that arrives after the history has landed', async () => {
+      const clipboardUpdated = vi.fn();
+      const { result } = renderHook(() =>
+        useStartupClipQueue(false, null, clipboardUpdated, { current: [storedImage] })
+      );
+
+      act(() => result.current(inlineImage));
+      act(() => result.current(text('later')));
+      expect(api().getFullImage).toHaveBeenCalledWith('img-1');
+      expect(clipboardUpdated).not.toHaveBeenCalled();
+      await act(async () => finishLookup(DATA_URL));
+
+      expect(clipboardUpdated.mock.calls.map(([clip]) => clip.id)).toEqual(['later']);
+    });
+
+    it('recovers when an insert throws, so captures are not held forever', async () => {
+      const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const clipboardUpdated = vi.fn().mockImplementationOnce(() => {
+        throw new Error('insert failed');
+      });
+      const { result } = renderHook(() =>
+        useStartupClipQueue(false, null, clipboardUpdated, { current: [storedImage] })
+      );
+
+      act(() => result.current(inlineImage));
+      await act(async () => finishLookup(null));
+      act(() => result.current(text('after')));
+
+      expect(clipboardUpdated).toHaveBeenLastCalledWith(text('after'));
+      expect(error).toHaveBeenCalled();
+      error.mockRestore();
+    });
+
     it('stops comparing once the provider has gone', async () => {
       const { unmount, first } = startComparison();
 

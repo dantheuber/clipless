@@ -37,6 +37,7 @@ This directory contains the modular implementation of the clips provider, which 
 - A failed load applies no history, so held clips are shown then too, unsaved
 - Clearing all data drops the queue: a clear ends the load, and held clips are part of what was cleared
 - Clips captured while an image is being compared join the queue, so they stay newer than what is still replaying
+- The startup read can answer after the history lands, so an inline image goes through the same comparison then too
 - The startup read carries an image as a data URL, so an image left on the clipboard is compared with the stored row 1 through the image store rather than gaining a row on every launch
 
 ### `state.ts`

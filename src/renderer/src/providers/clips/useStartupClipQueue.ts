@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { ClipItem, ClipsLoadError } from './types';
 
+const isInlineImage = (clip: ClipItem): boolean =>
+  clip.type === 'image' && clip.content.startsWith('data:image/');
+
 /**
  * Whether a clip from the startup read is the image already stored at row 1. That read gets
  * the image as a data URL while the stored clip holds an image-store id, so the content
@@ -54,24 +57,37 @@ export const useStartupClipQueue = (
   // Moves on a clear or an unmount, which abandons a replay waiting on that round trip
   const replayRun = useRef(0);
 
-  useEffect(() => {
-    if (holding || replaying.current || pending.current.length === 0) return;
+  const replay = useCallback(async (): Promise<void> => {
+    if (replaying.current) return;
     const run = replayRun.current;
     replaying.current = true;
-    // clipboardUpdated reads the list inside its state update, so each replayed clip
-    // builds on the one before it
-    const replay = async () => {
+    // Row 1 only shows what is stored until this replay inserts something. A later image is
+    // not compared: the list it would be compared with has not rendered yet
+    let inserted = false;
+    try {
       while (pending.current.length > 0) {
         const clip = pending.current.shift() as ClipItem;
-        const inlineImage = clip.type === 'image' && clip.content.startsWith('data:image/');
-        const duplicate = inlineImage && (await isCopyOfStoredImage(clip, clipsRef.current[0]));
+        const duplicate =
+          !inserted &&
+          isInlineImage(clip) &&
+          (await isCopyOfStoredImage(clip, clipsRef.current[0]));
         if (run !== replayRun.current) return;
-        if (!duplicate) clipboardUpdatedRef.current(clip);
+        if (duplicate) continue;
+        // clipboardUpdated reads the list inside its state update, so each replayed clip
+        // builds on the one before it
+        clipboardUpdatedRef.current(clip);
+        inserted = true;
       }
-      replaying.current = false;
-    };
-    void replay();
-  }, [holding, clipsRef]);
+    } catch (error) {
+      console.error('Failed to replay held clips:', error);
+    } finally {
+      if (run === replayRun.current) replaying.current = false;
+    }
+  }, [clipsRef]);
+
+  useEffect(() => {
+    if (!holding) void replay();
+  }, [holding, replay]);
 
   // A clear ends the load, which would replay clips that were copied before it onto the
   // emptied list and save them again. They are part of what was cleared.
@@ -88,15 +104,25 @@ export const useStartupClipQueue = (
     };
   }, []);
 
-  return useCallback((clip: ClipItem) => {
-    if (holdingRef.current || replaying.current) {
-      console.log(
-        'Holding clip until the stored history has loaded:',
-        clip.content.substring(0, 50)
-      );
-      pending.current.push(clip);
-      return;
-    }
-    clipboardUpdatedRef.current(clip);
-  }, []);
+  return useCallback(
+    (clip: ClipItem) => {
+      if (holdingRef.current || replaying.current) {
+        console.log(
+          'Holding clip until the stored history has loaded:',
+          clip.content.substring(0, 50)
+        );
+        pending.current.push(clip);
+        return;
+      }
+      // The startup read can answer after the history has landed, so its image still has to
+      // go through the comparison
+      if (isInlineImage(clip) || pending.current.length > 0) {
+        pending.current.push(clip);
+        void replay();
+        return;
+      }
+      clipboardUpdatedRef.current(clip);
+    },
+    [replay]
+  );
 };
