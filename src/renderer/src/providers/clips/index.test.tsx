@@ -422,6 +422,56 @@ describe('ClipsProvider clips captured during startup', () => {
     expect(contents(result.current.data.clips)).toEqual(['older', 'oldest']);
   });
 
+  describe('an image left on the clipboard across a restart', () => {
+    const DATA_URL = 'data:image/png;base64,AAAA';
+    const storedImage = (): StoredClipsSnapshot => ({
+      loadState: { complete: true, error: null },
+      clips: [
+        {
+          clip: { id: 'stored-0', type: 'image', content: 'img-1', imageId: 'img-1' },
+          isLocked: false,
+          timestamp: 1,
+        },
+        { clip: { id: 'stored-1', type: 'text', content: 'older' }, isLocked: false, timestamp: 1 },
+      ],
+    });
+
+    beforeEach(() => {
+      api().getCurrentClipboardData.mockResolvedValue({ type: 'image', content: DATA_URL });
+    });
+    afterEach(() => {
+      api().getFullImage.mockReset();
+    });
+
+    it('does not add a row for the image stored at row 1', async () => {
+      api().getFullImage.mockResolvedValue(DATA_URL);
+      const { result } = mountProbe();
+      await flush();
+      await act(async () => {
+        finishLoad(storedImage());
+      });
+      await settle();
+
+      expect(api().getFullImage).toHaveBeenCalledWith('img-1');
+      expect(contents(result.current.data.clips)).toEqual(['img-1', 'older']);
+    });
+
+    it('keeps a different image, and one whose stored copy cannot be read', async () => {
+      for (const stored of ['data:image/png;base64,BBBB', null]) {
+        api().getFullImage.mockResolvedValue(stored);
+        const { result, unmount } = mountProbe();
+        await flush();
+        await act(async () => {
+          finishLoad(storedImage());
+        });
+        await settle();
+
+        expect(contents(result.current.data.clips)).toEqual([DATA_URL, 'img-1', 'older']);
+        unmount();
+      }
+    });
+  });
+
   it('keeps a clip copied while the background load is pending above the reloaded history', async () => {
     let storageReady: (() => void) | null = null;
     api().onStorageReady.mockImplementation((cb: () => void) => {

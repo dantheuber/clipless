@@ -2,6 +2,21 @@ import { useCallback, useEffect, useRef } from 'react';
 import { ClipItem, ClipsLoadError } from './types';
 
 /**
+ * Whether a clip from the startup read is the image already stored at row 1. That read gets
+ * the image as a data URL while the stored clip holds an image-store id, so the content
+ * comparison in clipboardUpdated can never match them, and an image left on the clipboard
+ * would gain a row on every launch. The image store keeps the data URL it was given.
+ */
+const isCopyOfStoredImage = async (clip: ClipItem, newest?: ClipItem): Promise<boolean> => {
+  if (newest?.type !== 'image' || !newest.imageId || !window.api?.getFullImage) return false;
+  try {
+    return (await window.api.getFullImage(newest.imageId)) === clip.content;
+  } catch {
+    return false; // Keeping a possible duplicate is safer than dropping the clip
+  }
+};
+
+/**
  * Holds clips captured before the stored history has been applied, and replays them once
  * it has.
  *
@@ -21,7 +36,8 @@ import { ClipItem, ClipsLoadError } from './types';
 export const useStartupClipQueue = (
   isInitiallyLoading: boolean,
   loadError: ClipsLoadError | null,
-  clipboardUpdated: (clip: ClipItem) => void
+  clipboardUpdated: (clip: ClipItem) => void,
+  clipsRef: React.MutableRefObject<ClipItem[]>
 ): ((clip: ClipItem) => void) => {
   const pending = useRef<ClipItem[]>([]);
   const holding = isInitiallyLoading && loadError === null;
@@ -36,8 +52,15 @@ export const useStartupClipQueue = (
     pending.current = [];
     // clipboardUpdated reads the list inside its state update, so each replayed clip
     // builds on the one before it
-    for (const clip of queued) clipboardUpdated(clip);
-  }, [holding, clipboardUpdated]);
+    const replay = async () => {
+      for (const clip of queued) {
+        const inlineImage = clip.type === 'image' && clip.content.startsWith('data:image/');
+        if (inlineImage && (await isCopyOfStoredImage(clip, clipsRef.current[0]))) continue;
+        clipboardUpdated(clip);
+      }
+    };
+    void replay();
+  }, [holding, clipboardUpdated, clipsRef]);
 
   return useCallback(
     (clip: ClipItem) => {

@@ -12,7 +12,9 @@ function mount(initial: { isInitiallyLoading: boolean; loadError: ClipsLoadError
   const clipboardUpdated = vi.fn();
   const hook = renderHook(
     (props: typeof initial) =>
-      useStartupClipQueue(props.isInitiallyLoading, props.loadError, clipboardUpdated),
+      useStartupClipQueue(props.isInitiallyLoading, props.loadError, clipboardUpdated, {
+        current: [],
+      }),
     { initialProps: initial }
   );
   return { ...hook, clipboardUpdated };
