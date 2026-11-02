@@ -199,6 +199,24 @@ describe('useStartupClipQueue', () => {
       expect(clipboardUpdated.mock.calls.map(([clip]) => clip.id)).toEqual(['later']);
     });
 
+    it('keeps an image captured right after a clip that has not rendered yet', () => {
+      const clipboardUpdated = vi.fn();
+      const { result } = renderHook(() =>
+        useStartupClipQueue(false, null, clipboardUpdated, { current: [storedImage] })
+      );
+
+      act(() => {
+        result.current(text('latest-text'));
+        result.current(inlineImage);
+      });
+
+      expect(api().getFullImage).not.toHaveBeenCalled();
+      expect(clipboardUpdated.mock.calls.map(([clip]) => clip.id)).toEqual([
+        'latest-text',
+        'startup',
+      ]);
+    });
+
     it('recovers when an insert throws, so captures are not held forever', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => {});
       const clipboardUpdated = vi.fn().mockImplementationOnce(() => {

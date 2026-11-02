@@ -56,34 +56,39 @@ export const useStartupClipQueue = (
   const replaying = useRef(false);
   // Moves on a clear or an unmount, which abandons a replay waiting on that round trip
   const replayRun = useRef(0);
+  // Row 1 only shows what is stored until a clip is inserted, and clipsRef catches up on the
+  // next render. An image captured in between is not compared with it
+  const insertedSinceRender = useRef(false);
+  insertedSinceRender.current = false;
+
+  const insert = useCallback((clip: ClipItem) => {
+    insertedSinceRender.current = true;
+    clipboardUpdatedRef.current(clip);
+  }, []);
 
   const replay = useCallback(async (): Promise<void> => {
     if (replaying.current) return;
     const run = replayRun.current;
     replaying.current = true;
-    // Row 1 only shows what is stored until this replay inserts something. A later image is
-    // not compared: the list it would be compared with has not rendered yet
-    let inserted = false;
     try {
       while (pending.current.length > 0) {
         const clip = pending.current.shift() as ClipItem;
         const duplicate =
-          !inserted &&
+          !insertedSinceRender.current &&
           isInlineImage(clip) &&
           (await isCopyOfStoredImage(clip, clipsRef.current[0]));
         if (run !== replayRun.current) return;
         if (duplicate) continue;
         // clipboardUpdated reads the list inside its state update, so each replayed clip
         // builds on the one before it
-        clipboardUpdatedRef.current(clip);
-        inserted = true;
+        insert(clip);
       }
     } catch (error) {
       console.error('Failed to replay held clips:', error);
     } finally {
       if (run === replayRun.current) replaying.current = false;
     }
-  }, [clipsRef]);
+  }, [clipsRef, insert]);
 
   useEffect(() => {
     if (!holding) void replay();
@@ -121,8 +126,8 @@ export const useStartupClipQueue = (
         void replay();
         return;
       }
-      clipboardUpdatedRef.current(clip);
+      insert(clip);
     },
-    [replay]
+    [insert, replay]
   );
 };
