@@ -200,6 +200,53 @@ describe('useClipsStorage load guard', () => {
     expect(observed.isInitiallyLoading).toBe(false);
     expect(observed.clips[0].content).toBe('back');
   });
+
+  it('applies only the newest of two overlapping loads, whichever finishes first', async () => {
+    const pendingLoads: ((snapshot: StoredClipsSnapshot) => void)[] = [];
+    api().storageGetClipsSnapshot.mockImplementation(
+      () => new Promise<StoredClipsSnapshot>((resolve) => pendingLoads.push(resolve))
+    );
+    mount();
+    await flush();
+    await act(async () => {
+      storageReady?.();
+    });
+    await flush();
+    expect(pendingLoads).toHaveLength(2);
+
+    // The reload finishes first and is applied; the older mount load then lands and is dropped
+    await act(async () => {
+      pendingLoads[1](loaded([stored('b', 'from reload')]));
+    });
+    await flush();
+    expect(observed.clips[0].content).toBe('from reload');
+    expect(observed.isInitiallyLoading).toBe(false);
+
+    await act(async () => {
+      pendingLoads[0](loaded([stored('a', 'from mount load')]));
+    });
+    await settle();
+
+    expect(observed.clips[0].content).toBe('from reload');
+    expect(observed.loadError).toBeNull();
+  });
+
+  it('does not reload the history once a complete load has been applied', async () => {
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('a', 'kept')]));
+    mount();
+    await settle();
+    expect(observed.clips[0].content).toBe('kept');
+    expect(api().storageGetClipsSnapshot).toHaveBeenCalledTimes(1);
+
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded([stored('b', 'late')]));
+    await act(async () => {
+      storageReady?.();
+    });
+    await settle();
+
+    expect(api().storageGetClipsSnapshot).toHaveBeenCalledTimes(1);
+    expect(observed.clips[0].content).toBe('kept');
+  });
 });
 
 describe('useClipsStorage clear all', () => {

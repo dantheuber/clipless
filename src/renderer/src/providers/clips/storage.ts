@@ -29,6 +29,13 @@ export const useClipsStorage = (
   // A clear invalidates work that captured the previous history, including pending loads.
   const storageGeneration = useRef(0);
   const isStale = (generation: number) => generation !== storageGeneration.current;
+  // The mount load and the storage-ready reload overlap when the background load finishes
+  // between the mount load's two round trips, and both then come back complete. Each load
+  // replaces the whole list, so only the newest in-flight load may apply its snapshot, and
+  // once a complete history has been applied no later load replaces it: clips captured
+  // after the first snapshot landed would otherwise be overwritten by the second.
+  const loadSequence = useRef(0);
+  const historyApplied = useRef(false);
 
   // The two save paths fail independently, so each reports its own outcome and the list
   // shows the clip history first: a settings write that lands does not imply the clip
@@ -56,6 +63,13 @@ export const useClipsStorage = (
   // save of those would overwrite the real history and delete the images it references.
   const loadStoredData = useCallback(async () => {
     const generation = storageGeneration.current;
+    if (historyApplied.current) {
+      console.log('Stored history already applied, skipping reload');
+      return;
+    }
+    const sequence = ++loadSequence.current;
+    // A clear or a newer load started while this one was in flight
+    const superseded = () => isStale(generation) || sequence !== loadSequence.current;
     if (!window.api) {
       setIsInitiallyLoading(false);
       return;
@@ -69,7 +83,7 @@ export const useClipsStorage = (
       // The clips arrive with the load state they were read under, so the placeholder
       // served during the background load cannot be mistaken for an empty history
       const { loadState, clips: storedClips } = await window.api.storageGetClipsSnapshot();
-      if (isStale(generation)) return;
+      if (superseded()) return;
 
       if (settings && typeof settings.maxClips === 'number') {
         setMaxClips(settings.maxClips);
@@ -127,10 +141,11 @@ export const useClipsStorage = (
       }
 
       // Only a load that got this far may enable saving
+      historyApplied.current = true;
       setLoadError(null);
       setIsInitiallyLoading(false);
     } catch (error) {
-      if (isStale(generation)) return;
+      if (superseded()) return;
       console.error('Failed to load data from storage:', error);
       // The main process could not be reached or threw; a restart may well clear that
       setLoadError({ message: errorText(error), recoverable: true });
@@ -160,6 +175,7 @@ export const useClipsStorage = (
     if (!window.api?.onStorageCleared) return;
     return window.api.onStorageCleared(() => {
       storageGeneration.current++;
+      historyApplied.current = false;
       const emptyClips = updateClipsLength([], DEFAULT_MAX_CLIPS);
       // Settings may arrive before React renders this reset; shrink the empty list then.
       latest.current = { clips: emptyClips, lockedClips: {} };

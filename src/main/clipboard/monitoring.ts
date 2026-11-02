@@ -32,6 +32,22 @@ export function imageMetadata(dataUrl: string): {
   return { imageWidth: width, imageHeight: height, imageBytes: Math.round(payload.length * 0.75) };
 }
 
+/** For html and rtf, extract the text here so the renderer never parses markup. */
+function withExtractedText(data: { type: string; content: string }): Record<string, unknown> {
+  if (data.type === 'html') return { ...data, text: htmlToText(data.content) };
+  if (data.type === 'rtf') return { ...data, text: rtfToText(data.content) };
+  return data;
+}
+
+/**
+ * The clipboard as the renderer's startup read sees it: the same text extraction as a
+ * monitored change, since that clip now reaches the stored history.
+ */
+export function readClipboardForRenderer(): Record<string, unknown> | null {
+  const data = getCurrentClipboardData();
+  return data && withExtractedText(data);
+}
+
 // Initialize clipboard monitoring
 export function initializeClipboardMonitoring(_mainWindow: BrowserWindow | null): void {
   // Initialize with current clipboard content
@@ -73,14 +89,7 @@ export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<
       return false;
     }
 
-    let clipToSend: Record<string, unknown> = currentClipData;
-
-    // For html and rtf, extract the text here so the renderer never parses markup
-    if (currentClipData.type === 'html') {
-      clipToSend = { ...currentClipData, text: htmlToText(currentClipData.content) };
-    } else if (currentClipData.type === 'rtf') {
-      clipToSend = { ...currentClipData, text: rtfToText(currentClipData.content) };
-    }
+    let clipToSend = withExtractedText(currentClipData);
 
     // For images, save to image store and send thumbnail instead of full data URL
     if (currentClipData.type === 'image') {

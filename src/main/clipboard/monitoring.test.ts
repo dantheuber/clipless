@@ -33,6 +33,7 @@ import {
   setSkipNextImageChange,
   checkClipboardNow,
   imageMetadata,
+  readClipboardForRenderer,
 } from './monitoring';
 
 function createMockWindow(destroyed = false): {
@@ -524,6 +525,29 @@ describe('monitoring', () => {
       // Calling stop again should still work (no error on clearing null)
       const result = stopClipboardMonitoring();
       expect(result).toBe(true);
+    });
+  });
+
+  describe('readClipboardForRenderer', () => {
+    it('extracts the text of html and rtf, as a monitored change does', () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'html', content: '<b>hello</b>' });
+      expect(readClipboardForRenderer()).toEqual({
+        type: 'html',
+        content: '<b>hello</b>',
+        text: 'hello',
+      });
+
+      const rtf = '{\\rtf1 hello}';
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'rtf', content: rtf });
+      expect(readClipboardForRenderer()).toMatchObject({ type: 'rtf', content: rtf, text: 'hello' });
+    });
+
+    it('passes the other types and an empty clipboard through', () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'plain' });
+      expect(readClipboardForRenderer()).toEqual({ type: 'text', content: 'plain' });
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue(null);
+      expect(readClipboardForRenderer()).toBeNull();
     });
   });
 });

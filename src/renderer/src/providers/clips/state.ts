@@ -3,6 +3,56 @@ import { ClipItem } from './types';
 import { createEmptyClip, updateClipsLength } from './utils';
 
 /**
+ * Whether a clip matches row 1, the only row a new clip is ever compared with: row 1 can
+ * never be locked, so it is always the most recent capture.
+ */
+export const isDuplicateOfNewest = (clips: ClipItem[], newClip: ClipItem): boolean => {
+  if (clips.length === 0) return false;
+  const mostRecentClip = clips[0];
+
+  // Check if type and content match
+  if (mostRecentClip.type !== newClip.type || mostRecentClip.content !== newClip.content) {
+    return false;
+  }
+
+  // For bookmark type, also check title and url
+  if (newClip.type === 'bookmark') {
+    return mostRecentClip.title === newClip.title && mostRecentClip.url === newClip.url;
+  }
+
+  return true;
+};
+
+/**
+ * The list with a clip added at row 1: every unlocked row shifts down one place, locked rows
+ * stay where they are, and whatever shifts past the limit is dropped.
+ */
+export const insertClip = (
+  clips: ClipItem[],
+  newClip: ClipItem,
+  lockedClips: Record<number, boolean>,
+  maxClips: number
+): ClipItem[] => {
+  const newClips = [...clips];
+  let lastClip = newClip;
+
+  for (let index = 0; index < maxClips; index++) {
+    if (lockedClips[index]) {
+      // if the clip is locked, maintain its current value
+      continue;
+    }
+
+    // Shift the clip down
+    const currentClip = newClips[index] || createEmptyClip();
+    newClips[index] = lastClip;
+    lastClip = currentClip;
+  }
+
+  // Ensure the array has the correct length
+  return updateClipsLength(newClips, maxClips);
+};
+
+/**
  * Hook for managing clip state operations
  */
 export const useClipState = (
@@ -99,27 +149,15 @@ export const useClipState = (
    * @returns true if the clip is a duplicate of the most recent clip
    */
   const isDuplicateOfMostRecent = useCallback(
-    (newClip: ClipItem): boolean => {
-      if (clips.length === 0) return false;
-
-      // Since the first clip can never be locked, always check against it
-      const mostRecentClip = clips[0];
-
-      // Check if type and content match
-      if (mostRecentClip.type !== newClip.type || mostRecentClip.content !== newClip.content) {
-        return false;
-      }
-
-      // For bookmark type, also check title and url
-      if (newClip.type === 'bookmark') {
-        return mostRecentClip.title === newClip.title && mostRecentClip.url === newClip.url;
-      }
-
-      return true;
-    },
+    (newClip: ClipItem): boolean => isDuplicateOfNewest(clips, newClip),
     [clips]
   );
 
+  /**
+   * Add a clip at row 1, shifting the unlocked rows down. The list is read inside the state
+   * update, so calls made before React re-renders (a replayed startup queue, two clipboard
+   * events in one tick) each build on the one before rather than on the same stale list.
+   */
   const clipboardUpdated = useCallback(
     (newClip: ClipItem): void => {
       console.log(
@@ -129,41 +167,24 @@ export const useClipState = (
         newClip.type
       );
 
-      // Check if this clip is a duplicate of the most recent clip
-      if (isDuplicateOfMostRecent(newClip)) {
-        console.log(
-          '❌ Duplicate clip detected, not adding to array:',
-          newClip.content.substring(0, 50)
-        );
-        return; // Skip adding duplicate
-      }
-
-      console.log(
-        '✅ New clipboard content detected, adding to array:',
-        newClip.content.substring(0, 50)
-      );
-
-      // Create new clips array by shifting existing clips down
-      const newClips = [...clips];
-      let lastClip = newClip;
-
-      for (let index = 0; index < maxClips; index++) {
-        if (lockedClips[index]) {
-          // if the clip is locked, maintain its current value
-          continue;
+      setClips((current) => {
+        // Check if this clip is a duplicate of the most recent clip
+        if (isDuplicateOfNewest(current, newClip)) {
+          console.log(
+            '❌ Duplicate clip detected, not adding to array:',
+            newClip.content.substring(0, 50)
+          );
+          return current; // Skip adding duplicate
         }
 
-        // Shift the clip down
-        const currentClip = newClips[index] || createEmptyClip();
-        newClips[index] = lastClip;
-        lastClip = currentClip;
-      }
-
-      // Ensure the array has the correct length
-      const finalClips = updateClipsLength(newClips, maxClips);
-      setClips(finalClips);
+        console.log(
+          '✅ New clipboard content detected, adding to array:',
+          newClip.content.substring(0, 50)
+        );
+        return insertClip(current, newClip, lockedClips, maxClips);
+      });
     },
-    [clips, maxClips, lockedClips, setClips, isDuplicateOfMostRecent]
+    [maxClips, lockedClips, setClips]
   );
 
   return {
