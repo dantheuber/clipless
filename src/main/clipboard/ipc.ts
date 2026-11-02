@@ -1,6 +1,5 @@
 import { ipcMain, BrowserWindow } from 'electron';
 import {
-  getCurrentClipboardData,
   setClipboardText,
   setClipboardHTML,
   setClipboardRTF,
@@ -11,6 +10,7 @@ import {
   startClipboardMonitoring,
   stopClipboardMonitoring,
   setSkipNextImageChange,
+  readClipboardForRenderer,
 } from './monitoring';
 import {
   getClipsSnapshot,
@@ -87,7 +87,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   }
 
   // Get current clipboard data using same prioritization as monitoring
-  ipcMain.handle('get-current-clipboard-data', () => getCurrentClipboardData());
+  ipcMain.handle('get-current-clipboard-data', () => readClipboardForRenderer());
 
   // Clipboard write operations
   ipcMain.handle('set-clipboard-text', (_event, text: string) => setClipboardText(text));
