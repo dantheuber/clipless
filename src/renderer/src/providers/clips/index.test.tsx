@@ -459,6 +459,53 @@ describe('ClipsProvider clips captured during startup', () => {
     expect(contents(saved)).toEqual(['copied', 'startup', 'older', 'oldest']);
   });
 
+  it.each([
+    ['mount load first', [0, 1]],
+    ['reload first', [1, 0]],
+  ])(
+    'keeps a clip copied while two startup loads overlap and both complete, %s',
+    async (_order, resolveOrder) => {
+      let storageReady: (() => void) | null = null;
+      api().onStorageReady.mockImplementation((cb: () => void) => {
+        storageReady = cb;
+        return () => {
+          storageReady = null;
+        };
+      });
+      // The background load finishes between the mount load's two round trips, so the
+      // storage-ready reload starts while the mount load is still waiting on its snapshot
+      const pendingLoads: ((snapshot: StoredClipsSnapshot) => void)[] = [];
+      api().storageGetClipsSnapshot.mockImplementation(
+        () => new Promise<StoredClipsSnapshot>((resolve) => pendingLoads.push(resolve))
+      );
+      const { result } = mountProbe();
+      await flush();
+      await act(async () => {
+        storageReady?.();
+      });
+      await flush();
+      expect(pendingLoads).toHaveLength(2);
+      expect(clipboardListeners.length).toBeGreaterThan(0);
+
+      act(() => {
+        clipboardListeners.forEach((listener) => listener({ type: 'text', content: 'copied' }));
+      });
+
+      for (const index of resolveOrder) {
+        await act(async () => {
+          pendingLoads[index](history('older', 'oldest'));
+        });
+        await flush();
+      }
+      await settle();
+
+      expect(contents(result.current.data.clips)).toEqual(['copied', 'startup', 'older', 'oldest']);
+      expect(result.current.meta.loadError).toBeNull();
+      const saved = api().storageSaveClips.mock.calls.at(-1)?.[0];
+      expect(contents(saved)).toEqual(['copied', 'startup', 'older', 'oldest']);
+    }
+  );
+
   it('shows the captured clips without saving them when the history cannot be loaded', async () => {
     const { result } = mountProbe();
     await flush();
