@@ -83,6 +83,7 @@
     "app-builder-lib": {
       "@electron/get": "^5.0.0"
     },
-    "minimatch@^10.2.5": "^11.0.1"
+    "minimatch@^10.2.5": "^11.0.1",
+    "minimatch@^9.0.3": "^11.0.1"
   }
 }
