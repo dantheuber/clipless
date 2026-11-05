@@ -1,6 +1,6 @@
 {
   "name": "clipless",
-  "version": "2.6.11",
+  "version": "2.6.12",
   "description": "A Clipboard manager for busy people",
   "main": "./out/main/index.js",
   "author": "Daniel Essig",
@@ -82,6 +82,7 @@
   "overrides": {
     "app-builder-lib": {
       "@electron/get": "^5.0.0"
-    }
+    },
+    "minimatch@^10.2.5": "^11.0.1"
   }
 }
