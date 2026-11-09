@@ -85,19 +85,3 @@ export function formatBytes(bytes: number): string {
   if (bytes >= 1048576) return `${(bytes / 1048576).toFixed(1)} MB`;
   return `${Math.round(bytes / 1024)} KB`;
 }
-
-/**
- * Save text as a file through the browser's download path. Returns its byte size.
- */
-export function downloadText(name: string, text: string, type = 'application/json'): number {
-  const blob = new Blob([text], { type });
-  const url = URL.createObjectURL(blob);
-  const anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.download = name;
-  document.body.appendChild(anchor);
-  anchor.click();
-  document.body.removeChild(anchor);
-  URL.revokeObjectURL(url);
-  return blob.size;
-}

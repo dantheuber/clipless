@@ -61,6 +61,7 @@ declare global {
       storageSaveSettings: (settings: Partial<UserSettings>) => Promise<boolean>;
       storageGetStats: () => Promise<StorageStats>;
       storageExportData: () => Promise<string>;
+      saveTextFile: (name: string, text: string) => Promise<string | null>;
       storageImportData: (jsonData: string) => Promise<boolean>;
       storageClearAll: () => Promise<boolean>;
       // Template APIs

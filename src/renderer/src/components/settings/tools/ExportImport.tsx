@@ -4,7 +4,7 @@ import type { QuickClipsConfig, QuickClipsImportMode } from '../../../../../shar
 import { patternGroups } from '../../../../../shared/readiness';
 import { ConfirmDialog } from '../../ConfirmDialog';
 import { useToast } from '../../Toast';
-import { downloadText, readFileText } from '../general/backup';
+import { readFileText } from '../general/backup';
 import { errorText } from '../../../utils/errorText';
 import { GroupPill } from './GroupPill';
 import { useToolsData } from './useToolsData';
@@ -102,10 +102,16 @@ export function ExportImport() {
     setExportJson(null);
   };
 
-  const save = () => {
-    const size = downloadText('clipless-tools-config.json', exportJson as string);
-    toast('Saved clipless-tools-config.json', `${size} bytes`);
-    setExportJson(null);
+  const save = async () => {
+    try {
+      const json = exportJson as string;
+      const path = await window.api.saveTextFile('clipless-tools-config.json', json);
+      if (!path) return;
+      toast('Saved clipless-tools-config.json', `${path} · ${new Blob([json]).size} bytes`);
+      setExportJson(null);
+    } catch (error) {
+      toast('Export failed', errorText(error));
+    }
   };
 
   const parsed = summarizeConfig(importText);
