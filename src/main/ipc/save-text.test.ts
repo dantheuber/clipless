@@ -21,7 +21,7 @@ vi.mock('fs', () => ({ promises: { writeFile: vi.fn() } }));
 import { setupTextExportIPC } from './save-text';
 
 const event = { sender: {} } as IpcMainInvokeEvent;
-const save = () => handlers.get('save-text-file')!(event, 'backup.json', '{"text":"é"}');
+const save = (name = 'backup.json') => handlers.get('save-text-file')!(event, name, '{"text":"é"}');
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -74,6 +74,15 @@ describe('save-text-file handler', () => {
 
     await expect(save()).rejects.toThrow('disk full');
   });
+
+  it.each(['../backup.json', 'dir/backup.json', 'dir\\backup.json', '/etc/passwd', '.', '..', ''])(
+    'rejects the name %j without opening a dialog or writing',
+    async (name) => {
+      await expect(save(name)).rejects.toThrow('bare file name');
+      expect(dialog.showSaveDialog).not.toHaveBeenCalled();
+      expect(fs.writeFile).not.toHaveBeenCalled();
+    }
+  );
 
   it('does not write when the dialog returns no path', async () => {
     vi.mocked(dialog.showSaveDialog).mockResolvedValue({ canceled: false, filePath: '' });
