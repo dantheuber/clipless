@@ -703,11 +703,48 @@ describe('SecureStorage.importQuickClipsConfig', () => {
       ['q1', 0],
       ['q2', 1],
     ]);
-    expect((await storage.getTemplates()).map((t) => [t.id, t.order])).toEqual([
+    expect((await storage.getTemplates()).map((t) => [t.name, t.order])).toEqual([
       ['t1', 0],
       ['t2', 1],
     ]);
     expect(fileOperations.saveEncryptedJson).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives merged templates new ids so the same config can be merged twice', async () => {
+    await initialiseAndWaitForLoad();
+    const config = quickClips({ templates: [template('t1'), template('t2')] });
+
+    await storage.importQuickClipsConfig(config, 'merge');
+    await storage.importQuickClipsConfig(config, 'merge');
+
+    const templates = await storage.getTemplates();
+    expect(templates.map((t) => t.name)).toEqual(['t1', 't2', 't1', 't2']);
+    expect(new Set(templates.map((t) => t.id)).size).toBe(4);
+    expect(templates.map((t) => t.id)).not.toContain('t1');
+
+    const [first, , second] = templates;
+    await storage.updateTemplate(second.id, { name: 'renamed' });
+    expect((await storage.getTemplates()).map((t) => t.name)).toEqual([
+      't1',
+      't2',
+      'renamed',
+      't2',
+    ]);
+
+    await storage.deleteTemplate(second.id);
+    expect((await storage.getTemplates()).map((t) => [t.id, t.name, t.order])).toEqual([
+      [first.id, 't1', 0],
+      [templates[1].id, 't2', 1],
+      [templates[3].id, 't2', 2],
+    ]);
+  });
+
+  it('keeps the file template ids when replacing', async () => {
+    await initialiseAndWaitForLoad();
+
+    await storage.importQuickClipsConfig(quickClips({ templates: [template('t1')] }), 'replace');
+
+    expect((await storage.getTemplates()).map((t) => t.id)).toEqual(['t1']);
   });
 
   it('skips templates missing an id, name or content, and a templates field that is not a list', async () => {
@@ -728,7 +765,7 @@ describe('SecureStorage.importQuickClipsConfig', () => {
     );
     await storage.importQuickClipsConfig(quickClips({ templates: [] }));
 
-    expect((await storage.getTemplates()).map((t) => t.id)).toEqual(['ok']);
+    expect((await storage.getTemplates()).map((t) => t.name)).toEqual(['ok']);
   });
 
   it('writes nothing when a merge brings nothing new', async () => {
