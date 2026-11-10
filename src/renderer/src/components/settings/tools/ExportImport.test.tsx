@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { screen, fireEvent, cleanup, within, act } from '@testing-library/react';
 import { ExportImport, summarizeConfig } from './ExportImport';
 import { api, defaultConfig, flush, installConfig, renderTools } from './harness';
 
 beforeEach(() => {
   vi.clearAllMocks();
   installConfig(defaultConfig());
+  api().saveTextFile.mockResolvedValue('/exports/clipless-tools-config.json');
 });
 
 afterEach(() => {
@@ -75,12 +76,11 @@ describe('ExportImport', () => {
   });
 
   it('export can save a file, and a failure to export shows inline', async () => {
-    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     await renderTools(<ExportImport />);
     fireEvent.click(screen.getByTestId('tools-export'));
     await flush();
     fireEvent.click(screen.getByText('Save file'));
+    await flush();
     expect(screen.getByTestId('toast')).toHaveTextContent('Saved clipless-tools-config.json');
 
     api().quickClipsExportConfig.mockRejectedValueOnce(new Error('storage locked'));
@@ -94,6 +94,54 @@ describe('ExportImport', () => {
     await flush();
     expect(screen.getByRole('dialog')).toHaveTextContent('plain failure');
     fireEvent.click(screen.getByText('Close'));
+  });
+
+  it('waits for the save result before announcing success or closing the export', async () => {
+    let finish!: (path: string | null) => void;
+    api().saveTextFile.mockImplementationOnce(
+      () => new Promise<string | null>((resolve) => (finish = resolve))
+    );
+    await renderTools(<ExportImport />);
+    fireEvent.click(screen.getByTestId('tools-export'));
+    await flush();
+    const json = (screen.getByLabelText('Config JSON') as HTMLTextAreaElement).value;
+    fireEvent.click(screen.getByText('Save file'));
+    await flush();
+
+    expect(api().saveTextFile).toHaveBeenCalledWith('clipless-tools-config.json', json);
+    expect(screen.queryByTestId('toast')).toBeNull();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    await act(async () => finish('/exports/team.json'));
+    expect(screen.getByTestId('toast')).toHaveTextContent('Saved');
+    expect(screen.getByTestId('toast')).toHaveTextContent('/exports/team.json');
+    expect(screen.queryByRole('dialog')).toBeNull();
+  });
+
+  it('keeps the config available without a success toast when saving is cancelled', async () => {
+    api().saveTextFile.mockResolvedValueOnce(null);
+    await renderTools(<ExportImport />);
+    fireEvent.click(screen.getByTestId('tools-export'));
+    await flush();
+    fireEvent.click(screen.getByText('Save file'));
+    await flush();
+
+    expect(api().saveTextFile).toHaveBeenCalled();
+    expect(screen.queryByTestId('toast')).toBeNull();
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(screen.getByText('Save file')).not.toBeDisabled();
+  });
+
+  it('reports a write error and keeps the config available to retry', async () => {
+    api().saveTextFile.mockRejectedValueOnce(new Error('disk full'));
+    await renderTools(<ExportImport />);
+    fireEvent.click(screen.getByTestId('tools-export'));
+    await flush();
+    fireEvent.click(screen.getByText('Save file'));
+    await flush();
+
+    expect(screen.getByTestId('toast')).toHaveTextContent('Export failed');
+    expect(screen.getByTestId('toast')).toHaveTextContent('disk full');
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
   });
 
   it('import previews the counts and groups, then merges or replaces with the mode', async () => {

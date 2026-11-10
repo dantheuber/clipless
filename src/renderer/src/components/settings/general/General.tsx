@@ -10,10 +10,24 @@ import { Updates } from './Updates';
 import { About } from './About';
 import { ClearAll } from './ClearAll';
 import { ImportPreview } from './ImportPreview';
-import { backupFileName, downloadText, formatBytes } from './backup';
+import { backupFileName, formatBytes } from './backup';
 import { errorText } from '../../../utils/errorText';
 import w from '../shell/widgets.module.css';
 import styles from './General.module.css';
+
+/** Saves a backup; resolves to true only after the file was written. */
+export async function exportData(toast: ReturnType<typeof useToast>): Promise<boolean> {
+  try {
+    const data = await window.api.storageExportData();
+    const path = await window.api.saveTextFile(backupFileName(new Date()), data);
+    if (!path) return false;
+    toast('Saved', `${path} · ${formatBytes(new Blob([data]).size)}`);
+    return true;
+  } catch (error) {
+    toast('Export failed', errorText(error));
+    return false;
+  }
+}
 
 /**
  * General (spec 15.4): Application beside Window and Privacy, three panels across the bottom, and
@@ -22,19 +36,7 @@ import styles from './General.module.css';
 export function General() {
   const toast = useToast();
 
-  /** Saves a backup and says so; resolves to whether one was written. */
-  const exportData = async (): Promise<boolean> => {
-    try {
-      const data = await window.api.storageExportData();
-      const name = backupFileName(new Date());
-      const size = downloadText(name, data);
-      toast('Saved', `${name} · ${formatBytes(size)}`);
-      return true;
-    } catch (error) {
-      toast('Export failed', errorText(error));
-      return false;
-    }
-  };
+  const exportBackup = () => exportData(toast);
 
   return (
     <StatsProvider>
@@ -42,11 +44,16 @@ export function General() {
         title="General"
         footer={
           <Footer text="Changes apply as you make them.">
-            <button type="button" className={w.link} onClick={exportData} data-testid="export-data">
+            <button
+              type="button"
+              className={w.link}
+              onClick={exportBackup}
+              data-testid="export-data"
+            >
               export data
             </button>
             <ImportPreview />
-            <ClearAll onExportFirst={exportData} />
+            <ClearAll onExportFirst={exportBackup} />
           </Footer>
         }
       >

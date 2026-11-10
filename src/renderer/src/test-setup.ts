@@ -61,6 +61,7 @@ const createMockApi = () => ({
   openAppPath: vi.fn().mockResolvedValue(''),
   storageGetStats: vi.fn().mockResolvedValue({ clipCount: 0, lockedCount: 0, dataSize: 0 }),
   storageExportData: vi.fn().mockResolvedValue('{}'),
+  saveTextFile: vi.fn().mockResolvedValue('/exports/backup.json'),
   storageImportData: vi.fn().mockResolvedValue(true),
   storageClearAll: vi.fn().mockResolvedValue(true),
   searchTermsGetAll: vi.fn().mockResolvedValue([]),

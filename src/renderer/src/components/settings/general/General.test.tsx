@@ -4,7 +4,7 @@ import type { UpdateState, UserSettings } from '../../../../../shared/types';
 import { ToastProvider } from '../../Toast';
 import { ScanIndexProvider } from '../../../providers/scan';
 import { SettingsProvider } from './SettingsProvider';
-import { General } from './General';
+import { General, exportData } from './General';
 import { platformLine } from './About';
 
 const api = () => window.api as unknown as Record<string, ReturnType<typeof vi.fn>>;
@@ -45,6 +45,7 @@ beforeEach(() => {
   vi.clearAllMocks();
   api().storageGetSettings.mockResolvedValue({ ...stored });
   api().getAutoStartState.mockResolvedValue(null);
+  api().saveTextFile.mockResolvedValue('/exports/backup.json');
   api().settingsChanged.mockResolvedValue({ ok: true, failed: [] });
   api().storageGetStats.mockResolvedValue({ clipCount: 87, lockedCount: 4, dataSize: 217088 });
   api().getUpdateState.mockResolvedValue({ status: 'idle' });
@@ -63,6 +64,59 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
+});
+
+describe('exportData', () => {
+  it('returns true only after saving and reports the selected path and UTF-8 size', async () => {
+    const data = 'é'.repeat(1024);
+    api().storageExportData.mockResolvedValueOnce(data);
+    let finish!: (path: string | null) => void;
+    api().saveTextFile.mockImplementationOnce(
+      () => new Promise<string | null>((resolve) => (finish = resolve))
+    );
+    const toast = vi.fn();
+    const settled = vi.fn();
+    const pending = exportData(toast).then((saved) => {
+      settled(saved);
+      return saved;
+    });
+    await Promise.resolve();
+
+    expect(api().saveTextFile).toHaveBeenCalledWith(
+      expect.stringMatching(/^clipless-backup-\d{4}-\d{2}-\d{2}\.json$/),
+      data
+    );
+    expect(toast).not.toHaveBeenCalled();
+    expect(settled).not.toHaveBeenCalled();
+    finish('/exports/renamed.json');
+    await expect(pending).resolves.toBe(true);
+    expect(toast).toHaveBeenCalledWith('Saved', '/exports/renamed.json · 2 KB');
+  });
+
+  it('returns false without a success toast on cancel', async () => {
+    api().saveTextFile.mockResolvedValueOnce(null);
+    const toast = vi.fn();
+
+    await expect(exportData(toast)).resolves.toBe(false);
+    expect(toast).not.toHaveBeenCalled();
+  });
+
+  it('returns false and reports a failed file write', async () => {
+    api().saveTextFile.mockRejectedValueOnce(new Error('disk full'));
+    const toast = vi.fn();
+
+    await expect(exportData(toast)).resolves.toBe(false);
+    expect(toast).toHaveBeenCalledExactlyOnceWith('Export failed', 'disk full');
+  });
+
+  it('returns false without opening a save dialog when backup generation fails', async () => {
+    api().storageExportData.mockRejectedValueOnce(new Error('image missing'));
+    const toast = vi.fn();
+
+    await expect(exportData(toast)).resolves.toBe(false);
+    expect(api().saveTextFile).not.toHaveBeenCalled();
+    expect(toast).toHaveBeenCalledExactlyOnceWith('Export failed', 'image missing');
+  });
 });
 
 describe('General', () => {
@@ -251,15 +305,48 @@ describe('General', () => {
 
   it('exports a backup named by the date and toasts the name and size', async () => {
     api().storageExportData.mockResolvedValue('{"clips":[]}');
-    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    api().saveTextFile.mockImplementationOnce(async (name: string) => `/exports/${name}`);
     await mount();
     fireEvent.click(screen.getByTestId('export-data'));
     await flush();
     expect(screen.getByTestId('toast')).toHaveTextContent(
       /Saved.*clipless-backup-\d{4}-\d{2}-\d{2}\.json/
     );
-    vi.unstubAllGlobals();
+  });
+
+  it('keeps deletion disabled when the backup save dialog is cancelled', async () => {
+    api().saveTextFile.mockResolvedValueOnce(null);
+    await mount();
+    fireEvent.click(screen.getByTestId('clear-all'));
+    fireEvent.click(screen.getByText('export first'));
+    await flush();
+
+    expect(api().saveTextFile).toHaveBeenCalled();
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    expect(screen.getByTestId('clear-all-backup-failed')).toHaveTextContent('not saved');
+    expect(screen.queryByTestId('toast')).toBeNull();
+    fireEvent.click(screen.getByText('Delete everything'));
+    expect(api().storageClearAll).not.toHaveBeenCalled();
+  });
+
+  it('holds deletion until the backup write finishes and keeps it off after a write error', async () => {
+    let fail!: (error: Error) => void;
+    api().saveTextFile.mockImplementationOnce(
+      () => new Promise<string | null>((_resolve, reject) => (fail = reject))
+    );
+    await mount();
+    fireEvent.click(screen.getByTestId('clear-all'));
+    fireEvent.click(screen.getByText('export first'));
+    await flush();
+
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    expect(screen.queryByTestId('toast')).toBeNull();
+    await act(async () => fail(new Error('disk full')));
+    expect(screen.getByText('Delete everything')).toBeDisabled();
+    expect(screen.getByTestId('clear-all-backup-failed')).toHaveTextContent('not saved');
+    expect(screen.getByTestId('toast')).toHaveTextContent('Export failed');
+    expect(screen.getByTestId('toast')).toHaveTextContent('disk full');
+    expect(api().storageClearAll).not.toHaveBeenCalled();
   });
 
   it('reports an export failure as a toast, whatever was thrown', async () => {
@@ -343,8 +430,6 @@ describe('General', () => {
 
   it('clear all names the counts and size, offers export first, and re-applies the defaults', async () => {
     api().storageExportData.mockResolvedValue('{}');
-    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     await mount();
     fireEvent.click(screen.getByTestId('clear-all'));
     const dialog = screen.getByRole('dialog');
@@ -367,7 +452,6 @@ describe('General', () => {
     expect(screen.getAllByTestId('toast').pop()).toHaveTextContent('Cleared');
     expect(screen.getByTestId('clip-count')).toHaveTextContent('0');
     expect(api().settingsChanged).toHaveBeenCalled();
-    vi.unstubAllGlobals();
   });
 
   it('holds deletion while export first runs, and keeps it off after a failed backup', async () => {
@@ -380,8 +464,6 @@ describe('General', () => {
           fail = reject;
         })
     );
-    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     await mount();
     fireEvent.click(screen.getByTestId('clear-all'));
     const dialog = screen.getByRole('dialog');
@@ -424,7 +506,6 @@ describe('General', () => {
     fireEvent.click(screen.getByText('Cancel'));
     fireEvent.click(screen.getByTestId('clear-all'));
     expect(screen.getByText('Delete everything')).not.toBeDisabled();
-    vi.unstubAllGlobals();
   });
 
   it('keeps deletion off when the dialog is reopened while export first is still running', async () => {
@@ -432,8 +513,6 @@ describe('General', () => {
     api().storageExportData.mockImplementationOnce(
       () => new Promise<string>((resolve) => (finish = resolve))
     );
-    vi.stubGlobal('URL', { ...URL, createObjectURL: () => 'blob:x', revokeObjectURL: () => {} });
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     await mount();
     fireEvent.click(screen.getByTestId('clear-all'));
     fireEvent.click(within(screen.getByRole('dialog')).getByText('export first'));
@@ -453,7 +532,6 @@ describe('General', () => {
     fireEvent.click(screen.getByText('Delete everything'));
     await flush();
     expect(api().storageClearAll).toHaveBeenCalled();
-    vi.unstubAllGlobals();
   });
 
   it('keeps a failed clear inline, and cancel closes it', async () => {

@@ -102,6 +102,8 @@ const api = {
     electronAPI.ipcRenderer.invoke('storage-save-settings', settings),
   storageGetStats: () => electronAPI.ipcRenderer.invoke('storage-get-stats'),
   storageExportData: () => electronAPI.ipcRenderer.invoke('storage-export-data'),
+  saveTextFile: (name: string, text: string): Promise<string | null> =>
+    electronAPI.ipcRenderer.invoke('save-text-file', name, text),
   storageImportData: (jsonData: string) =>
     electronAPI.ipcRenderer.invoke('storage-import-data', jsonData),
   storageClearAll: () => electronAPI.ipcRenderer.invoke('storage-clear-all'),
