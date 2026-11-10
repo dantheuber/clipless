@@ -37,6 +37,7 @@ import { SaveQueue } from './save-queue';
 import { pruneGroupColours, mergeGroupColours } from './group-colours';
 import {
   createTemplateObject,
+  generateTemplateId,
   updateTemplateObject,
   sortTemplatesByOrder,
   reorderTemplatesArray,
@@ -817,12 +818,15 @@ class SecureStorage {
       hasChanges = true;
     }
 
-    // Add templates (backwards-compatible: missing templates array is fine)
+    // Add templates (backwards-compatible: missing templates array is fine). A merge gives
+    // each template a fresh id, as terms and tools get, so re-importing the same file never
+    // leaves two templates sharing an id; replace keeps the file's ids as the list is empty.
     if (config.templates && Array.isArray(config.templates) && config.templates.length > 0) {
       config.templates.forEach((template) => {
         if (template.id && template.name && template.content) {
           const newTemplate = {
             ...template,
+            id: mode === 'merge' ? generateTemplateId() : template.id,
             order:
               this.templatesData.templates.length > 0
                 ? Math.max(...this.templatesData.templates.map((t) => t.order)) + 1
