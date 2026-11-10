@@ -17,8 +17,9 @@ interface ClearAllProps {
 
 /**
  * Where "export first" stands. Deletion is off while a backup is being written and after
- * one fails: the export reads every image file, so a deletion running alongside it would
- * remove the images first and the backup would fail after the history was already gone.
+ * one fails or is cancelled: the export reads every image file, so a deletion running
+ * alongside it would remove the images first and the backup would fail after the history
+ * was already gone.
  */
 type BackupState = 'none' | 'pending' | 'failed' | 'saved';
 

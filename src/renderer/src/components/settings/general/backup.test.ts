@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
-import { backupFileName, downloadText, formatBytes, readFileText, summarizeBackup } from './backup';
+import { describe, it, expect, vi } from 'vitest';
+import { backupFileName, formatBytes, readFileText, summarizeBackup } from './backup';
 
 describe('summarizeBackup', () => {
   it('counts what a backup holds', () => {
@@ -122,23 +122,5 @@ describe('formatBytes', () => {
     expect(formatBytes(2048)).toBe('2 KB');
     expect(formatBytes(217088)).toBe('212 KB');
     expect(formatBytes(3 * 1048576)).toBe('3.0 MB');
-  });
-});
-
-describe('downloadText', () => {
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('clicks a download link and reports the size', () => {
-    const createObjectURL = vi.fn(() => 'blob:x');
-    const revokeObjectURL = vi.fn();
-    vi.stubGlobal('URL', { ...URL, createObjectURL, revokeObjectURL });
-    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
-    expect(downloadText('a.json', '{"a":1}')).toBe(7);
-    expect(click).toHaveBeenCalled();
-    expect(createObjectURL).toHaveBeenCalled();
-    expect(revokeObjectURL).toHaveBeenCalledWith('blob:x');
-    vi.unstubAllGlobals();
   });
 });

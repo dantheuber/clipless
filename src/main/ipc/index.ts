@@ -17,9 +17,12 @@ import {
 import { applyAutoStart } from '../autoStart';
 import { restartApp } from '../app/restart';
 import { openAppPath } from '../app/open-path';
+import { setupTextExportIPC } from './save-text';
 import type { AppPathName, SettingsApplyResult, UserSettings } from '../../shared/types';
 
 export function setupMainIPC(): void {
+  setupTextExportIPC();
+
   // IPC test
   ipcMain.on('ping', () => console.log('pong'));
 
