@@ -62,3 +62,42 @@ describe('clipboardUpdated', () => {
     expect(result.current.clips.map((clip) => clip.content)).toEqual(['four', '', 'three']);
   });
 });
+
+describe('deleting a locked clip', () => {
+  const seed = (result: { current: ReturnType<typeof useProbe> }) => {
+    act(() => {
+      result.current.clipboardUpdated(text('a', 'keep me'));
+      result.current.clipboardUpdated(text('b', 'newest'));
+    });
+    act(() => result.current.toggleClipLock(1));
+    expect(result.current.isClipLocked(1)).toBe(true);
+  };
+
+  it('unlocks the row when it is deleted', () => {
+    const { result } = renderHook(() => useProbe(3));
+    seed(result);
+
+    act(() => result.current.emptyClip(1));
+
+    expect(result.current.clips[1].content).toBe('');
+    expect(result.current.isClipLocked(1)).toBe(false);
+  });
+
+  it('unlocks the row when its content is edited away', () => {
+    const { result } = renderHook(() => useProbe(3));
+    seed(result);
+
+    act(() => result.current.updateClip(1, { ...result.current.clips[1], content: '  \n' }));
+
+    expect(result.current.isClipLocked(1)).toBe(false);
+  });
+
+  it('keeps the lock when an edit leaves content behind', () => {
+    const { result } = renderHook(() => useProbe(3));
+    seed(result);
+
+    act(() => result.current.updateClip(1, { ...result.current.clips[1], content: 'edited' }));
+
+    expect(result.current.isClipLocked(1)).toBe(true);
+  });
+});

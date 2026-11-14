@@ -7,11 +7,11 @@ tags:
   - state
 status: stable
 generated:
-  by: claude-code/fable-5
-  at: 2026-08-23T16:44:54.229Z
+  by: okf-mcp/2.1.0
+  at: 2026-11-13T21:55:23.783Z
 verified:
-  by: claude-code/fable-5
-  at: 2026-08-23T14:00:00Z
+  - by: claude-code/opus-5-5
+    at: 2026-11-13T00:00:00Z
 ---
 
 Renderer clipboard state lives in `src/renderer/src/providers/clips/`, a modular React Context provider (the old single-file `providers/clips.tsx` wrapper is gone; import from the directory).
@@ -24,6 +24,8 @@ Modules, each a focused hook:
 - `pins.ts` and `usePinPruning.ts` -- the pinned `group|value` set behind the tray, memory only, pruned with a reason when a value disappears from every clip
 - `quickLook.ts` and `useOpenQuickLookSignal.ts` -- the reader's state (open clip by id, view: text, source or rendered) and the `open-quick-look` hotkey signal, which waits for a pending `clipboard-changed` before opening on row 1
 - `index.tsx` -- `ClipsProvider` orchestrates the hooks; consumers use `useClips` (plus split contexts `useClipsData` / `useClipsMeta` / `useClipsActions` to limit re-renders)
+
+Locks follow content: an empty row is never locked. `emptyClip` (context-menu Delete) and `updateClip` (an edit that leaves no content, judged by `hasContent`) both drop the row's lock, and loading from disk skips locks on empty slots. This matters because `ClipContextMenu` disables Lock/Unlock on an empty row, so a lock left on one could never be removed, and `insertClip` would keep skipping that dead row.
 
 Scanning is not in this provider: `providers/scan.tsx` (`ScanIndexProvider`) holds the Quick Clips config and one cached scan per clip id, see [Quick Clips](../systems/quick-clips.md).
 

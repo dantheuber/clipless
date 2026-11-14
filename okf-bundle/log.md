@@ -1,5 +1,8 @@
 # Update Log
 
+## 2026-11-13
+* Record the rule that deleting or emptying a row drops its lock
+
 ## 2026-09-12
 * **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
 * **Update**: Updated [Opt-in Usage Analytics](/systems/opt-in-usage-analytics.md).
