@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import { ClipItem } from './types';
 import { createEmptyClip, updateClipsLength } from './utils';
+import { hasContent } from './quickLook';
 
 /**
  * Whether a clip matches row 1, the only row a new clip is ever compared with: row 1 can
@@ -74,6 +75,22 @@ export const useClipState = (
     [clips]
   );
 
+  /**
+   * Drop the lock on a row whose content is gone. The Unlock menu item is disabled on an
+   * empty row, so a lock left there could never be removed.
+   */
+  const releaseLock = useCallback(
+    (index: number): void => {
+      setLockedClips((current) => {
+        if (!current[index]) return current;
+        const next = { ...current };
+        delete next[index];
+        return next;
+      });
+    },
+    [setLockedClips]
+  );
+
   const emptyClip = useCallback(
     (index: number): void => {
       // Prevent emptying the first clip (index 0)
@@ -85,8 +102,9 @@ export const useClipState = (
       const newClips = [...clips];
       newClips[index] = createEmptyClip(); // replace the clip at the specified index
       setClips(newClips);
+      releaseLock(index);
     },
-    [clips, setClips]
+    [clips, setClips, releaseLock]
   );
 
   /**
@@ -99,8 +117,10 @@ export const useClipState = (
       const newClips = [...clips];
       newClips[index] = updatedClip;
       setClips(newClips);
+      // Editing a row down to nothing deletes its content, so it loses its lock too
+      if (!hasContent(updatedClip)) releaseLock(index);
     },
-    [clips, setClips]
+    [clips, setClips, releaseLock]
   );
 
   /**
