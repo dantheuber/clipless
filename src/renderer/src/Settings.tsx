@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ScanIndexProvider } from './providers/scan';
 import { ToastProvider } from './components/Toast';
 import { ThemeProvider } from './providers/theme';
@@ -7,7 +7,7 @@ import { useSettingsStore } from './components/settings/general/useSetting';
 import { Rail, type SettingsTab } from './components/settings/shell/Rail';
 import { General } from './components/settings/general/General';
 import { Hotkeys } from './components/settings/hotkeys/Hotkeys';
-import { Tools } from './components/settings/tools/Tools';
+import { Tools, type ToolsNavigationGuard } from './components/settings/tools/Tools';
 import styles from './components/settings/shell/Shell.module.css';
 import w from './components/settings/shell/widgets.module.css';
 
@@ -31,7 +31,18 @@ function initialTab(): SettingsTab {
  */
 function SettingsShell(): React.JSX.Element {
   const [tab, setTab] = useState<SettingsTab>(initialTab);
+  const toolsNavigationGuard = useRef<ToolsNavigationGuard | null>(null);
+  const registerToolsNavigationGuard = useCallback((guard: ToolsNavigationGuard | null) => {
+    toolsNavigationGuard.current = guard;
+  }, []);
   const { settings, loadError, reload } = useSettingsStore();
+
+  const selectTab = (next: SettingsTab) => {
+    if (next === tab) return;
+    const go = () => setTab(next);
+    if (tab === 'tools' && toolsNavigationGuard.current) toolsNavigationGuard.current(go);
+    else go();
+  };
 
   useEffect(() => {
     document.title = 'Clipless settings';
@@ -54,12 +65,12 @@ function SettingsShell(): React.JSX.Element {
   } else if (tab === 'hotkeys') {
     pane = <Hotkeys />;
   } else {
-    pane = <Tools />;
+    pane = <Tools onNavigationGuardChange={registerToolsNavigationGuard} />;
   }
 
   return (
     <div className={styles.shell}>
-      <Rail active={tab} onSelect={setTab} version={__APP_VERSION__} />
+      <Rail active={tab} onSelect={selectTab} version={__APP_VERSION__} />
       {pane}
     </div>
   );
