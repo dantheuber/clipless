@@ -12,6 +12,7 @@ const { state } = vi.hoisted(() => ({
     copyClipToClipboard: vi.fn().mockResolvedValue(undefined),
     updateClip: vi.fn(),
     pendingScan: false,
+    clips: [] as ClipItem[],
   },
 }));
 
@@ -30,6 +31,7 @@ vi.mock('../../../providers/clips', async () => {
   const utils = await import('../../../providers/clips/utils');
   return {
     clipText: utils.clipText,
+    useClipsData: () => ({ clips: state.clips }),
     useClipsActions: () => ({
       copyClipToClipboard: state.copyClipToClipboard,
       updateClip: state.updateClip,
@@ -75,8 +77,10 @@ const row = (
   clip: ClipItem,
   index = 1,
   extra: Partial<React.ComponentProps<typeof ClipWrapper>> = {}
-) =>
-  render(
+) => {
+  state.clips = Array.from({ length: index + 1 }, (_, i) => ({ ...empty, id: `empty-${i}` }));
+  state.clips[index] = clip;
+  return render(
     <ClipWrapper
       clip={clip}
       index={index}
@@ -85,12 +89,14 @@ const row = (
       {...extra}
     />
   );
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
   state.openClipId = null;
   state.locked = new Set();
   state.pendingScan = false;
+  state.clips = [];
 });
 
 afterEach(cleanup);
@@ -192,6 +198,39 @@ describe('ClipWrapper', () => {
       fireEvent.click(screen.getByTestId('menu'));
     });
     expect(screen.queryByTestId('menu')).toBeNull();
+  });
+
+  it('resolves an inline save by clip id even when the row index is stale', () => {
+    const { rerender } = row(text, 2);
+    fireEvent.click(screen.getByTestId('clip-line'));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Edited' } });
+    state.clips = [image, html, empty, { ...text, language: 'bash' }];
+    rerender(
+      <ClipWrapper clip={text} index={2} visibleIndex={2} isCurrentCopiedClip={false} isEvenRow />
+    );
+
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' });
+
+    expect(state.updateClip).toHaveBeenCalledExactlyOnceWith(3, {
+      ...text,
+      language: 'bash',
+      content: 'Edited',
+    });
+  });
+
+  it('does not save if the edited clip no longer exists', () => {
+    const { rerender } = row(text, 2);
+    fireEvent.click(screen.getByTestId('clip-line'));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Discard this draft' } });
+    state.clips = [image, html, empty];
+    rerender(
+      <ClipWrapper clip={text} index={2} visibleIndex={2} isCurrentCopiedClip={false} isEvenRow />
+    );
+
+    fireEvent.blur(screen.getByRole('textbox'));
+
+    expect(state.updateClip).not.toHaveBeenCalled();
+    expect(screen.queryByRole('textbox')).toBeNull();
   });
 
   it('renders rtf and bookmark rows', () => {

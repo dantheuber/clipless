@@ -175,6 +175,46 @@ describe('TextClip editing', () => {
     expect(onUpdate).not.toHaveBeenCalled();
   });
 
+  it.each(['Enter', 'blur'])(
+    'cancels on %s if the clip identity changed during editing',
+    (commit) => {
+      const onUpdate = vi.fn();
+      const onEditingChange = vi.fn();
+      const { rerender } = render(
+        <TextClip
+          clip={clip('Hello')}
+          scan={null}
+          onUpdate={onUpdate}
+          onEditingChange={onEditingChange}
+        />
+      );
+      fireEvent.click(screen.getByText('Hello'));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Changed' } });
+      rerender(
+        <TextClip
+          clip={clip('Another clip', { id: 'c2' })}
+          scan={null}
+          onUpdate={onUpdate}
+          onEditingChange={onEditingChange}
+        />
+      );
+
+      const editor = screen.getByRole('textbox');
+      if (commit === 'Enter') fireEvent.keyDown(editor, { key: 'Enter' });
+      else fireEvent.blur(editor);
+
+      expect(onUpdate).not.toHaveBeenCalled();
+      expect(onEditingChange).toHaveBeenLastCalledWith(false);
+      expect(screen.queryByRole('textbox')).toBeNull();
+      expect(screen.getByText('Another clip')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByText('Another clip'));
+      fireEvent.change(screen.getByRole('textbox'), { target: { value: 'New edit' } });
+      fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' });
+      expect(onUpdate).toHaveBeenCalledExactlyOnceWith('New edit');
+    }
+  );
+
   it('Esc restores the pre-edit content and saves nothing', () => {
     const onUpdate = vi.fn();
     render(<TextClip clip={clip('Hello')} scan={null} onUpdate={onUpdate} />);

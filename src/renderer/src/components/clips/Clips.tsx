@@ -26,6 +26,7 @@ export function Clips(): React.JSX.Element {
 
   const virtualizer = useVirtualizer({
     count: showEmpty ? 0 : items.length,
+    getItemKey: (index) => items[index].clip.id,
     getScrollElement: () => scrollContainerRef.current,
     estimateSize: () => 40,
     overscan: 5,
