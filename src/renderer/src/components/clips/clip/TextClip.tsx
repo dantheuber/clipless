@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { ClipItem } from '../../../providers/clips';
 import { useLanguageDetection } from '../../../providers/languageDetection';
@@ -34,10 +34,12 @@ export const TextClip = ({
   const { isCodeDetectionEnabled, isLanguageLabelEnabled } = useLanguageDetection();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
+  const editingClipId = useRef<string | null>(null);
   const isEmpty = clip.content.trim() === '';
 
   const startEdit = () => {
     if (isEmpty || isEditing) return;
+    editingClipId.current = clip.id;
     setEditValue(clip.content);
     setIsEditing(true);
     onEditingChange?.(true);
@@ -49,12 +51,13 @@ export const TextClip = ({
   }, [editSeq]);
 
   const stopEdit = () => {
+    editingClipId.current = null;
     setIsEditing(false);
     onEditingChange?.(false);
   };
 
   const commit = () => {
-    if (editValue !== clip.content) onUpdate(editValue);
+    if (editingClipId.current === clip.id && editValue !== clip.content) onUpdate(editValue);
     stopEdit();
   };
 

@@ -1,6 +1,12 @@
 import classNames from 'classnames';
 import { memo, useState, type CSSProperties } from 'react';
-import { ClipItem, useClipsActions, useClipsPins, useQuickLook } from '../../../providers/clips';
+import {
+  ClipItem,
+  useClipsActions,
+  useClipsData,
+  useClipsPins,
+  useQuickLook,
+} from '../../../providers/clips';
 import { hasContent } from '../../../providers/clips/quickLook';
 import { scanKeys } from '../../../providers/clips/pins';
 import { useScanIndex, EMPTY_SCAN } from '../../../providers/scan';
@@ -42,6 +48,7 @@ export const ClipWrapper = memo(function ClipWrapper({
   searchTerm,
 }: ClipProps): React.JSX.Element {
   const { copyClipToClipboard, updateClip, isClipLocked } = useClipsActions();
+  const { clips } = useClipsData();
   const { togglePins } = useClipsPins();
   const { quickLook, openQuickLook } = useQuickLook();
   const { getScan, slotFor } = useScanIndex();
@@ -60,7 +67,12 @@ export const ClipWrapper = memo(function ClipWrapper({
   };
 
   const handleUpdateClip = (newContent: string) => {
-    updateClip(index, { ...clip, content: newContent });
+    // The row's own slot wins while it still holds this clip; search by id only after a
+    // shift, so a history that repeats an id (hand-edited or corrupt) never saves elsewhere.
+    const currentIndex =
+      clips[index]?.id === clip.id ? index : clips.findIndex((item) => item.id === clip.id);
+    if (currentIndex === -1) return;
+    updateClip(currentIndex, { ...clips[currentIndex], content: newContent });
   };
 
   const handleEditingChange = (isEditing: boolean) => {
