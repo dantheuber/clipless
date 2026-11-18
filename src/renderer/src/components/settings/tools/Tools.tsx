@@ -29,7 +29,13 @@ type View =
 
 const NEW_KEYS = new Set(['s', 'S']);
 
-function ToolsBody() {
+export type ToolsNavigationGuard = (go: () => void) => void;
+
+interface ToolsProps {
+  onNavigationGuardChange?: (guard: ToolsNavigationGuard | null) => void;
+}
+
+function ToolsBody({ onNavigationGuardChange }: ToolsProps) {
   const toast = useToast();
   const data = useToolsData();
   const { config } = data;
@@ -57,6 +63,11 @@ function ToolsBody() {
     },
     [dirty]
   );
+
+  useEffect(() => {
+    onNavigationGuardChange?.(navigate);
+    return () => onNavigationGuardChange?.(null);
+  }, [navigate, onNavigationGuardChange]);
 
   const selected = view.mode === 'item' ? view.sel : null;
   const current = selected ? itemOf(config, selected.kind, selected.id) : undefined;
@@ -408,21 +419,21 @@ function ToolsBody() {
   );
 }
 
-function ToolsLoading() {
+function ToolsLoading(props: ToolsProps) {
   const { loaded } = useToolsData();
   if (!loaded) return <div className={shell.loading}>Loading</div>;
-  return <ToolsBody />;
+  return <ToolsBody {...props} />;
 }
 
 /**
  * Settings > Tools (spec 14): a list pane and an inspector. No sub-tabs, no Test Patterns
  * tab, no separate template manager.
  */
-export function Tools() {
+export function Tools(props: ToolsProps) {
   return (
     <ToolsDataProvider>
       <Pane title="Tools" scroll={false}>
-        <ToolsLoading />
+        <ToolsLoading {...props} />
       </Pane>
     </ToolsDataProvider>
   );
