@@ -67,7 +67,10 @@ export const ClipWrapper = memo(function ClipWrapper({
   };
 
   const handleUpdateClip = (newContent: string) => {
-    const currentIndex = clips.findIndex((item) => item.id === clip.id);
+    // The row's own slot wins while it still holds this clip; search by id only after a
+    // shift, so a history that repeats an id (hand-edited or corrupt) never saves elsewhere.
+    const currentIndex =
+      clips[index]?.id === clip.id ? index : clips.findIndex((item) => item.id === clip.id);
     if (currentIndex === -1) return;
     updateClip(currentIndex, { ...clips[currentIndex], content: newContent });
   };

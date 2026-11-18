@@ -218,6 +218,21 @@ describe('ClipWrapper', () => {
     });
   });
 
+  it('saves to its own slot when a corrupt history repeats the clip id', () => {
+    const twin = { ...text, content: 'first copy' };
+    const { rerender } = row(text, 2);
+    fireEvent.click(screen.getByTestId('clip-line'));
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Edited' } });
+    state.clips = [image, twin, text];
+    rerender(
+      <ClipWrapper clip={text} index={2} visibleIndex={2} isCurrentCopiedClip={false} isEvenRow />
+    );
+
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' });
+
+    expect(state.updateClip).toHaveBeenCalledExactlyOnceWith(2, { ...text, content: 'Edited' });
+  });
+
   it('does not save if the edited clip no longer exists', () => {
     const { rerender } = row(text, 2);
     fireEvent.click(screen.getByTestId('clip-line'));
