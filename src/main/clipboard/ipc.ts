@@ -94,7 +94,7 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
   ipcMain.handle('set-clipboard-html', (_event, html: string) => setClipboardHTML(html));
   ipcMain.handle('set-clipboard-rtf', (_event, rtf: string) => setClipboardRTF(rtf));
   ipcMain.handle('set-clipboard-image', (_event, imageData: string) => {
-    setSkipNextImageChange();
+    setSkipNextImageChange(imageData);
     return setClipboardImage(imageData);
   });
   ipcMain.handle(

@@ -39,6 +39,7 @@ import {
   setClipboardImage,
   setClipboardBookmark,
   clearImageCache,
+  imageDataUrlFingerprint,
 } from './data';
 
 function createMockImage(
@@ -278,5 +279,23 @@ describe('setClipboardBookmark', () => {
       throw new Error('write failed');
     });
     expect(() => setClipboardBookmark({ text: 'a', html: '<a>a</a>' })).toThrow('write failed');
+  });
+});
+
+describe('imageDataUrlFingerprint', () => {
+  it('fingerprints the decoded image like the poll does, so re-encoded data URLs match', () => {
+    const decoded = createMockImage(false, '', 100, 100);
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValue(decoded);
+
+    const fromPng = imageDataUrlFingerprint('data:image/png;base64,aaa');
+    const fromJpeg = imageDataUrlFingerprint('data:image/jpeg;base64,bbb');
+
+    expect(nativeImage.createFromDataURL).toHaveBeenCalledWith('data:image/png;base64,aaa');
+    expect(fromPng).toBe(fromJpeg);
+    expect(fromPng).toContain('100x100:');
+
+    const other = createMockImage(false, '', 200, 100);
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValue(other);
+    expect(imageDataUrlFingerprint('data:image/png;base64,ccc')).not.toBe(fromPng);
   });
 });

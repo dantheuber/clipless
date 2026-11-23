@@ -1,6 +1,6 @@
 import { app, BrowserWindow, nativeImage } from 'electron';
 import { join } from 'path';
-import { getCurrentClipboardData } from './data';
+import { getCurrentClipboardData, imageDataUrlFingerprint } from './data';
 import { saveImage } from '../storage/image-store';
 import { generateId } from '../storage/search-terms';
 import { htmlToText } from './extract-html';
@@ -10,7 +10,13 @@ import { rtfToText } from './extract-rtf';
 let lastClipboardContent = '';
 let lastClipboardType = '';
 let clipboardCheckInterval: NodeJS.Timeout | null = null;
-let skipNextImageChange = false;
+/**
+ * The image most recently written back to the clipboard by this app, armed until the next
+ * poll. Only an image change that matches it is skipped, and the next poll clears it whether
+ * or not it matched, so a no-op write (the image was already on the clipboard) or a text
+ * fallback can never leave a skip armed that would swallow the next real screenshot.
+ */
+let pendingImageSkip: { dataUrl: string; fingerprint: string } | null = null;
 let monitoredWindow: BrowserWindow | null = null;
 
 function getDataPath(): string {
@@ -59,12 +65,20 @@ export function initializeClipboardMonitoring(_mainWindow: BrowserWindow | null)
 }
 
 /**
- * Set flag to skip the next image clipboard change detection.
- * Used when copying an image clip back to the system clipboard
- * to prevent re-detecting it as a new clip.
+ * Skip the image change the next poll sees if it is `dataUrl`, the image being copied back
+ * to the system clipboard, so it is not re-detected as a new clip. Call this right before
+ * the write. The skip lasts one poll: any other outcome of that poll discards it.
  */
-export function setSkipNextImageChange(): void {
-  skipNextImageChange = true;
+export function setSkipNextImageChange(dataUrl: string): void {
+  pendingImageSkip = { dataUrl, fingerprint: imageDataUrlFingerprint(dataUrl) };
+}
+
+/** Whether an image now on the clipboard is the one a pending skip was armed for. */
+function matchesPendingSkip(
+  skip: { dataUrl: string; fingerprint: string },
+  content: string
+): boolean {
+  return skip.dataUrl === content || skip.fingerprint === imageDataUrlFingerprint(content);
 }
 
 /**
@@ -73,6 +87,9 @@ export function setSkipNextImageChange(): void {
  */
 export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<boolean> => {
   const currentClipData = getCurrentClipboardData();
+  // The pending skip applies to this poll only, whatever it finds
+  const imageSkip = pendingImageSkip;
+  pendingImageSkip = null;
 
   // Check if clipboard content has changed
   if (
@@ -83,9 +100,12 @@ export const checkClipboard = async (mainWindow: BrowserWindow | null): Promise<
     lastClipboardContent = currentClipData.content;
     lastClipboardType = currentClipData.type;
 
-    // For images, check skip flag (set when copying image clip back to clipboard)
-    if (currentClipData.type === 'image' && skipNextImageChange) {
-      skipNextImageChange = false;
+    // Skip the image this app just copied back to the clipboard (and only that image)
+    if (
+      currentClipData.type === 'image' &&
+      imageSkip &&
+      matchesPendingSkip(imageSkip, currentClipData.content)
+    ) {
       return false;
     }
 

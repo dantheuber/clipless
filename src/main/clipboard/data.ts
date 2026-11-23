@@ -55,6 +55,16 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
   return null;
 };
 
+/**
+ * Fingerprint of the pixels an image data URL decodes to, computed the same way as the
+ * poll's clipboard fingerprint. Two data URLs that differ only in encoding (the stored PNG
+ * and the PNG Electron re-encodes after a clipboard round trip) share a fingerprint.
+ * An undecodable data URL yields the fingerprint of an empty image.
+ */
+export function imageDataUrlFingerprint(dataUrl: string): string {
+  return getImageFingerprint(nativeImage.createFromDataURL(dataUrl));
+}
+
 export function clearImageCache(): void {
   lastImageFingerprint = '';
   lastImageDataUrl = '';

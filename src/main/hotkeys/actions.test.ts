@@ -300,7 +300,7 @@ describe('HotkeyActions', () => {
       ]);
       await actions.copyQuickClip(0);
       expect(loadImage).toHaveBeenCalledWith('img-123', expect.stringContaining('clipless-data'));
-      expect(setSkipNextImageChange).toHaveBeenCalled();
+      expect(setSkipNextImageChange).toHaveBeenCalledWith('data:image/png;base64,fullimage');
       expect(nativeImage.createFromDataURL).toHaveBeenCalledWith('data:image/png;base64,fullimage');
       expect(clipboard.writeImage).toHaveBeenCalled();
     });

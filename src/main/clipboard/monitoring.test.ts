@@ -12,6 +12,7 @@ vi.mock('electron', () => ({
 
 vi.mock('./data', () => ({
   getCurrentClipboardData: vi.fn(),
+  imageDataUrlFingerprint: vi.fn((dataUrl: string) => `fp:${dataUrl}`),
 }));
 
 vi.mock('../storage/image-store', () => ({
@@ -22,7 +23,7 @@ vi.mock('../storage/search-terms', () => ({
   generateId: vi.fn(),
 }));
 
-import { getCurrentClipboardData } from './data';
+import { getCurrentClipboardData, imageDataUrlFingerprint } from './data';
 import { saveImage } from '../storage/image-store';
 import { generateId } from '../storage/search-terms';
 import {
@@ -240,7 +241,7 @@ describe('monitoring', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initializeClipboardMonitoring(mockWindow as any);
 
-      setSkipNextImageChange();
+      setSkipNextImageChange('data:image/png;base64,skip-me');
 
       vi.mocked(getCurrentClipboardData).mockReturnValue({
         type: 'image',
@@ -259,7 +260,7 @@ describe('monitoring', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initializeClipboardMonitoring(mockWindow as any);
 
-      setSkipNextImageChange();
+      setSkipNextImageChange('data:image/png;base64,first');
 
       // First image - should be skipped
       vi.mocked(getCurrentClipboardData).mockReturnValue({
@@ -289,6 +290,130 @@ describe('monitoring', () => {
         imageHeight: 480,
         imageBytes: 5,
       });
+    });
+
+    it('captures a different image that arrives while a skip is pending', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'base3' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      setSkipNextImageChange('data:image/png;base64,written');
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'image',
+        content: 'data:image/png;base64,screenshot',
+      });
+      vi.mocked(generateId).mockReturnValue('img-shot');
+      vi.mocked(saveImage).mockResolvedValue('data:image/png;base64,thumb-shot');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+      expect(saveImage).toHaveBeenCalledWith(
+        'img-shot',
+        'data:image/png;base64,screenshot',
+        expect.any(String)
+      );
+    });
+
+    it('re-writing the image already on the clipboard does not drop the next screenshot', async () => {
+      // Row 1 is the image on the clipboard; monitoring has already seen it
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'image',
+        content: 'data:image/png;base64,row1',
+      });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      // Clicking row 1 writes the same image back: the poll sees no change
+      setSkipNextImageChange('data:image/png;base64,row1');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(false);
+
+      // The next screenshot must be captured
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'image',
+        content: 'data:image/png;base64,row2',
+      });
+      vi.mocked(generateId).mockReturnValue('img-row2');
+      vi.mocked(saveImage).mockResolvedValue('data:image/png;base64,thumb-row2');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+      expect(mockWindow.webContents.send).toHaveBeenCalledWith(
+        'clipboard-changed',
+        expect.objectContaining({ type: 'image', imageId: 'img-row2' })
+      );
+    });
+
+    it('a text change after the write clears the pending skip', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'base4' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      // The hotkey fell back to writing the data URL as text
+      setSkipNextImageChange('data:image/png;base64,fallback-text');
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'text',
+        content: 'data:image/png;base64,fallback-text',
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+
+      // A later image with the same content as the write is a real copy, not the echo
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'image',
+        content: 'data:image/png;base64,fallback-text',
+      });
+      vi.mocked(generateId).mockReturnValue('img-later');
+      vi.mocked(saveImage).mockResolvedValue('data:image/png;base64,thumb-later');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+      expect(saveImage).toHaveBeenCalledWith('img-later', expect.any(String), expect.any(String));
+    });
+
+    it('a stale skip does not survive an unchanged poll', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'base5' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      setSkipNextImageChange('data:image/png;base64,stale');
+      // Nothing changed on the clipboard after the write
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(false);
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'image',
+        content: 'data:image/png;base64,stale',
+      });
+      vi.mocked(generateId).mockReturnValue('img-stale');
+      vi.mocked(saveImage).mockResolvedValue('data:image/png;base64,thumb-stale');
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(true);
+    });
+
+    it('skips an image whose data URL was re-encoded but decodes to the written pixels', async () => {
+      vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'text', content: 'base6' });
+      const mockWindow = createMockWindow();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      initializeClipboardMonitoring(mockWindow as any);
+
+      vi.mocked(imageDataUrlFingerprint).mockReturnValue('same-pixels');
+      setSkipNextImageChange('data:image/jpeg;base64,written-jpeg');
+
+      vi.mocked(getCurrentClipboardData).mockReturnValue({
+        type: 'image',
+        content: 'data:image/png;base64,read-back-png',
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await expect(checkClipboard(mockWindow as any)).resolves.toBe(false);
+      expect(saveImage).not.toHaveBeenCalled();
+      expect(mockWindow.webContents.send).not.toHaveBeenCalled();
     });
 
     it('handles image save failure by falling back to sending raw data', async () => {
@@ -374,7 +499,7 @@ describe('monitoring', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initializeClipboardMonitoring(mockWindow as any);
 
-      setSkipNextImageChange();
+      setSkipNextImageChange('data:image/png;base64,written');
 
       vi.mocked(getCurrentClipboardData).mockReturnValue({
         type: 'text',
@@ -401,7 +526,7 @@ describe('monitoring', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       initializeClipboardMonitoring(mockWindow as any);
 
-      setSkipNextImageChange();
+      setSkipNextImageChange('data:image/png;base64,flagtest');
 
       vi.mocked(getCurrentClipboardData).mockReturnValue({
         type: 'image',
@@ -539,7 +664,11 @@ describe('monitoring', () => {
 
       const rtf = '{\\rtf1 hello}';
       vi.mocked(getCurrentClipboardData).mockReturnValue({ type: 'rtf', content: rtf });
-      expect(readClipboardForRenderer()).toMatchObject({ type: 'rtf', content: rtf, text: 'hello' });
+      expect(readClipboardForRenderer()).toMatchObject({
+        type: 'rtf',
+        content: rtf,
+        text: 'hello',
+      });
     });
 
     it('passes the other types and an empty clipboard through', () => {

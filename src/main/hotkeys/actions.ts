@@ -170,7 +170,7 @@ export class HotkeyActions {
    */
   private copyImageClip(dataUrl: string, content: string): void {
     try {
-      setSkipNextImageChange();
+      setSkipNextImageChange(dataUrl);
       const image = nativeImage.createFromDataURL(dataUrl);
       if (!image.isEmpty()) {
         clipboard.writeImage(image);
