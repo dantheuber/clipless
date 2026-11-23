@@ -92,20 +92,19 @@ export const useClipboardOperations = (
   }, [clipboardUpdated, isDuplicateOfMostRecent, createTextClipWithDetection]);
 
   /**
-   * Copy a clip's content to the system clipboard. Returns true when something was written,
-   * so the caller can toast; the OS notification is for hotkey copies only (spec 17.7).
-   * @param index the index of the clip to copy
+   * Write one clip to the system clipboard. Takes the clip object rather than an index so a
+   * caller that already resolved the row (the hotkey listener reads the live ref) writes
+   * exactly that clip, not whatever a stale list held at the same index.
    */
-  const copyClipToClipboard = useCallback(
-    async (index: number): Promise<boolean> => {
+  const writeClip = useCallback(
+    async (clip: ClipItem | undefined): Promise<boolean> => {
       if (!window.api) return false;
 
       // Set flag to prevent clipboard monitoring from adding this as a new clip
       setIsHotkeyOperation(true);
 
-      const clip = getClip(index);
       if (!clip?.content) {
-        console.warn('No clip content to copy at index:', index);
+        console.warn('No clip content to copy');
         setIsHotkeyOperation(false);
         return false;
       }
@@ -209,19 +208,32 @@ export const useClipboardOperations = (
         }
       }
     },
-    [getClip, setClipCopyId, setLastCopiedContent, setIsHotkeyOperation]
+    [setClipCopyId, setLastCopiedContent, setIsHotkeyOperation]
+  );
+
+  /**
+   * Copy a clip's content to the system clipboard. Returns true when something was written,
+   * so the caller can toast; the OS notification is for hotkey copies only (spec 17.7).
+   * @param index the index of the clip to copy
+   */
+  const copyClipToClipboard = useCallback(
+    async (index: number): Promise<boolean> => writeClip(getClip(index)),
+    [writeClip, getClip]
   );
 
   // Register before monitoring so requests always use the live row and the normal copy path.
+  // The row is resolved once from the ref and that same object is written and reported, so a
+  // request that lands after the list changed but before this effect re-ran cannot write one
+  // clip and report another.
   useEffect(() => {
     if (!window.api) return;
     return window.api.onCopyQuickClip(async (index: number) => {
       const clip = clipsRef.current[index];
       if (!clip?.content) return;
-      const copied = await copyClipToClipboard(index);
+      const copied = await writeClip(clip);
       await window.api.quickClipCopyResult(copied ? clip : null);
     });
-  }, [copyClipToClipboard, clipsRef]);
+  }, [writeClip, clipsRef]);
 
   // Guard to ensure readCurrentClipboard only runs on initial mount
   const hasReadInitialClipboard = useRef(false);

@@ -149,3 +149,45 @@ describe('copyClipToClipboard formats', () => {
     });
   });
 });
+
+describe('quick-clip hotkey requests', () => {
+  const clipA: ClipItem = { id: 'a', type: 'text', content: 'A' };
+  const clipB: ClipItem = { id: 'b', type: 'text', content: 'B' };
+  const clipC: ClipItem = { id: 'c', type: 'text', content: 'C' };
+
+  it('writes and reports the live row when the list changed before the listener refreshed', async () => {
+    let hotkey: ((index: number) => Promise<void>) | undefined;
+    vi.mocked(window.api.onCopyQuickClip).mockImplementation((callback) => {
+      hotkey = callback as typeof hotkey;
+      return () => {};
+    });
+    const rendered = [clipA, clipC];
+    const clipsRef = { current: rendered };
+    const setClipCopyId = vi.fn();
+    renderHook(() =>
+      useClipboardOperations(
+        false,
+        () => false,
+        vi.fn(),
+        (index) => rendered[index],
+        setClipCopyId,
+        vi.fn(),
+        vi.fn(),
+        clipsRef,
+        { current: false },
+        { current: null }
+      )
+    );
+
+    // A capture inserts B at the top; the ref is updated during render, the listener is not
+    // reinstalled until the effect re-runs.
+    clipsRef.current = [clipB, clipA];
+    await act(async () => {
+      await hotkey!(1);
+    });
+
+    expect(window.api.setClipboardText).toHaveBeenCalledExactlyOnceWith('A');
+    expect(setClipCopyId).toHaveBeenLastCalledWith('a');
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledExactlyOnceWith(clipA);
+  });
+});
