@@ -28,6 +28,8 @@ This directory contains the modular implementation of the clips provider, which 
 - Hook for clipboard operations (`useClipboardOperations`)
 - Manages clipboard monitoring and change detection
 - Handles copying clips to clipboard with proper format handling
+- Handles quick-clip hotkey requests through the same live-row copy path as row-number clicks, independently of debounced saves
+- Reports completed hotkey copies to main for usage recording and desktop notifications; empty slots do nothing and missing full images fail without marking the row
 - Implements hotkey operation tracking and duplicate prevention
 
 ### `useStartupClipQueue.ts`

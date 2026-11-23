@@ -14,6 +14,8 @@ vi.mock('electron', () => ({
   BrowserWindow: { getAllWindows: vi.fn(() => []) },
 }));
 
+vi.mock('../hotkeys/actions', () => ({ reportQuickClipCopy: vi.fn() }));
+
 vi.mock('./data', () => ({
   getCurrentClipboardData: vi.fn(),
   setClipboardText: vi.fn(),
@@ -75,13 +77,15 @@ vi.mock('../storage', () => ({
 import { clearAllData, saveSettings } from './storage-integration';
 import { applyAutoStart } from '../autoStart';
 import { setupClipboardIPC } from './ipc';
+import { reportQuickClipCopy } from '../hotkeys/actions';
 
 const event = {} as IpcMainInvokeEvent;
 
 // The module registers its handlers once per process, so register before any test runs
 // and silence the registration log.
 vi.spyOn(console, 'log').mockImplementation(() => {});
-setupClipboardIPC(null);
+const mainWindow = { isDestroyed: vi.fn(() => false), webContents: {} };
+setupClipboardIPC(mainWindow as unknown as BrowserWindow);
 
 const invokeSaveSettings = (settings: unknown): Promise<unknown> => {
   const handler = handlers.get('storage-save-settings');
@@ -163,5 +167,23 @@ describe('storage-clear-all', () => {
 
     expect(await invokeClear()).toBe(false);
     expect(send).not.toHaveBeenCalled();
+  });
+});
+
+describe('quick-clip-copy-result', () => {
+  it.each([null, { id: 'live', type: 'text', content: 'live row' }])(
+    'reports the result returned by the clips window: %s',
+    (clip) => {
+      handlers.get('quick-clip-copy-result')!(
+        { sender: mainWindow.webContents } as IpcMainInvokeEvent,
+        clip
+      );
+      expect(reportQuickClipCopy).toHaveBeenCalledExactlyOnceWith(clip);
+    }
+  );
+
+  it('ignores results from another window', () => {
+    handlers.get('quick-clip-copy-result')!({ sender: {} } as IpcMainInvokeEvent, null);
+    expect(reportQuickClipCopy).not.toHaveBeenCalled();
   });
 });

@@ -33,7 +33,8 @@ src/main/hotkeys/
 ### `actions.ts`
 
 - `HotkeyActions` class implements all hotkey action handlers
-- Handles window focusing, clip copying, and clipboard format conversion
+- Handles window focusing and asks the renderer to copy a live quick-clip row
+- Records hotkey copy usage and shows desktop notifications after the renderer reports the result
 - Separates action logic from registration logic
 
 ### `manager.ts`

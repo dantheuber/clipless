@@ -104,7 +104,6 @@ export const useClipboardOperations = (
       setIsHotkeyOperation(true);
 
       const clip = getClip(index);
-      setClipCopyId(clip?.id ?? null);
       if (!clip?.content) {
         console.warn('No clip content to copy at index:', index);
         setIsHotkeyOperation(false);
@@ -175,6 +174,8 @@ export const useClipboardOperations = (
             console.log('Copied unknown type as text to clipboard');
         }
 
+        setClipCopyId(clip.id);
+
         // Clear the flag after a short delay
         setTimeout(() => {
           setIsHotkeyOperation(false);
@@ -200,6 +201,7 @@ export const useClipboardOperations = (
         try {
           await window.api.setClipboardText(clip.content);
           console.log('Fallback: copied as text to clipboard');
+          setClipCopyId(clip.id);
           return true;
         } catch (fallbackError) {
           console.error('Fallback copy also failed:', fallbackError);
@@ -210,6 +212,17 @@ export const useClipboardOperations = (
     [getClip, setClipCopyId, setLastCopiedContent, setIsHotkeyOperation]
   );
 
+  // Register before monitoring so requests always use the live row and the normal copy path.
+  useEffect(() => {
+    if (!window.api) return;
+    return window.api.onCopyQuickClip(async (index: number) => {
+      const clip = clipsRef.current[index];
+      if (!clip?.content) return;
+      const copied = await copyClipToClipboard(index);
+      await window.api.quickClipCopyResult(copied ? clip : null);
+    });
+  }, [copyClipToClipboard, clipsRef]);
+
   // Guard to ensure readCurrentClipboard only runs on initial mount
   const hasReadInitialClipboard = useRef(false);
 
@@ -219,40 +232,6 @@ export const useClipboardOperations = (
     const startMonitoring = async () => {
       if (window.api) {
         try {
-          // Set up hotkey clip copied listener - this needs to happen before clipboard monitoring
-          const offHotkey = window.api.onHotkeyClipCopied((clipIndex: number) => {
-            console.log('🔥 Hotkey copied clip at index:', clipIndex);
-
-            // The hotkey path sends an index; the marker follows the clip by id from here
-            const currentClips = clipsRef.current;
-            setClipCopyId(currentClips[clipIndex]?.id ?? null);
-            if (currentClips[clipIndex]) {
-              setLastCopiedContent({
-                content: currentClips[clipIndex].content,
-                type: currentClips[clipIndex].type,
-              });
-              console.log(
-                'Set lastCopiedContent for hotkey operation:',
-                currentClips[clipIndex].content.substring(0, 50)
-              );
-
-              // Clear lastCopiedContent after 3 seconds to avoid blocking future legitimate clips
-              setTimeout(() => {
-                setLastCopiedContent(null);
-                console.log('Cleared lastCopiedContent after timeout');
-              }, 3000);
-            } else {
-              console.warn('No clip found at index', clipIndex, 'in current clips array');
-            }
-
-            // Set flag to ignore clipboard changes briefly (backup mechanism)
-            setIsHotkeyOperation(true);
-            setTimeout(() => {
-              setIsHotkeyOperation(false);
-            }, 1000); // Ignore clipboard changes for 1 second after hotkey operation
-          });
-          unsubscribers.push(offHotkey);
-
           // Read current clipboard content only on initial mount (not on effect re-runs)
           if (!hasReadInitialClipboard.current) {
             hasReadInitialClipboard.current = true;

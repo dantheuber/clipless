@@ -66,8 +66,11 @@ const api = {
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
   onClipboardChanged: (callback: (clipData: ClipItem) => void) =>
     subscribe('clipboard-changed', (clipData: ClipItem) => callback(clipData)),
-  onHotkeyClipCopied: (callback: (clipIndex: number) => void) =>
-    subscribe('hotkey-clip-copied', (clipIndex: number) => callback(clipIndex)),
+  onCopyQuickClip: (callback: (clipIndex: number) => void) =>
+    subscribe('copy-quick-clip', (clipIndex: number) => callback(clipIndex)),
+
+  quickClipCopyResult: (clip: ClipItem | null): Promise<void> =>
+    electronAPI.ipcRenderer.invoke('quick-clip-copy-result', clip),
 
   // Settings APIs
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),

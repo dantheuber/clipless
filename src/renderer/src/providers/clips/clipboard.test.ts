@@ -119,3 +119,33 @@ describe('copyClipToClipboard images', () => {
     expect(window.api.setClipboardText).toHaveBeenCalledWith(fullImage);
   });
 });
+
+describe('copyClipToClipboard formats', () => {
+  it.each([
+    ['text', 'plain', 'setClipboardText'],
+    ['html', '<p>hello</p>', 'setClipboardHTML'],
+    ['rtf', '{\\rtf1 hello}', 'setClipboardRTF'],
+  ] as const)('copies %s through its clipboard writer', async (type, content, method) => {
+    const result = await copyClip({ id: 'format', type, content });
+    expect(result.copied).toBe(true);
+    expect(window.api[method]).toHaveBeenCalledWith(content);
+    expect(result.setClipCopyId).toHaveBeenLastCalledWith('format');
+  });
+
+  it('copies a bookmark through the shared bookmark writer', async () => {
+    const result = await copyClip({
+      id: 'bookmark',
+      type: 'bookmark',
+      content: 'Example',
+      title: 'Example',
+      url: 'https://example.com',
+    });
+    expect(result.copied).toBe(true);
+    expect(window.api.setClipboardBookmark).toHaveBeenCalledWith({
+      text: 'https://example.com',
+      html: '<a href="https://example.com">Example</a>',
+      title: 'Example',
+      url: 'https://example.com',
+    });
+  });
+});

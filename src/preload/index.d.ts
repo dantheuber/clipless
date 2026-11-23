@@ -2,6 +2,7 @@ import { ElectronAPI } from '@electron-toolkit/preload';
 import type { AnalyticsFeature } from '../shared/analytics';
 import type {
   AnalyticsPreference,
+  ClipItem,
   AppPathName,
   GroupColours,
   HotkeySettings,
@@ -41,7 +42,8 @@ declare global {
       onClipboardChanged: (
         callback: (clipData: { type: string; content: string; text?: string }) => void
       ) => () => void;
-      onHotkeyClipCopied: (callback: (clipIndex: number) => void) => () => void;
+      onCopyQuickClip: (callback: (clipIndex: number) => void) => () => void;
+      quickClipCopyResult: (clip: ClipItem | null) => Promise<void>;
       openSettings: (tab?: string) => Promise<void>;
       getAutoStartState: () => Promise<boolean | null>;
       settingsChanged: (settings: UserSettings) => Promise<SettingsApplyResult>;

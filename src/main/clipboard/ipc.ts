@@ -52,6 +52,7 @@ import type {
 import { loadImage } from '../storage/image-store';
 import { storage } from '../storage';
 import { sanitizeHtml } from './sanitize-html';
+import { reportQuickClipCopy } from '../hotkeys/actions';
 
 let ipcHandlersRegistered = false; // Guard to prevent multiple IPC registrations
 
@@ -102,6 +103,11 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
     (_event, bookmarkData: { text: string; html: string; title?: string; url?: string }) =>
       setClipboardBookmark(bookmarkData)
   );
+
+  ipcMain.handle('quick-clip-copy-result', (event, clip: ClipItem | null) => {
+    if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents) return;
+    reportQuickClipCopy(clip);
+  });
 
   // Clipboard monitoring control
   ipcMain.handle('start-clipboard-monitoring', () => startClipboardMonitoring(mainWindow));
