@@ -261,6 +261,17 @@ describe('setClipboardImage', () => {
     });
     expect(() => setClipboardImage('bad-data')).toThrow('invalid image');
   });
+
+  it('throws instead of writing an image that decoded to nothing', () => {
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValueOnce({
+      isEmpty: () => true,
+    } as unknown as Electron.NativeImage);
+    vi.mocked(clipboard.writeImage).mockClear();
+    expect(() => setClipboardImage('data:image/png;base64,corrupt')).toThrow(
+      'Image data could not be decoded'
+    );
+    expect(clipboard.writeImage).not.toHaveBeenCalled();
+  });
 });
 
 describe('setClipboardBookmark', () => {

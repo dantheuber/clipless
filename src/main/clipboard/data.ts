@@ -108,6 +108,11 @@ export const setClipboardImage = (imageData: string): void => {
   try {
     // Convert base64 data URL to NativeImage
     const image = nativeImage.createFromDataURL(imageData);
+    // A malformed data URL decodes to an empty image without throwing; writing it would
+    // report a copy that put nothing usable on the clipboard
+    if (image.isEmpty()) {
+      throw new Error('Image data could not be decoded');
+    }
     clipboard.writeImage(image);
   } catch (error) {
     console.error('Failed to write image to clipboard:', error);
