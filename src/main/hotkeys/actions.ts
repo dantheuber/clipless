@@ -1,8 +1,26 @@
 import { BrowserWindow, app } from 'electron';
 import { showNotification } from '../notifications';
 import { checkClipboardNow } from '../clipboard/monitoring';
-import type { ClipItem } from '../../shared/types';
+import type { ClipItem, QuickClipCopyRequest, QuickClipCopyResult } from '../../shared/types';
 import { recordFeatureUsage } from '../analytics';
+
+/**
+ * How long a quick-clip request waits for the clips window to answer before the press is
+ * reported as a failed copy. The renderer may be reloading, hung, or not yet listening at
+ * startup; without a deadline the press would vanish and the user would paste stale content.
+ */
+export const QUICK_CLIP_REPLY_DEADLINE_MS = 1500;
+
+const FAILED_COPY_TITLE = 'Could not copy clip';
+const FAILED_COPY_BODY = 'The clip could not be copied to the clipboard.';
+
+/** Requests sent to the renderer that have not been answered or timed out yet. */
+const pendingQuickClipCopies = new Map<number, NodeJS.Timeout>();
+let nextQuickClipRequestId = 1;
+
+function reportFailedQuickClipCopy(): void {
+  showNotification(FAILED_COPY_TITLE, FAILED_COPY_BODY);
+}
 
 /**
  * What the OS notification for a hotkey copy says: the clip's first line, since the window
@@ -67,15 +85,28 @@ export class HotkeyActions {
   }
 
   /**
-   * Copy a quick clip to the clipboard by index
+   * Copy a quick clip to the clipboard by index. The renderer does the write and answers via
+   * `quick-clip-copy-result` (see reportQuickClipCopy); a request it never answers is reported
+   * as a failed copy when the deadline passes.
    */
   async copyQuickClip(index: number): Promise<void> {
+    if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
+
+    const request: QuickClipCopyRequest = { requestId: nextQuickClipRequestId++, index };
+    const deadline = setTimeout(() => {
+      pendingQuickClipCopies.delete(request.requestId);
+      console.error(`Quick clip ${index}: no answer from the clips window`);
+      reportFailedQuickClipCopy();
+    }, QUICK_CLIP_REPLY_DEADLINE_MS);
+    pendingQuickClipCopies.set(request.requestId, deadline);
+
     try {
-      if (!this.mainWindow || this.mainWindow.isDestroyed()) return;
-      this.mainWindow.webContents.send('copy-quick-clip', index);
+      this.mainWindow.webContents.send('copy-quick-clip', request);
     } catch (error) {
+      clearTimeout(deadline);
+      pendingQuickClipCopies.delete(request.requestId);
       console.error(`Error copying quick clip ${index}:`, error);
-      showNotification('Could not copy clip', 'The clip could not be copied to the clipboard.');
+      reportFailedQuickClipCopy();
     }
   }
 
@@ -122,12 +153,23 @@ export class HotkeyActions {
   }
 }
 
-/** Record only completed hotkey copies, using the clip selected by the renderer. */
-export function reportQuickClipCopy(clip: ClipItem | null): void {
-  if (!clip) {
-    showNotification('Could not copy clip', 'The clip could not be copied to the clipboard.');
+/**
+ * The renderer's answer to a copyQuickClip request. Usage is recorded only for `copied`, an
+ * `empty` slot copies nothing and says nothing (#204), and anything else is a failed copy.
+ * A reply to a request that already timed out, was already answered, or was never sent is
+ * dropped so nothing is recorded or shown twice.
+ */
+export function reportQuickClipCopy(result: QuickClipCopyResult): void {
+  const deadline = pendingQuickClipCopies.get(result.requestId);
+  if (deadline === undefined) return;
+  clearTimeout(deadline);
+  pendingQuickClipCopies.delete(result.requestId);
+
+  if (result.status === 'empty') return;
+  if (result.status === 'copied' && result.clip) {
+    recordFeatureUsage('quick_clip_hotkey');
+    showNotification('Clip copied', clipSummary(result.clip));
     return;
   }
-  recordFeatureUsage('quick_clip_hotkey');
-  showNotification('Clip copied', clipSummary(clip));
+  reportFailedQuickClipCopy();
 }

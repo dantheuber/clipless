@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { useClipboardOperations } from './clipboard';
 import type { ClipItem } from './types';
+import type { QuickClipCopyRequest } from '../../../../shared/types';
 
 const fullImage = 'data:image/png;base64,fullimage';
 const imageClip: ClipItem = {
@@ -193,13 +194,14 @@ describe('quick-clip hotkey requests', () => {
   const clipB: ClipItem = { id: 'b', type: 'text', content: 'B' };
   const clipC: ClipItem = { id: 'c', type: 'text', content: 'C' };
 
-  it('writes and reports the live row when the list changed before the listener refreshed', async () => {
-    let hotkey: ((index: number) => Promise<void>) | undefined;
+  type Hotkey = (request: QuickClipCopyRequest) => Promise<void>;
+
+  function mountHotkeyListener(rendered: ClipItem[]) {
+    let hotkey: Hotkey | undefined;
     vi.mocked(window.api.onCopyQuickClip).mockImplementation((callback) => {
-      hotkey = callback as typeof hotkey;
+      hotkey = callback as Hotkey;
       return () => {};
     });
-    const rendered = [clipA, clipC];
     const clipsRef = { current: rendered };
     const setClipCopyId = vi.fn();
     renderHook(() =>
@@ -216,16 +218,71 @@ describe('quick-clip hotkey requests', () => {
         { current: null }
       )
     );
+    if (!hotkey) throw new Error('onCopyQuickClip listener was not registered');
+    return { hotkey, clipsRef, setClipCopyId };
+  }
+
+  it('writes and reports the live row when the list changed before the listener refreshed', async () => {
+    const { hotkey, clipsRef, setClipCopyId } = mountHotkeyListener([clipA, clipC]);
 
     // A capture inserts B at the top; the ref is updated during render, the listener is not
     // reinstalled until the effect re-runs.
     clipsRef.current = [clipB, clipA];
     await act(async () => {
-      await hotkey!(1);
+      await hotkey({ requestId: 7, index: 1 });
     });
 
     expect(window.api.setClipboardText).toHaveBeenCalledExactlyOnceWith('A');
     expect(setClipCopyId).toHaveBeenLastCalledWith('a');
-    expect(window.api.quickClipCopyResult).toHaveBeenCalledExactlyOnceWith(clipA);
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledExactlyOnceWith({
+      requestId: 7,
+      status: 'copied',
+      clip: clipA,
+    });
+  });
+
+  it('answers empty for a slot with nothing in it, without writing', async () => {
+    const { hotkey } = mountHotkeyListener([clipA, { id: 'blank', type: 'text', content: '' }]);
+
+    await act(async () => {
+      await hotkey({ requestId: 8, index: 1 });
+      await hotkey({ requestId: 9, index: 5 });
+    });
+
+    expect(window.api.setClipboardText).not.toHaveBeenCalled();
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledTimes(2);
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledWith({ requestId: 8, status: 'empty' });
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledWith({ requestId: 9, status: 'empty' });
+  });
+
+  it('answers failed when the write does not happen', async () => {
+    vi.mocked(window.api.setClipboardText).mockRejectedValue(new Error('clipboard busy'));
+    const { hotkey, setClipCopyId } = mountHotkeyListener([clipA]);
+
+    await act(async () => {
+      await hotkey({ requestId: 10, index: 0 });
+    });
+
+    expect(setClipCopyId).not.toHaveBeenCalledWith('a');
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledExactlyOnceWith({
+      requestId: 10,
+      status: 'failed',
+    });
+  });
+
+  it('answers failed when the copy path throws', async () => {
+    vi.mocked(window.api.setClipboardText).mockImplementation(() => {
+      throw new Error('bridge gone');
+    });
+    const { hotkey } = mountHotkeyListener([clipA]);
+
+    await act(async () => {
+      await hotkey({ requestId: 11, index: 0 });
+    });
+
+    expect(window.api.quickClipCopyResult).toHaveBeenCalledExactlyOnceWith({
+      requestId: 11,
+      status: 'failed',
+    });
   });
 });

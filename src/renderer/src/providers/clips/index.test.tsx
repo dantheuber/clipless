@@ -605,7 +605,7 @@ describe('ClipsProvider clips captured during startup', () => {
 });
 
 describe('ClipsProvider quick-clip hotkeys', () => {
-  let hotkey: (index: number) => void;
+  let hotkey: (request: { requestId: number; index: number }) => void;
   let capture: (clip: { type: string; content: string }) => void;
   const mountHotkeys = () =>
     renderHook(() => ({ actions: useClipsActions(), data: useClipsData(), meta: useClipsMeta() }), {
@@ -624,7 +624,7 @@ describe('ClipsProvider quick-clip hotkeys', () => {
     vi.useFakeTimers();
     hotkey = () => {};
     capture = () => {};
-    api().onCopyQuickClip.mockImplementation((callback: (index: number) => void) => {
+    api().onCopyQuickClip.mockImplementation((callback: typeof hotkey) => {
       hotkey = callback;
       return () => {};
     });
@@ -662,32 +662,38 @@ describe('ClipsProvider quick-clip hotkeys', () => {
       expect(api().storageSaveClips).not.toHaveBeenCalled();
 
       await act(async () => {
-        hotkey(1);
+        hotkey({ requestId: 1, index: 1 });
       });
 
       expect(api().setClipboardText).toHaveBeenCalledExactlyOnceWith('A');
       expect(result.current.meta.clipCopyId).toBe(result.current.data.clips[1].id);
-      expect(api().quickClipCopyResult).toHaveBeenCalledExactlyOnceWith(
-        result.current.data.clips[1]
-      );
+      expect(api().quickClipCopyResult).toHaveBeenCalledExactlyOnceWith({
+        requestId: 1,
+        status: 'copied',
+        clip: result.current.data.clips[1],
+      });
       expect(api().storageSaveClips).not.toHaveBeenCalled();
     }
   );
 
-  it('copies nothing for an empty, deleted or out-of-range slot', async () => {
+  it('copies nothing for an empty, deleted or out-of-range slot, answering empty each time', async () => {
     const { result } = mountHotkeys();
     await act(async () => {});
     act(() => capture({ type: 'text', content: 'new' }));
     act(() => result.current.actions.emptyClip(1));
 
     await act(async () => {
-      hotkey(1);
-      hotkey(2);
-      hotkey(1000);
+      hotkey({ requestId: 1, index: 1 });
+      hotkey({ requestId: 2, index: 2 });
+      hotkey({ requestId: 3, index: 1000 });
     });
 
     expect(api().setClipboardText).not.toHaveBeenCalled();
-    expect(api().quickClipCopyResult).not.toHaveBeenCalled();
+    expect(api().quickClipCopyResult.mock.calls.map(([reply]) => reply)).toEqual([
+      { requestId: 1, status: 'empty' },
+      { requestId: 2, status: 'empty' },
+      { requestId: 3, status: 'empty' },
+    ]);
     expect(result.current.meta.clipCopyId).toBeNull();
   });
 
@@ -709,7 +715,7 @@ describe('ClipsProvider quick-clip hotkeys', () => {
       await act(async () => {});
 
       await act(async () => {
-        hotkey(0);
+        hotkey({ requestId: 4, index: 0 });
       });
 
       expect(api().setClipboardText).not.toHaveBeenCalled();
@@ -723,7 +729,9 @@ describe('ClipsProvider quick-clip hotkeys', () => {
         expect(result.current.meta.clipCopyId).toBeNull();
       }
       expect(api().quickClipCopyResult).toHaveBeenCalledExactlyOnceWith(
-        available ? result.current.data.clips[0] : null
+        available
+          ? { requestId: 4, status: 'copied', clip: result.current.data.clips[0] }
+          : { requestId: 4, status: 'failed' }
       );
     }
   );

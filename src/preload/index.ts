@@ -13,6 +13,8 @@ import type {
   QuickTool,
   QuickClipsConfig,
   QuickClipsImportMode,
+  QuickClipCopyRequest,
+  QuickClipCopyResult,
   GroupColours,
   UpdateState,
   SettingsApplyResult,
@@ -66,11 +68,11 @@ const api = {
   stopClipboardMonitoring: () => electronAPI.ipcRenderer.invoke('stop-clipboard-monitoring'),
   onClipboardChanged: (callback: (clipData: ClipItem) => void) =>
     subscribe('clipboard-changed', (clipData: ClipItem) => callback(clipData)),
-  onCopyQuickClip: (callback: (clipIndex: number) => void) =>
-    subscribe('copy-quick-clip', (clipIndex: number) => callback(clipIndex)),
+  onCopyQuickClip: (callback: (request: QuickClipCopyRequest) => void) =>
+    subscribe('copy-quick-clip', (request: QuickClipCopyRequest) => callback(request)),
 
-  quickClipCopyResult: (clip: ClipItem | null): Promise<void> =>
-    electronAPI.ipcRenderer.invoke('quick-clip-copy-result', clip),
+  quickClipCopyResult: (result: QuickClipCopyResult): Promise<void> =>
+    electronAPI.ipcRenderer.invoke('quick-clip-copy-result', result),
 
   // Settings APIs
   openSettings: (tab?: string) => electronAPI.ipcRenderer.invoke('open-settings', tab),

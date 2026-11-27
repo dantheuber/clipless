@@ -48,6 +48,7 @@ import type {
   QuickClipsConfig,
   QuickClipsImportMode,
   GroupColours,
+  QuickClipCopyResult,
 } from '../../shared/types';
 import { loadImage } from '../storage/image-store';
 import { storage } from '../storage';
@@ -104,9 +105,9 @@ export function setupClipboardIPC(mainWindow: BrowserWindow | null): void {
       setClipboardBookmark(bookmarkData)
   );
 
-  ipcMain.handle('quick-clip-copy-result', (event, clip: ClipItem | null) => {
+  ipcMain.handle('quick-clip-copy-result', (event, result: QuickClipCopyResult) => {
     if (!mainWindow || mainWindow.isDestroyed() || event.sender !== mainWindow.webContents) return;
-    reportQuickClipCopy(clip);
+    reportQuickClipCopy(result);
   });
 
   // Clipboard monitoring control
