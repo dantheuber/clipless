@@ -55,6 +55,16 @@ export const getCurrentClipboardData = (): { type: string; content: string } | n
   return null;
 };
 
+/**
+ * Fingerprint of the pixels an image data URL decodes to, computed the same way as the
+ * poll's clipboard fingerprint. Two data URLs that differ only in encoding (the stored PNG
+ * and the PNG Electron re-encodes after a clipboard round trip) share a fingerprint.
+ * An undecodable data URL yields the fingerprint of an empty image.
+ */
+export function imageDataUrlFingerprint(dataUrl: string): string {
+  return getImageFingerprint(nativeImage.createFromDataURL(dataUrl));
+}
+
 export function clearImageCache(): void {
   lastImageFingerprint = '';
   lastImageDataUrl = '';
@@ -98,6 +108,11 @@ export const setClipboardImage = (imageData: string): void => {
   try {
     // Convert base64 data URL to NativeImage
     const image = nativeImage.createFromDataURL(imageData);
+    // A malformed data URL decodes to an empty image without throwing; writing it would
+    // report a copy that put nothing usable on the clipboard
+    if (image.isEmpty()) {
+      throw new Error('Image data could not be decoded');
+    }
     clipboard.writeImage(image);
   } catch (error) {
     console.error('Failed to write image to clipboard:', error);

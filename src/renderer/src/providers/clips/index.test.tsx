@@ -603,3 +603,128 @@ describe('ClipsProvider clips captured during startup', () => {
     expect(api().storageSaveClips).not.toHaveBeenCalled();
   });
 });
+
+describe('ClipsProvider quick-clip hotkeys', () => {
+  let hotkey: (index: number) => void;
+  let capture: (clip: { type: string; content: string }) => void;
+  const mountHotkeys = () =>
+    renderHook(() => ({ actions: useClipsActions(), data: useClipsData(), meta: useClipsMeta() }), {
+      wrapper: ({ children }) => (
+        <ToastProvider>
+          <LanguageDetectionProvider>
+            <ScanIndexProvider>
+              <ClipsProvider>{children}</ClipsProvider>
+            </ScanIndexProvider>
+          </LanguageDetectionProvider>
+        </ToastProvider>
+      ),
+    });
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    hotkey = () => {};
+    capture = () => {};
+    api().onCopyQuickClip.mockImplementation((callback: (index: number) => void) => {
+      hotkey = callback;
+      return () => {};
+    });
+    api().onClipboardChanged.mockImplementation((callback: typeof capture) => {
+      capture = callback;
+      return () => {};
+    });
+    api().storageGetClipsSnapshot.mockResolvedValue(loaded());
+    api().storageSaveClips.mockReset().mockResolvedValue(true);
+    api().setClipboardText.mockClear();
+    api().setClipboardImage.mockClear();
+    api().quickClipCopyResult.mockClear();
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.clearAllTimers();
+    vi.useRealTimers();
+    for (const name of ['onCopyQuickClip', 'onClipboardChanged']) {
+      api()
+        [name].mockReset()
+        .mockReturnValue(() => {});
+    }
+  });
+
+  it.each([false, true])(
+    'copies the new row 2 immediately after a capture, with saving paused: %s',
+    async (paused) => {
+      if (paused) api().storageGetClipsSnapshot.mockResolvedValue(failed());
+      const { result } = mountHotkeys();
+      await act(async () => {});
+      act(() => capture({ type: 'text', content: 'A' }));
+      act(() => capture({ type: 'text', content: 'B' }));
+      expect(result.current.data.clips[1].content).toBe('A');
+      expect(api().storageSaveClips).not.toHaveBeenCalled();
+
+      await act(async () => {
+        hotkey(1);
+      });
+
+      expect(api().setClipboardText).toHaveBeenCalledExactlyOnceWith('A');
+      expect(result.current.meta.clipCopyId).toBe(result.current.data.clips[1].id);
+      expect(api().quickClipCopyResult).toHaveBeenCalledExactlyOnceWith(
+        result.current.data.clips[1]
+      );
+      expect(api().storageSaveClips).not.toHaveBeenCalled();
+    }
+  );
+
+  it('copies nothing for an empty, deleted or out-of-range slot', async () => {
+    const { result } = mountHotkeys();
+    await act(async () => {});
+    act(() => capture({ type: 'text', content: 'new' }));
+    act(() => result.current.actions.emptyClip(1));
+
+    await act(async () => {
+      hotkey(1);
+      hotkey(2);
+      hotkey(1000);
+    });
+
+    expect(api().setClipboardText).not.toHaveBeenCalled();
+    expect(api().quickClipCopyResult).not.toHaveBeenCalled();
+    expect(result.current.meta.clipCopyId).toBeNull();
+  });
+
+  it.each([false, true])(
+    'copies an image only if its full data is available: %s',
+    async (available) => {
+      api().storageGetClipsSnapshot.mockResolvedValue({
+        loadState: { complete: true, error: null },
+        clips: [
+          {
+            clip: { id: 'image', type: 'image', content: 'img-1', imageId: 'img-1' },
+            isLocked: false,
+            timestamp: 1,
+          },
+        ],
+      });
+      api().getFullImage.mockResolvedValue(available ? 'data:image/png;base64,full' : null);
+      const { result } = mountHotkeys();
+      await act(async () => {});
+
+      await act(async () => {
+        hotkey(0);
+      });
+
+      expect(api().setClipboardText).not.toHaveBeenCalled();
+      if (available) {
+        expect(api().setClipboardImage).toHaveBeenCalledExactlyOnceWith(
+          'data:image/png;base64,full'
+        );
+        expect(result.current.meta.clipCopyId).toBe('image');
+      } else {
+        expect(api().setClipboardImage).not.toHaveBeenCalled();
+        expect(result.current.meta.clipCopyId).toBeNull();
+      }
+      expect(api().quickClipCopyResult).toHaveBeenCalledExactlyOnceWith(
+        available ? result.current.data.clips[0] : null
+      );
+    }
+  );
+});
