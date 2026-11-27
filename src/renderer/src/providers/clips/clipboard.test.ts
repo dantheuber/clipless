@@ -92,6 +92,44 @@ describe('copyClipToClipboard images', () => {
     expect(window.api.setClipboardText).not.toHaveBeenCalled();
   });
 
+  it('does not suppress clipboard changes while the full image is still loading', async () => {
+    let resolveImage: (value: string) => void = () => {};
+    vi.mocked(window.api.getFullImage).mockReturnValueOnce(
+      new Promise<string>((resolve) => {
+        resolveImage = resolve;
+      })
+    );
+    const setIsHotkeyOperation = vi.fn();
+    const { result } = renderHook(() =>
+      useClipboardOperations(
+        false,
+        () => false,
+        vi.fn(),
+        () => imageClip,
+        vi.fn(),
+        setIsHotkeyOperation,
+        vi.fn(),
+        { current: [imageClip] },
+        { current: false },
+        { current: null }
+      )
+    );
+
+    let copying: Promise<boolean> = Promise.resolve(false);
+    await act(async () => {
+      copying = result.current.copyClipToClipboard(0);
+    });
+    // A screenshot taken now must still be captured
+    expect(setIsHotkeyOperation).not.toHaveBeenCalledWith(true);
+
+    await act(async () => {
+      resolveImage(fullImage);
+      await copying;
+    });
+    expect(setIsHotkeyOperation).toHaveBeenCalledWith(true);
+    expect(window.api.setClipboardImage).toHaveBeenCalledWith(fullImage);
+  });
+
   it('copies legacy inline images', async () => {
     const result = await copyClip({ id: 'clip-1', type: 'image', content: fullImage });
 

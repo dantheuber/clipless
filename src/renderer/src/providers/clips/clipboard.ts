@@ -100,14 +100,27 @@ export const useClipboardOperations = (
     async (clip: ClipItem | undefined): Promise<boolean> => {
       if (!window.api) return false;
 
-      // Set flag to prevent clipboard monitoring from adding this as a new clip
-      setIsHotkeyOperation(true);
-
       if (!clip?.content) {
         console.warn('No clip content to copy');
-        setIsHotkeyOperation(false);
         return false;
       }
+
+      // Load a stored image before suppressing clipboard changes, so a screenshot taken
+      // while the full image loads is not swallowed by the suppression window below.
+      let imageData = clip.content;
+      if (clip.type === 'image' && clip.imageId && window.api.getFullImage) {
+        try {
+          const fullImage = await window.api.getFullImage(clip.imageId);
+          if (fullImage) {
+            imageData = fullImage;
+          }
+        } catch (error) {
+          console.error('Failed to load full image:', error);
+        }
+      }
+
+      // Set flag to prevent clipboard monitoring from adding this as a new clip
+      setIsHotkeyOperation(true);
 
       // Store the content that we're about to copy to prevent re-adding it
       setLastCopiedContent({
@@ -138,14 +151,6 @@ export const useClipboardOperations = (
             break;
 
           case 'image': {
-            // For image clips with imageId, load full image from storage first
-            let imageData = clip.content;
-            if (clip.imageId && window.api.getFullImage) {
-              const fullImage = await window.api.getFullImage(clip.imageId);
-              if (fullImage) {
-                imageData = fullImage;
-              }
-            }
             if (!imageData.startsWith('data:image/')) {
               throw new Error('Full image is unavailable');
             }
