@@ -143,6 +143,36 @@ describe('getCurrentClipboardData', () => {
     expect(toDataURL2).toHaveBeenCalledTimes(1);
   });
 
+  it('distinguishes same-size images that share their first 64 bitmap bytes', () => {
+    // Two full-screen screenshots: same dimensions, same top-left corner, different elsewhere
+    const sharedCorner = Buffer.alloc(64, 0x7f);
+    const bitmap1 = Buffer.concat([sharedCorner, Buffer.alloc(4096, 0x01)]);
+    const bitmap2 = Buffer.concat([sharedCorner, Buffer.alloc(4096, 0x02)]);
+    const toDataURL1 = vi.fn().mockReturnValue('data:image/png;base64,shot1');
+    const toDataURL2 = vi.fn().mockReturnValue('data:image/png;base64,shot2');
+    const shot1 = {
+      isEmpty: () => false,
+      toDataURL: toDataURL1,
+      getSize: () => ({ width: 32, height: 32 }),
+      toBitmap: () => bitmap1,
+    };
+    const shot2 = {
+      isEmpty: () => false,
+      toDataURL: toDataURL2,
+      getSize: () => ({ width: 32, height: 32 }),
+      toBitmap: () => bitmap2,
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(clipboard.readImage).mockReturnValue(shot1 as any);
+    expect(getCurrentClipboardData()?.content).toBe('data:image/png;base64,shot1');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(clipboard.readImage).mockReturnValue(shot2 as any);
+    expect(getCurrentClipboardData()?.content).toBe('data:image/png;base64,shot2');
+    expect(toDataURL2).toHaveBeenCalledTimes(1);
+  });
+
   it('returns bookmark type when only bookmark is available', () => {
     vi.mocked(clipboard.readBookmark).mockReturnValue({
       title: 'Example',
@@ -308,5 +338,27 @@ describe('imageDataUrlFingerprint', () => {
     const other = createMockImage(false, '', 200, 100);
     vi.mocked(nativeImage.createFromDataURL).mockReturnValue(other);
     expect(imageDataUrlFingerprint('data:image/png;base64,ccc')).not.toBe(fromPng);
+  });
+
+  it('reflects the whole bitmap, not just its first 64 bytes', () => {
+    const sharedCorner = Buffer.alloc(64, 0x7f);
+    const withBitmap = (tail: number): Electron.NativeImage =>
+      ({
+        isEmpty: () => false,
+        toDataURL: () => '',
+        getSize: () => ({ width: 32, height: 32 }),
+        toBitmap: () => Buffer.concat([sharedCorner, Buffer.alloc(4096, tail)]),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any;
+
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValue(withBitmap(0x01));
+    const first = imageDataUrlFingerprint('data:image/png;base64,shot1');
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValue(withBitmap(0x02));
+    const second = imageDataUrlFingerprint('data:image/png;base64,shot2');
+    vi.mocked(nativeImage.createFromDataURL).mockReturnValue(withBitmap(0x01));
+    const firstAgain = imageDataUrlFingerprint('data:image/png;base64,shot1-reencoded');
+
+    expect(first).not.toBe(second);
+    expect(firstAgain).toBe(first);
   });
 });
