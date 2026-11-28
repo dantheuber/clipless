@@ -28,6 +28,28 @@ export interface ClipItem {
 }
 
 /**
+ * A quick-clip hotkey press forwarded to the clips window (`copy-quick-clip`). The id ties the
+ * window's reply to this press so main can tell a slow answer from no answer.
+ */
+export interface QuickClipCopyRequest {
+  requestId: number;
+  index: number;
+}
+
+/**
+ * The clips window's answer to a quick-clip request (`quick-clip-copy-result`). The window
+ * always replies: `empty` for a slot with nothing in it, `failed` when the write did not
+ * happen, `copied` with the clip that was written.
+ */
+export type QuickClipCopyStatus = 'copied' | 'empty' | 'failed';
+
+export interface QuickClipCopyResult {
+  requestId: number;
+  status: QuickClipCopyStatus;
+  clip?: ClipItem;
+}
+
+/**
  * Stored clip with metadata
  */
 export interface StoredClip {

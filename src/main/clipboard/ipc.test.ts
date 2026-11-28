@@ -171,19 +171,23 @@ describe('storage-clear-all', () => {
 });
 
 describe('quick-clip-copy-result', () => {
-  it.each([null, { id: 'live', type: 'text', content: 'live row' }])(
-    'reports the result returned by the clips window: %s',
-    (clip) => {
-      handlers.get('quick-clip-copy-result')!(
-        { sender: mainWindow.webContents } as IpcMainInvokeEvent,
-        clip
-      );
-      expect(reportQuickClipCopy).toHaveBeenCalledExactlyOnceWith(clip);
-    }
-  );
+  it.each([
+    { requestId: 1, status: 'empty' },
+    { requestId: 2, status: 'failed' },
+    { requestId: 3, status: 'copied', clip: { id: 'live', type: 'text', content: 'live row' } },
+  ])('passes the clips window reply through with its request id: %o', (result) => {
+    handlers.get('quick-clip-copy-result')!(
+      { sender: mainWindow.webContents } as IpcMainInvokeEvent,
+      result
+    );
+    expect(reportQuickClipCopy).toHaveBeenCalledExactlyOnceWith(result);
+  });
 
   it('ignores results from another window', () => {
-    handlers.get('quick-clip-copy-result')!({ sender: {} } as IpcMainInvokeEvent, null);
+    handlers.get('quick-clip-copy-result')!({ sender: {} } as IpcMainInvokeEvent, {
+      requestId: 1,
+      status: 'failed',
+    });
     expect(reportQuickClipCopy).not.toHaveBeenCalled();
   });
 });

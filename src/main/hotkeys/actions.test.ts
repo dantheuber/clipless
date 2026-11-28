@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 vi.mock('electron', () => ({
   BrowserWindow: vi.fn(),
@@ -37,7 +37,13 @@ vi.mock('../clipboard/monitoring', () => ({
   checkClipboardNow: vi.fn().mockResolvedValue(false),
 }));
 
-import { HotkeyActions, clipSummary, reportQuickClipCopy } from './actions';
+import {
+  HotkeyActions,
+  QUICK_CLIP_REPLY_DEADLINE_MS,
+  clipSummary,
+  reportQuickClipCopy,
+} from './actions';
+import type { ClipItem, QuickClipCopyRequest } from '../../shared/types';
 import { clipboard, app } from 'electron';
 import { storage } from '../storage';
 import { recordFeatureUsage } from '../analytics';
@@ -92,13 +98,38 @@ describe('HotkeyActions', () => {
   });
 
   describe('copyQuickClip', () => {
+    const sentRequestIds = (): number[] =>
+      mockWindow.webContents.send.mock.calls.map(
+        (call: [string, QuickClipCopyRequest]) => call[1].requestId
+      );
+    const sentRequestId = (): number => sentRequestIds()[0];
+
+    beforeEach(() => {
+      vi.useFakeTimers();
+    });
+
+    afterEach(() => {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    });
+
     it('asks the renderer to copy the live row without reading saved clips', async () => {
       await actions.copyQuickClip(1);
-      expect(mockWindow.webContents.send).toHaveBeenCalledExactlyOnceWith('copy-quick-clip', 1);
+      expect(mockWindow.webContents.send).toHaveBeenCalledExactlyOnceWith('copy-quick-clip', {
+        requestId: expect.any(Number),
+        index: 1,
+      });
       expect(storage.getClips).not.toHaveBeenCalled();
       expect(clipboard.writeText).not.toHaveBeenCalled();
       expect(recordFeatureUsage).not.toHaveBeenCalled();
       expect(showNotification).not.toHaveBeenCalled();
+    });
+
+    it('gives every request its own id', async () => {
+      await actions.copyQuickClip(0);
+      await actions.copyQuickClip(0);
+      const [first, second] = sentRequestIds();
+      expect(first).not.toBe(second);
     });
 
     it('does nothing without a window or with a destroyed window', async () => {
@@ -109,6 +140,8 @@ describe('HotkeyActions', () => {
       await actions.copyQuickClip(0);
       expect(mockWindow.webContents.send).not.toHaveBeenCalled();
       expect(storage.getClips).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS * 2);
+      expect(showNotification).not.toHaveBeenCalled();
     });
 
     it('reports failure if the renderer cannot be reached', async () => {
@@ -116,8 +149,98 @@ describe('HotkeyActions', () => {
         throw new Error('unavailable');
       });
       await expect(actions.copyQuickClip(0)).resolves.toBeUndefined();
-      expect(showNotification).toHaveBeenCalledWith('Could not copy clip', expect.any(String));
+      expect(showNotification).toHaveBeenCalledExactlyOnceWith(
+        'Could not copy clip',
+        expect.any(String)
+      );
       expect(recordFeatureUsage).not.toHaveBeenCalled();
+      // The failed send is not reported a second time as a missed deadline.
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS * 2);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports failure when the renderer does not answer within the deadline', async () => {
+      await actions.copyQuickClip(0);
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS - 1);
+      expect(showNotification).not.toHaveBeenCalled();
+      vi.advanceTimersByTime(1);
+      expect(showNotification).toHaveBeenCalledExactlyOnceWith(
+        'Could not copy clip',
+        expect.any(String)
+      );
+      expect(recordFeatureUsage).not.toHaveBeenCalled();
+    });
+
+    it('records and announces a copied reply, and does not time out afterwards', async () => {
+      await actions.copyQuickClip(0);
+      const clip: ClipItem = { id: 'c1', type: 'text', content: 'hello there\nmore' };
+      reportQuickClipCopy({ requestId: sentRequestId(), status: 'copied', clip });
+      expect(recordFeatureUsage).toHaveBeenCalledExactlyOnceWith('quick_clip_hotkey');
+      expect(showNotification).toHaveBeenCalledExactlyOnceWith('Clip copied', 'hello there');
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS * 2);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+    });
+
+    it('stays silent for an empty slot and does not time out afterwards', async () => {
+      await actions.copyQuickClip(2);
+      reportQuickClipCopy({ requestId: sentRequestId(), status: 'empty' });
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS * 2);
+      expect(showNotification).not.toHaveBeenCalled();
+      expect(recordFeatureUsage).not.toHaveBeenCalled();
+    });
+
+    it.each(['failed', 'copied'] as const)(
+      'reports a %s reply without a clip as a failure once, without recording usage',
+      async (status) => {
+        await actions.copyQuickClip(0);
+        reportQuickClipCopy({ requestId: sentRequestId(), status });
+        expect(showNotification).toHaveBeenCalledExactlyOnceWith(
+          'Could not copy clip',
+          expect.any(String)
+        );
+        expect(recordFeatureUsage).not.toHaveBeenCalled();
+        vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS * 2);
+        expect(showNotification).toHaveBeenCalledTimes(1);
+      }
+    );
+
+    it('ignores a reply that arrives after the deadline', async () => {
+      await actions.copyQuickClip(0);
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+
+      const clip: ClipItem = { id: 'c1', type: 'text', content: 'late' };
+      reportQuickClipCopy({ requestId: sentRequestId(), status: 'copied', clip });
+      expect(recordFeatureUsage).not.toHaveBeenCalled();
+      expect(showNotification).toHaveBeenCalledTimes(1);
+    });
+
+    it('ignores a reply to a request it never sent, and a second reply to the same request', async () => {
+      reportQuickClipCopy({ requestId: 999999, status: 'failed' });
+      expect(showNotification).not.toHaveBeenCalled();
+
+      await actions.copyQuickClip(0);
+      const clip: ClipItem = { id: 'c1', type: 'text', content: 'once' };
+      const reply = { requestId: sentRequestId(), status: 'copied', clip } as const;
+      reportQuickClipCopy(reply);
+      reportQuickClipCopy(reply);
+      expect(recordFeatureUsage).toHaveBeenCalledTimes(1);
+      expect(showNotification).toHaveBeenCalledTimes(1);
+    });
+
+    it('matches each reply to its own request', async () => {
+      await actions.copyQuickClip(0);
+      await actions.copyQuickClip(1);
+      const [first, second] = sentRequestIds();
+      reportQuickClipCopy({ requestId: second, status: 'empty' });
+      vi.advanceTimersByTime(QUICK_CLIP_REPLY_DEADLINE_MS);
+      // Only the unanswered first request is reported.
+      expect(showNotification).toHaveBeenCalledExactlyOnceWith(
+        'Could not copy clip',
+        expect.any(String)
+      );
+      reportQuickClipCopy({ requestId: first, status: 'empty' });
+      expect(showNotification).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -240,15 +363,6 @@ describe('HotkeyActions', () => {
     });
   });
 
-  it('reports failed copies without recording usage', () => {
-    reportQuickClipCopy(null);
-    expect(showNotification).toHaveBeenCalledExactlyOnceWith(
-      'Could not copy clip',
-      expect.any(String)
-    );
-    expect(recordFeatureUsage).not.toHaveBeenCalled();
-  });
-
   describe('clipSummary', () => {
     it('names the first non-empty line, trimmed to 80 characters', () => {
       expect(clipSummary({ id: 'a', type: 'text', content: '\n  first line \nsecond' })).toBe(
@@ -278,12 +392,6 @@ describe('HotkeyActions', () => {
       ).toBe('https://x');
       expect(clipSummary({ id: 'a', type: 'bookmark', content: 'https://c' })).toBe('https://c');
       expect(clipSummary({ id: 'a', type: 'image', content: 'img' })).toBe('Image');
-    });
-
-    it('is what the hotkey copy notification says', async () => {
-      reportQuickClipCopy({ id: 'c1', type: 'text', content: 'hello there\nmore' });
-      expect(recordFeatureUsage).toHaveBeenCalledExactlyOnceWith('quick_clip_hotkey');
-      expect(showNotification).toHaveBeenCalledWith('Clip copied', 'hello there');
     });
   });
 });

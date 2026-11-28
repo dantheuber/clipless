@@ -8,6 +8,8 @@ import type {
   HotkeySettings,
   QuickClipsConfig,
   QuickClipsImportMode,
+  QuickClipCopyRequest,
+  QuickClipCopyResult,
   QuickTool,
   SearchTerm,
   Template,
@@ -42,8 +44,8 @@ declare global {
       onClipboardChanged: (
         callback: (clipData: { type: string; content: string; text?: string }) => void
       ) => () => void;
-      onCopyQuickClip: (callback: (clipIndex: number) => void) => () => void;
-      quickClipCopyResult: (clip: ClipItem | null) => Promise<void>;
+      onCopyQuickClip: (callback: (request: QuickClipCopyRequest) => void) => () => void;
+      quickClipCopyResult: (result: QuickClipCopyResult) => Promise<void>;
       openSettings: (tab?: string) => Promise<void>;
       getAutoStartState: () => Promise<boolean | null>;
       settingsChanged: (settings: UserSettings) => Promise<SettingsApplyResult>;

@@ -229,14 +229,25 @@ export const useClipboardOperations = (
   // Register before monitoring so requests always use the live row and the normal copy path.
   // The row is resolved once from the ref and that same object is written and reported, so a
   // request that lands after the list changed but before this effect re-ran cannot write one
-  // clip and report another.
+  // clip and report another. Every request is answered, echoing its id, so main can tell an
+  // empty slot or a failed write from a window that never heard the request.
   useEffect(() => {
     if (!window.api) return;
-    return window.api.onCopyQuickClip(async (index: number) => {
+    return window.api.onCopyQuickClip(async ({ requestId, index }) => {
       const clip = clipsRef.current[index];
-      if (!clip?.content) return;
-      const copied = await writeClip(clip);
-      await window.api.quickClipCopyResult(copied ? clip : null);
+      if (!clip?.content) {
+        await window.api.quickClipCopyResult({ requestId, status: 'empty' });
+        return;
+      }
+      let copied = false;
+      try {
+        copied = await writeClip(clip);
+      } catch (error) {
+        console.error(`Quick clip ${index} copy threw:`, error);
+      }
+      await window.api.quickClipCopyResult(
+        copied ? { requestId, status: 'copied', clip } : { requestId, status: 'failed' }
+      );
     });
   }, [writeClip, clipsRef]);
 
