@@ -1,15 +1,21 @@
 import { clipboard, nativeImage } from 'electron';
+import { crc32 } from 'zlib';
 
 // Cached image fingerprint to avoid expensive toDataURL on every poll
 let lastImageFingerprint = '';
 let lastImageDataUrl = '';
 
+/**
+ * Dimensions, bitmap byte length and a crc32 of the whole bitmap. Hashing every byte is what
+ * tells apart two screenshots of the same display, which share size and usually their
+ * top-left corner. The crc runs at memcpy speed (about 7 ms for a 5K BGRA bitmap, less than
+ * the `toBitmap` copy itself), so it stays cheap for the 250 ms poll. This is the single
+ * definition behind both the poll's data URL cache and the copy-back skip in monitoring.
+ */
 function getImageFingerprint(image: Electron.NativeImage): string {
   const size = image.getSize();
   const bitmap = image.toBitmap();
-  // Use dimensions + bitmap byte length + first 64 bytes as a fast fingerprint
-  const sample = bitmap.subarray(0, 64).toString('base64');
-  return `${size.width}x${size.height}:${bitmap.length}:${sample}`;
+  return `${size.width}x${size.height}:${bitmap.length}:${crc32(bitmap).toString(16)}`;
 }
 
 // Helper function to determine the current clipboard type and content

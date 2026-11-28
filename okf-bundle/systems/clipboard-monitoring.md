@@ -25,7 +25,7 @@ Work done at capture, in the main process, so the renderer never parses markup:
 
 Image handling specifics (all verified in source):
 
-- Image change detection uses a cached **fingerprint** (dimensions + bitmap byte length + first 64 bytes) so the expensive `toDataURL` is not run on every poll.
+- Image change detection uses a cached **fingerprint** (dimensions + bitmap byte length + a crc32 of the whole bitmap) so the expensive `toDataURL` is not run on every poll. The same fingerprint backs the copy-back skip, so two same-size screenshots that share a corner are still told apart.
 - On capture, the image is immediately saved to the encrypted image store and the renderer receives `{imageId, thumbnailDataUrl}` -- the full image never travels over IPC unless the store write fails (then it falls back to inline data URL).
 - A `skipNextImageChange` flag is set when copying an image clip back to the clipboard, so it is not re-detected as a new clip.
 
