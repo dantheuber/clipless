@@ -1,6 +1,6 @@
 {
   "name": "clipless",
-  "version": "2.6.20",
+  "version": "2.6.21",
   "description": "A Clipboard manager for busy people",
   "main": "./out/main/index.js",
   "author": "Daniel Essig",
